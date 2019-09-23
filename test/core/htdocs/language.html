@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+<title>CLIP言語リファレンス</title>
+<style type="text/css">
+html, body {
+	margin:0;
+	padding:0;
+	line-height:22px;
+}
+* {
+	font-family:"Helvetica";
+	font-size:18px;
+	color:#000000;
+}
+.div_body {
+	background-color:#FFFFFF;
+}
+i {
+	color:#FF00FF;
+}
+.pink {
+	font-family:"Courier New";
+	color:#FF00FF;
+}
+.blue {
+	color:#0000FF;
+}
+.hr {
+	border:0;
+	margin:0;
+	height:4px;
+}
+.hr_border {
+	border-top:1px solid #808080;
+	margin-top:4px;
+	margin-bottom:3px;
+}
+dl {
+	margin:4px;
+}
+</style>
+</head>
+<body>
+<div class="div_body">
+
+<hr class="hr">
+<b><span style="font-size:20px">CLIP言語リファレンス</span></b><br>
+
+<a name="mokuji"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">目次</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<a href="#syosiki">書式</a><br>
+<hr class="hr">
+<a href="#command">コマンド</a><br>
+<hr class="hr">
+<a href="#command_func">外部関数・ユーザー定義関数内での初期状態</a><br>
+<hr class="hr">
+<a href="#suuchi">数値表現</a><br>
+<hr class="hr">
+<a href="#stat">制御文</a><br>
+<hr class="hr">
+<a href="#operator">演算子</a><br>
+<hr class="hr">
+<a href="#operator_mat">演算子(行列計算)</a><br>
+<hr class="hr">
+<a href="#func">内部関数</a><br>
+<hr class="hr">
+<a href="#extfunc">外部関数</a><br>
+<hr class="hr">
+<a href="#eclipse">ECLIPSE</a><br>
+
+<a name="syosiki"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">書式</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+CLIP言語での計算式の記述は、インフィクス表記(中置記法)でおこなう。<br>
+<hr class="hr">
+CLIP言語書式は、計算処理に特化させている。計算記述が変数への代入の形になっていない場合、自動的に「計算結果用変数」に代入され、計算結果が保持される。そのため、計算記述を演算子から始めることができ、その場合、演算子の左辺は「計算結果用変数」になる。<br>
+<hr class="hr_border">
+演算の優先順位を指定する括弧<span class="pink">()</span>を使用することができる。<br>
+<hr class="hr">
+括弧は釣り合いがとれていなくても構わない。例えば、次のように記述できる。<br>
+<dl>
+<dd><span class="pink">12+34)*56</span><br>
+<dd><span class="pink">12*(34+56</span><br>
+</dl>
+また、関数のパラメータなど、数値を記述する部分には、代わりに括弧で囲まれた計算式を記述することができる。<br>
+<hr class="hr_border">
+インタープリタがCLIP言語で特別な意味をもつ文字を解釈することを抑制するために、エスケープ文字<span class="pink">\</span>(または<span class="pink">¥</span><!--C2A5-->)が使用できる。文字<span class="pink">\</span>(または<span class="pink">¥</span><!--C2A5-->)自体を文字として使用する場合、<span class="pink">\\</span>(または<span class="pink">¥¥</span><!--C2A5-->)と記述する必要がある。本リファレンスでは、以降の記述では<span class="pink">\</span>を用いるが、<span class="pink">¥</span><!--C2A5-->に置き換えても問題ない。<br>
+<hr class="hr_border">
+<span class="pink">[</span><i>string</i><span class="pink">]</span><br>
+<hr class="hr">
+<span class="pink">[</span>から<span class="pink">]</span>までを1つのトークンとみなす。次の場合には、<span class="pink">[]</span>を用いる必要がある。<br>
+<hr class="hr">
+A) 文字列定数の記述で、<br>
+<dl>
+<dd>a) <span class="pink">*</span>など、CLIP言語で特別な意味をもつ文字<br>
+<dd>b) 空白文字<br>
+<dd>c) 文字<span class="pink">[</span><br>
+</dl>
+のいずれかが含まれる場合、その文字をエスケープ文字<span class="pink">\</span>でエスケープするか、文字列定数全体(文字列定数開始文字<span class="pink">&quot;</span>を含む)を<span class="pink">[]</span>で囲む必要がある。<br>
+<hr class="hr">
+B) 変数のインデックスに、文字<span class="pink">[</span>を使用したい場合、エスケープ文字<span class="pink">\</span>を用いて<span class="pink">@\[</span>と記述するか、<span class="pink">[@[]</span>と記述する必要がある。<br>
+<hr class="hr">
+C) 複素定数の記述で虚数部を含む場合、マイナス文字(<span class="pink">-</span>)またはプラス文字(<span class="pink">+</span>)をエスケープ文字<span class="pink">\</span>でエスケープするか、定数の記述全体を<span class="pink">[]</span>で囲む必要がある。例えば、次のように記述する。<br>
+<dl>
+<dd><span class="pink">1.23\+4.5i</span><br>
+<dd><span class="pink">1e+2\-3e-4i</span> # 実数部<span class="pink">1e+2</span>と虚数部<span class="pink">\-3e-4</span><br>
+<dd><span class="pink">[1e+2-3e-4i]</span> # 上と同じ値<br>
+</dl>
+D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述する。例えば単項マイナスは、二項マイナスと区別するために<span class="pink">[-]</span>と記述する。<br>
+<hr class="hr">
+なお、<span class="pink">[</span>から<span class="pink">]</span>の中に、文字<span class="pink">]</span>を使用する場合、エスケープ文字<span class="pink">\</span>を用いる必要がある。文字<span class="pink">[</span>の場合は必要ない。例えば、次のように記述する。<br>
+<dl>
+<dd><span class="pink">:plot [&quot;sin [-\]x]</span><br>
+</dl>
+<hr class="hr_border">
+<i>expression</i><span class="blue">[</span><span class="pink">;</span><span class="blue">[</span><i>expression</i><span class="blue">]]...</span><br>
+<hr class="hr">
+複数の<i>expression</i>を1行にセミコロン(<span class="pink">;</span>)で区切って記述することができる。セミコロンの後ろの<i>expression</i>を省略した場合でも、空の計算式として解釈される。例えば<span class="pink">for</span>文で初期化式、条件式、更新式すべてを省略した形で<br>
+<dl>
+<dd><span class="pink">for;;</span><br>
+</dl>
+のように記述し、空の計算式として解釈されるのを利用することができる。<br>
+<hr class="hr_border">
+<span class="blue">[</span><i>expression</i><span class="blue">]</span><span class="pink">#</span><i>comment</i><br>
+<hr class="hr">
+コメント開始文字<span class="pink">#</span>から行末までがコメントになる。<br>
+<hr class="hr">
+なお、コメント開始文字の識別は<span class="pink">[]</span>または<span class="pink">;</span>よりも前に行われる。例えば、変数のインデックスに文字<span class="pink">#</span>を使用する場合、<span class="pink">[@#]</span>と記述するのは間違いで、エスケープ文字<span class="pink">\</span>を用いて<span class="pink">@\#</span>と記述する必要がある。<br>
+
+<a name="command"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">コマンド</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">:efloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>倍精度浮動小数点型(指数表記)<br></dl>
+<hr class="hr">
+<span class="pink">:float </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>倍精度浮動小数点型(小数点表記)<br></dl>
+<hr class="hr">
+<span class="pink">:gfloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>倍精度浮動小数点型<br></dl>
+<hr class="hr">
+<span class="pink">:ecomplex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>複素数型(指数表記)<br></dl>
+<hr class="hr">
+<span class="pink">:complex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>複素数型(小数点表記)<br></dl>
+<hr class="hr">
+<span class="pink">:gcomplex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>複素数型<br></dl>
+<hr class="hr">
+<span class="pink">:prec </span><i>prec</i><br><dl><dd>表示精度<br></dl>
+<hr class="hr_border">
+<span class="pink">:fract</span><br><dl><dd>分数型<br></dl>
+<hr class="hr">
+<span class="pink">:mfract</span><br><dl><dd>帯分数型<br></dl>
+<hr class="hr_border">
+<span class="pink">:htime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>時間型(時)<br></dl>
+<hr class="hr">
+<span class="pink">:mtime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>時間型(分)<br></dl>
+<hr class="hr">
+<span class="pink">:time </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>時間型(秒)<br></dl>
+<hr class="hr">
+<span class="pink">:ftime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>時間型(フレーム)<br></dl>
+<hr class="hr">
+<span class="pink">:fps </span><i>fps</i><br><dl><dd>秒間フレーム数<br></dl>
+<hr class="hr_border">
+<span class="pink">:char </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号付き8ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:uchar </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号なし8ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:short </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号付き16ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:ushort </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号なし16ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:long </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号付き32ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:ulong </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号なし32ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:int </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号付き32ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:uint </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>符号なし32ビット整数型<br></dl>
+<hr class="hr">
+<span class="pink">:radix </span><i>radix</i><br><dl><dd>基数<br></dl>
+<hr class="hr_border">
+<span class="pink">:ptype</span><br><dl><dd>親プロセスの型<br></dl>
+<hr class="hr_border">
+<span class="pink">:rad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>ラジアン。親プロセスに戻る時に計算結果の単位を変換しない／変換する。<br></dl>
+<dl>
+<dd>角度を求める外部関数・ユーザー定義関数では、関数の内部で、パラメータに<span class="pink">TRUE</span>を指定して本コマンドを発行することが必須である。<br>
+</dl>
+<span class="pink">:deg </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>度。親プロセスに戻る時に計算結果の単位を変換しない／変換する。<br></dl>
+<dl>
+<dd>角度を求める外部関数・ユーザー定義関数では、関数の内部で、パラメータに<span class="pink">TRUE</span>を指定して本コマンドを発行することが必須である。<br>
+</dl>
+<span class="pink">:grad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>グラジアン。親プロセスに戻る時に計算結果の単位を変換しない／変換する。<br></dl>
+<dl>
+<dd>角度を求める外部関数・ユーザー定義関数では、関数の内部で、パラメータに<span class="pink">TRUE</span>を指定して本コマンドを発行することが必須である。<br>
+</dl>
+<span class="pink">:angle </span><i>num</i><br><dl><dd>パラメータ値の単位変換<br></dl>
+<dl>
+<dd><i>num</i>は、0から9の値をとる。例えば、<br>
+<dl>
+<dd><span class="pink">func torad</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rad</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:angle 0</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return @0</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">:deg</span><br>
+<dd><span class="pink">@t=torad 180</span><br>
+</dl>
+<dd>と実行されると、関数<span class="pink">torad</span>内での<span class="pink">@0</span>の値は180(度)をラジアンに変換した値3.141592...になり、<span class="pink">@t</span>には3.141592...が代入される。<br>
+</dl>
+<dl>
+<dd>外部関数・ユーザー定義関数で、関数のパラメータとして角度をとる場合、関数の内部で本コマンドを発行することが必須である。<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:label </span><i>label</i><span class="pink"> @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><br><dl><dd>変数／配列にラベルを付ける<br></dl>
+<hr class="hr">
+<span class="pink">:params </span><i>label</i><span class="blue">...</span><br><dl><dd>引数用変数または配列にラベルを設定する。10個まで指定できる。<br></dl>
+<dl>
+<dd><i>label</i>の前に<span class="pink">&amp;</span>を記述すると、コマンド<span class="pink">:param </span><i>n</i><span class="pink"> TRUE</span>の機能をする。また、<i>label</i>の後ろに<span class="pink">[]</span>を記述すると、引数用配列にラベル設定する。例えば、<br>
+<dl>
+<dd><span class="pink">:params a &amp;b c[]</span><br>
+</dl>
+<dd>は、<br>
+<dl>
+<dd><span class="pink">:label a @0</span><br>
+<dd><span class="pink">:label b @1</span><br>
+<dd><span class="pink">:param 1 TRUE</span><br>
+<dd><span class="pink">:label c @@2</span><br>
+</dl>
+<dd>と同等の機能をする。<br>
+</dl>
+<span class="pink">:var </span><i>var_name</i><span class="blue">...</span><br><dl><dd>変数を定義する<br></dl>
+<hr class="hr">
+<span class="pink">:array </span><i>array_name</i><span class="blue">...</span><br><dl><dd>配列を定義する<br></dl>
+<hr class="hr">
+<span class="pink">:local </span><i>label</i><span class="blue">...</span><br><dl><dd>ローカルの変数または配列を定義する<br></dl>
+<dl>
+<dd><i>label</i>の後ろに<span class="pink">[]</span>を記述すると配列の定義になる。例えば、<br>
+<dl>
+<dd><span class="pink">:local a b[] c</span><br>
+</dl>
+<dd>は、<br>
+<dl>
+<dd><span class="pink">:var a c</span><br>
+<dd><span class="pink">:array b</span><br>
+</dl>
+<dd>と同等の機能をする。<br>
+</dl>
+<span class="pink">:global </span><i>label</i><span class="blue">...</span><br><dl><dd>グローバルな変数または配列を定義または使用宣言する<br></dl>
+<dl>
+<dd><i>label</i>の後ろに<span class="pink">[]</span>を記述すると配列の定義または使用宣言になる。<br>
+</dl>
+<span class="pink">:define </span><i>label</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">]</span><br><dl><dd>定数を定義する<br></dl>
+<dl>
+<dd><i>val</i>が指定されていると、定数値が<i>val</i>になる。指定されていないと、値は1(TRUE)になる。<br>
+</dl>
+<span class="pink">:enum </span><span class="blue">[</span><i>label</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">]]...</span><br><dl><dd>列挙子を定義する<br></dl>
+<dl>
+<dd>デフォルトでは、最初の列挙子の値が0になる。以降の列挙子は前の列挙子より1つずつ値が大きくなる。<i>val</i>を指定することにより、特定の列挙子の値を明示的に指定することができる。以下に例を示す。<br>
+<dl>
+<dd><span class="pink">:enum BIN 1 OCT DEC HEX</span><br>
+</dl>
+</dl>
+<span class="pink">:undef </span><i>name</i><br><dl><dd>定義を削除する<br></dl>
+<hr class="hr_border">
+<span class="pink">:calculator FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>C言語モード／電卓モード<br></dl>
+<hr class="hr">
+<span class="pink">:base 0</span><span class="blue">|</span><span class="pink">1</span><br><dl><dd>0オリジン／1オリジン<br></dl>
+<hr class="hr">
+<span class="pink">:ans FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>計算結果を返さない／返す<br></dl>
+<hr class="hr">
+<span class="pink">:assert FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><br><dl><dd>診断メッセージOFF／ON／前回の設定<br></dl>
+<hr class="hr">
+<span class="pink">:warn FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><br><dl><dd>警告メッセージOFF／ON／前回の設定<br></dl>
+<hr class="hr">
+<span class="pink">:param </span><i>num</i><span class="pink"> FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>パラメータ値変更の親プロセスへの反映OFF／ON<br></dl>
+<dl>
+<dd>外部関数・ユーザー定義関数内で、指定番号<i>num</i>のパラメータ値を変更した場合に、親プロセスに値を反映させるかどうか指定する。<i>num</i>は、0から9の値をとる。例えば、<br>
+<dl>
+<dd><span class="pink">func test</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 0 TRUE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 1 FALSE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@0=123</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@1=456</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">test @A @B</span><br>
+</dl>
+<dd>と実行すると、<span class="pink">@A</span>には<span class="pink">@0</span>の値が反映されるが、<span class="pink">@B</span>には<span class="pink">@1</span>の値が反映されない。<br>
+</dl>
+<span class="pink">:params FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">...</span><br><dl><dd>パラメータ値変更の親プロセスへの反映OFF／ON。10個まで指定できる。例えば、<br>
+<dl>
+<dd><span class="pink">:params TRUE TRUE FALSE</span><br>
+</dl>
+<dd>は、<br>
+<dl>
+<dd><span class="pink">:param 0 TRUE</span><br>
+<dd><span class="pink">:param 1 TRUE</span><br>
+<dd><span class="pink">:param 2 FALSE</span><br>
+</dl>
+<dd>と同等の機能をする。<br>
+</dl>
+<span class="pink">:parent @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><span class="pink"> </span><span class="blue">[</span><i>label</i><span class="blue">]</span><br><dl><dd>親プロセスの変数／配列を参照する<br></dl>
+<hr class="hr">
+<span class="pink">:namespace </span><span class="blue">[</span><i>name</i><span class="blue">]</span><br><dl><dd>現在のプロセスの、外部関数の名前空間を指定する<br></dl>
+<dl>
+<dd><i>name</i>を省略すると、指定が解除される。<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:real </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>複素数値の実数部を設定する<br></dl>
+<hr class="hr">
+<span class="pink">:imag </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>複素数値の虚数部を設定する<br></dl>
+<hr class="hr_border">
+<span class="pink">:num </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>分数の分子を設定する<br></dl>
+<hr class="hr">
+<span class="pink">:denom </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>分数の分母を設定する<br></dl>
+<hr class="hr_border">
+<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> @@</span><i>index</i><br><dl><dd>行列を設定する<br></dl>
+<hr class="hr">
+<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> </span><i>array_name</i><br><dl><dd>行列を定義する<br></dl>
+<hr class="hr">
+<span class="pink">:trans @@</span><i>index</i><br><dl><dd>行列の転置<br></dl>
+<hr class="hr_border">
+<span class="pink">:srand </span><i>val</i><br><dl><dd>乱数を初期化する<br></dl>
+<hr class="hr">
+<span class="pink">:localtime </span><i>val</i><span class="pink"> &quot;</span><i>format</i><span class="pink"> </span><span class="blue">[</span><i>var</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>時刻値を現地時刻に変換する。<i>format</i>には、以下の文字が指定できる。<br>
+<dl>
+<dd><span class="pink">%s </span>秒(0～59)<br>
+<dd><span class="pink">%m </span>分(0～59)<br>
+<dd><span class="pink">%h </span>時間(0～24)<br>
+<dd><span class="pink">%D </span>日(1～31)<br>
+<dd><span class="pink">%M </span>月(0～11、1月を0とする)<br>
+<dd><span class="pink">%Y </span>年(現在の年から1900を引いた値)<br>
+<dd><span class="pink">%w </span>曜日(0～6、日曜日を0とする)<br>
+<dd><span class="pink">%y </span>年初からの通算日数(0～365、1月1日を0とする)<br>
+</dl>
+</dl>
+<hr class="hr_border">
+<span class="pink">:sprint @@</span><i>index</i><span class="pink"> </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>文字列に出力<br></dl>
+<hr class="hr_border">
+<span class="pink">:clear</span><br><dl><dd>画面のクリア<br></dl>
+<hr class="hr">
+<span class="pink">:warn &quot;</span><i>message</i><br><dl><dd>警告メッセージの出力。ただし、<span class="pink">:warn FALSE</span>が発行されていると、出力が抑制される。<br></dl>
+<hr class="hr">
+<span class="pink">:error &quot;</span><i>message</i><br><dl><dd>エラーメッセージの出力<br></dl>
+<hr class="hr">
+<span class="pink">:print </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>文字列の出力<br></dl>
+<hr class="hr">
+<span class="pink">:println </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>文字列の出力(改行付き)<br></dl>
+<hr class="hr">
+<span class="pink">:scan </span><span class="blue">[[</span><span class="pink">&quot;</span><i>prompt</i><span class="blue">]</span><span class="pink"> @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><span class="blue">]...</span><br><dl><dd>変数値／文字列の入力<br></dl>
+<hr class="hr_border">
+<span class="pink">:gworld </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>オフスクリーンの作成<br></dl>
+<dl>
+<dd><i>w</i>または<i>h</i>に<span class="pink">0</span>または負の値を指定すると、オフスクリーンが消去される。<br>
+</dl>
+<span class="pink">:gclear </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>オフスクリーンのクリア<br></dl>
+<dl>
+<dd><i>col</i>が省略されると、0でクリアされる。<br>
+</dl>
+<span class="pink">:gcolor </span><i>col</i><span class="pink"> </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>現在色インデックスを設定する<br></dl>
+<dl>
+<dd><i>rgb_color</i>が指定されると、現在色インデックスのRGBカラー値が設定される。<br>
+</dl>
+<span class="pink">:gfill </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>w</i><span class="pink"> </span><i>h</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>オフスクリーンを塗りつぶす<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<br>
+</dl>
+<span class="pink">:gmove </span><i>x1</i><span class="pink"> </span><i>y1</i><br><dl><dd>現在点を設定する<br></dl>
+<hr class="hr">
+<span class="pink">:gtext &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:gtextl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>テキスト描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向右側が現在点に設定される。<br>
+</dl>
+<span class="pink">:gline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ライン描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<i>x1</i>と<i>y1</i>が指定されていないと、現在点が使用される。描画後、<i>x2</i>と<i>y2</i>が現在点に設定される。<br>
+</dl>
+<span class="pink">:gput </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ドット描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<br>
+</dl>
+<span class="pink">:gput </span><i>array</i><br><dl><dd>二次元配列からイメージを描画<br></dl>
+<hr class="hr">
+<span class="pink">:gget </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>var</i><br><dl><dd>ドット値を変数に格納<br></dl>
+<hr class="hr">
+<span class="pink">:gget </span><i>array</i><br><dl><dd>イメージを二次元配列に格納<br></dl>
+<hr class="hr">
+<span class="pink">:gget24 </span><i>array</i><br><dl><dd>ロードしたイメージのRGBカラーデータを二次元配列に格納<br></dl>
+<!--
+<hr class="hr">
+<span class="pink">:gupdate </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><span class="blue">]</span><br><dl><dd>画面更新のOFF／ON／前回の設定<br></dl>
+-->
+<hr class="hr_border">
+<span class="pink">:window </span><i>left</i><span class="pink"> </span><i>bottom</i><span class="pink"> </span><i>right</i><span class="pink"> </span><i>top</i><br><dl><dd>ウィンドウを設定する<br></dl>
+<dl>
+<dd><span class="pink">:gworld</span>コマンドで確保されたオフスクリーン・イメージの、左下座標に対応する論理座標を<i>left</i>と<i>bottom</i>に、右上座標に対応する論理座標を<i>right</i>と<i>top</i>に指定する。<i>left</i>と<i>right</i>、または、<i>bottom</i>と<i>top</i>の大小は問わない。例えば、<br>
+<dl>
+<dd><span class="pink">:window \-3 \-2 10 8</span><br>
+</dl>
+<dd>で、次のような座標系が設定される。<br>
+<dl>
+<dd><img src="window.jpg"><br>
+</dl>
+</dl>
+<span class="pink">:wfill </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>w</i><span class="pink"> </span><i>h</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ウィンドウ内を塗りつぶす<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<br>
+</dl>
+<span class="pink">:wmove </span><i>x1</i><span class="pink"> </span><i>y1</i><br><dl><dd>現在点を設定する<br></dl>
+<hr class="hr">
+<span class="pink">:wtext &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:wtextl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>テキスト描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向右側が現在点に設定される。<br>
+</dl>
+<span class="pink">:wline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ライン描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<i>x1</i>と<i>y1</i>が指定されていないと、現在点が使用される。描画後、<i>x2</i>と<i>y2</i>が現在点に設定される。<br>
+</dl>
+<span class="pink">:wput </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ドット描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<br>
+</dl>
+<span class="pink">:wget </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>var</i><br><dl><dd>ドット値を変数に格納<br></dl>
+<hr class="hr_border">
+<span class="pink">:rectangular</span><br><dl><dd>直交座標モード<br></dl>
+<hr class="hr">
+<span class="pink">:parametric</span><br><dl><dd>媒介変数モード<br></dl>
+<hr class="hr">
+<span class="pink">:polar</span><br><dl><dd>極座標モード<br></dl>
+<hr class="hr">
+<span class="pink">:logscale x</span><span class="blue">|</span><span class="pink">y</span><span class="blue">|</span><span class="pink">xy </span><span class="blue">[</span><i>base</i><span class="blue">]</span><br><dl><dd>直交座標モードにおけるX軸またはY軸を対数座標系に設定する<br></dl>
+<dl>
+<dd><i>base</i>には底を指定する。省略すると10.0になる。<br>
+<dd>直交座標モードに切り替えるには、別途<span class="pink">:rectangular</span>コマンドを発行する必要がある。<br>
+</dl>
+<span class="pink">:nologscale x</span><span class="blue">|</span><span class="pink">y</span><span class="blue">|</span><span class="pink">xy</span><br><dl><dd>直交座標モードにおけるX軸またはY軸の対数座標系の設定を解除する<br></dl>
+<dl>
+<dd>直交座標モードに切り替えるには、別途<span class="pink">:rectangular</span>コマンドを発行する必要がある。<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>x2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>プロット実行(直交座標モード)<br></dl>
+<dl>
+<dd><span class="pink">&quot;</span><i>expr</i>を省略すると、前回の演算式が使用される。<br>
+<dd><i>x1</i>と<i>x2</i>にプロットを行うX軸方向の範囲を指定できる。ウィンドウ座標で指定する。<i>x1</i>と<i>x2</i>が指定されていないと、ウィンドウ左端から右端までのプロットが行われる。<br>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<br>
+<dd>演算式<span class="pink">&quot;</span><i>expr</i>中に、X座標に対応する変数として<span class="pink">x</span>または<span class="pink">@x</span>を使用することができる。<br>
+</dl>
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr1</i><span class="pink"> &quot;</span><i>expr2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>プロット実行(媒介変数モード)<br></dl>
+<dl>
+<dd>演算式<span class="pink">&quot;</span><i>expr1</i>をX値、<span class="pink">&quot;</span><i>expr2</i>をY値としてプロットを行う。<br>
+<dd><span class="pink">&quot;</span><i>expr1</i>と<span class="pink">&quot;</span><i>expr2</i>を省略すると、前回の演算式が使用される。<br>
+<dd><i>t1</i>と<i>t2</i>にパラメータの範囲を、<i>step</i>にサンプリング単位を指定できる。省略すると、前回のパラメータ範囲とサンプリング単位が使用される。<br>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<br>
+<dd>演算式<span class="pink">&quot;</span><i>expr1</i>、<span class="pink">&quot;</span><i>expr2</i>中に、パラメータ値に対応する変数として<span class="pink">t</span>または<span class="pink">@t</span>を使用することができる。<br>
+</dl>
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>プロット実行(極座標モード)<br></dl>
+<dl>
+<dd><span class="pink">&quot;</span><i>expr</i>を省略すると、前回の演算式が使用される。<br>
+<dd><i>t1</i>と<i>t2</i>に角度の範囲を、<i>step</i>にサンプリング単位を指定できる。省略すると、前回の角度範囲とサンプリング単位が使用される。なお、<i>t1</i>と<i>t2</i>に指定する値は、現在の角度単位コマンド(<span class="pink">:deg</span>、<span class="pink">:rad</span>、<span class="pink">:grad</span>)で設定されている単位に依存する。<br>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<br>
+<dd>演算式<span class="pink">&quot;</span><i>expr</i>中に、角度に対応する変数として<span class="pink">t</span>または<span class="pink">@t</span>を使用することができる。<br>
+</dl>
+<span class="pink">:replot </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>x2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>プロット再実行(直交座標モード)<br></dl>
+<hr class="hr">
+<span class="pink">:replot </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>プロット再実行(媒介変数モード／極座標モード)<br></dl>
+
+<a name="command_func"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">外部関数・ユーザー定義関数内での初期状態</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+外部関数・ユーザー定義関数内での初期状態をまとめると、次のようになる。<br>
+<dl>
+<dd><span class="pink">:gfloat </span>- 倍精度浮動小数点型<br>
+<dd><span class="pink">:prec 6 </span>- 浮動小数点数の表示精度6<br>
+<dd><span class="pink">:fps 30.0 </span>- 秒間フレーム数30.0<br>
+<dd><span class="pink">:radix 10 </span>- 整数における基数10<br>
+<dd><span class="pink">:rad FALSE </span>- ラジアン、親プロセスに戻る時に計算結果の単位を変換しない<br>
+<dd><span class="pink">:calculator FALSE </span>- C言語モード<br>
+<dd><span class="pink">:base 0 </span>- 0オリジン<br>
+<dd><span class="pink">:ans TRUE </span>- 計算結果を返す<br>
+<dd><span class="pink">:assert </span><i>parent</i><span class="pink"> </span>- 診断メッセージ表示の設定は、親プロセスの設定を引き継ぐ<br>
+<dd><span class="pink">:warn </span><i>parent</i><span class="pink"> </span>- 警告メッセージ表示の設定は、親プロセスの設定を引き継ぐ<br>
+<dd><span class="pink">:param 0</span><span class="blue">..</span><span class="pink">9 FALSE </span>- パラメータ値変更の親プロセスへの反映OFF<br>
+<!--
+<dd><span class="pink">:gupdate </span><i>parent</i><span class="pink"> </span>- オフスクリーン・イメージの画面への更新の設定は、親プロセスの設定を引き継ぐ<br>
+-->
+</dl>
+
+<a name="suuchi"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">数値表現</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+定数表現<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>小数点表記<br></dl>
+<dl>
+<dd>末尾に<span class="pink">d</span>、<span class="pink">g</span>、<span class="pink">r</span>を付加することでそれぞれ、度、グラジアン、ラジアンに角度単位を指定できる。<br>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>m</i><span class="pink">.</span><i>ddd</i><span class="pink">e+</span><span class="blue">|</span><span class="pink">e-</span><i>xx</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>指数表記。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">\-1.23e+4</span><br>
+<dd><span class="pink">1.23e-4</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">][</span><i>nnn</i><span class="pink">_</span><span class="blue">]</span><i>uuu</i><span class="pink">_</span><i>ddd</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>分数。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">1_2_3</span><br>
+<dd><span class="pink">[-1_2_3]</span><br>
+<dd><span class="pink">\-12_34</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[[[</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">]</span><span class="pink">\+</span><span class="blue">|</span><span class="pink">\-</span><span class="blue">][</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">]</span><span class="pink">i</span><br><dl><dd>複素数値。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">\-12.3\+4.5i</span><br>
+<dd><span class="pink">[12.3-4.5i]</span><br>
+<dd><span class="pink">i</span><br>
+<dd><span class="pink">\-i</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><br><dl><dd>現在の基数での整数表記<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><br><dl><dd>2進数<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><br><dl><dd>8進数<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><br><dl><dd>10進数<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><br><dl><dd>16進数<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">&apos;</span><i>cccc</i><br><dl><dd>文字コード。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">&apos;T&nbsp;&nbsp;&apos;E&nbsp;&nbsp;&apos;S&nbsp;&nbsp;&apos;TEST</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[[[[</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">[</span><span class="pink">h</span><span class="blue">|</span><span class="pink">m</span><span class="blue">|</span><span class="pink">s</span><span class="blue">|</span><span class="pink">f</span><span class="blue">]</span><br><dl><dd>時間値。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">\-12:34</span><br>
+<dl>
+<dd># 現在の時間の単位(時、分、秒、フレーム)により12と34の解釈が異なる。<br>
+</dl>
+<dd><span class="pink">1.5h </span># 1.5時間<br>
+<dd><span class="pink">3m </span># 3分<br>
+<dd><span class="pink">23:45s </span># 23分45秒<br>
+<dd><span class="pink">60f </span># 60フレーム<br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&quot;</span><i>string</i><br><dl><dd>文字列<br></dl>
+<dl>
+<dd><i>string</i>中に空白文字または文字<span class="pink">[</span>を含む場合、文字を<span class="pink">\</span>でエスケープするか、文字列定数全体(文字列定数開始文字<span class="pink">&quot;</span>も含む)を<span class="pink">[]</span>で囲む必要がある。<br>
+</dl>
+<hr class="hr_border">
+定義定数<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">DBL_EPSILON</span><br><dl><dd>1より大きい最小の値と1との差(機械イプシロン)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">HUGE_VAL</span><br><dl><dd>浮動小数点型で表現できる最大の値<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">INFINITY</span><br><dl><dd>無限大を表す数値<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">NAN</span><br><dl><dd>非数(Not-A-Number)を表す値<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">RAND_MAX</span><br><dl><dd><span class="pink">rand</span>関数が返す最大値<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">FALSE</span><br><dl><dd>偽(0)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">TRUE</span><br><dl><dd>真(1)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">BG_COLOR</span><br><dl><dd>システムの背景色(RGBカラー値)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">TIME_ZONE</span><br><dl><dd>タイムゾーン(秒)<br></dl>
+<hr class="hr_border">
+変数表現<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@</span><i>char</i><br><dl><dd>インデックスを文字<i>char</i>で指定する<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@:</span><i>code</i><br><dl><dd>インデックスを文字コード<i>code</i>で指定する。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">@:\x42</span><br>
+<dd><span class="pink">@:&apos;B</span><br>
+<dd><span class="pink">@:(&apos;A+1)</span><br>
+<dl>
+<dd># いずれも<span class="pink">@B</span>を指定したことになる<br>
+</dl>
+</dl>
+</dl>
+次の変数は予約されている。<br>
+<dl>
+<dd><span class="pink">@:0 </span>- 計算結果<br>
+<dd><span class="pink">@! </span>- 外部関数のパラメータ数<br>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- 外部関数の各パラメータ値<br>
+</dl>
+<hr class="hr_border">
+配列表現<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><span class="pink"> </span><i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>インデックスを文字<i>char</i>で指定する<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@:</span><i>code</i><span class="pink"> </span><i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>インデックスを文字コード<i>code</i>で指定する。例えば次の通り。<br>
+<dl>
+<dd><span class="pink">@@:\x42</span><br>
+<dd><span class="pink">@@:&apos;B</span><br>
+<dd><span class="pink">@@:(&apos;A+1)</span><br>
+<dl>
+<dd># いずれも<span class="pink">@@B</span>を指定したことになる<br>
+</dl>
+</dl>
+</dl>
+次の配列は予約されている。<br>
+<dl>
+<dd><span class="pink">@@:0 </span>- 行列計算結果<br>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- 外部関数の各パラメータ<br>
+</dl>
+CLIP言語では、多次元配列をサポートする。配列の要素数の宣言を必要とせず、現在の要素数より大きいインデックスに対して値の代入を行った時点で自動的に拡張される。拡張された場合、既存のデータは受け継がれ、新規データは値0で初期化される。なお、現在の要素数より大きいインデックスまたは負のインデックスで配列を参照すると、値0が返される。<br>
+<hr class="hr_border">
+文字列・行列<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><br>
+<hr class="hr">
+一次元配列を文字列として扱うことができる。文字列の各文字への設定または参照は、一次元配列への値の設定または参照により行う。<br>
+<hr class="hr">
+二次元配列を行列として扱うことができる。行列の要素への値の設定または参照は、二次元配列への値の設定または参照により行う。<br>
+<hr class="hr_border">
+分数表現<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>val</i><span class="blue">]</span><span class="pink"> </span><i>val</i><span class="pink"> </span><i>val</i><br>
+<hr class="hr">
+数値を2個続けて記述すると、1番目の数値を分子、2番目の数値を分母と解釈する。数値3個の記述で帯分数表現になり、1番目を整数部、2番目を分子、3番目を分母と解釈する。演算中に含める場合、分数表現全体を括弧<span class="pink">()</span>で囲む必要がある。<i>val</i>には、定数表現、変数表現、括弧で囲まれた配列表現、または括弧で囲まれた計算式を使用することができる。<br>
+<hr class="hr_border">
+複素数表現<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><i>val</i><span class="pink"> </span><i>val</i><br>
+<hr class="hr">
+数値を2個続けて記述すると、1番目の数値を実数部、2番目の数値を虚数部と解釈する。演算中に含める場合、複素数表現全体を括弧<span class="pink">()</span>で囲む必要がある。<i>val</i>には、定数表現、変数表現、括弧で囲まれた配列表現、または括弧で囲まれた計算式を使用することができる。<br>
+<hr class="hr">
+複素数表現の記述例を次に記す。<br>
+<dl>
+<dd><span class="pink">1.23 4.5</span><br>
+<dd><span class="pink">pow (<u class="pink">0 1</u>) 2</span><br>
+<dd><span class="pink">(<u class="pink">@A @B</u>)+(<u class="pink">@C @D</u>)</span><br>
+</dl>
+<dl>
+<dd><span class="pink">@z=(<u class="pink">(real @x) (imag @y)</u>)</span><br>
+<dl>
+<dd># 変数<span class="pink">@x</span>の実数部と変数<span class="pink">@y</span>の虚数部から、複素数<span class="pink">@z</span>を再構成<br>
+</dl>
+</dl>
+<hr class="hr_border">
+関数の実行<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><i>func</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>内部関数、ユーザー定義関数<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!</span><i>func</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>外部関数<br></dl>
+<dl>
+<dd>名前空間<i>name</i>に属した外部関数を実行するには、外部関数名の頭に<i>name</i><span class="pink">:</span>を付ける。<br>
+</dl>
+<hr class="hr_border">
+配列の初期化<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i> <span class="pink">{</span> <i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span> <span class="pink">}</span><br><dl><dd>一次元<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i> <span class="pink">{</span> <span class="pink">{</span> <span class="blue">...</span> <span class="pink">}</span> <span class="blue">[</span><span class="pink">{</span> <span class="blue">...</span> <span class="pink">}</span> <span class="blue">...]</span> <span class="pink">}</span><br><dl><dd>多次元<br></dl>
+<hr class="hr">
+<i>index</i>の後ろの<span class="pink">{</span>の個数で次元数が決定する。例えば、<br>
+<dl>
+<dd><span class="pink">@@A<b><u class="pink">{{</u></b>1 2 3}{4 5 6}{7 8 9 10}}</span><br>
+</dl>
+と記述すると、<span class="pink">@@A</span>は二次元配列として初期化される。<br>
+<hr class="hr_border">
+行列の初期化は、二次元配列の初期化方法により行うことができる。<br>
+<hr class="hr">
+行ベクトル、列ベクトルも、二次元配列として初期化を行う必要がある。<br>
+<dl>
+<dd># 行ベクトル<br>
+<dd><span class="pink">@@A { { 12 34 56 78 } }</span><br>
+<dd># 列ベクトル<br>
+<dd><span class="pink">@@B { { 12 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 34 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 56 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 78 } }</span><br>
+</dl>
+<hr class="hr_border">
+CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が変数への代入の形になっていない場合、自動的に「計算結果用変数」に代入され、計算結果が保持される。そのため、計算記述を演算子から始めることができ、その場合、演算子の左辺は「計算結果用変数」になる。<br>
+<hr class="hr">
+変数<span class="pink">@:0</span>または行列<span class="pink">@@:0</span>を参照することで、現在の計算結果が得られる。それに加えて、文字<span class="pink">@</span>による参照ができる。これは、最後の計算結果がスカラーの場合、変数<span class="pink">@:0</span>が参照され、最後の計算結果が行列の場合、行列<span class="pink">@@:0</span>が参照される。<br>
+
+<a name="stat"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">制御文</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">if </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="blue">[</span><span class="pink">elif </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="blue">[</span><span class="pink">else</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="pink">endif</span><br>
+<hr class="hr_border">
+<span class="pink">switch </span><i>condition</i><br>
+<span class="blue">[</span><span class="pink">case </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="blue">[</span><span class="pink">default</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="pink">endswi</span><br>
+<hr class="hr_border">
+<span class="pink">breakswi</span><br><dl><dd>switch文から脱出する<br></dl>
+<hr class="hr_border">
+<span class="pink">do</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">until </span><i>condition</i><br>
+<hr class="hr_border">
+<span class="pink">while </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">endwhile</span><br>
+<hr class="hr_border">
+<span class="pink">for </span><span class="blue">[</span><i>init</i><span class="blue">]</span><span class="pink">;</span><span class="blue">[</span><i>condition</i><span class="blue">]</span><span class="pink">;</span><span class="blue">[</span><i>expression</i><span class="blue">]</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">next</span><br>
+<hr class="hr_border">
+<span class="pink">continue</span><br><dl><dd>ループの末尾までジャンプする<br></dl>
+<hr class="hr">
+<span class="pink">break</span><br><dl><dd>ループ文から脱出する<br></dl>
+<hr class="hr_border">
+<span class="pink">assert </span><i>expression</i><br><dl><dd><i>expression</i>を評価し、結果が偽(0)であると、診断メッセージを表示し、プロセスを打ち切る<br></dl>
+<dl>
+<dd>コマンド<span class="pink">:assert FALSE</span>が発行されていると、<i>expression</i>の実行および評価は行われない。<br>
+</dl>
+<span class="pink">return </span><span class="blue">[</span><i>expression</i><span class="blue">]</span><br><dl><dd>外部関数・ユーザー定義関数の呼び出し元に戻る<br></dl>
+<dl>
+<dd><i>expression</i>が指定されていると、<i>expression</i>の計算結果が呼び出し元に返される。指定されていない場合、これまでの計算結果が返される。<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">func </span><i>name</i><span class="pink"> </span><span class="blue">[</span><i>label</i><span class="blue">...]</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">endfunc</span><br>
+<dl>
+<dd>ユーザー定義関数を定義する<br>
+</dl>
+<dl>
+<dd><i>label</i>を指定すると、引数用変数または配列にラベルを設定することができる。10個まで指定できる。<br>
+<dd><i>label</i>の前に<span class="pink">&amp;</span>を記述すると、コマンド<span class="pink">:param </span><i>n</i><span class="pink"> TRUE</span>の機能をする。また、<i>label</i>の後ろに<span class="pink">[]</span>を記述すると、引数用配列にラベル設定する。例えば、<br>
+<dl>
+<dd><span class="pink">func test a &amp;b c[]</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+</dl>
+<dd>は、<br>
+<dl>
+<dd><span class="pink">func test</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label a @0</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label b @1</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 1 TRUE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label c @@2</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+</dl>
+<dd>と同等の機能をする。<br>
+</dl>
+<hr class="hr_border">
+ユーザー定義関数は、現在のプロセス内と、同レベルのユーザー定義関数内で、有効である。これは、再帰呼び出し、あるいは次のような記述が可能であることを意味する。<br>
+<dl>
+<dd><span class="pink">func test1</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">func test2</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;test1</span><br>
+<dd><span class="pink">endfunc</span><br>
+</dl>
+ユーザー定義関数内で、ユーザー定義関数の定義はできない。<br>
+<hr class="hr">
+<!--
+ユーザー定義関数内での、親プロセスから渡されたパラメータの参照方法は、外部関数の場合と同じである。<br>
+-->
+ユーザー定義関数が親プロセスから実行されると、ユーザー定義関数内で以下の変数および配列を参照することで、親プロセスから渡されたパラメータ数と各パラメータ値を確認することができる。<br>
+<dl>
+<dd><span class="pink">@! </span>- ユーザー定義関数のパラメータの数<br>
+</dl>
+<dl>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- ユーザー定義関数の各パラメータ変数。親プロセスで、ユーザー定義関数のパラメータとして、定数または変数を指定した場合に値が格納される。<br>
+</dl>
+<dl>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- ユーザー定義関数の各パラメータ配列。親プロセスで、ユーザー定義関数のパラメータとして、配列名を指定した場合に配列値がコピーされる。また、文字列定数を指定した場合、文字列が一次元配列としてコピーされる。<br>
+</dl>
+角度を求めるユーザー定義関数では、角度の単位指定コマンド<span class="pink">:rad TRUE</span>、<span class="pink">:deg TRUE</span>または<span class="pink">:grad TRUE</span>を発行することが必須である。<br>
+<hr class="hr">
+ユーザー定義関数のパラメータとして角度をとる場合、<span class="pink">:angle</span>コマンドを発行することが必須である。<br>
+<hr class="hr">
+ユーザー定義関数内では、親プロセスでコマンド<span class="pink">:define</span>により定義された定数を参照できる。<br>
+
+<a name="operator"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">演算子</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+演算子を優先度の高い順に挙げると次のようになる。<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+後置<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">++&nbsp;&nbsp;&nbsp;</span>後置インクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">--&nbsp;&nbsp;&nbsp;</span>後置デクリメント<br>
+</td>
+</tr>
+<tr>
+<td>
+単項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[++]&nbsp;</span>前置インクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[--]&nbsp;</span>前置デクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[~]&nbsp;&nbsp;</span>補数<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[!]&nbsp;&nbsp;</span>否定<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-]&nbsp;&nbsp;</span>単項マイナス<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+]&nbsp;&nbsp;</span>単項プラス<br>
+二項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">**&nbsp;&nbsp;&nbsp;</span>累乗<br>
+</td>
+</tr>
+<tr>
+<td>
+二項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">*&nbsp;&nbsp;&nbsp;&nbsp;</span>乗算<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">/&nbsp;&nbsp;&nbsp;&nbsp;</span>除算<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">%&nbsp;&nbsp;&nbsp;&nbsp;</span>モジュロ(剰余)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">+&nbsp;&nbsp;&nbsp;&nbsp;</span>加算(プラス)<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">-&nbsp;&nbsp;&nbsp;&nbsp;</span>減算(マイナス)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&lt;&nbsp;&nbsp;&nbsp;</span>左シフト<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&gt;&nbsp;&nbsp;&nbsp;</span>右シフト<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&nbsp;&nbsp;&nbsp;&nbsp;</span>未満<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;=&nbsp;&nbsp;&nbsp;</span>以下<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&nbsp;&nbsp;&nbsp;&nbsp;</span>より大きい<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;=&nbsp;&nbsp;&nbsp;</span>以上<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">==&nbsp;&nbsp;&nbsp;</span>等しい<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!=&nbsp;&nbsp;&nbsp;</span>等しくない<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&amp;&nbsp;&nbsp;&nbsp;&nbsp;</span>ビット単位の論理積<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">^&nbsp;&nbsp;&nbsp;&nbsp;</span>ビット単位の排他的論理和<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">|&nbsp;&nbsp;&nbsp;&nbsp;</span>ビット単位の内包的論理和<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&amp;&amp;&nbsp;&nbsp;&nbsp;</span>論理積<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">||&nbsp;&nbsp;&nbsp;</span>論理和<br>
+</td>
+</tr>
+<tr>
+<td>
+三項(条件式)<br>
+<span class="pink">&nbsp;&nbsp;</span><i>condition</i> <span class="pink">?</span> <i>expr</i><span class="pink"> </span><i>expr</i><br>
+</td>
+</tr>
+<tr>
+<td>
+代入<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">= *= /= %= += -= **=</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&lt;= &gt;&gt;= &amp;= |= ^=</span><br>
+</td>
+</tr>
+<tr>
+<td>
+コンマ<br>
+<span class="pink">&nbsp;&nbsp;</span><i>expr</i> <span class="pink">,</span> <i>expr</i><br>
+</td>
+</tr>
+</table>
+
+<a name="operator_mat"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">演算子(行列計算)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+行列計算に用いることのできる演算子を優先度の高い順に挙げると以下のようになる。<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+単項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-] @@</span><i>index</i><br><dl><dd>単項マイナス<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+] @@</span><i>index</i><br><dl><dd>単項プラス<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+二項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> * @@</span><i>index</i><br><dl><dd>行列の積<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> * </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><i>val</i><span class="pink"> * @@</span><i>index</i><br><dl><dd>行列とスカラー(数)の積<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> / </span><i>val</i><br><dl><dd>行列とスカラー(数)の商<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> + @@</span><i>index</i><br><dl><dd>行列の和<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> - @@</span><i>index</i><br><dl><dd>行列の差<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> == @@</span><i>index</i><br><dl><dd>等しい<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> != @@</span><i>index</i><br><dl><dd>等しくない<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+代入<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> = @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> *= @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> *= </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> /= </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> += @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> -= @@</span><i>index</i><br>
+</td>
+</tr>
+</table>
+
+<a name="func"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">内部関数</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">defined </span><i>label</i><br><dl><dd>ラベルが定義されているかどうか評価する<br></dl>
+<hr class="hr_border">
+<span class="pink">isinf </span><i>val</i><br><dl><dd>無限大であるかチェックする<br></dl>
+<hr class="hr">
+<span class="pink">isnan </span><i>val</i><br><dl><dd>非数であるかチェックする<br></dl>
+<hr class="hr_border">
+<span class="pink">rand</span><br><dl><dd>疑似乱数を生成する<br></dl>
+<hr class="hr">
+<span class="pink">time</span><br><dl><dd>現在の時刻を秒単位で得る<br></dl>
+<hr class="hr">
+<span class="pink">mktime &quot;</span><i>format</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...]</span><br><dl><dd>現地時刻をカレンダー値に変換する。<i>format</i>には、以下の文字が指定できる。<br>
+<dl>
+<dd><span class="pink">%s </span>秒(0～59)<br>
+<dd><span class="pink">%m </span>分(0～59)<br>
+<dd><span class="pink">%h </span>時間(0～24)<br>
+<dd><span class="pink">%D </span>日(1～31)<br>
+<dd><span class="pink">%M </span>月(0～11、1月を0とする)<br>
+<dd><span class="pink">%Y </span>年(現在の年から1900を引いた値)<br>
+<dd><span class="pink">%w </span>曜日(0～6、日曜日を0とする)<br>
+<dd><span class="pink">%y </span>年初からの通算日数(0～365、1月1日を0とする)<br>
+</dl>
+</dl>
+<span class="pink">tm_sec</span><br><dl><dd>秒<br></dl>
+<hr class="hr">
+<span class="pink">tm_min</span><br><dl><dd>分<br></dl>
+<hr class="hr">
+<span class="pink">tm_hour</span><br><dl><dd>時間<br></dl>
+<hr class="hr">
+<span class="pink">tm_mday</span><br><dl><dd>日<br></dl>
+<hr class="hr">
+<span class="pink">tm_mon</span><br><dl><dd>月(0～11)<br></dl>
+<hr class="hr">
+<span class="pink">tm_xmon</span><br><dl><dd>月(1～12)<br></dl>
+<hr class="hr">
+<span class="pink">tm_year</span><br><dl><dd>年(1900を引いた値)<br></dl>
+<hr class="hr">
+<span class="pink">tm_xyear</span><br><dl><dd>年<br></dl>
+<hr class="hr">
+<span class="pink">tm_wday</span><br><dl><dd>曜日<br></dl>
+<hr class="hr">
+<span class="pink">tm_yday</span><br><dl><dd>年初からの通算日数<br></dl>
+<hr class="hr_border">
+<span class="pink">a2d </span><i>val</i><br><dl><dd>現在の角度単位→度<br></dl>
+<hr class="hr">
+<span class="pink">a2g </span><i>val</i><br><dl><dd>現在の角度単位→グラジアン<br></dl>
+<hr class="hr">
+<span class="pink">a2r </span><i>val</i><br><dl><dd>現在の角度単位→ラジアン<br></dl>
+<hr class="hr">
+<span class="pink">d2a </span><i>val</i><br><dl><dd>度→現在の角度単位<br></dl>
+<hr class="hr">
+<span class="pink">d2g </span><i>val</i><br><dl><dd>度→グラジアン<br></dl>
+<hr class="hr">
+<span class="pink">d2r </span><i>val</i><br><dl><dd>度→ラジアン<br></dl>
+<hr class="hr">
+<span class="pink">g2a </span><i>val</i><br><dl><dd>グラジアン→現在の角度単位<br></dl>
+<hr class="hr">
+<span class="pink">g2d </span><i>val</i><br><dl><dd>グラジアン→度<br></dl>
+<hr class="hr">
+<span class="pink">g2r </span><i>val</i><br><dl><dd>グラジアン→ラジアン<br></dl>
+<hr class="hr">
+<span class="pink">r2a </span><i>val</i><br><dl><dd>ラジアン→現在の角度単位<br></dl>
+<hr class="hr">
+<span class="pink">r2d </span><i>val</i><br><dl><dd>ラジアン→度<br></dl>
+<hr class="hr">
+<span class="pink">r2g </span><i>val</i><br><dl><dd>ラジアン→グラジアン<br></dl>
+<hr class="hr_border">
+<span class="pink">sin </span><i>val</i><br><dl><dd>正弦<br></dl>
+<hr class="hr">
+<span class="pink">cos </span><i>val</i><br><dl><dd>余弦<br></dl>
+<hr class="hr">
+<span class="pink">tan </span><i>val</i><br><dl><dd>正接<br></dl>
+<hr class="hr">
+<span class="pink">asin </span><i>val</i><br><dl><dd>逆正弦<br></dl>
+<hr class="hr">
+<span class="pink">acos </span><i>val</i><br><dl><dd>逆余弦<br></dl>
+<hr class="hr">
+<span class="pink">atan </span><i>val</i><br><dl><dd>逆正接<br></dl>
+<hr class="hr">
+<span class="pink">atan2 </span><i>y</i><span class="pink"> </span><i>x</i><br><dl><dd><i>y</i>/<i>x</i>の逆正接<br></dl>
+<hr class="hr">
+<span class="pink">sinh </span><i>val</i><br><dl><dd>双曲線正弦<br></dl>
+<hr class="hr">
+<span class="pink">cosh </span><i>val</i><br><dl><dd>双曲線余弦<br></dl>
+<hr class="hr">
+<span class="pink">tanh </span><i>val</i><br><dl><dd>双曲線正接<br></dl>
+<hr class="hr">
+<span class="pink">asinh </span><i>val</i><br><dl><dd>逆双曲線正弦<br></dl>
+<hr class="hr">
+<span class="pink">acosh </span><i>val</i><br><dl><dd>逆双曲線余弦<br></dl>
+<hr class="hr">
+<span class="pink">atanh </span><i>val</i><br><dl><dd>逆双曲線正接<br></dl>
+<hr class="hr_border">
+<span class="pink">exp </span><i>val</i><br><dl><dd>指数<br></dl>
+<hr class="hr">
+<span class="pink">exp10 </span><i>val</i><br><dl><dd>底10の指数<br></dl>
+<hr class="hr">
+<span class="pink">ln </span><i>val</i><br><dl><dd>自然対数<br></dl>
+<hr class="hr">
+<span class="pink">log </span><i>val</i><br><dl><dd>(C言語モード)自然対数<br><dd>(電卓モード)底10の対数<br></dl>
+<hr class="hr">
+<span class="pink">log10 </span><i>val</i><br><dl><dd>底10の対数<br></dl>
+<hr class="hr">
+<span class="pink">pow </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd><i>x</i>の<i>y</i>乗<br></dl>
+<hr class="hr">
+<span class="pink">sqr </span><i>val</i><br><dl><dd>自乗<br></dl>
+<hr class="hr">
+<span class="pink">sqrt </span><i>val</i><br><dl><dd>平方根<br></dl>
+<hr class="hr">
+<span class="pink">ceil </span><i>val</i><br><dl><dd><i>val</i>以上の最小の整数<br></dl>
+<hr class="hr">
+<span class="pink">floor </span><i>val</i><br><dl><dd><i>val</i>以下の最大の整数<br></dl>
+<hr class="hr">
+<span class="pink">int </span><i>val</i><br><dl><dd>整数<br></dl>
+<hr class="hr">
+<span class="pink">abs </span><i>val</i><br><dl><dd>絶対値<br></dl>
+<hr class="hr">
+<span class="pink">ldexp </span><i>x</i><span class="pink"> </span><i>exp</i><br><dl><dd>仮数<i>x</i>と指数<i>exp</i>から実数を計算する<br></dl>
+<hr class="hr">
+<span class="pink">frexp </span><i>x</i><span class="pink"> </span><i>var_exp</i><br><dl><dd><i>x</i>の仮数を返し、<i>var_exp</i>に指数が格納される<br></dl>
+<hr class="hr">
+<span class="pink">modf </span><i>x</i><span class="pink"> </span><i>var_int</i><br><dl><dd><i>x</i>の小数部を返し、<i>var_int</i>に整数部が格納される<br></dl>
+<hr class="hr_border">
+<span class="pink">real </span><i>val</i><br><dl><dd>複素数の実数部<br></dl>
+<hr class="hr">
+<span class="pink">imag </span><i>val</i><br><dl><dd>複素数の虚数部<br></dl>
+<hr class="hr">
+<span class="pink">arg </span><i>val</i><br><dl><dd>複素数の位相角度<br></dl>
+<hr class="hr">
+<span class="pink">norm </span><i>val</i><br><dl><dd>絶対値の自乗<br></dl>
+<hr class="hr">
+<span class="pink">conjg </span><i>val</i><br><dl><dd>共役複素数<br></dl>
+<hr class="hr">
+<span class="pink">polar </span><i>rho</i><span class="pink"> </span><i>theta</i><br><dl><dd>絶対値<i>rho</i>、位相角度<i>theta</i>の複素数値<br></dl>
+<hr class="hr_border">
+<span class="pink">num </span><i>val</i><br><dl><dd>分数の分子<br></dl>
+<hr class="hr">
+<span class="pink">denom </span><i>val</i><br><dl><dd>分数の分母<br></dl>
+<hr class="hr_border">
+<span class="pink">row @@</span><i>index</i><br><dl><dd>行列の行数<br></dl>
+<hr class="hr">
+<span class="pink">col @@</span><i>index</i><br><dl><dd>行列の列数<br></dl>
+<hr class="hr">
+<span class="pink">trans @@</span><i>index</i><br><dl><dd>転置行列<br></dl>
+<hr class="hr_border">
+<span class="pink">gwidth</span><br><dl><dd>オフスクリーンの幅<br></dl>
+<hr class="hr">
+<span class="pink">gheight</span><br><dl><dd>オフスクリーンの高さ<br></dl>
+<hr class="hr">
+<span class="pink">gcolor </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>現在色インデックス<br></dl>
+<dl>
+<dd><i>rgb_color</i>が指定されると、指定のRGBカラー値に近い色のインデックスが現在色インデックスとなり、そのインデックスが返される。<br>
+</dl>
+<hr class="hr">
+<span class="pink">gcolor24 </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>現在色インデックスのRGBカラー値<br></dl>
+<dl>
+<dd><i>rgb_color</i>が指定されると、指定のRGBカラー値に近い色のインデックスが現在色インデックスとなり、そのRGBカラー値が返される。<br>
+</dl>
+<hr class="hr">
+<span class="pink">gcx</span><br><dl><dd>現在のオフスクリーンX座標<br></dl>
+<hr class="hr">
+<span class="pink">gcy</span><br><dl><dd>現在のオフスクリーンY座標<br></dl>
+<hr class="hr">
+<span class="pink">wcx</span><br><dl><dd>現在のウィンドウX座標<br></dl>
+<hr class="hr">
+<span class="pink">wcy</span><br><dl><dd>現在のウィンドウY座標<br></dl>
+<hr class="hr">
+<span class="pink">gget</span> <i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>オフスクリーンのドット値<br></dl>
+<hr class="hr">
+<span class="pink">wget </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>ウィンドウ内のドット値<br></dl>
+<hr class="hr">
+<span class="pink">gx </span><i>x</i><br><dl><dd>ウィンドウX座標→オフスクリーンX座標<br></dl>
+<hr class="hr">
+<span class="pink">gy </span><i>y</i><br><dl><dd>ウィンドウY座標→オフスクリーンY座標<br></dl>
+<hr class="hr">
+<span class="pink">wx </span><i>x</i><br><dl><dd>オフスクリーンX座標→ウィンドウX座標<br></dl>
+<hr class="hr">
+<span class="pink">wy </span><i>y</i><br><dl><dd>オフスクリーンY座標→ウィンドウY座標<br></dl>
+<hr class="hr_border">
+<span class="pink">call &quot;</span><i>name</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...]</span><br><dl><dd>関数の間接呼び出し<br></dl>
+<hr class="hr">
+<span class="pink">eval &quot;</span><i>expr</i><br><dl><dd>文字列として表された演算式を実行し、演算結果の値または行列を返す<br></dl>
+<hr class="hr">
+<span class="pink">indexof </span><i>label</i><br><dl><dd>ローカル変数・配列の一時インデックス<br></dl>
+
+<a name="extfunc"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">外部関数</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+外部関数が親プロセスから実行されると、外部関数内で以下の変数および配列を参照することで、親プロセスから渡されたパラメータ数と各パラメータ値を確認することができる。<br>
+<dl>
+<dd><span class="pink">@! </span>- 外部関数のパラメータの数<br>
+</dl>
+<dl>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- 外部関数の各パラメータ変数。親プロセスで、外部関数のパラメータとして、定数または変数を指定した場合に値が格納される。<br>
+</dl>
+<dl>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- 外部関数の各パラメータ配列。親プロセスで、外部関数のパラメータとして、配列名を指定した場合に配列値がコピーされる。また、文字列定数を指定した場合、文字列が一次元配列としてコピーされる。<br>
+</dl>
+角度を求める外部関数では、角度の単位指定コマンド<span class="pink">:rad TRUE</span>、<span class="pink">:deg TRUE</span>または<span class="pink">:grad TRUE</span>を発行することが必須である。<br>
+<hr class="hr">
+外部関数のパラメータとして角度をとる場合、<span class="pink">:angle</span>コマンドを発行することが必須である。<br>
+<hr class="hr_border">
+外部関数名の衝突を回避するために、外部関数に名前空間を指定することができる。外部関数ファイルの先頭行に<br>
+<dl>
+<dd><span class="pink">#!NAMESPACE </span><i>name</i><br>
+</dl>
+を記述することで、その外部関数は、名前空間<i>name</i>に属したものとなる。<br>
+
+<a name="eclipse"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">ECLIPSE</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+「ECLIPSE」は、計算処理の高速化向け拡張命令である。<br>
+<hr class="hr">
+命令は、<span class="pink">$</span>で始まるニーモニックと、0個以上のオペランドからなる。ニーモニックとオペランドの区切りには空白文字を使用し、オペランドごとの区切りにはコンマ(<span class="pink">,</span>)を使用する。コンマの前後には空白文字を入れることができる。<br>
+<hr class="hr">
+ニーモニックは、大文字・小文字は問わない。<br>
+<hr class="hr">
+第一オペランドには変数表現、配列表現、行列表現が使用できる。<br>
+<hr class="hr">
+第二オペランド以降には、定数表現、変数表現、配列表現、行列表現、文字列表現、文字列定数が使用できる。また、括弧<span class="pink">()</span>で囲まれたCLIP記述が使用できる。ただし、括弧内の演算は、さらに括弧があればその中が優先されるが、原則は左側から右側へ行われる。また、ECLIPSEでは、括弧は釣り合いがとれている必要がある。<br>
+<hr class="hr">
+エスケープ文字<span class="pink">\</span>(または<span class="pink">¥</span><!--C2A5-->)が使用できる。<br>
+<hr class="hr">
+<span class="pink">[</span>から<span class="pink">]</span>までを1つのトークンとみなす。<br>
+<hr class="hr">
+コメント開始文字<span class="pink">#</span>から行末までがコメントになる。<br>
+<hr class="hr">
+「計算結果用変数」値の更新は自動では行われない。計算結果用変数<span class="pink">@</span>を参照したり、<span class="pink">@</span>に値を代入するのは構わない。<br>
+<hr class="hr">
+CLIP式中にECLIPSE命令を含めることはできない。独立した行に記述するか、セミコロン(<span class="pink">;</span>)で区切ってCLIP式とECLIPSE命令を分ける必要がある。<br>
+<hr class="hr_border">
+演算命令<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>ニーモニック</b></td><td width="100"><b>オペランド</b></td></tr></table>
+</td><td width="120"><b>CLIP</b></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$INC</span></td><td><i>r</i></td></tr></table>
+</td><td><span class="pink">[++]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$DEC</span></td><td><i>r</i></td></tr></table>
+</td><td><span class="pink">[--]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NEG</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [-]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$CMP</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [~]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NOT</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [!]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MINUS</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [-]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MUL<br>$MUL_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> *= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> * </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$DIV<br>$DIV_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> /= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> / </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MOD<br>$MOD_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> %= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> % </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$ADD<br>$ADD_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> += </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> + </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SUB<br>$SUB_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> -= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> - </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$POW<br>$POW_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> **= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> ** </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SHIFTL<br>$SHIFTL_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &lt;&lt;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt;&lt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SHIFTR<br>$SHIFTR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &gt;&gt;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt;&gt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$AND<br>$AND_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &amp;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &amp; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$OR<br>$OR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> |= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> | </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$XOR<br>$XOR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> ^= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> ^ </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LT<br>$LT_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &lt; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LE<br>$LE_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &lt;= <span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt;= </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$GT<br>$GT_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &gt; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$GE<br>$GE_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &gt;= </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt;= </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$EQ<br>$EQ_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> == </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> == </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NEQ<br>$NEQ_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> != </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> != </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LOGAND<br>$LOGAND_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &amp;&amp; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &amp;&amp; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LOGOR<br>$LOGOR_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> || </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> || </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$CND</span></td><td><i>r</i><span class="pink">,</span><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>b</i><span class="pink"> ? </span><i>x</i><span class="pink"> </span><i>y</i></td>
+</tr>
+</table>
+<hr class="hr_border">
+初期化命令<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>ニーモニック</b></td><td width="100"><b>オペランド</b></td></tr></table>
+</td><td width="120"><b>CLIP</b></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_F</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = FALSE</span></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_T</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = TRUE</span></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_Z</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = 0</span></td>
+</tr>
+</table>
+<hr class="hr_border">
+全てのCLIP内部関数を、頭に<span class="pink">$</span>を付けて呼び出すことができる。大文字に変えても構わない。<br>
+<hr class="hr">
+第一オペランドに結果を格納する変数・配列・行列を指定し、第二オペランド以降に内部関数の引数を指定する。例えば次の通り。<br>
+<hr class="hr">
+<dl>
+<dd><span class="pink">$SQR&nbsp;&nbsp;@a,\-5</span><br>
+<dd><span class="pink">$modf&nbsp;@x,12.345,@i</span><br>
+</dl>
+<hr class="hr_border">
+ループ命令<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>ニーモニック</b></td><td width="210"><b>オペランド</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPSTART</span></td><td>&nbsp;</td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND<br>$LOOPENDE</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><span class="pink">,</span><i>step</i><br><i>count</i><span class="pink">,</span><i>stop</i><span class="pink">,</span><i>step</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND_I<br>$LOOPENDE_I</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><br><i>count</i><span class="pink">,</span><i>stop</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND_D<br>$LOOPENDE_D</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><br><i>count</i><span class="pink">,</span><i>stop</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+<i>stop</i>、<i>step</i>は整数。<i>step</i>に0は指定できない。<br>
+<hr class="hr">
+<span class="pink">$LOOPEND</span>では、まず<i>count</i><span class="pink">+=</span><i>step</i>が計算され、次の条件でループを抜ける。<br>
+A) <i>step</i>が正の値の場合、<i>count</i>の値が<i>stop</i>以上<br>
+B) <i>step</i>が負の値の場合、<i>count</i>の値が<i>stop</i>以下<br>
+<hr class="hr">
+<span class="pink">$LOOPEND_I</span>では、まず<span class="pink">[++]</span><i>count</i>が計算され、<i>count</i>の値が<i>stop</i>以上でループを抜ける。<br>
+<hr class="hr">
+<span class="pink">$LOOPEND_D</span>では、まず<span class="pink">[--]</span><i>count</i>が計算され、<i>count</i>の値が<i>stop</i>以下でループを抜ける。<br>
+<hr class="hr">
+<span class="pink">$LOOPENDE</span>、<span class="pink">$LOOPENDE_I</span>、<span class="pink">$LOOPENDE_D</span>では、<i>count</i>の値が<i>stop</i>に等しい場合もループ処理が実行される。<br>
+<hr class="hr">
+<span class="pink">$LOOPSTART</span>の前に<i>count</i>の値を初期化しておく必要がある。<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>ニーモニック</b></td><td width="210"><b>オペランド</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$CONTINUE</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+<i>b</i>が真の場合、ループの末尾までジャンプする。CLIPのループ文に対しても有効である。<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>ニーモニック</b></td><td width="210"><b>オペランド</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$BREAK</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+<i>b</i>が真の場合、ループから脱出する。CLIPのループ文に対しても有効である。<br>
+<hr class="hr">
+ECLIPSEのループ中、CLIPの<span class="pink">continue</span>、<span class="pink">break</span>が有効である。<br>
+<hr class="hr_border">
+リターン命令<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>ニーモニック</b></td><td width="210"><b>オペランド</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$RETURN</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$RETURN_A</span></td><td><i>b</i><span class="pink">,</span><i>ans</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+<i>b</i>が真の場合、外部関数・ユーザー定義関数の呼び出し元に戻る。<br>
+
+<br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000">&nbsp;</td>
+	</tr>
+</table>
+<hr class="hr">
+<a href="#mokuji">目次へ</a><br>
+<hr class="hr">
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+<title>CLIP Language Reference</title>
+<style type="text/css">
+html, body {
+	margin:0;
+	padding:0;
+	line-height:22px;
+}
+* {
+	font-family:"Helvetica";
+	font-size:18px;
+	color:#000000;
+}
+.div_body {
+	background-color:#FFFFFF;
+}
+i {
+	color:#FF00FF;
+}
+.pink {
+	font-family:"Courier New";
+	color:#FF00FF;
+}
+.blue {
+	color:#0000FF;
+}
+.hr {
+	border:0;
+	margin:0;
+	height:4px;
+}
+.hr_border {
+	border-top:1px solid #808080;
+	margin-top:4px;
+	margin-bottom:3px;
+}
+dl {
+	margin:4px;
+}
+</style>
+</head>
+<body>
+<div class="div_body">
+
+<hr class="hr">
+<b><span style="font-size:20px">CLIP Language Reference</span></b><br>
+
+<a name="mokuji"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Contents</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<a href="#syosiki">Format</a><br>
+<hr class="hr">
+<a href="#command">Command</a><br>
+<hr class="hr">
+<a href="#command_func">Initial state in function (external function / user-defined function)</a><br>
+<hr class="hr">
+<a href="#suuchi">Numeric expression</a><br>
+<hr class="hr">
+<a href="#stat">Control statement</a><br>
+<hr class="hr">
+<a href="#operator">Operator</a><br>
+<hr class="hr">
+<a href="#operator_mat">Operator (matrix calculation)</a><br>
+<hr class="hr">
+<a href="#func">Internal function</a><br>
+<hr class="hr">
+<a href="#extfunc">External function</a><br>
+<hr class="hr">
+<a href="#eclipse">ECLIPSE</a><br>
+
+<a name="syosiki"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Format</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+Descriptions of calculation formulas in the CLIP language are made with infix notation.<br>
+<hr class="hr">
+The CLIP language format is specialized for calculation processing. When the calculation description is not in the form of assignment to a variable, it is automatically assigned to the &quot;variable for calculation result&quot;, and the calculation result is held. Therefore, you can start a calculation description from an operator, in which case the left side of the operator is a &quot;variable for calculation result&quot;.<br>
+<hr class="hr_border">
+Parentheses <span class="pink">()</span> can be used to specify the order of precedence of operations.<br>
+<hr class="hr">
+Parentheses do not have to be balanced. For example, it can be described as follows.<br>
+<dl>
+<dd><span class="pink">12+34)*56</span><br>
+<dd><span class="pink">12*(34+56</span><br>
+</dl>
+Also, in a part describing a numerical value such as a parameter of a function, a calculation expression enclosed in parentheses can be written instead.<br>
+<hr class="hr_border">
+The escape character <span class="pink">\</span> (or <span class="pink">¥</span><!--C2A5-->) can be used to suppress the interpreter from interpreting characters with special meaning in the CLIP language. When using the character <span class="pink">\</span> (or <span class="pink">¥</span><!--C2A5-->) itself as a character, it is necessary to describe <span class="pink">\\</span> (or <span class="pink">¥¥</span><!--C2A5-->). In this reference, <span class="pink">\</span> is used in the following description, but it can be replaced with <span class="pink">¥</span><!--C2A5--> without any problem.<br>
+<hr class="hr_border">
+<span class="pink">[</span><i>string</i><span class="pink">]</span><br>
+<hr class="hr">
+We consider <span class="pink">[</span> to <span class="pink">]</span> as one token. In the following cases, it is necessary to use <span class="pink">[]</span>.<br>
+<hr class="hr">
+A) If any of the following are included in the description of the string constant, it is necessary to escape the character with the escape character <span class="pink">\</span> or to enclose the entire character string constant (including the character string constant start character <span class="pink">&quot;</span>) with <span class="pink">[]</span>.<br>
+<dl>
+<dd>a) Characters with special meaning in the CLIP language, such as <span class="pink">*</span><br>
+<dd>b) Whitespace<br>
+<dd>c) The letter <span class="pink">[</span><br>
+</dl>
+<hr class="hr">
+B) If you wish to use the letter <span class="pink">[</span> in the variable index, you need to write <span class="pink">@\[</span> with the escape character <span class="pink">\</span> or write <span class="pink">[@[]</span>.<br>
+<hr class="hr">
+C) If you include an imaginary part in the description of a complex constant, you need to escape the minus character (<span class="pink">-</span>) or plus character (<span class="pink">+</span>) with the escape character <span class="pink">\</span> or enclose the whole constant description in <span class="pink">[]</span>. For example, it is described as follows.<br>
+<dl>
+<dd><span class="pink">1.23\+4.5i</span><br>
+<dd><span class="pink">1e+2\-3e-4i</span> # The real part <span class="pink">1e+2</span> and the imaginary part <span class="pink">\-3e-4</span><br>
+<dd><span class="pink">[1e+2-3e-4i]</span> # Same value as above<br>
+</dl>
+D) Describe unary operators in parentheses <span class="pink">[]</span>. For example, unary minus is described as <span class="pink">[-]</span> to distinguish it from binomial minus.<br>
+<hr class="hr">
+When using the character <span class="pink">]</span> in <span class="pink">[</span> to <span class="pink">]</span>, it is necessary to use the escape character <span class="pink">\</span>. It is not necessary in case of the letter <span class="pink">[</span>. For example, it is described as follows.<br>
+<dl>
+<dd><span class="pink">:plot [&quot;sin [-\]x]</span><br>
+</dl>
+<hr class="hr_border">
+<i>expression</i><span class="blue">[</span><span class="pink">;</span><span class="blue">[</span><i>expression</i><span class="blue">]]...</span><br>
+<hr class="hr">
+Multiple <i>expression</i> can be described by separating them with a semicolon (<span class="pink">;</span>) on one line. Even if <i>expression</i> after the semicolon is omitted, it is interpreted as an empty calculation expression. For example, it is possible to describe in the form of omitting initializer, condition, and iterator sections in a <span class="pink">for</span> statement, and to interpret it as an empty calculation expression. It is as follows.<br>
+<dl>
+<dd><span class="pink">for;;</span><br>
+</dl>
+<hr class="hr_border">
+<span class="blue">[</span><i>expression</i><span class="blue">]</span><span class="pink">#</span><i>comment</i><br>
+<hr class="hr">
+From the comment start character <span class="pink">#</span> to the end of the line is a comment.<br>
+<hr class="hr">
+The comment start character is identified before <span class="pink">[]</span> or <span class="pink">;</span>. For example, if you use the letter <span class="pink">#</span> in the index of variables, it is wrong to describe <span class="pink">[@#]</span> and you must write <span class="pink">@\#</span> using the escape character <span class="pink">\</span>.<br>
+
+<a name="command"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Command</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">:efloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Floating point type (exponential notation)<br></dl>
+<hr class="hr">
+<span class="pink">:float </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Floating point type (decimal notation)<br></dl>
+<hr class="hr">
+<span class="pink">:gfloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Floating point type<br></dl>
+<hr class="hr">
+<span class="pink">:ecomplex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Complex type (exponential notation)<br></dl>
+<hr class="hr">
+<span class="pink">:complex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Complex type (decimal notation)<br></dl>
+<hr class="hr">
+<span class="pink">:gcomplex </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><br><dl><dd>Complex type<br></dl>
+<hr class="hr">
+<span class="pink">:prec </span><i>prec</i><br><dl><dd>Precision<br></dl>
+<hr class="hr_border">
+<span class="pink">:fract</span><br><dl><dd>Fraction type<br></dl>
+<hr class="hr">
+<span class="pink">:mfract</span><br><dl><dd>Mixed fraction type<br></dl>
+<hr class="hr_border">
+<span class="pink">:htime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>Time type (hour)<br></dl>
+<hr class="hr">
+<span class="pink">:mtime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>Time type (minute)<br></dl>
+<hr class="hr">
+<span class="pink">:time </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>Time type (second)<br></dl>
+<hr class="hr">
+<span class="pink">:ftime </span><span class="blue">[</span><i>fps</i><span class="blue">]</span><br><dl><dd>Time type (frame)<br></dl>
+<hr class="hr">
+<span class="pink">:fps </span><i>fps</i><br><dl><dd>Number of frames per second<br></dl>
+<hr class="hr_border">
+<span class="pink">:char </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Signed 8 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:uchar </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Unsigned 8 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:short </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Signed 16 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:ushort </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Unsigned 16 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:long </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Signed 32 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:ulong </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Unsigned 32 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:int </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Signed 32 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:uint </span><span class="blue">[</span><i>radix</i><span class="blue">]</span><br><dl><dd>Unsigned 32 bit integer type<br></dl>
+<hr class="hr">
+<span class="pink">:radix </span><i>radix</i><br><dl><dd>Radix<br></dl>
+<hr class="hr_border">
+<span class="pink">:ptype</span><br><dl><dd>Type of parent process<br></dl>
+<hr class="hr_border">
+<span class="pink">:rad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>Radian. Do not convert / Convert units of calculation result when returning to parent process.<br></dl>
+<dl>
+<dd>In function (external function / user-defined function) for determining the angle, it is mandatory to issue a unit specifying command of the angle by specifying <span class="pink">TRUE</span> as the parameter inside the function.<br>
+</dl>
+<span class="pink">:deg </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>Degree. Do not convert / Convert units of calculation result when returning to parent process.<br></dl>
+<dl>
+<dd>In function (external function / user-defined function) for determining the angle, it is mandatory to issue a unit specifying command of the angle by specifying <span class="pink">TRUE</span> as the parameter inside the function.<br>
+</dl>
+<span class="pink">:grad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>Gradian. Do not convert / Convert units of calculation result when returning to parent process.<br></dl>
+<dl>
+<dd>In function (external function / user-defined function) for determining the angle, it is mandatory to issue a unit specifying command of the angle by specifying <span class="pink">TRUE</span> as the parameter inside the function.<br>
+</dl>
+<span class="pink">:angle </span><i>num</i><br><dl><dd>Unit conversion of parameter value<br></dl>
+<dl>
+<dd><i>num</i> takes the value of 0 to 9. For example, When the following code is executed, the value of <span class="pink">@0</span> in the function <span class="pink">torad</span> becomes the value 3.141592... obtained by converting 180 (degrees) to radians, and 3.141592... is assigned to <span class="pink">@t</span>.<br>
+<dl>
+<dd><span class="pink">func torad</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:rad</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:angle 0</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return @0</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">:deg</span><br>
+<dd><span class="pink">@t=torad 180</span><br>
+</dl>
+</dl>
+<dl>
+<dd>In function (external function / user-defined function), when taking an angle as a parameter of a function, it is essential to issue this command inside the function.<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:label </span><i>label</i><span class="pink"> @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><br><dl><dd>Label variables / arrays<br></dl>
+<hr class="hr">
+<span class="pink">:params </span><i>label</i><span class="blue">...</span><br><dl><dd>Set labels for argument variables or arrays. Up to 10 can be specified.<br></dl>
+<dl>
+<dd>When <span class="pink">&amp;</span> is written before <i>label</i>, it functions as the command <span class="pink">:param </span><i>n</i><span class="pink"> TRUE</span>. Also, if you write <span class="pink">[]</span> after <i>label</i>, label it in the argument array. For example:<br>
+<dl>
+<dd><span class="pink">:params a &amp;b c[]</span><br>
+</dl>
+<dd>With the above command, it has the same function as the following code.<br>
+<dl>
+<dd><span class="pink">:label a @0</span><br>
+<dd><span class="pink">:label b @1</span><br>
+<dd><span class="pink">:param 1 TRUE</span><br>
+<dd><span class="pink">:label c @@2</span><br>
+</dl>
+</dl>
+<span class="pink">:var </span><i>var_name</i><span class="blue">...</span><br><dl><dd>Define variables<br></dl>
+<hr class="hr">
+<span class="pink">:array </span><i>array_name</i><span class="blue">...</span><br><dl><dd>Define arrays<br></dl>
+<hr class="hr">
+<span class="pink">:local </span><i>label</i><span class="blue">...</span><br><dl><dd>Define a local variable or array<br></dl>
+<dl>
+<dd>If <span class="pink">[]</span> is written after <i>label</i>, it becomes definition of array. For example:<br>
+<dl>
+<dd><span class="pink">:local a b[] c</span><br>
+</dl>
+<dd>With the above command, it has the same function as the following code.<br>
+<dl>
+<dd><span class="pink">:var a c</span><br>
+<dd><span class="pink">:array b</span><br>
+</dl>
+</dl>
+<span class="pink">:global </span><i>label</i><span class="blue">...</span><br><dl><dd>Define or declare global variables or arrays<br></dl>
+<dl>
+<dd>If <span class="pink">[]</span> is written after <i>label</i>, it becomes definition or declaration of array.<br>
+</dl>
+<span class="pink">:define </span><i>label</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">]</span><br><dl><dd>Define constants<br></dl>
+<dl>
+<dd>When <i>val</i> is specified, the constant value becomes <i>val</i>. If not specified, the value will be 1 (TRUE).<br>
+</dl>
+<span class="pink">:enum </span><span class="blue">[</span><i>label</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">]]...</span><br><dl><dd>Define an enumerator<br></dl>
+<dl>
+<dd>By default, the value of the first enumerator is 0. Subsequent enumerators will have one greater value than the previous enumerator. By specifying <i>val</i>, you can explicitly specify the value of a specific enumerator. For example:<br>
+<dl>
+<dd><span class="pink">:enum BIN 1 OCT DEC HEX</span><br>
+</dl>
+</dl>
+<span class="pink">:undef </span><i>name</i><br><dl><dd>Delete the definition<br></dl>
+<hr class="hr_border">
+<span class="pink">:calculator FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>C language mode / Calculator mode<br></dl>
+<hr class="hr">
+<span class="pink">:base 0</span><span class="blue">|</span><span class="pink">1</span><br><dl><dd>Zero-based / One-based<br></dl>
+<hr class="hr">
+<span class="pink">:ans FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>Do not return calculation results / Return<br></dl>
+<hr class="hr">
+<span class="pink">:assert FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><br><dl><dd>Diagnostic message OFF / ON / Previous setting<br></dl>
+<hr class="hr">
+<span class="pink">:warn FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><br><dl><dd>Warning message OFF / ON / Previous setting<br></dl>
+<hr class="hr">
+<span class="pink">:param </span><i>num</i><span class="pink"> FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><br><dl><dd>Reflect parameter value change to parent process OFF / ON<br></dl>
+<dl>
+<dd>When changing the parameter value of the specified number <i>num</i> in function (external function / user-defined function), specify whether to reflect the value in the parent process. <i>num</i> takes the value of 0 to 9. For example:<br>
+<dl>
+<dd><span class="pink">func test</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 0 TRUE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 1 FALSE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@0=123</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@1=456</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">test @A @B</span><br>
+</dl>
+<dd>With the above code, the value of <span class="pink">@0</span> is reflected in <span class="pink">@A</span>, but the value of <span class="pink">@1</span> is not reflected in <span class="pink">@B</span>.<br>
+</dl>
+<span class="pink">:params FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">...</span><br><dl><dd>Reflect parameter value change to parent process OFF / ON. Up to 10 can be specified. For example:<br>
+<dl>
+<dd><span class="pink">:params TRUE TRUE FALSE</span><br>
+</dl>
+<dd>With the above command, it has the same function as the following code.<br>
+<dl>
+<dd><span class="pink">:param 0 TRUE</span><br>
+<dd><span class="pink">:param 1 TRUE</span><br>
+<dd><span class="pink">:param 2 FALSE</span><br>
+</dl>
+</dl>
+<span class="pink">:parent @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><span class="pink"> </span><span class="blue">[</span><i>label</i><span class="blue">]</span><br><dl><dd>Reference variable / array of parent process<br></dl>
+<hr class="hr">
+<span class="pink">:namespace </span><span class="blue">[</span><i>name</i><span class="blue">]</span><br><dl><dd>Specify the namespace of the external function in the current process<br></dl>
+<dl>
+<dd>When <i>name</i> is omitted, setting is canceled.<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:real </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>Set the real part of the complex value<br></dl>
+<hr class="hr">
+<span class="pink">:imag </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>Set the imaginary part of the complex value<br></dl>
+<hr class="hr_border">
+<span class="pink">:num </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>Set the numerator of the fraction<br></dl>
+<hr class="hr">
+<span class="pink">:denom </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>Set denominator of fraction<br></dl>
+<hr class="hr_border">
+<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> @@</span><i>index</i><br><dl><dd>Set a matrix<br></dl>
+<hr class="hr">
+<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> </span><i>array_name</i><br><dl><dd>Define a matrix<br></dl>
+<hr class="hr">
+<span class="pink">:trans @@</span><i>index</i><br><dl><dd>Transpose of matrix<br></dl>
+<hr class="hr_border">
+<span class="pink">:srand </span><i>val</i><br><dl><dd>Initialize a random number<br></dl>
+<hr class="hr">
+<span class="pink">:localtime </span><i>val</i><span class="pink"> &quot;</span><i>format</i><span class="pink"> </span><span class="blue">[</span><i>var</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>Convert time value to local time. The following characters can be specified for <i>format</i>.<br>
+<dl>
+<dd><span class="pink">%s </span>Seconds (0 ~ 59)<br>
+<dd><span class="pink">%m </span>Minutes (0 ~ 59)<br>
+<dd><span class="pink">%h </span>Time (0 ~ 24)<br>
+<dd><span class="pink">%D </span>Day (1 ~ 31)<br>
+<dd><span class="pink">%M </span>Month (0 ~ 11, January is assumed to be 0)<br>
+<dd><span class="pink">%Y </span>Year (the current year minus 1900)<br>
+<dd><span class="pink">%w </span>Day of the week (0 ~ 6, Sunday is assumed to be 0)<br>
+<dd><span class="pink">%y </span>Total number of days since the beginning of the year (0 ~ 365, January 1 is assumed to be 0)<br>
+</dl>
+</dl>
+<hr class="hr_border">
+<span class="pink">:sprint @@</span><i>index</i><span class="pink"> </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>Output to character string<br></dl>
+<hr class="hr_border">
+<span class="pink">:clear</span><br><dl><dd>Clear the screen<br></dl>
+<hr class="hr">
+<span class="pink">:warn &quot;</span><i>message</i><br><dl><dd>Output warning message. However, if <span class="pink">:warn FALSE</span> is issued, output is suppressed.<br></dl>
+<hr class="hr">
+<span class="pink">:error &quot;</span><i>message</i><br><dl><dd>Output error message<br></dl>
+<hr class="hr">
+<span class="pink">:print </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>String output<br></dl>
+<hr class="hr">
+<span class="pink">:println </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>String output (with line feed)<br></dl>
+<hr class="hr">
+<span class="pink">:scan </span><span class="blue">[[</span><span class="pink">&quot;</span><i>prompt</i><span class="blue">]</span><span class="pink"> @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><span class="blue">]...</span><br><dl><dd>Enter variable value / character string<br></dl>
+<hr class="hr_border">
+<span class="pink">:gworld </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>Secure off-screen<br></dl>
+<dl>
+<dd>If <span class="pink">0</span> or negative value is specified for <i>w</i> or <i>h</i>, off-screen is erased.<br>
+</dl>
+<span class="pink">:gclear </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Clear off-screen<br></dl>
+<dl>
+<dd>If <i>col</i> is omitted, it is cleared with 0.<br>
+</dl>
+<span class="pink">:gcolor </span><i>col</i><span class="pink"> </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>Set the current color index<br></dl>
+<dl>
+<dd>When <i>rgb_color</i> is specified, the RGB color value of the current color index is set.<br>
+</dl>
+<span class="pink">:gfill </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>w</i><span class="pink"> </span><i>h</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Fill off-screen<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+</dl>
+<span class="pink">:gmove </span><i>x1</i><span class="pink"> </span><i>y1</i><br><dl><dd>Set the current point<br></dl>
+<hr class="hr">
+<span class="pink">:gtext &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:gtextl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>Text drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the right side of the text in the X direction is set as the current point.<br>
+</dl>
+<span class="pink">:gline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Line drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x1</i> and <i>y1</i> are not specified, the current point is used. After drawing, <i>x2</i> and <i>y2</i> are set as the current point.<br>
+</dl>
+<span class="pink">:gput </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Dot drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+</dl>
+<span class="pink">:gput </span><i>array</i><br><dl><dd>Draw an image from a two-dimensional array<br></dl>
+<hr class="hr">
+<span class="pink">:gget </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>var</i><br><dl><dd>Store dot value in variable<br></dl>
+<hr class="hr">
+<span class="pink">:gget </span><i>array</i><br><dl><dd>Store the image in a two-dimensional array<br></dl>
+<hr class="hr">
+<span class="pink">:gget24 </span><i>array</i><br><dl><dd>Store RGB color data of loaded image in two-dimensional array<br></dl>
+<!--
+<hr class="hr">
+<span class="pink">:gupdate </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><span class="blue">]</span><br><dl><dd><br></dl>
+-->
+<hr class="hr_border">
+<span class="pink">:window </span><i>left</i><span class="pink"> </span><i>bottom</i><span class="pink"> </span><i>right</i><span class="pink"> </span><i>top</i><br><dl><dd>Set the window<br></dl>
+<dl>
+<dd>The logical coordinates corresponding to the lower-left coordinates of the off-screen image secured by the command <span class="pink">:gworld</span> are designated as <i>left</i> and <i>bottom</i>, and the logical coordinates corresponding to the upper-right coordinates as <i>right</i> and <i>top</i>. It does not matter whether <i>left</i> and <i>right</i>, or <i>bottom</i> and <i>top</i> are large or small. For example:<br>
+<dl>
+<dd><span class="pink">:window \-3 \-2 10 8</span><br>
+</dl>
+<dd>With the above command, the following coordinate system is set.<br>
+<dl>
+<dd><img src="window.jpg"><br>
+</dl>
+</dl>
+<span class="pink">:wfill </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>w</i><span class="pink"> </span><i>h</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Fill the window<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+</dl>
+<span class="pink">:wmove </span><i>x1</i><span class="pink"> </span><i>y1</i><br><dl><dd>Set the current point<br></dl>
+<hr class="hr">
+<span class="pink">:wtext &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:wtextl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>Text drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the right side of the text in the X direction is set as the current point.<br>
+</dl>
+<span class="pink">:wline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Line drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x1</i> and <i>y1</i> are not specified, the current point is used. After drawing, <i>x2</i> and <i>y2</i> are set as the current point.<br>
+</dl>
+<span class="pink">:wput </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Dot drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+</dl>
+<span class="pink">:wget </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>var</i><br><dl><dd>Store dot value in variable<br></dl>
+<hr class="hr_border">
+<span class="pink">:rectangular</span><br><dl><dd>Cartesian coordinate mode<br></dl>
+<hr class="hr">
+<span class="pink">:parametric</span><br><dl><dd>Parameter mode<br></dl>
+<hr class="hr">
+<span class="pink">:polar</span><br><dl><dd>Polar coordinate mode<br></dl>
+<hr class="hr">
+<span class="pink">:logscale x</span><span class="blue">|</span><span class="pink">y</span><span class="blue">|</span><span class="pink">xy </span><span class="blue">[</span><i>base</i><span class="blue">]</span><br><dl><dd>The X axis or Y axis in the rectangular coordinate mode is set to the logarithmic coordinate system<br></dl>
+<dl>
+<dd><i>base</i> designates the base. If omitted, it will be 10.0.<br>
+<dd>In order to switch to rectangular coordinate mode, it is necessary to separately issue command <span class="pink">:rectangular</span>.<br>
+</dl>
+<span class="pink">:nologscale x</span><span class="blue">|</span><span class="pink">y</span><span class="blue">|</span><span class="pink">xy</span><br><dl><dd>Cancels the setting of the logarithmic coordinate system of the X axis or the Y axis in the Cartesian coordinate mode<br></dl>
+<dl>
+<dd>In order to switch to rectangular coordinate mode, it is necessary to separately issue command <span class="pink">:rectangular</span>.<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>x2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Plot execution (rectangular coordinate mode)<br></dl>
+<dl>
+<dd>If <span class="pink">&quot;</span><i>expr</i> is omitted, the previous arithmetic expression is used.<br>
+<dd>You can specify the range in the X axis direction that plots <i>x1</i> and <i>x2</i>. It is specified by window coordinates. If <i>x1</i> and <i>x2</i> are not specified, plots are made from the left edge of the window to the right edge.<br>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+<dd><span class="pink">x</span> or <span class="pink">@x</span> can be used as a variable corresponding to the X coordinate in the arithmetic expression <span class="pink">&quot;</span><i>expr</i>.<br>
+</dl>
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr1</i><span class="pink"> &quot;</span><i>expr2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Plot execution (parametric mode)<br></dl>
+<dl>
+<dd>Plot the calculation formula <span class="pink">&quot;</span><i>expr1</i> as X value and <span class="pink">&quot;</span><i>expr2</i> as Y value.<br>
+<dd>If <span class="pink">&quot;</span><i>expr1</i> and <span class="pink">&quot;</span><i>expr2</i> are omitted, the previous operation expression is used.<br>
+<dd>You can specify parameter ranges for <i>t1</i> and <i>t2</i> and sampling units for <i>step</i>. If omitted, the previous parameter range and sampling unit are used.<br>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+<dd><span class="pink">t</span> or <span class="pink">@t</span> can be used as a variable corresponding to the parameter value in the arithmetic expressions <span class="pink">&quot;</span><i>expr1</i> and <span class="pink">&quot;</span><i>expr2</i>.<br>
+</dl>
+<span class="pink">:plot </span><span class="blue">[</span><span class="pink">&quot;</span><i>expr</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Plot execution (polar mode)<br></dl>
+<dl>
+<dd>If <span class="pink">&quot;</span><i>expr</i> is omitted, the previous arithmetic expression is used.<br>
+<dd>You can specify an angle range for <i>t1</i> and <i>t2</i> and a sampling unit for <i>step</i>. If omitted, the previous angle range and sampling unit are used. The value specified for <i>t1</i> and <i>t2</i> depends on the unit set by the current angle unit command (<span class="pink">:deg</span>, <span class="pink">:rad</span>, <span class="pink">:grad</span>).<br>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
+<dd><span class="pink">t</span> or <span class="pink">@t</span> can be used as a variable corresponding to the angle in the arithmetic expression <span class="pink">&quot;</span><i>expr</i>.<br>
+</dl>
+<span class="pink">:replot </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>x2</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Reprogram plot (rectangular coordinate mode)<br></dl>
+<hr class="hr">
+<span class="pink">:replot </span><span class="blue">[</span><i>t1</i><span class="pink"> </span><i>t2</i><span class="pink"> </span><i>step</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Plot reexecution (parametric mode / polar coordinate mode)<br></dl>
+
+<a name="command_func"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Initial state in function (external function / user-defined function)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+The initial states in function (external function / user-defined function) are summarized as follows.<br>
+<dl>
+<dd><span class="pink">:gfloat </span>- Double precision floating point type<br>
+<dd><span class="pink">:prec 6 </span>- Display precision of floating point number 6<br>
+<dd><span class="pink">:fps 30.0 </span>- Number of frames 30.0 per second<br>
+<dd><span class="pink">:radix 10 </span>- Radix 10 in integer<br>
+<dd><span class="pink">:rad FALSE </span>- Radian. Do not convert the calculation result unit when returning to the parent process.<br>
+<dd><span class="pink">:calculator FALSE </span>- C language mode<br>
+<dd><span class="pink">:base 0 </span>- Zero-based<br>
+<dd><span class="pink">:ans TRUE </span>- Returns the calculation result<br>
+<dd><span class="pink">:assert </span><i>parent</i><span class="pink"> </span>- The setting of the diagnostic message display inherits the setting of the parent process<br>
+<dd><span class="pink">:warn </span><i>parent</i><span class="pink"> </span>- Setting of warning message display inherits setting of parent process<br>
+<dd><span class="pink">:param 0</span><span class="blue">..</span><span class="pink">9 FALSE </span>- Reflect parameter value change in parent process OFF<br>
+<!--
+<dd><span class="pink">:gupdate </span><i>parent</i><span class="pink"> </span>- <br>
+-->
+</dl>
+
+<a name="suuchi"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Numeric expression</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+Constant expression<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>Decimal point notation<br></dl>
+<dl>
+<dd>By adding <span class="pink">d</span>, <span class="pink">g</span>, <span class="pink">r</span> to the end, you can specify angle units for degrees, gradients, and radian, respectively.<br>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>m</i><span class="pink">.</span><i>ddd</i><span class="pink">e+</span><span class="blue">|</span><span class="pink">e-</span><i>xx</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>Exponential notation. For example:<br>
+<dl>
+<dd><span class="pink">\-1.23e+4</span><br>
+<dd><span class="pink">1.23e-4</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">][</span><i>nnn</i><span class="pink">_</span><span class="blue">]</span><i>uuu</i><span class="pink">_</span><i>ddd</i><span class="blue">[</span><span class="pink">d</span><span class="blue">|</span><span class="pink">g</span><span class="blue">|</span><span class="pink">r</span><span class="blue">]</span><br><dl><dd>Fraction. For example:<br>
+<dl>
+<dd><span class="pink">1_2_3</span><br>
+<dd><span class="pink">[-1_2_3]</span><br>
+<dd><span class="pink">\-12_34</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[[[</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">]</span><span class="pink">\+</span><span class="blue">|</span><span class="pink">\-</span><span class="blue">][</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">]</span><span class="pink">i</span><br><dl><dd>Complex value. For example:<br>
+<dl>
+<dd><span class="pink">\-12.3\+4.5i</span><br>
+<dd><span class="pink">[12.3-4.5i]</span><br>
+<dd><span class="pink">i</span><br>
+<dd><span class="pink">\-i</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><br><dl><dd>Integer representation in the current radix<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><br><dl><dd>Binary number<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><br><dl><dd>Octal number<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><br><dl><dd>Decimal number<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><br><dl><dd>Hexadecimal<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">&apos;</span><i>cccc</i><br><dl><dd>Character code. For example:<br>
+<dl>
+<dd><span class="pink">&apos;T&nbsp;&nbsp;&apos;E&nbsp;&nbsp;&apos;S&nbsp;&nbsp;&apos;TEST</span><br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[[[[</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>nn</i><span class="pink">:</span><span class="blue">][</span><span class="pink">\-</span><span class="blue">]</span><i>mmm</i><span class="pink">.</span><i>ddd</i><span class="blue">[</span><span class="pink">h</span><span class="blue">|</span><span class="pink">m</span><span class="blue">|</span><span class="pink">s</span><span class="blue">|</span><span class="pink">f</span><span class="blue">]</span><br><dl><dd>Time value. For example:<br>
+<dl>
+<dd><span class="pink">\-12:34</span><br>
+<dl>
+<dd># The interpretation of 12 and 34 is different depending on the unit of current time (hour, minute, second, frame).<br>
+</dl>
+<dd><span class="pink">1.5h </span># 1.5 hours<br>
+<dd><span class="pink">3m </span># 3 minutes<br>
+<dd><span class="pink">23:45s </span># 23 minutes 45 seconds<br>
+<dd><span class="pink">60f </span># 60 frames<br>
+</dl>
+</dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&quot;</span><i>string</i><br><dl><dd>String<br></dl>
+<dl>
+<dd>If you include a space character or <span class="pink">[</span> in <i>string</i>, you need to escape the character with <span class="pink">\</span> or enclose the entire string constant (including the character string start character <span class="pink">&quot;</span>) with <span class="pink">[]</span> is there.<br>
+</dl>
+<hr class="hr_border">
+Definition constant<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">DBL_EPSILON</span><br><dl><dd>The difference between 1 and the smallest value greater than 1 (machine epsilon)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">HUGE_VAL</span><br><dl><dd>The maximum value that can be expressed as a floating point type<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">INFINITY</span><br><dl><dd>Numeric value representing infinity<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">NAN</span><br><dl><dd>Value representing Not-A-Number<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">RAND_MAX</span><br><dl><dd>The maximum value returned by the function <span class="pink">rand</span><br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">FALSE</span><br><dl><dd>False (0)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">TRUE</span><br><dl><dd>True (1)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">BG_COLOR</span><br><dl><dd>System background color (RGB color value)<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">TIME_ZONE</span><br><dl><dd>Time zone (seconds)<br></dl>
+<hr class="hr_border">
+Variable expression<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@</span><i>char</i><br><dl><dd>The index is specified by the letter <i>char</i><br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@:</span><i>code</i><br><dl><dd>The index is specified by character code <i>code</i>. For example:<br>
+<dl>
+<dd><span class="pink">@:\x42</span><br>
+<dd><span class="pink">@:&apos;B</span><br>
+<dd><span class="pink">@:(&apos;A+1)</span><br>
+<dl>
+<dd># In both cases, <span class="pink">@B</span> is specified.<br>
+</dl>
+</dl>
+</dl>
+The following variables are reserved.<br>
+<dl>
+<dd><span class="pink">@:0 </span>- Calculation result<br>
+<dd><span class="pink">@! </span>- Number of external function parameters<br>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- Each parameter value of the external function<br>
+</dl>
+<hr class="hr_border">
+Array representation<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><span class="pink"> </span><i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>The index is specified by the letter <i>char</i><br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@:</span><i>code</i><span class="pink"> </span><i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>The index is specified by character code <i>code</i>. For example:<br>
+<dl>
+<dd><span class="pink">@@:\x42</span><br>
+<dd><span class="pink">@@:&apos;B</span><br>
+<dd><span class="pink">@@:(&apos;A+1)</span><br>
+<dl>
+<dd># In both cases, <span class="pink">@@B</span> is specified.<br>
+</dl>
+</dl>
+</dl>
+The following sequences are reserved.<br>
+<dl>
+<dd><span class="pink">@@:0 </span>- Matrix calculation result<br>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- Each parameter of the external function<br>
+</dl>
+In the CLIP language, multidimensional arrays are supported. It does not require declaration of the number of elements of the array and it is automatically expanded when assigning values to indexes larger than the current number of elements. When expanded, existing data is inherited and new data is initialized with the value 0. If you reference an array with an index larger than the current number of elements or a negative index, the value 0 is returned.<br>
+<hr class="hr_border">
+String / Matrix<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@:</span><i>code</i><br>
+<hr class="hr">
+One-dimensional arrays can be handled as character strings. Setting or referring to each character of a character string is performed by setting or referring to a one-dimensional array.<br>
+<hr class="hr">
+A two-dimensional array can be treated as a matrix. Setting or referring to the elements of the matrix is done by setting or referring to the values in the two-dimensional array.<br>
+<hr class="hr_border">
+Fractional representation<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>val</i><span class="blue">]</span><span class="pink"> </span><i>val</i><span class="pink"> </span><i>val</i><br>
+<hr class="hr">
+When two numerical values are described consecutively, the first numerical value is interpreted as a numerator, and the second numerical value is taken as a denominator. A numerical value of three describes the mixed fractional expression, interpreting the first as an integer part, the second as a numerator, and the third as a denominator. When included during computation, it is necessary to enclose the whole fractional expression in parentheses <span class="pink">()</span>. In <i>val</i> you can use constant expressions, variable expressions, array expressions enclosed in parentheses, or expressions enclosed in parentheses.<br>
+<hr class="hr_border">
+Complex number representation<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><i>val</i><span class="pink"> </span><i>val</i><br>
+<hr class="hr">
+When two numerical values are described consecutively, the first numerical value is interpreted as a real part, and the second numerical value as an imaginary part. When included during operation, it is necessary to enclose the entire complex number expression in parentheses <span class="pink">()</span>. In <i>val</i> you can use constant expressions, variable expressions, array expressions enclosed in parentheses, or expressions enclosed in parentheses.<br>
+<hr class="hr">
+An example of a description of a complex number expression is described below.<br>
+<dl>
+<dd><span class="pink">1.23 4.5</span><br>
+<dd><span class="pink">pow (<u class="pink">0 1</u>) 2</span><br>
+<dd><span class="pink">(<u class="pink">@A @B</u>)+(<u class="pink">@C @D</u>)</span><br>
+</dl>
+<dl>
+<dd><span class="pink">@z=(<u class="pink">(real @x) (imag @y)</u>)</span><br>
+<dl>
+<dd># Complex <span class="pink">@z</span> is reconstructed from the real part of variable <span class="pink">@x</span> and the imaginary part of variable <span class="pink">@y</span>.<br>
+</dl>
+</dl>
+<hr class="hr_border">
+Function call<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><i>func</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>Internal function / User-defined function<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!</span><i>func</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...</span><span class="blue">]</span><br><dl><dd>External function<br></dl>
+<dl>
+<dd>To execute an external function belonging to the namespace <i>name</i>, add <i>name</i><span class="pink">:</span> to the name of the external function name.<br>
+</dl>
+<hr class="hr_border">
+Initialization of array<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i> <span class="pink">{</span> <i>val</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...</span><span class="blue">]</span> <span class="pink">}</span><br><dl><dd>One dimension<br></dl>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i> <span class="pink">{</span> <span class="pink">{</span> <span class="blue">...</span> <span class="pink">}</span> <span class="blue">[</span><span class="pink">{</span> <span class="blue">...</span> <span class="pink">}</span> <span class="blue">...]</span> <span class="pink">}</span><br><dl><dd>Multidimensional<br></dl>
+<hr class="hr">
+The number of dimensions is determined by the number of <span class="pink">{</span> after <i>index</i>. For example, if you write it as follows, <span class="pink">@@A</span> is initialized as a two-dimensional array.<br>
+<dl>
+<dd><span class="pink">@@A<b><u class="pink">{{</u></b>1 2 3}{4 5 6}{7 8 9 10}}</span><br>
+</dl>
+<hr class="hr_border">
+Initialization of a matrix can be performed by a two-dimensional array initialization method.<br>
+<hr class="hr">
+It is necessary to initialize the row vector and the column vector as a two-dimensional array.<br>
+<dl>
+<dd># Row vector<br>
+<dd><span class="pink">@@A { { 12 34 56 78 } }</span><br>
+<dd># Column vector<br>
+<dd><span class="pink">@@B { { 12 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 34 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 56 }</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{ 78 } }</span><br>
+</dl>
+<hr class="hr_border">
+The CLIP language has the concept of &quot;variable for calculation result&quot;, and when the calculation description is not in the form of assignment to a variable, it is automatically assigned to &quot;variable for calculation result&quot; and the calculation result is held. Therefore, you can start a calculation description from an operator, in which case the left side of the operator is a &quot;variable for calculation result&quot;.<br>
+<hr class="hr">
+By referring to the variable <span class="pink">@:0</span> or matrix <span class="pink">@@:0</span>, the current calculation result is obtained. In addition, we can refer to by the letter <span class="pink">@</span>. If the last calculation result is a scalar, the variable <span class="pink">@:0</span> is referred to, and if the last calculation result is a matrix, the matrix <span class="pink">@@:0</span> is referred to.<br>
+
+<a name="stat"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Control statement</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">if </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><i><span class="blue">[</span>statement</i><span class="blue">]</span><br>
+<span class="blue">[</span><span class="pink">elif </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="blue">[</span><span class="pink">else</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="pink">endif</span><br>
+<hr class="hr_border">
+<span class="pink">switch </span><i>condition</i><br>
+<span class="blue">[</span><span class="pink">case </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="blue">[</span><span class="pink">default</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]]</span><br>
+<span class="pink">endswi</span><br>
+<hr class="hr_border">
+<span class="pink">breakswi</span><br><dl><dd>Escape from the switch statement<br></dl>
+<hr class="hr_border">
+<span class="pink">do</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">until </span><i>condition</i><br>
+<hr class="hr_border">
+<span class="pink">while </span><i>condition</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">endwhile</span><br>
+<hr class="hr_border">
+<span class="pink">for </span><span class="blue">[</span><i>init</i><span class="blue">]</span><span class="pink">;</span><span class="blue">[</span><i>condition</i><span class="blue">]</span><span class="pink">;</span><span class="blue">[</span><i>expression</i><span class="blue">]</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><i>statement</i><span class="blue">]</span><br>
+<span class="pink">next</span><br>
+<hr class="hr_border">
+<span class="pink">continue</span><br><dl><dd>Jump to the end of the loop<br></dl>
+<hr class="hr">
+<span class="pink">break</span><br><dl><dd>Escape from the loop statement<br></dl>
+<hr class="hr_border">
+<span class="pink">assert </span><i>expression</i><br><dl><dd>Evaluate <i>expression</i> and if the result is FALSE (0), display a diagnostic message and abort the process.<br></dl>
+<dl>
+<dd>When the command <span class="pink">:assert FALSE</span> is issued, execution and evaluation of <i>expression</i> is not performed.<br>
+</dl>
+<span class="pink">return </span><span class="blue">[</span><i>expression</i><span class="blue">]</span><br><dl><dd>Returns to the caller of function (external function / user-defined function)<br></dl>
+<dl>
+<dd>If <i>expression</i> is specified, the calculation result of <i>expression</i> is returned to the caller. If not specified, the calculation result so far is returned.<br>
+</dl>
+<hr class="hr_border">
+<span class="pink">func </span><i>name</i><span class="pink"> </span><span class="blue">[</span><i>label</i><span class="blue">...]</span><br>
+<span class="pink">&nbsp;&nbsp;</span><i>statement</i><br>
+<span class="pink">endfunc</span><br>
+<dl>
+<dd>Define a user-defined function<br>
+</dl>
+<dl>
+<dd>If <i>label</i> is specified, labels can be set for argument variables or arrays. Up to 10 can be specified.<br>
+<dd>If <span class="pink">&amp;</span> is written before <i>label</i>, it functions as command <span class="pink">:param </span><i>n</i><span class="pink"> TRUE</span>. Also, if you write <span class="pink">[]</span> after <i>label</i>, label it in the argument array. For example:<br>
+<dl>
+<dd><span class="pink">func test a &amp;b c[]</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+</dl>
+<dd>With the above code, It has the same function as the following code.<br>
+<dl>
+<dd><span class="pink">func test</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label a @0</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label b @1</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:param 1 TRUE</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:label c @@2</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+</dl>
+</dl>
+<hr class="hr_border">
+User-defined functions are valid within the current process and within user-defined functions of the same level. This means that it is possible to describe a recursive call or the following description.<br>
+<dl>
+<dd><span class="pink">func test1</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="blue">:</span><br>
+<dd><span class="pink">endfunc</span><br>
+<dd><span class="pink">func test2</span><br>
+<dd><span class="pink">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;test1</span><br>
+<dd><span class="pink">endfunc</span><br>
+</dl>
+You can not define user-defined functions within user-defined functions.<br>
+<hr class="hr">
+<!--
+The method of referring to the parameters passed from the parent process in the user-defined function is the same as in the case of the external function.<br>
+-->
+When the user-defined function is executed from the parent process, by referring to the following variables and arrays in the user-defined function, it is possible to check the number of parameters passed from the parent process and each parameter value.<br>
+<dl>
+<dd><span class="pink">@! </span>- Number of user-defined function parameters<br>
+</dl>
+<dl>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- Each parameter variable of the user-defined function. In the parent process, the value is stored when a constant or variable is specified as a parameter of the user-defined function.<br>
+</dl>
+<dl>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- Parameter array of user-defined function. If the array name is specified as the parameter of the user-defined function in the parent process, the array value is copied. In addition, when a character string constant is specified, the character string is copied as a one-dimensional array.<br>
+</dl>
+In the user-defined function for obtaining the angle, it is essential to issue the angle designation command <span class="pink">:rad TRUE</span>, <span class="pink">:deg TRUE</span> or <span class="pink">:grad TRUE</span>.<br>
+<hr class="hr">
+When taking an angle as a parameter of an user-defined function, it is mandatory to issue the command <span class="pink">:angle</span>.<br>
+<hr class="hr">
+Within a user-defined function, you can refer to constants defined by the command <span class="pink">:define</span> in the parent process.<br>
+
+<a name="operator"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Operator</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+The operators are listed in descending order of priority as follows.<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+Postfix<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">++&nbsp;&nbsp;&nbsp;</span>Increment<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">--&nbsp;&nbsp;&nbsp;</span>Decrement<br>
+</td>
+</tr>
+<tr>
+<td>
+Unary<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[++]&nbsp;</span>Prefix increment<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[--]&nbsp;</span>Prefix decrement<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[~]&nbsp;&nbsp;</span>Complement<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[!]&nbsp;&nbsp;</span>Denial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-]&nbsp;&nbsp;</span>Unary minus<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+]&nbsp;&nbsp;</span>Unary plus<br>
+Binomial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">**&nbsp;&nbsp;&nbsp;</span>Powers<br>
+</td>
+</tr>
+<tr>
+<td>
+Binomial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">*&nbsp;&nbsp;&nbsp;&nbsp;</span>Multiplication<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">/&nbsp;&nbsp;&nbsp;&nbsp;</span>Division<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">%&nbsp;&nbsp;&nbsp;&nbsp;</span>Modulo (remainder)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">+&nbsp;&nbsp;&nbsp;&nbsp;</span>Addition (plus)<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">-&nbsp;&nbsp;&nbsp;&nbsp;</span>Subtraction (minus)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&lt;&nbsp;&nbsp;&nbsp;</span>Shift left<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&gt;&nbsp;&nbsp;&nbsp;</span>Shift right<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&nbsp;&nbsp;&nbsp;&nbsp;</span>Less than<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;=&nbsp;&nbsp;&nbsp;</span>Less than or equal<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&nbsp;&nbsp;&nbsp;&nbsp;</span>Greater than<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;=&nbsp;&nbsp;&nbsp;</span>Greater than or equal<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">==&nbsp;&nbsp;&nbsp;</span>Equal<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!=&nbsp;&nbsp;&nbsp;</span>Not equal<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&amp;&nbsp;&nbsp;&nbsp;&nbsp;</span>Bitwise AND<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">^&nbsp;&nbsp;&nbsp;&nbsp;</span>Bitwise exclusive OR<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">|&nbsp;&nbsp;&nbsp;&nbsp;</span>Bitwise inclusive OR<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&amp;&amp;&nbsp;&nbsp;&nbsp;</span>Logical product<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">||&nbsp;&nbsp;&nbsp;</span>Logical OR<br>
+</td>
+</tr>
+<tr>
+<td>
+Third term (conditional expression)<br>
+<span class="pink">&nbsp;&nbsp;</span><i>condition</i> <span class="pink">?</span> <i>expr</i><span class="pink"> </span><i>expr</i><br>
+</td>
+</tr>
+<tr>
+<td>
+Substitution<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">= *= /= %= += -= **=</span><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&lt;= &gt;&gt;= &amp;= |= ^=</span><br>
+</td>
+</tr>
+<tr>
+<td>
+Comma<br>
+<span class="pink">&nbsp;&nbsp;</span><i>expr</i> <span class="pink">,</span> <i>expr</i><br>
+</td>
+</tr>
+</table>
+
+<a name="operator_mat"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Operator (matrix calculation)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+The operators that can be used for matrix calculation are listed in descending order of priority as follows.<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+Unary<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-] @@</span><i>index</i><br><dl><dd>Unary minus<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+] @@</span><i>index</i><br><dl><dd>Unary plus<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+Binomial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> * @@</span><i>index</i><br><dl><dd>Matrix product<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> * </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><i>val</i><span class="pink"> * @@</span><i>index</i><br><dl><dd>Product of matrix and scalar<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> / </span><i>val</i><br><dl><dd>Quotient of matrix and scalar<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> + @@</span><i>index</i><br><dl><dd>Sum of matrices<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> - @@</span><i>index</i><br><dl><dd>Matrix difference<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> == @@</span><i>index</i><br><dl><dd>Equal<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> != @@</span><i>index</i><br><dl><dd>Not equal<br></dl>
+</td>
+</tr>
+<tr>
+<td>
+Substitution<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> = @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> *= @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> *= </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> /= </span><i>val</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> += @@</span><i>index</i><br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>index</i><span class="pink"> -= @@</span><i>index</i><br>
+</td>
+</tr>
+</table>
+
+<a name="func"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Internal function</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">defined </span><i>label</i><br><dl><dd>Evaluate whether a label is defined<br></dl>
+<hr class="hr_border">
+<span class="pink">isinf </span><i>val</i><br><dl><dd>Check if it is infinite<br></dl>
+<hr class="hr">
+<span class="pink">isnan </span><i>val</i><br><dl><dd>Check whether it is a non-number<br></dl>
+<hr class="hr_border">
+<span class="pink">rand</span><br><dl><dd>Generate a pseudo random number<br></dl>
+<hr class="hr">
+<span class="pink">time</span><br><dl><dd>Get the current time in seconds<br></dl>
+<hr class="hr">
+<span class="pink">mktime &quot;</span><i>format</i><span class="pink"> </span><span class="blue">[</span><i>val</i><span class="blue">...]</span><br><dl><dd>Convert local time to calendar value. The following characters can be specified for <i>format</i>.<br>
+<dl>
+<dd><span class="pink">%s </span>Seconds (0 ~ 59)<br>
+<dd><span class="pink">%m </span>Minutes (0 ~ 59)<br>
+<dd><span class="pink">%h </span>Time (0 ~ 24)<br>
+<dd><span class="pink">%D </span>Day (1 ~ 31)<br>
+<dd><span class="pink">%M </span>Month (0 ~ 11, January is assumed to be 0)<br>
+<dd><span class="pink">%Y </span>Year (the current year minus 1900)<br>
+<dd><span class="pink">%w </span>Day of the week (0 ~ 6, Sunday is assumed to be 0)<br>
+<dd><span class="pink">%y </span>Total number of days since the beginning of the year (0 ~ 365, January 1 is assumed to be 0)<br>
+</dl>
+</dl>
+<span class="pink">tm_sec</span><br><dl><dd>Second<br></dl>
+<hr class="hr">
+<span class="pink">tm_min</span><br><dl><dd>Minute<br></dl>
+<hr class="hr">
+<span class="pink">tm_hour</span><br><dl><dd>Hour<br></dl>
+<hr class="hr">
+<span class="pink">tm_mday</span><br><dl><dd>Day<br></dl>
+<hr class="hr">
+<span class="pink">tm_mon</span><br><dl><dd>Month (0 ~ 11)<br></dl>
+<hr class="hr">
+<span class="pink">tm_xmon</span><br><dl><dd>Month (1 ~ 12)<br></dl>
+<hr class="hr">
+<span class="pink">tm_year</span><br><dl><dd>Year (minus 1900)<br></dl>
+<hr class="hr">
+<span class="pink">tm_xyear</span><br><dl><dd>Year<br></dl>
+<hr class="hr">
+<span class="pink">tm_wday</span><br><dl><dd>Day of the week<br></dl>
+<hr class="hr">
+<span class="pink">tm_yday</span><br><dl><dd>Total number of days since the beginning of the year<br></dl>
+<hr class="hr_border">
+<span class="pink">a2d </span><i>val</i><br><dl><dd>Current angle unit to degree<br></dl>
+<hr class="hr">
+<span class="pink">a2g </span><i>val</i><br><dl><dd>Current Angle Unit to gradian<br></dl>
+<hr class="hr">
+<span class="pink">a2r </span><i>val</i><br><dl><dd>Current angle unit to radian<br></dl>
+<hr class="hr">
+<span class="pink">d2a </span><i>val</i><br><dl><dd>Degree to current angular unit<br></dl>
+<hr class="hr">
+<span class="pink">d2g </span><i>val</i><br><dl><dd>Degrees to gradian<br></dl>
+<hr class="hr">
+<span class="pink">d2r </span><i>val</i><br><dl><dd>Degrees to radians<br></dl>
+<hr class="hr">
+<span class="pink">g2a </span><i>val</i><br><dl><dd>Gradian to current angular unit<br></dl>
+<hr class="hr">
+<span class="pink">g2d </span><i>val</i><br><dl><dd>Gradian to degree<br></dl>
+<hr class="hr">
+<span class="pink">g2r </span><i>val</i><br><dl><dd>Gradian to radian<br></dl>
+<hr class="hr">
+<span class="pink">r2a </span><i>val</i><br><dl><dd>Radian to current angle unit<br></dl>
+<hr class="hr">
+<span class="pink">r2d </span><i>val</i><br><dl><dd>Radian to degrees<br></dl>
+<hr class="hr">
+<span class="pink">r2g </span><i>val</i><br><dl><dd>Radian to gradian<br></dl>
+<hr class="hr_border">
+<span class="pink">sin </span><i>val</i><br><dl><dd>Sine<br></dl>
+<hr class="hr">
+<span class="pink">cos </span><i>val</i><br><dl><dd>Cosine<br></dl>
+<hr class="hr">
+<span class="pink">tan </span><i>val</i><br><dl><dd>Tangent<br></dl>
+<hr class="hr">
+<span class="pink">asin </span><i>val</i><br><dl><dd>Inverse sine<br></dl>
+<hr class="hr">
+<span class="pink">acos </span><i>val</i><br><dl><dd>Inverse cosine<br></dl>
+<hr class="hr">
+<span class="pink">atan </span><i>val</i><br><dl><dd>Inverse tangent<br></dl>
+<hr class="hr">
+<span class="pink">atan2 </span><i>y</i><span class="pink"> </span><i>x</i><br><dl><dd>Inverse tangent of <i>y</i>/<i>x</i><br></dl>
+<hr class="hr">
+<span class="pink">sinh </span><i>val</i><br><dl><dd>Hyperbolic sine<br></dl>
+<hr class="hr">
+<span class="pink">cosh </span><i>val</i><br><dl><dd>Hyperbolic cosine<br></dl>
+<hr class="hr">
+<span class="pink">tanh </span><i>val</i><br><dl><dd>Hyperbolic tangent<br></dl>
+<hr class="hr">
+<span class="pink">asinh </span><i>val</i><br><dl><dd>Inverse hyperbolic sine<br></dl>
+<hr class="hr">
+<span class="pink">acosh </span><i>val</i><br><dl><dd>Inverse hyperbolic cosine<br></dl>
+<hr class="hr">
+<span class="pink">atanh </span><i>val</i><br><dl><dd>Inverse hyperbolic tangent<br></dl>
+<hr class="hr_border">
+<span class="pink">exp </span><i>val</i><br><dl><dd>Calculate e to the <i>val</i>th power<br></dl>
+<hr class="hr">
+<span class="pink">exp10 </span><i>val</i><br><dl><dd>Calculate 10 to the <i>val</i>th power<br></dl>
+<hr class="hr">
+<span class="pink">ln </span><i>val</i><br><dl><dd>Natural logarithm<br></dl>
+<hr class="hr">
+<span class="pink">log </span><i>val</i><br><dl><dd>(C language mode) Natural logarithm<br><dd>(Calculator mode) Logarithm of base 10<br></dl>
+<hr class="hr">
+<span class="pink">log10 </span><i>val</i><br><dl><dd>The logarithm of base 10<br></dl>
+<hr class="hr">
+<span class="pink">pow </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>Calculate <i>x</i> to the <i>y</i>th power<br></dl>
+<hr class="hr">
+<span class="pink">sqr </span><i>val</i><br><dl><dd>Squaring<br></dl>
+<hr class="hr">
+<span class="pink">sqrt </span><i>val</i><br><dl><dd>Square root<br></dl>
+<hr class="hr">
+<span class="pink">ceil </span><i>val</i><br><dl><dd>The smallest integer greater than or equal to <i>val</i><br></dl>
+<hr class="hr">
+<span class="pink">floor </span><i>val</i><br><dl><dd>The largest integer less than or equal to <i>val</i><br></dl>
+<hr class="hr">
+<span class="pink">int </span><i>val</i><br><dl><dd>Integer<br></dl>
+<hr class="hr">
+<span class="pink">abs </span><i>val</i><br><dl><dd>Absolute value<br></dl>
+<hr class="hr">
+<span class="pink">ldexp </span><i>x</i><span class="pink"> </span><i>exp</i><br><dl><dd>Calculate real numbers from the mantissa <i>x</i> and the exponent <i>exp</i><br></dl>
+<hr class="hr">
+<span class="pink">frexp </span><i>x</i><span class="pink"> </span><i>var_exp</i><br><dl><dd>Returns the mantissa of <i>x</i> and the exponent is stored in <i>var_exp</i><br></dl>
+<hr class="hr">
+<span class="pink">modf </span><i>x</i><span class="pink"> </span><i>var_int</i><br><dl><dd>The decimal part of <i>x</i> is returned, and the integer part is stored in <i>var_int</i>.<br></dl>
+<hr class="hr_border">
+<span class="pink">real </span><i>val</i><br><dl><dd>Real part of complex number<br></dl>
+<hr class="hr">
+<span class="pink">imag </span><i>val</i><br><dl><dd>Imaginary part of complex number<br></dl>
+<hr class="hr">
+<span class="pink">arg </span><i>val</i><br><dl><dd>Phase angle of complex number<br></dl>
+<hr class="hr">
+<span class="pink">norm </span><i>val</i><br><dl><dd>Squared absolute value<br></dl>
+<hr class="hr">
+<span class="pink">conjg </span><i>val</i><br><dl><dd>Conjugate complex number<br></dl>
+<hr class="hr">
+<span class="pink">polar </span><i>rho</i><span class="pink"> </span><i>theta</i><br><dl><dd>Complex value of absolute value <i>rho</i>, phase angle <i>theta</i><br></dl>
+<hr class="hr_border">
+<span class="pink">num </span><i>val</i><br><dl><dd>Numerator of fraction<br></dl>
+<hr class="hr">
+<span class="pink">denom </span><i>val</i><br><dl><dd>Denominator of fraction<br></dl>
+<hr class="hr_border">
+<span class="pink">row @@</span><i>index</i><br><dl><dd>Number of rows in the matrix<br></dl>
+<hr class="hr">
+<span class="pink">col @@</span><i>index</i><br><dl><dd>Number of columns in the matrix<br></dl>
+<hr class="hr">
+<span class="pink">trans @@</span><i>index</i><br><dl><dd>Transpose matrix<br></dl>
+<hr class="hr_border">
+<span class="pink">gwidth</span><br><dl><dd>Off-screen width<br></dl>
+<hr class="hr">
+<span class="pink">gheight</span><br><dl><dd>Off-screen height<br></dl>
+<hr class="hr">
+<span class="pink">gcolor </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>Current color index<br></dl>
+<dl>
+<dd>When <i>rgb_color</i> is specified, the index of the color approximate to the RGB color value is the current color index, and its index is returned.<br>
+</dl>
+<hr class="hr">
+<span class="pink">gcolor24 </span><span class="blue">[</span><i>rgb_color</i><span class="blue">]</span><br><dl><dd>RGB color of current color index<br></dl>
+<dl>
+<dd>When <i>rgb_color</i> is specified, the index of the color approximate to the RGB color value is the current color index, and its RGB color is returned.<br>
+</dl>
+<hr class="hr">
+<span class="pink">gcx</span><br><dl><dd>The current off-screen X coordinate<br></dl>
+<hr class="hr">
+<span class="pink">gcy</span><br><dl><dd>The current off-screen Y coordinate<br></dl>
+<hr class="hr">
+<span class="pink">wcx</span><br><dl><dd>The current window X coordinate<br></dl>
+<hr class="hr">
+<span class="pink">wcy</span><br><dl><dd>Current window Y coordinate<br></dl>
+<hr class="hr">
+<span class="pink">gget</span> <i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>Off-screen dot value<br></dl>
+<hr class="hr">
+<span class="pink">wget </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>The dot value of the window<br></dl>
+<hr class="hr">
+<span class="pink">gx </span><i>x</i><br><dl><dd>Window X coordinate to off-screen X coordinate<br></dl>
+<hr class="hr">
+<span class="pink">gy </span><i>y</i><br><dl><dd>Window Y coordinate to iff-screen Y coordinate<br></dl>
+<hr class="hr">
+<span class="pink">wx </span><i>x</i><br><dl><dd>Off-screen X coordinate to window X coordinate<br></dl>
+<hr class="hr">
+<span class="pink">wy </span><i>y</i><br><dl><dd>Off-screen Y coordinate to window Y coordinate<br></dl>
+<hr class="hr_border">
+<span class="pink">call &quot;</span><i>name</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...]</span><br><dl><dd>Indirect call of function<br></dl>
+<hr class="hr">
+<span class="pink">eval &quot;</span><i>expr</i><br><dl><dd>Executes an arithmetic expression represented as a string, and returns the value or matrix of the operation result.<br></dl>
+<hr class="hr">
+<span class="pink">indexof </span><i>label</i><br><dl><dd>Temporary index of local variable or array<br></dl>
+
+<a name="extfunc"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">External function</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+When the external function is executed from the parent process, by referring to the following variables and arrays in the external function, it is possible to check the number of parameters passed from the parent process and each parameter value.<br>
+<dl>
+<dd><span class="pink">@! </span>- Number of external function parameters<br>
+</dl>
+<dl>
+<dd><span class="pink">@0</span><span class="blue">..</span><span class="pink">@9 </span>- Each parameter variable of the external function. In the parent process, the value is stored when a constant or variable is specified as a parameter of the external function.<br>
+</dl>
+<dl>
+<dd><span class="pink">@@0</span><span class="blue">..</span><span class="pink">@@9 </span>- Parameter array of external function. If the array name is specified as the parameter of the external function in the parent process, the array value is copied. In addition, when a character string constant is specified, the character string is copied as a one-dimensional array.<br>
+</dl>
+In the external function for obtaining the angle, it is essential to issue the angle designation command <span class="pink">:rad TRUE</span>, <span class="pink">:deg TRUE</span> or <span class="pink">:grad TRUE</span>.<br>
+<hr class="hr">
+When taking an angle as a parameter of an external function, it is mandatory to issue the command <span class="pink">:angle</span>.<br>
+<hr class="hr_border">
+In order to avoid collision of external function names, a namespace can be specified for external functions. By making the following description in the first line of the external function file, the external function belongs to the namespace <i>name</i>.<br>
+<dl>
+<dd><span class="pink">#!NAMESPACE </span><i>name</i><br>
+</dl>
+
+<a name="eclipse"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">ECLIPSE</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+"ECLIPSE" is an extended instruction for speeding up the calculation processing.<br>
+<hr class="hr">
+Instructions consist of mnemonic starting with <span class="pink">$</span> and zero or more operands. Use a space character to separate mnemonics and operands, and use a comma (<span class="pink">,</span>) to separate operands. Spaces can be put before and after a comma.<br>
+<hr class="hr">
+Mnemonics are case-insensitive.<br>
+<hr class="hr">
+Variable representation, array representation, matrix representation can be used for the first operand.<br>
+<hr class="hr">
+After the second operand, you can use constant expressions, variable expressions, array expressions, matrix expressions, character string expressions, and character string constants. In addition, the CLIP description enclosed in parentheses <span class="pink">()</span> can be used. However, if there are more parentheses in the operation in parentheses, priority is given to them, but in principle it is done from the left side to the right side. In ECLIPSE, parentheses need to be balanced.<br>
+<hr class="hr">
+The escape character <span class="pink">\</span> (or <span class="pink">¥</span><!--C2A5-->) can be used.<br>
+<hr class="hr">
+We consider <span class="pink">[</span> to <span class="pink">]</span> as one token.<br>
+<hr class="hr">
+From the comment start character <span class="pink">#</span> to the end of the line is a comment.<br>
+<hr class="hr">
+The value of &quot;variable for calculation result&quot; is not updated automatically. You can reference &quot;variable for calculation result&quot; <span class="pink">@</span> or assign a value to <span class="pink">@</span>.<br>
+<hr class="hr">
+An ECLIPSE instruction can not be included in a CLIP expression. It must be written on an independent line. Or you need to describe the CLIP expression and the ECLIPSE instruction separated by semicolon (<span class="pink">;</span>).<br>
+<hr class="hr_border">
+Arithmetic instruction<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>Mnemonic</b></td><td width="100"><b>Operand</b></td></tr></table>
+</td><td width="120"><b>CLIP</b></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$INC</span></td><td><i>r</i></td></tr></table>
+</td><td><span class="pink">[++]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$DEC</span></td><td><i>r</i></td></tr></table>
+</td><td><span class="pink">[--]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NEG</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [-]</span><i>r</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$CMP</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [~]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NOT</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [!]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MINUS</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = [-]</span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>x</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MUL<br>$MUL_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> *= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> * </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$DIV<br>$DIV_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> /= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> / </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$MOD<br>$MOD_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> %= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> % </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$ADD<br>$ADD_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> += </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> + </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SUB<br>$SUB_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> -= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> - </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$POW<br>$POW_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> **= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> ** </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SHIFTL<br>$SHIFTL_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &lt;&lt;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt;&lt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SHIFTR<br>$SHIFTR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &gt;&gt;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt;&gt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$AND<br>$AND_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> &amp;= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> &amp; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$OR<br>$OR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> |= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> | </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$XOR<br>$XOR_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> ^= </span><i>x</i><br><i>r</i><span class="pink"> = </span><i>x</i><span class="pink"> ^ </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LT<br>$LT_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &lt; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LE<br>$LE_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &lt;= <span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &lt;= </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$GT<br>$GT_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &gt; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$GE<br>$GE_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &gt;= </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &gt;= </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$EQ<br>$EQ_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> == </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> == </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$NEQ<br>$NEQ_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> != </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> != </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LOGAND<br>$LOGAND_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> &amp;&amp; </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> &amp;&amp; </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$LOGOR<br>$LOGOR_A</span></td><td><i>b</i><span class="pink">,</span><i>x</i><br><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>b</i><span class="pink"> = </span><i>b</i><span class="pink"> || </span><i>x</i><br><i>b</i><span class="pink"> = </span><i>x</i><span class="pink"> || </span><i>y</i></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$CND</span></td><td><i>r</i><span class="pink">,</span><i>b</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>b</i><span class="pink"> ? </span><i>x</i><span class="pink"> </span><i>y</i></td>
+</tr>
+</table>
+<hr class="hr_border">
+Initialization instruction<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>Mnemonic</b></td><td width="100"><b>Operand</b></td></tr></table>
+</td><td width="120"><b>CLIP</b></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_F</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = FALSE</span></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_T</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = TRUE</span></td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET_Z</span></td><td><i>r</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = 0</span></td>
+</tr>
+</table>
+<hr class="hr_border">
+You can call all CLIP internal functions with <span class="pink">$</span> at the beginning. You can change to uppercase letters.<br>
+<hr class="hr">
+In the first operand, specify variables, arrays, and matrices to store the operation result. And after the second operand, specify the argument of the internal function. For example:<br>
+<hr class="hr">
+<dl>
+<dd><span class="pink">$SQR&nbsp;&nbsp;@a,\-5</span><br>
+<dd><span class="pink">$modf&nbsp;@x,12.345,@i</span><br>
+</dl>
+<hr class="hr_border">
+Loop instruction<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>Mnemonic</b></td><td width="210"><b>Operand</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPSTART</span></td><td>&nbsp;</td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND<br>$LOOPENDE</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><span class="pink">,</span><i>step</i><br><i>count</i><span class="pink">,</span><i>stop</i><span class="pink">,</span><i>step</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND_I<br>$LOOPENDE_I</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><br><i>count</i><span class="pink">,</span><i>stop</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$LOOPEND_D<br>$LOOPENDE_D</span></td><td><i>count</i><span class="pink">,</span><i>stop</i><br><i>count</i><span class="pink">,</span><i>stop</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+<i>stop</i>, <i>step</i> is integer. 0 can not be specified for <i>step</i>.<br>
+<hr class="hr">
+In <span class="pink">$LOOPEND</span>, <i>count</i><span class="pink">+=</span><i>step</i> is calculated first, and it exits the loop under the following conditions.<br>
+A) If <i>step</i> is a positive value, it exits when the value of <i>count</i> is greater than or equal to <i>stop</i>.<br>
+B) If <i>step</i> is a negative value, it exits when the value of <i>count</i> is less than or equal to <i>stop</i>.<br>
+<hr class="hr">
+In <span class="pink">$LOOPEND_I</span>, <span class="pink">[++]</span><i>count</i> is calculated first, and when the value of <i>count</i> is greater than or equal to <i>stop</i>, exit the loop.<br>
+<hr class="hr">
+In <span class="pink">$LOOPEND_D</span>, <span class="pink">[--]</span><i>count</i> is calculated first, and when the value of <i>count</i> is less than or equal to <i>stop</i>, exit the loop.<br>
+<hr class="hr">
+In <span class="pink">$LOOPENDE</span>, <span class="pink">$LOOPENDE_I</span> and <span class="pink">$LOOPENDE_D</span>, loop processing is also executed even if the value of <i>count</i> is equal to <i>stop</i>.<br>
+<hr class="hr">
+It is necessary to initialize the value of <i>count</i> before <span class="pink">$LOOPSTART</span>.<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>Mnemonic</b></td><td width="210"><b>Operand</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$CONTINUE</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+If <i>b</i> is TRUE, jump to the end of the loop. It is also valid for CLIP loop statements.<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>Mnemonic</b></td><td width="210"><b>Operand</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$BREAK</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+If <i>b</i> is TRUE, escape from the loop statement. It is also valid for CLIP loop statements.<br>
+<hr class="hr">
+During the loop of ECLIPSE, the <span class="pink">continue</span> or <span class="pink">break</span> statement of CLIP is valid.<br>
+<hr class="hr_border">
+Return instruction<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><b>Mnemonic</b></td><td width="210"><b>Operand</b></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$RETURN</span></td><td><i>b</i></td></tr></table>
+</td>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="130"><span class="pink">$RETURN_A</span></td><td><i>b</i><span class="pink">,</span><i>ans</i></td></tr></table>
+</td>
+</tr>
+</table>
+<hr class="hr">
+If <i>b</i> is TRUE, returns to the caller of function (external function / user-defined function).<br>
+
+<br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000">&nbsp;</td>
+	</tr>
+</table>
+<hr class="hr">
+<a href="#mokuji">To the contents</a><br>
+<hr class="hr">
+
+</div>
+</body>
+</html>

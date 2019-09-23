@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="target-densitydpi=device-dpi, width=640, user-scalable=no">
+<meta name="format-detection" content="telephone=no, email=no, address=no">
+<title>CLIP</title>
+
+<!--リリース用-->
+<script type="text/javascript" src="clip.js?v=190921"></script>
+<script type="text/javascript" src="Main.js?v=190923"></script>
+
+<!--デバッグ用
+<script type="text/javascript" src="clip.debug.js?v=190921"></script>
+<script type="text/javascript" src="Main.debug.js?v=190923"></script>
+-->
+
+<!--ライブラリ未使用版デバッグ用
+<script type="text/javascript" src="All.debug.js?v=190923"></script>
+-->
+
+<script type="text/javascript">
+
+window.dispCache     = false;	// 起動時にキャッシュ内容を表示するかどうか
+window.conMaxLen     = 65536;	// コンソールの最大文字数
+window.retAssertProc = false;	// アサートに失敗した時に処理を停止するかどうか
+window.loopMax       = 65536;	// ループ回数上限
+window.dispLoopCount = 1;		// ループ回数表示レベル（0～2）
+window.useStorage    = true;	// ストレージを使用するかどうか
+window.lockGUpdate   = true;
+
+window.onerror = clip_onerror;
+
+</script>
+<style type="text/css">
+html, body {
+	margin:0;
+	padding:0;
+}
+.div_body {
+	background-color:#FFFFFF;
+}
+table {
+	border-collapse:collapse;
+//	border-spacing:0px;
+	border:0px;
+}
+td {
+	padding:0px;
+}
+button {
+	-webkit-appearance:button;
+	padding:0;
+	height:26px;
+	font-family:"Helvetica";
+	font-size:14px;
+	line-height:16px;
+	vertical-align:middle;
+	border-left:1px solid #E0E0E0;
+	border-top:1px solid #E0E0E0;
+	border-right:1px solid #808080;
+	border-bottom:1px solid #808080;
+	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#E0E0E0),color-stop(100%,#A0A0A0));
+	color:#000000;
+	text-shadow:1px 1px #E0E0E0;
+}
+.span {
+	font-family:"Helvetica";
+	font-size:14px;
+	line-height:16px;
+	color:#000000;
+}
+.div_help {
+	height:18px;
+}
+.span_help {
+	font-family:"Helvetica";
+	font-size:14px;
+	color:#000000;
+}
+.span_help_expr {
+	font-family:"Courier New";
+	font-size:15px;
+	color:#000000;
+}
+.input {
+	padding:2px;
+	font-family:"Courier New";
+	font-size:16px;
+	border:1px solid #808080;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+	-webkit-appearance:none;
+	margin:0;
+}
+.input_expression {
+	width:561px;
+	height:20px;
+	padding:1px;
+	font-family:"Courier New";
+	font-size:16px;
+	border:1px solid #808080;
+}
+.div_console {
+	overflow:scroll;
+	word-break:break-all;
+	overflow-wrap:break-word;
+	width:628px;
+	height:407px;
+	background-color:#C0C0C0;
+	font-family:"Courier New";
+	font-size:16px;
+	line-height:18px;
+	border:1px solid #808080;
+}
+.div_main {
+	width:628px;
+	font-family:"Helvetica";
+	font-size:16px;
+}
+.div_editor {
+	width:628px;
+	font-family:"Helvetica";
+	font-size:16px;
+}
+.div_gworld {
+	border:1px solid #808080;
+}
+.textarea_func {
+	word-break:break-all;
+	overflow-wrap:break-word;
+	width:624px;
+	height:403px;
+	font-family:"Courier New";
+	font-size:16px;
+	line-height:18px;
+	border:1px solid #808080;
+	tab-size:4;
+}
+select {
+	-webkit-appearance:button;
+	padding:4px;
+	border-left:1px solid #E0E0E0;
+	border-top:1px solid #E0E0E0;
+	border-right:1px solid #808080;
+	border-bottom:1px solid #808080;
+}
+select::-ms-expand {
+	display:none;
+}
+.select_func {
+	width:45px;
+	height:26px;
+	padding-left:10px;
+	font-family:"Courier New";
+	font-size:16px;
+	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#E0E0E0),color-stop(100%,#A0A0A0));
+	color:#000000;
+	text-shadow:0 0;
+}
+.label_checkbox {
+	display:inline-block;
+	position:relative;
+	padding-left:20px;
+}
+.label_checkbox::before {
+	content:"";
+	position:absolute;
+	left:0;
+	top:50%;
+	margin-top:-8px;
+	width:16px;
+	height:16px;
+	background:#202020;
+	background:-webkit-gradient(linear,left top,right bottom,color-stop(0%,rgba(160,160,160,1)),color-stop(100%,rgba(224,224,224,1)));
+	-webkit-box-shadow:inset 0px 0px 1px 0px rgba(0,0,0,0.75);
+	box-shadow:inset 0px 0px 1px 0px rgba(0,0,0,0.75);
+}
+input[type="checkbox"]:checked + label::after {
+	content:"";
+	position:absolute;
+	left:4px;
+	top:50%;
+	margin-top:-4px;
+	width:8px;
+	height:8px;
+	background:#2080B0;
+}
+.hr {
+	border-top:1px solid #808080;
+	margin-top:0;
+	margin-bottom:0;
+}
+</style>
+</head>
+<body onload="main( 'div0', 'canvas0', 'file0', 'textarea0' )">
+<div id="body" class="div_body" style="width:640px; height:480px">
+	<table>
+		<tr>
+			<td width="5"></td>
+			<td valign="top">
+				<hr style="border:0; margin:0; height:5px">
+				<table width="100%">
+					<tr>
+						<td>
+							<form action="javascript:proc()">
+								<input class="input_expression" type="text" id="input0" value="" spellcheck="false" autocapitalize="off" autocorrect="off">
+							</form>
+						</td>
+						<td width="5"></td>
+						<td>
+							<form action="javascript:doShowConsole()">
+								<button type="submit" id="button_console" style="width:30px; height:24px"><img src="icon1.png" width="20" height="20"></button>
+							</form>
+						</td>
+						<td>
+							<form action="javascript:doShowEditor()">
+								<button type="submit" id="button_editor" style="width:30px; height:24px"><img src="icon7.png" width="16" height="16"></button>
+							</form>
+						</td>
+					</tr>
+				</table>
+				<hr style="border:0; margin:0; height:5px">
+				<div id="clip_console" class="div_main">
+					<div id="div0" class="div_console"></div>
+					<hr style="border:0; margin:0; height:5px">
+					<table>
+						<tr>
+							<td>
+<div id="clip_loadextfunc">
+								<table>
+									<tr>
+										<td>
+											<input type="file" id="file0" multiple>
+										</td>
+										<td width="10"></td>
+									</tr>
+								</table>
+</div>
+							</td>
+							<td>
+								<form action="javascript:doClearFuncCache()">
+									<button type="submit" id="button_cache_clear">&nbsp;&nbsp;外部関数ｷｬｯｼｭのｸﾘｱ&nbsp;&nbsp;</button>
+								</form>
+							</td>
+							<td width="10"></td>
+							<td>
+								<form action="javascript:doClearStorage()">
+									<button type="submit" id="button_storage_clear">&nbsp;&nbsp;ｽﾄﾚｰｼﾞのｸﾘｱ&nbsp;&nbsp;</button>
+								</form>
+							</td>
+							<td width="10"></td>
+							<td>
+								<form action="javascript:doClearCookie()">
+									<button type="submit" id="button_cookie_clear">&nbsp;&nbsp;Cookieのｸﾘｱ&nbsp;&nbsp;</button>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<hr style="border:0; margin:0; height:5px">
+				</div>
+				<div id="clip_editor" class="div_editor" style="display:none">
+					<table>
+						<tr>
+							<td>
+								<textarea id="textarea0" class="textarea_func" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+							</td>
+						</tr>
+					</table>
+					<hr style="border:0; margin:0; height:1px">
+					<table>
+						<tr>
+							<td width="320">
+								<table>
+									<tr>
+										<td>
+											<form action="javascript:callFunc()">
+												<button type="submit" id="button_callfunc">&nbsp;&nbsp;呼び出し&nbsp;&nbsp;</button>
+											</form>
+										</td>
+										<td width="10"></td>
+										<td>
+											<select id="select_func" class="select_func" onchange="doChangeFunc( this )">
+												<option value="97" selected>a</option>
+												<option value="98">b</option>
+												<option value="99">c</option>
+												<option value="100">d</option>
+												<option value="101">e</option>
+												<option value="102">f</option>
+												<option value="103">g</option>
+												<option value="104">h</option>
+												<option value="105">i</option>
+												<option value="106">j</option>
+												<option value="107">k</option>
+												<option value="108">l</option>
+												<option value="109">m</option>
+												<option value="110">n</option>
+												<option value="111">o</option>
+												<option value="112">p</option>
+												<option value="113">q</option>
+												<option value="114">r</option>
+												<option value="115">s</option>
+												<option value="116">t</option>
+												<option value="117">u</option>
+												<option value="118">v</option>
+												<option value="119">w</option>
+												<option value="120">x</option>
+												<option value="121">y</option>
+												<option value="122">z</option>
+											</select>
+										</td>
+										<td width="10"></td>
+										<td><span id="static_len" class="span">0</span></td>
+										<td width="10"></td>
+										<td width="130">
+<div id="clip_savefunc" style="display:none">
+											<form action="javascript:saveFunc()">
+												<button type="submit" id="button_savefunc">&nbsp;&nbsp;メモリ保存&nbsp;&nbsp;</button>
+											</form>
+</div>
+										</td>
+									</tr>
+								</table>
+							</td>
+							<td width="100" align="right">
+								<span id="static_tab" class="span">Tab幅:&nbsp;</span>
+							</td>
+							<td>
+								<form action="javascript:onChangeTabWidth()">
+									<input type="text" id="tab_width" class="input" style="width:35px; height:20px" value="">
+								</form>
+							</td>
+							<td width="125" align="center">
+								<div>
+									<input type="checkbox" id="check_smart" style="display:none" onchange="doCheckSmart()">
+									<label for="check_smart" class="label_checkbox" onclick=""><span id="static_smart" class="span">スマート</span></label>
+								</div>
+							</td>
+							<td>
+<div id="lang_japanese">
+								<form action="language.html" target="_blank">
+									<button type="submit" style="width:30px; height:26px; padding:0; font-size:18px; text-shadow:-1px -1px #404040, 1px -1px #404040, -1px 1px #404040, 1px 1px #404040"><b><span style="color:#FFFF00">？</span></b></button>
+								</form>
+</div>
+<div id="lang_english" style="display:none">
+								<form action="language_e.html" target="_blank">
+									<button type="submit" style="width:30px; height:26px; padding:0; font-size:18px; text-shadow:-1px -1px #404040, 1px -1px #404040, -1px 1px #404040, 1px 1px #404040"><b><span style="color:#FFFF00">？</span></b></button>
+								</form>
+</div>
+							</td>
+						</tr>
+					</table>
+					<hr style="border:0; margin:0; height:5px">
+				</div>
+			</td>
+			<td width="5"></td>
+			<td valign="top">
+				<hr style="border:0; margin:0; height:5px">
+				<div id="gworld" class="div_gworld" style="width:1px; height:1px; display:none">
+					<canvas id="canvas0" width="1" height="1"></canvas>
+				</div>
+				<hr style="border:0; margin:0; height:5px">
+				<div id="savecanvas" style="display:none">
+					<form action="javascript:saveCanvas()">
+						<button type="submit" id="button_savecanvas">&nbsp;&nbsp;ダウンロード&nbsp;&nbsp;</button>
+					</form>
+					<hr style="border:0; margin:0; height:5px">
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+<div style="width:640px; height:65px">
+	<hr class="hr">
+	<table>
+		<tr>
+			<td valign="top">
+				<table>
+					<tr>
+						<td><div class="div_help"><span class="span_help_expr">:env </span></div></td>
+						<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+						<td><div class="div_help"><span id="static_command_env" class="span_help">&nbsp;</span></div></td>
+					</tr>
+					<tr>
+						<td><div class="div_help"><span class="span_help_expr">:list </span></div></td>
+						<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+						<td><div class="div_help"><span id="static_command_list_var" class="span_help">&nbsp;</span></div></td>
+					</tr>
+					<tr>
+						<td><div class="div_help"><span class="span_help_expr">:list </span><i><span class="span_help">array</span></i><span class="span_help_expr">&nbsp;</span></div></td>
+						<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+						<td><div class="div_help"><span id="static_command_print_array_help" class="span_help">&nbsp;</span></div></td>
+					</tr>
+				</table>
+			</td>
+			<td width="30"></td>
+			<td valign="top">
+				<div id="command_pc">
+					<table>
+						<tr>
+							<td><div class="div_help"><span class="span_help_expr">:extfunc </span></div></td>
+							<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+							<td><div class="div_help"><span id="static_command_list_extfunc" class="span_help">&nbsp;</span></div></td>
+						</tr>
+						<tr>
+							<td><div class="div_help"><span class="span_help_expr">:usage !</span><i><span class="span_help">name</span></i><span class="span_help_expr">&nbsp;</span></div></td>
+							<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+							<td><div class="div_help"><span id="static_command_print_usage" class="span_help">&nbsp;</span></div></td>
+						</tr>
+						<tr>
+							<td><div class="div_help"><span class="span_help_expr">:trace 0</span><i><span class="span_help">..</span></i><span class="span_help_expr">3 </span></div></td>
+							<td><div class="div_help"><span class="span_help">-&nbsp;</span></div></td>
+							<td><div class="div_help"><span id="static_command_trace" class="span_help">&nbsp;</span></div></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+</body>
+</html>
