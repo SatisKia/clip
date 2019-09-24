@@ -97,9 +97,7 @@ var _CHAR_CODE_7     = _CHAR( '7' );
 var _CHAR_CODE_8     = _CHAR( '8' );
 var _CHAR_CODE_9     = _CHAR( '9' );
 var _CHAR_CODE_LA    = _CHAR( 'a' );	// Lowercase
-var _CHAR_CODE_LF    = _CHAR( 'f' );	// Lowercase
 var _CHAR_CODE_UA    = _CHAR( 'A' );	// Uppercase
-var _CHAR_CODE_UF    = _CHAR( 'F' );	// Uppercase
 var _CHAR_CODE_EX    = _CHAR( '!' );	// Exclamation
 var _CHAR_CODE_COLON = _CHAR( ':' );
 
@@ -266,73 +264,36 @@ function stringToFloat( str, top, stop/*_Integer*/ ){
 }
 
 // 文字列を整数値に変換する
-function stringToInt( str, top, stop/*_Integer*/, rad ){
+function stringToInt( str, top, stop/*_Integer*/, radix ){
 	var val = 0;
 	var i = top;
-	var _swi = false;
+	var swi = false;
 	if( str.charAt( i ) == '+' ){
 		i++;
 	} else if( str.charAt( i ) == '-' ){
-		_swi = true;
+		swi = true;
 		i++;
 	}
 	var chr;
-	var _break = false;
+	var num = (radix > 10) ? 10 : radix;
 	while( i < str.length ){
 		chr = str.charCodeAt( i );
-		switch( rad ){
-		case 2:
-			val *= 2;
-			if( (chr == _CHAR_CODE_0) || (chr == _CHAR_CODE_1) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 8:
-			val *= 8;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_7) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 10:
-			val *= 10;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_9) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 16:
-			val *= 16;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_9) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else if( (chr >= _CHAR_CODE_LA) && (chr <= _CHAR_CODE_LF) ){
-				val += 10 + (chr - _CHAR_CODE_LA);
-				i++;
-			} else if( (chr >= _CHAR_CODE_UA) && (chr <= _CHAR_CODE_UF) ){
-				val += 10 + (chr - _CHAR_CODE_UA);
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		default:
-			_break = true;
-			break;
-		}
-		if( _break ){
+		val *= radix;
+		if( (chr >= _CHAR_CODE_0) && (chr < _CHAR_CODE_0 + num) ){
+			val += chr - _CHAR_CODE_0;
+			i++;
+		} else if( (chr >= _CHAR_CODE_LA) && (chr < _CHAR_CODE_LA + (radix - 10)) ){
+			val += 10 + (chr - _CHAR_CODE_LA);
+			i++;
+		} else if( (chr >= _CHAR_CODE_UA) && (chr < _CHAR_CODE_UA + (radix - 10)) ){
+			val += 10 + (chr - _CHAR_CODE_UA);
+			i++;
+		} else {
 			break;
 		}
 	}
 	stop.set( i );
-	return _swi ? -val : val;
+	return swi ? -val : val;
 }
 
 // 浮動小数点数を文字列に変換する
@@ -420,7 +381,7 @@ function floatToStringPoint( val, width ){
 }
 
 // 整数を文字列に変換する
-function intToString( val, rad, width ){
+function intToString( val, radix, width ){
 	if( _ISNAN( val ) ){
 		return val.toString();
 	}
@@ -440,8 +401,8 @@ function intToString( val, rad, width ){
 	// 基数の変換メイン
 	var str = "";
 	while( val != 0 ){
-		str += chr.charAt( _MOD( val, rad ) );
-		val = _DIV( val, rad );
+		str += chr.charAt( _MOD( val, radix ) );
+		val = _DIV( val, radix );
 	}
 	for( i = str.length; i < width; i++ ){
 		str += "0";

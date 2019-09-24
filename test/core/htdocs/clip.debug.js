@@ -106,9 +106,7 @@ window._CHAR_CODE_7 = _CHAR_CODE_7;
 window._CHAR_CODE_8 = _CHAR_CODE_8;
 window._CHAR_CODE_9 = _CHAR_CODE_9;
 window._CHAR_CODE_LA = _CHAR_CODE_LA;
-window._CHAR_CODE_LF = _CHAR_CODE_LF;
 window._CHAR_CODE_UA = _CHAR_CODE_UA;
-window._CHAR_CODE_UF = _CHAR_CODE_UF;
 window._CHAR_CODE_EX = _CHAR_CODE_EX;
 window._CHAR_CODE_COLON = _CHAR_CODE_COLON;
 window._ISINF = _ISINF;
@@ -13817,9 +13815,7 @@ var _CHAR_CODE_7 = _CHAR( '7' );
 var _CHAR_CODE_8 = _CHAR( '8' );
 var _CHAR_CODE_9 = _CHAR( '9' );
 var _CHAR_CODE_LA = _CHAR( 'a' );
-var _CHAR_CODE_LF = _CHAR( 'f' );
 var _CHAR_CODE_UA = _CHAR( 'A' );
-var _CHAR_CODE_UF = _CHAR( 'F' );
 var _CHAR_CODE_EX = _CHAR( '!' );
 var _CHAR_CODE_COLON = _CHAR( ':' );
 Number.isFinite = Number.isFinite || function( x ){
@@ -13966,73 +13962,36 @@ function stringToFloat( str, top, stop ){
 	stop.set( i );
 	return parseFloat( str.substring( top, i ) );
 }
-function stringToInt( str, top, stop , rad ){
+function stringToInt( str, top, stop , radix ){
 	var val = 0;
 	var i = top;
-	var _swi = false;
+	var swi = false;
 	if( str.charAt( i ) == '+' ){
 		i++;
 	} else if( str.charAt( i ) == '-' ){
-		_swi = true;
+		swi = true;
 		i++;
 	}
 	var chr;
-	var _break = false;
+	var num = (radix > 10) ? 10 : radix;
 	while( i < str.length ){
 		chr = str.charCodeAt( i );
-		switch( rad ){
-		case 2:
-			val *= 2;
-			if( (chr == _CHAR_CODE_0) || (chr == _CHAR_CODE_1) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 8:
-			val *= 8;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_7) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 10:
-			val *= 10;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_9) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		case 16:
-			val *= 16;
-			if( (chr >= _CHAR_CODE_0) && (chr <= _CHAR_CODE_9) ){
-				val += chr - _CHAR_CODE_0;
-				i++;
-			} else if( (chr >= _CHAR_CODE_LA) && (chr <= _CHAR_CODE_LF) ){
-				val += 10 + (chr - _CHAR_CODE_LA);
-				i++;
-			} else if( (chr >= _CHAR_CODE_UA) && (chr <= _CHAR_CODE_UF) ){
-				val += 10 + (chr - _CHAR_CODE_UA);
-				i++;
-			} else {
-				_break = true;
-			}
-			break;
-		default:
-			_break = true;
-			break;
-		}
-		if( _break ){
+		val *= radix;
+		if( (chr >= _CHAR_CODE_0) && (chr < _CHAR_CODE_0 + num) ){
+			val += chr - _CHAR_CODE_0;
+			i++;
+		} else if( (chr >= _CHAR_CODE_LA) && (chr < _CHAR_CODE_LA + (radix - 10)) ){
+			val += 10 + (chr - _CHAR_CODE_LA);
+			i++;
+		} else if( (chr >= _CHAR_CODE_UA) && (chr < _CHAR_CODE_UA + (radix - 10)) ){
+			val += 10 + (chr - _CHAR_CODE_UA);
+			i++;
+		} else {
 			break;
 		}
 	}
 	stop.set( i );
-	return _swi ? -val : val;
+	return swi ? -val : val;
 }
 function _floatString( str ){
 	var str1 = str;
@@ -14116,7 +14075,7 @@ function floatToStringPoint( val, width ){
 	}
 	return str;
 }
-function intToString( val, rad, width ){
+function intToString( val, radix, width ){
 	if( _ISNAN( val ) ){
 		return val.toString();
 	}
@@ -14130,8 +14089,8 @@ function intToString( val, rad, width ){
 	}
 	var str = "";
 	while( val != 0 ){
-		str += chr.charAt( _MOD( val, rad ) );
-		val = _DIV( val, rad );
+		str += chr.charAt( _MOD( val, radix ) );
+		val = _DIV( val, radix );
 	}
 	for( i = str.length; i < width; i++ ){
 		str += "0";
