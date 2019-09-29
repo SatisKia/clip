@@ -296,8 +296,8 @@ function stringToInt( str, top, stop/*_Integer*/, radix ){
 	return swi ? -val : val;
 }
 
-// 浮動小数点数を文字列に変換する
-function _floatString( str ){
+// 浮動小数点数表記文字列の最適化
+function _trimFloatStr( str ){
 	var str1 = str;
 	var str2 = "";
 	var top = str.indexOf( "e" );
@@ -321,6 +321,8 @@ function _floatString( str ){
 	}
 	return str1 + str2;
 }
+
+// 浮動小数点数を文字列に変換する
 function floatToExponential( val, width ){
 	var str;
 	if( width == undefined ){
@@ -334,7 +336,7 @@ function floatToExponential( val, width ){
 		}
 		str = val.toExponential( width );
 	}
-	return _floatString( str );
+	return _trimFloatStr( str );
 }
 function floatToFixed( val, width ){
 	var str;
@@ -355,7 +357,7 @@ function floatToFixed( val, width ){
 			str = val.toExponential( width );
 		}
 	}
-	return _floatString( str );
+	return _trimFloatStr( str );
 }
 function floatToString( val, width ){
 	var str;
@@ -370,7 +372,7 @@ function floatToString( val, width ){
 		}
 		str = val.toPrecision( width );
 	}
-	return _floatString( str );
+	return _trimFloatStr( str );
 }
 function floatToStringPoint( val, width ){
 	var str = floatToString( val, width );
@@ -392,7 +394,7 @@ function intToString( val, radix, width ){
 
 	var chr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-	// 符号をチェックして, 負の値の場合は正の値に変換する
+	// 符号をチェックして、負の値の場合は正の値に変換する
 	var swi = (val < 0);
 	if( swi ){
 		val = -val;

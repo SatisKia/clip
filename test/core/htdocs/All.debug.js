@@ -1495,7 +1495,7 @@ function stringToInt( str, top, stop , radix ){
  stop.set( i );
  return swi ? -val : val;
 }
-function _floatString( str ){
+function _trimFloatStr( str ){
  var str1 = str;
  var str2 = "";
  var top = str.indexOf( "e" );
@@ -1532,7 +1532,7 @@ function floatToExponential( val, width ){
   }
   str = val.toExponential( width );
  }
- return _floatString( str );
+ return _trimFloatStr( str );
 }
 function floatToFixed( val, width ){
  var str;
@@ -1553,7 +1553,7 @@ function floatToFixed( val, width ){
    str = val.toExponential( width );
   }
  }
- return _floatString( str );
+ return _trimFloatStr( str );
 }
 function floatToString( val, width ){
  var str;
@@ -1568,7 +1568,7 @@ function floatToString( val, width ){
   }
   str = val.toPrecision( width );
  }
- return _floatString( str );
+ return _trimFloatStr( str );
 }
 function floatToStringPoint( val, width ){
  var str = floatToString( val, width );
