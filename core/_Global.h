@@ -83,13 +83,10 @@
 #define _CLIP_CODE_MATRIX		18	// 行列
 #define _CLIP_CODE_STRING		19	// 文字列
 
-#define _CLIP_CODE_SEPARATOR	20	// 
-#define _CLIP_CODE_COMMENT		21	// コメント
+#define _CLIP_CODE_PARAM_ANS	20	// &
+#define _CLIP_CODE_PARAM_ARRAY	21	// []
 
-#define _CLIP_CODE_PARAM_ANS	22	// &
-#define _CLIP_CODE_PARAM_ARRAY	23	// []
-
-#define _CLIP_CODE_SE			24	// 単一式
+#define _CLIP_CODE_SE			22	// 単一式
 
 /*
  * 演算子の種類

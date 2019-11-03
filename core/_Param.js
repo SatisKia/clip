@@ -6,8 +6,16 @@
 #include "_Global.h"
 
 // 計算パラメータ
-function _Param( parentParam, inherit ){
+function _Param( num, parentParam, inherit ){
 	var i;
+
+	// 呼び出し元情報
+	this._parentNum = (parentParam == undefined) ? 0 : (
+		parentParam._fileFlag ? (num - parentParam._topNum + 1) : 0
+		);
+	this._parentFunc = (parentParam == undefined) ? "" : (
+		(parentParam._funcName == null) ? "" : parentParam._funcName
+		);
 
 	if( parentParam == undefined ){
 		inherit = false;
@@ -31,14 +39,13 @@ function _Param( parentParam, inherit ){
 	this._func  = new _Func();		// ユーザー定義関数
 
 	// 外部関数関連
+	this._funcName    = null;	// 外部関数名
 	this._fileData    = null;	// 計算対象のファイル内容
 	this._fileDataGet = 0;
 	this._fileLine    = null;	// 計算対象の行管理クラス
 	this._fileFlag    = false;	// ファイルか標準入力かのフラグ
+	this._topNum      = 0;
 	this._lineNum     = 1;		// 行番号
-
-	this._funcName = null;	// 外部関数名
-	this._topNum   = 0;		//
 
 	// 各種フラグ
 	this._enableCommand = true;		// コマンドが使用できるかどうかのフラグ
@@ -63,9 +70,9 @@ function _Param( parentParam, inherit ){
 	this._updateParentArray = new Array();
 
 	this._defNameSpace = null;
-	this._nameSpace = null;
+	this._nameSpace    = null;
 
-	this._seFlag = false;
+	this._seFlag  = false;
 	this._seToken = _CLIP_SE_NULL;
 }
 

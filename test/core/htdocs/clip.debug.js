@@ -2780,8 +2780,14 @@ _Loop.prototype = {
 		return this._curLoop._contFlag;
 	}
 };
-function _Param( parentParam, inherit ){
+function _Param( num, parentParam, inherit ){
 	var i;
+	this._parentNum = (parentParam == undefined) ? 0 : (
+		parentParam._fileFlag ? (num - parentParam._topNum + 1) : 0
+		);
+	this._parentFunc = (parentParam == undefined) ? "" : (
+		(parentParam._funcName == null) ? "" : parentParam._funcName
+		);
 	if( parentParam == undefined ){
 		inherit = false;
 	}
@@ -2800,13 +2806,13 @@ function _Param( parentParam, inherit ){
 	this._var = new _Variable();
 	this._array = new _Array();
 	this._func = new _Func();
+	this._funcName = null;
 	this._fileData = null;
 	this._fileDataGet = 0;
 	this._fileLine = null;
 	this._fileFlag = false;
-	this._lineNum = 1;
-	this._funcName = null;
 	this._topNum = 0;
+	this._lineNum = 1;
 	this._enableCommand = true;
 	this._enableOpPow = false;
 	this._enableStat = true;
@@ -2992,7 +2998,7 @@ _Param.prototype = {
 		i = 0;
 		label.beginGetToken();
 		while( label.getToken( code, token ) ){
-			if( (code.val() == 22) || ((code.val() == 11) && (token.obj() >= 21)) ){
+			if( (code.val() == 20) || ((code.val() == 11) && (token.obj() >= 21)) ){
 				if( !(label.getToken( code, token )) ){
 					break;
 				}
@@ -3004,7 +3010,7 @@ _Param.prototype = {
 				strLabel = token.obj();
 				lock = label.lock();
 				if( label.getToken( code, token ) ){
-					if( code.val() == 23 ){
+					if( code.val() == 21 ){
 						this._array._label.setLabel( _CHAR_CODE_0 + i, strLabel, true );
 					} else {
 						label.unlock( lock );
@@ -4147,7 +4153,7 @@ _Proc.prototype = {
 				return 0x101;
 			}
 			break;
-		case 24:
+		case 22:
 			param._seFlag = true;
 			param._seToken = token.obj();
 			break;
@@ -4517,22 +4523,22 @@ _Proc.prototype = {
 	},
 	_processSe : function( param, token, value ){
 		var ret;
-		if( (ret = this._constFirst( param, 24, token, value )) != 0x00 ){
+		if( (ret = this._constFirst( param, 22, token, value )) != 0x00 ){
 			return ret;
 		}
 		var saveArray = this._curInfo._curArray;
 		var saveArraySize = this._curInfo._curArraySize;
 		if( token < 61 ){
-			ret = this._procSubSe[token]( this, param, 24, token, value );
+			ret = this._procSubSe[token]( this, param, 22, token, value );
 		} else {
 			ret = this._procFunc( this, param, 12, token - 61, value );
 		}
 		if( ret == 0x00 ){
 			if( this.curLine()._get != null ){
-				ret = this._retError( 0x2181, 24, token );
+				ret = this._retError( 0x2181, 22, token );
 			} else {
 				this._updateMatrix( param, value );
-				ret = this._assVal( param, 24, token, saveArray, saveArraySize, value );
+				ret = this._assVal( param, 22, token, saveArray, saveArraySize, value );
 			}
 		}
 		saveArray = null;
@@ -7880,8 +7886,8 @@ _Proc.prototype = {
 							case 0:
 							case 15:
 								break;
-							case 22:
-							case 23:
+							case 20:
+							case 21:
 							case 11:
 								func._label.addCode( newCode.val(), newToken.obj() );
 								break;
@@ -8471,7 +8477,7 @@ _Proc.prototype = {
 						param._fileFlag ? param._funcName : null,
 						error
 						);
-					printWarn( error.str() );
+					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return 0x03;
 			} else if( (newCode.val() & 0x40) != 0 ){
@@ -8487,7 +8493,7 @@ _Proc.prototype = {
 						error
 						);
 					string = null;
-					printWarn( error.str() );
+					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return 0x03;
 			} else {
@@ -8522,7 +8528,7 @@ _Proc.prototype = {
 		var label;
 		lock = _this.curLine().lock();
 		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() == 22) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
+			if( (newCode.val() == 20) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
 				if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
 					return _this._retError( 0x2141, code, token );
 				}
@@ -8534,7 +8540,7 @@ _Proc.prototype = {
 				label = newToken.obj();
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 23 ){
+					if( newCode.val() == 21 ){
 						param._array._label.setLabel( _CHAR_CODE_0, label, true );
 					} else {
 						_this.curLine().unlock( lock );
@@ -8549,7 +8555,7 @@ _Proc.prototype = {
 					if( i > 9 ){
 						return _this._retError( 0x2144, code, token );
 					}
-					if( (newCode.val() == 22) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
+					if( (newCode.val() == 20) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
 						if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
 							return _this._retError( 0x2141, code, token );
 						}
@@ -8567,7 +8573,7 @@ _Proc.prototype = {
 						label = newToken.obj();
 						lock = _this.curLine().lock();
 						if( _this.curLine().getToken( newCode, newToken ) ){
-							if( newCode.val() == 23 ){
+							if( newCode.val() == 21 ){
 								param._array._label.setLabel( _CHAR_CODE_0 + i, label, true );
 							} else {
 								_this.curLine().unlock( lock );
@@ -8727,7 +8733,7 @@ _Proc.prototype = {
 				label = newToken.obj();
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 23 ){
+					if( newCode.val() == 21 ){
 						param._array._label.define( label );
 					} else {
 						_this.curLine().unlock( lock );
@@ -8756,7 +8762,7 @@ _Proc.prototype = {
 				label = newToken.obj();
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 23 ){
+					if( newCode.val() == 21 ){
 						_global_param._array._label.define( label );
 					} else {
 						_this.curLine().unlock( lock );
@@ -8769,7 +8775,7 @@ _Proc.prototype = {
 			} else {
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( tmpCode, tmpToken ) ){
-					if( tmpCode.val() == 23 ){
+					if( tmpCode.val() == 21 ){
 						if( (newCode.val() & 0x40) == 0 ){
 							return _this._retError( 0x2142, newCode.val(), newToken.obj() );
 						}
@@ -8820,13 +8826,15 @@ _Proc.prototype = {
 		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 			if( newCode.val() == 0x21 ){
 				index = _this.varIndexParam( param, newToken.obj() );
-				param.setVal( index, param._parent._var.val( index ), true );
-				if( index == 0 ){
-					_this._updateMatrix( param._parent, param._array._mat[index] );
-				} else {
-					_this._updateValue( param._parent, param._var.val( index ) );
+				if( param._parent != null ){
+					param.setVal( index, param._parent._var.val( index ), true );
+					if( index == 0 ){
+						_this._updateMatrix( param._parent, param._array._mat[index] );
+					} else {
+						_this._updateValue( param._parent, param._var.val( index ) );
+					}
+					param._updateParentVar[param._updateParentVar.length] = index;
 				}
-				param._updateParentVar[param._updateParentVar.length] = index;
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 					switch( newCode.val() ){
 					case 0x22:
@@ -8844,8 +8852,10 @@ _Proc.prototype = {
 				return 0x03;
 			} else if( newCode.val() == 0x44 ){
 				index = _this.arrayIndexParam( param, newToken.obj() );
-				param._parent._array.dup( param._array, index, index, true );
-				param._updateParentArray[param._updateParentArray.length] = index;
+				if( param._parent != null ){
+					param._parent._array.dup( param._array, index, index, true );
+					param._updateParentArray[param._updateParentArray.length] = index;
+				}
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 					switch( newCode.val() ){
 					case 0x22:
@@ -9261,7 +9271,7 @@ _Proc.prototype = {
 					param._fileFlag ? param._funcName : null,
 					error
 					);
-				printError( error.str() );
+				printError( error.str(), param._parentNum, param._parentFunc );
 				return 0x03;
 			} else if( (newCode.val() & 0x40) != 0 ){
 				if( newCode.val() == 0x46 ){
@@ -9275,7 +9285,7 @@ _Proc.prototype = {
 					error
 					);
 				string = null;
-				printError( error.str() );
+				printError( error.str(), param._parentNum, param._parentFunc );
 				return 0x03;
 			}
 		}
@@ -10160,7 +10170,7 @@ _Proc.prototype = {
 		_this._getParams( parentParam, code, token, funcParam );
 		if( (func = parentParam._func.search( token, false, null )) != null ){
 			var ret;
-			var childParam = new _Param( parentParam, false );
+			var childParam = new _Param( _this.curNum(), parentParam, false );
 			if( mainProcCache( _this, func, true, childParam, funcParam, parentParam ) == 0x04 ){
 				_this.getAns( childParam, value, parentParam );
 				ret = 0x00;
@@ -10220,7 +10230,7 @@ _Proc.prototype = {
 		var funcParam = new _Token();
 		var func;
 		_this._getParams( parentParam, code, token, funcParam );
-		var childParam = new _Param( parentParam, false );
+		var childParam = new _Param( _this.curNum(), parentParam, false );
 		if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
 			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == 0x04 ){
 				_this.getAns( childParam, value, parentParam );
@@ -11338,8 +11348,8 @@ _Token.prototype = {
 		case 15:
 		case 16:
 		case 17:
-		case 22:
-		case 23:
+		case 20:
+		case 21:
 			newToken.set( null );
 			break;
 		case 7:
@@ -11375,7 +11385,7 @@ _Token.prototype = {
 		case 15:
 		case 16:
 		case 17:
-		case 23:
+		case 21:
 			cur._code = token.charCodeAt( 0 );
 			cur._token = null;
 			return 0x00;
@@ -11399,7 +11409,7 @@ _Token.prototype = {
 			}
 			if( token.charAt( 0 ) == '&' ){
 				if( len == 1 ){
-					cur._code = 22;
+					cur._code = 20;
 					cur._token = null;
 					return 0x00;
 				}
@@ -11454,12 +11464,12 @@ _Token.prototype = {
 						cur._token = 32;
 						break;
 					default:
-						cur._code = 24;
+						cur._code = 22;
 						cur._token = code.val();
 						break;
 					}
 				} else {
-					cur._code = 24;
+					cur._code = 22;
 					cur._token = 0;
 				}
 			} else if( this.checkSqOp( tmp, code ) ){
@@ -11727,7 +11737,7 @@ _Token.prototype = {
 				strFlag = true;
 			} else if( (line.charAt( cur ) == ']') && strFlag ){
 				if( len == 0 ){
-					token = String.fromCharCode( 23 );
+					token = String.fromCharCode( 21 );
 					if( (ret = this.add( param, token, 1, strToVal )) != 0x00 ){
 						return ret;
 					}
@@ -12060,7 +12070,7 @@ _Token.prototype = {
 			}
 		}
 		if( this._top != null ){
-			if( this._top._code == 24 ){
+			if( this._top._code == 22 ){
 				if( topCount != 0 ){
 					return 0x2181;
 				}
@@ -12139,7 +12149,7 @@ _Token.prototype = {
 		var tmpEnd;
 		var ret;
 		if( this._top != null ){
-			if( this._top._code == 24 ){
+			if( this._top._code == 22 ){
 				return 0x00;
 			} else if( this._top._code == 10 ){
 				switch( this._top._token ){
@@ -12426,10 +12436,10 @@ _Token.prototype = {
 		case 17:
 			string = "}";
 			break;
-		case 22:
+		case 20:
 			string = "&";
 			break;
-		case 23:
+		case 21:
 			string = "[]";
 			break;
 		case 0x21:
@@ -12458,7 +12468,7 @@ _Token.prototype = {
 		case 11:
 			string = _TOKEN_OP[token];
 			break;
-		case 24:
+		case 22:
 			string = "$";
 			if( token == 0 ){
 				break;
@@ -14398,7 +14408,7 @@ assert( (row != undefined) && (col != undefined) );
 		if( r instanceof _Matrix ){
 			return valueToMatrix( this._mat[0].mod( r._mat[0] ) );
 		}
-		return valueToMatrix( this._mat[0],mod( r ) );
+		return valueToMatrix( this._mat[0].mod( r ) );
 	},
 	modAndAss : function( r ){
 		this._resize1();
@@ -15882,11 +15892,9 @@ window._CLIP_CODE_ARRAY_TOP = 16;
 window._CLIP_CODE_ARRAY_END = 17;
 window._CLIP_CODE_MATRIX = 18;
 window._CLIP_CODE_STRING = 19;
-window._CLIP_CODE_SEPARATOR = 20;
-window._CLIP_CODE_COMMENT = 21;
-window._CLIP_CODE_PARAM_ANS = 22;
-window._CLIP_CODE_PARAM_ARRAY = 23;
-window._CLIP_CODE_SE = 24;
+window._CLIP_CODE_PARAM_ANS = 20;
+window._CLIP_CODE_PARAM_ARRAY = 21;
+window._CLIP_CODE_SE = 22;
 window._CLIP_OP_INCREMENT = 0;
 window._CLIP_OP_DECREMENT = 1;
 window._CLIP_OP_COMPLEMENT = 2;

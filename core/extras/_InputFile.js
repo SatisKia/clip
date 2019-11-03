@@ -29,6 +29,7 @@ function _onInputFileChange( e ){
 		return;
 	}
 
+	// 画像ファイル
 	if( files[0].type.startsWith( "image/" ) ){
 		var name = files[0].name;
 		var reader = new FileReader();
@@ -43,6 +44,7 @@ function _onInputFileChange( e ){
 		return;
 	}
 
+	// 外部関数ファイル
 	_input_file_cnt = 0;
 	_input_file_num = files.length;
 	for( var i = 0; i < files.length; i++ ){
@@ -103,7 +105,7 @@ function _onInputFileChange( e ){
 	}
 }
 
+//function onInputFileLoadImage( name, image ){}
+
 //function onInputFileLoad( func, data ){}
 //function onInputFileLoadEnd( num ){}
-
-//function onInputFileLoadImage( name, image ){}

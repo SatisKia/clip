@@ -6349,7 +6349,7 @@ _Proc.prototype = {
 						param._fileFlag ? param._funcName : null,
 						error
 						);
-					printWarn( error.str() );
+					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return _CLIP_PROC_SUB_END;
 			} else if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
@@ -6365,7 +6365,7 @@ _Proc.prototype = {
 						error
 						);
 					string = null;
-					printWarn( error.str() );
+					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return _CLIP_PROC_SUB_END;
 			} else {
@@ -6728,15 +6728,17 @@ _Proc.prototype = {
 			if( newCode.val() == _CLIP_CODE_VARIABLE ){
 				index = _this.varIndexParam( param, newToken.obj() );
 
-				// 親プロセスの変数を取り込む
-				param.setVal( index, param._parent._var.val( index ), true );
-				if( index == 0 ){
-					_this._updateMatrix( param._parent, param._array._mat[index] );
-				} else {
-					_this._updateValue( param._parent, param._var.val( index ) );
-				}
+				if( param._parent != null ){
+					// 親プロセスの変数を取り込む
+					param.setVal( index, param._parent._var.val( index ), true );
+					if( index == 0 ){
+						_this._updateMatrix( param._parent, param._array._mat[index] );
+					} else {
+						_this._updateValue( param._parent, param._var.val( index ) );
+					}
 
-				param._updateParentVar[param._updateParentVar.length] = index;
+					param._updateParentVar[param._updateParentVar.length] = index;
+				}
 
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 					switch( newCode.val() ){
@@ -6757,10 +6759,12 @@ _Proc.prototype = {
 			} else if( newCode.val() == _CLIP_CODE_ARRAY ){
 				index = _this.arrayIndexParam( param, newToken.obj() );
 
-				// 親プロセスの配列を取り込む
-				param._parent._array.dup( param._array, index, index, true );
+				if( param._parent != null ){
+					// 親プロセスの配列を取り込む
+					param._parent._array.dup( param._array, index, index, true );
 
-				param._updateParentArray[param._updateParentArray.length] = index;
+					param._updateParentArray[param._updateParentArray.length] = index;
+				}
 
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 					switch( newCode.val() ){
@@ -7260,7 +7264,7 @@ _Proc.prototype = {
 					param._fileFlag ? param._funcName : null,
 					error
 					);
-				printError( error.str() );
+				printError( error.str(), param._parentNum, param._parentFunc );
 				return _CLIP_PROC_SUB_END;
 			} else if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
 				if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
@@ -7274,7 +7278,7 @@ _Proc.prototype = {
 					error
 					);
 				string = null;
-				printError( error.str() );
+				printError( error.str(), param._parentNum, param._parentFunc );
 				return _CLIP_PROC_SUB_END;
 			}
 		}
@@ -8255,7 +8259,7 @@ _Proc.prototype = {
 
 		if( (func = parentParam._func.search( token, false, null )) != null ){
 			var ret;
-			var childParam = new _Param( parentParam, false );
+			var childParam = new _Param( _this.curNum(), parentParam, false );
 			if( mainProcCache( _this, func, true, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
 				_this.getAns( childParam, value, parentParam );
 				ret = _CLIP_NO_ERR;
@@ -8326,7 +8330,7 @@ _Proc.prototype = {
 		// 関数のパラメータを取得する
 		_this._getParams( parentParam, code, token, funcParam );
 
-		var childParam = new _Param( parentParam, false );
+		var childParam = new _Param( _this.curNum(), parentParam, false );
 
 		if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
 			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
@@ -8438,8 +8442,8 @@ _Proc.prototype = {
 //function printTest( param, line, num, comment ){}
 //function printAnsMatrix( param, array ){}
 //function printAnsComplex( real, imag ){}
-//function printWarn( warn ){}
-//function printError( error ){}
+//function printWarn( warn, num, func ){}
+//function printError( error, num, func ){}
 
 //function doFuncGColor( rgb ){ return 0; }
 //function doFuncGColor24( index ){ return 0x000000; }

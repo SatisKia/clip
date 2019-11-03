@@ -1575,6 +1575,7 @@ _Preference.prototype = {
  }
 };
 var preference;
+var input;
 var _console_break = "<br>";
 function consoleBreak(){
  return _console_break;
@@ -2537,7 +2538,7 @@ var needGUpdate = false;
 var addExtFuncList = false;
 var englishFlag = false;
 var lastTouchEnd = 0;
-function main( divId, canvasId, inputFileId, editorId ){
+function main( inputId, divId, canvasId, inputFileId, editorId ){
  var i;
  var userAgent = window.navigator.userAgent;
  if( (userAgent.indexOf( "Android" ) != -1) || (userAgent.indexOf( "iPad" ) != -1) ){
@@ -2560,6 +2561,7 @@ function main( divId, canvasId, inputFileId, editorId ){
   }
  }
  preference = new _Preference( useStorage );
+ input = document.getElementById( inputId );
  con = new _Console( divId );
  con.setMaxBlankLine( 1 );
  con.setMaxLen( conMaxLen );
@@ -2647,10 +2649,9 @@ function doShowEditor(){
  document.getElementById( "clip_editor" ).style.display = "block";
 }
 function proc(){
- var line = "" + document.getElementById( "input0" ).value;
+ var line = "" + input.value;
  if( line.length > 0 ){
   doShowConsole();
-  procError.delAll();
   con.newLine();
   con.println( "<b>&gt;</b>" + line );
   con.lock();
@@ -2686,11 +2687,9 @@ try {
    con.setColor();
   }
   con.unlock();
-  if( !procError.isError() ){
-   addLogExpr();
-  }
+  addLogExpr();
  }
- document.getElementById( "input0" ).value = "";
+ input.value = "";
 }
 function doClearFuncCache(){
  topProc.clearAllFuncCache();
@@ -2890,9 +2889,12 @@ function getErrorString( err, num, func, token ){
  var string = new String();
  var error = getProcErrorDefString( err, token, topParam.isCalculator(), englishFlag );
  if( error.length > 0 ){
-  if( (num > 0) && (func != null) && (func.length > 0) ){
-   if( englishFlag ) string += func + ": Line " + num + ": ";
-   else string += func + ": " + num + "行: ";
+  if( (func != null) && (func.length > 0) ){
+   string += func + ": ";
+  }
+  if( num > 0 ){
+   if( englishFlag ) string += "Line " + num + ": ";
+   else string += "" + num + "行: ";
   }
   if( englishFlag ) string += (((err & _CLIP_PROC_WARN) != 0) ? "Warning" : "Error") + " " + intToString( err, 16, 4 ) + ": " + error;
   else string += (((err & _CLIP_PROC_WARN) != 0) ? "警告" : "エラー") + "(" + intToString( err, 16, 4 ) + "): " + error;
@@ -2935,8 +2937,6 @@ function codeString( code ){
  case _CLIP_CODE_ARRAY_END: string = "ARRAY_END"; break;
  case _CLIP_CODE_MATRIX: string = "MATRIX"; break;
  case _CLIP_CODE_STRING: string = "STRING"; break;
- case _CLIP_CODE_SEPARATOR: string = "SEPARATOR"; break;
- case _CLIP_CODE_COMMENT: string = "COMMENT"; break;
  case _CLIP_CODE_PARAM_ANS: string = "PARAM_ANS"; break;
  case _CLIP_CODE_PARAM_ARRAY: string = "PARAM_ARRAY"; break;
  default:
@@ -3079,13 +3079,27 @@ function printAnsComplex( real, imag ){
  con.println( real + imag );
  con.setBold( false );
 }
-function printWarn( warn ){
+function printWarn( warn, num, func ){
  con.newLine();
+ if( (func != null) && (func.length > 0) ){
+  con.print( func + ": " );
+ }
+ if( num > 0 ){
+  if( englishFlag ) con.print( "Line " + num + ": " );
+  else con.print( "" + num + "行: " );
+ }
  if( englishFlag ) con.println( "Warning: " + warn );
  else con.println( "警告: " + warn );
 }
-function printError( error ){
+function printError( error, num, func ){
  con.newLine();
+ if( (func != null) && (func.length > 0) ){
+  con.print( func + ": " );
+ }
+ if( num > 0 ){
+  if( englishFlag ) con.print( "Line " + num + ": " );
+  else con.print( "" + num + "行: " );
+ }
  if( englishFlag ) con.println( "Error: " + error );
  else con.println( "エラー: " + error );
 }
@@ -3114,7 +3128,7 @@ function doFuncGColor24( index ){
 function doFuncEval( parentProc, parentParam, string, value ){
  var ret;
  var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
- var childParam = new _Param( parentParam, true );
+ var childParam = new _Param( parentProc.curNum(), parentParam, true );
  childParam.setEnableCommand( false );
  childParam.setEnableStat( false );
 try {
@@ -3172,9 +3186,8 @@ function doCommandScan( _this, topScan, param ){
 }
 function doCommandGWorld( gWorld, width, height ){
  if( (width <= 0) || (height <= 0) ){
-  var canvas = document.getElementById( "canvas0" );
-  canvas.setAttribute( "width" , "1" );
-  canvas.setAttribute( "height", "1" );
+  canvas.element().setAttribute( "width" , "1" );
+  canvas.element().setAttribute( "height", "1" );
   var div1 = document.getElementById( "savecanvas" );
   div1.style.display = "none";
   var div2 = document.getElementById( "gworld" );
@@ -3192,9 +3205,8 @@ function doCommandGWorld( gWorld, width, height ){
   div2.style.display = "block";
   var div3 = document.getElementById( "savecanvas" );
   div3.style.display = "block";
-  var canvas = document.getElementById( "canvas0" );
-  canvas.setAttribute( "width" , "" + width );
-  canvas.setAttribute( "height", "" + height );
+  canvas.element().setAttribute( "width" , "" + width );
+  canvas.element().setAttribute( "height", "" + height );
  }
  gWorld.create( width, height, true );
 }
@@ -3284,7 +3296,7 @@ function doCommandGUpdate( gWorld ){
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
  var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentParam, true );
+ var childParam = new _Param( parentProc.curNum(), parentParam, true );
  childParam.setEnableCommand( false );
  childParam.setEnableStat( false );
 try {
@@ -3295,7 +3307,7 @@ try {
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
  var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentParam, true );
+ var childParam = new _Param( parentProc.curNum(), parentParam, true );
  childParam.setEnableCommand( false );
  childParam.setEnableStat( false );
 try {
@@ -3662,7 +3674,6 @@ function onWriteFileEnd( fileEntry ){
  con.println( "<b>[" + fileEntry.fullPath + "]</b>" );
 }
 function onStartPlot(){
- procError.delAll();
  setProcTraceFlag( false );
  silentErr = true;
 }
@@ -3673,15 +3684,11 @@ function onEndPlot(){
  var num = new _Integer();
  var func = new _String();
  var token = new _String();
- var string;
  for( var i = 0; i < procError.num(); i++ ){
   procError.get( i, err, num, func, token );
-  string = getErrorString( err.val(), num.val(), func.str(), token.str() );
-  if( string.length > 0 ){
-   con.newLine();
-   con.println( string );
-  }
+  errorProc( err.val(), num.val(), func.str(), token.str() );
  }
+ procError.delAll();
 }
 function onStartRePlot(){
  onStartPlot();
@@ -3769,7 +3776,6 @@ function doChangeFunc( select ){
 }
 function callFunc(){
  saveFunc();
- var input = document.getElementById( "input0" );
  var val = input.value;
  var pos = input.selectionStart;
  var tmp = "!!" + String.fromCharCode( curFunc ) + " ";
@@ -3806,7 +3812,6 @@ function updateSelectFunc(){
  }
 }
 function saveCanvas(){
- var canvas = document.getElementById( "canvas0" );
- var data = canvas.toDataURL( "image/png" ).replace( "image/png", "image/octet-stream" );
+ var data = canvas.element().toDataURL( "image/png" ).replace( "image/png", "image/octet-stream" );
  window.open( data, "save" );
 }

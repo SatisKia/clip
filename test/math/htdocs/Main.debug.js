@@ -1894,7 +1894,7 @@ _Matrix.prototype = {
   if( r instanceof _Matrix ){
    return valueToMatrix( this._mat[0].mod( r._mat[0] ) );
   }
-  return valueToMatrix( this._mat[0],mod( r ) );
+  return valueToMatrix( this._mat[0].mod( r ) );
  },
  modAndAss : function( r ){
   this._resize1();
