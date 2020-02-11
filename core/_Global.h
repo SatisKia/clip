@@ -432,68 +432,75 @@
 #define _CLIP_SE_MINUS			6
 
 #define _CLIP_SE_SET			7
+#define _CLIP_SE_SETC			8
+#define _CLIP_SE_SETF			9
+#define _CLIP_SE_SETM			10
 
-#define _CLIP_SE_MUL			8
-#define _CLIP_SE_DIV			9
-#define _CLIP_SE_MOD			10
-#define _CLIP_SE_ADD			11
-#define _CLIP_SE_SUB			12
-#define _CLIP_SE_POW			13
-#define _CLIP_SE_SHIFTL			14
-#define _CLIP_SE_SHIFTR			15
-#define _CLIP_SE_AND			16
-#define _CLIP_SE_OR				17
-#define _CLIP_SE_XOR			18
+#define _CLIP_SE_MUL			11
+#define _CLIP_SE_DIV			12
+#define _CLIP_SE_MOD			13
+#define _CLIP_SE_ADD			14
+#define _CLIP_SE_ADDS			15
+#define _CLIP_SE_SUB			16
+#define _CLIP_SE_SUBS			17
+#define _CLIP_SE_POW			18
+#define _CLIP_SE_SHIFTL			19
+#define _CLIP_SE_SHIFTR			20
+#define _CLIP_SE_AND			21
+#define _CLIP_SE_OR				22
+#define _CLIP_SE_XOR			23
 
-#define _CLIP_SE_LESS			19
-#define _CLIP_SE_LESSOREQ		20
-#define _CLIP_SE_GREAT			21
-#define _CLIP_SE_GREATOREQ		22
-#define _CLIP_SE_EQUAL			23
-#define _CLIP_SE_NOTEQUAL		24
-#define _CLIP_SE_LOGAND			25
-#define _CLIP_SE_LOGOR			26
+#define _CLIP_SE_LESS			24
+#define _CLIP_SE_LESSOREQ		25
+#define _CLIP_SE_GREAT			26
+#define _CLIP_SE_GREATOREQ		27
+#define _CLIP_SE_EQUAL			28
+#define _CLIP_SE_NOTEQUAL		29
+#define _CLIP_SE_LOGAND			30
+#define _CLIP_SE_LOGOR			31
 
-#define _CLIP_SE_MUL_A			27
-#define _CLIP_SE_DIV_A			28
-#define _CLIP_SE_MOD_A			29
-#define _CLIP_SE_ADD_A			30
-#define _CLIP_SE_SUB_A			31
-#define _CLIP_SE_POW_A			32
-#define _CLIP_SE_SHIFTL_A		33
-#define _CLIP_SE_SHIFTR_A		34
-#define _CLIP_SE_AND_A			35
-#define _CLIP_SE_OR_A			36
-#define _CLIP_SE_XOR_A			37
+#define _CLIP_SE_MUL_A			32
+#define _CLIP_SE_DIV_A			33
+#define _CLIP_SE_MOD_A			34
+#define _CLIP_SE_ADD_A			35
+#define _CLIP_SE_ADDS_A			36
+#define _CLIP_SE_SUB_A			37
+#define _CLIP_SE_SUBS_A			38
+#define _CLIP_SE_POW_A			39
+#define _CLIP_SE_SHIFTL_A		40
+#define _CLIP_SE_SHIFTR_A		41
+#define _CLIP_SE_AND_A			42
+#define _CLIP_SE_OR_A			43
+#define _CLIP_SE_XOR_A			44
 
-#define _CLIP_SE_LESS_A			38
-#define _CLIP_SE_LESSOREQ_A		39
-#define _CLIP_SE_GREAT_A		40
-#define _CLIP_SE_GREATOREQ_A	41
-#define _CLIP_SE_EQUAL_A		42
-#define _CLIP_SE_NOTEQUAL_A		43
-#define _CLIP_SE_LOGAND_A		44
-#define _CLIP_SE_LOGOR_A		45
+#define _CLIP_SE_LESS_A			45
+#define _CLIP_SE_LESSOREQ_A		46
+#define _CLIP_SE_GREAT_A		47
+#define _CLIP_SE_GREATOREQ_A	48
+#define _CLIP_SE_EQUAL_A		49
+#define _CLIP_SE_NOTEQUAL_A		50
+#define _CLIP_SE_LOGAND_A		51
+#define _CLIP_SE_LOGOR_A		52
 
-#define _CLIP_SE_CONDITIONAL	46
+#define _CLIP_SE_CONDITIONAL	53
 
-#define _CLIP_SE_SET_FALSE		47
-#define _CLIP_SE_SET_TRUE		48
-#define _CLIP_SE_SET_ZERO		49
+#define _CLIP_SE_SET_FALSE		54
+#define _CLIP_SE_SET_TRUE		55
+#define _CLIP_SE_SET_ZERO		56
 
-#define _CLIP_SE_LOOPSTART		50
-#define _CLIP_SE_LOOPEND		51
-#define _CLIP_SE_LOOPEND_INC	52
-#define _CLIP_SE_LOOPEND_DEC	53
-#define _CLIP_SE_LOOPENDEQ		54
-#define _CLIP_SE_LOOPENDEQ_INC	55
-#define _CLIP_SE_LOOPENDEQ_DEC	56
-#define _CLIP_SE_CONTINUE		57
-#define _CLIP_SE_BREAK			58
-#define _CLIP_SE_RETURN			59
-#define _CLIP_SE_RETURN_ANS		60
+#define _CLIP_SE_LOOPSTART		57
+#define _CLIP_SE_LOOPEND		58
+#define _CLIP_SE_LOOPEND_INC	59
+#define _CLIP_SE_LOOPEND_DEC	60
+#define _CLIP_SE_LOOPENDEQ		61
+#define _CLIP_SE_LOOPENDEQ_INC	62
+#define _CLIP_SE_LOOPENDEQ_DEC	63
+#define _CLIP_SE_CONTINUE		64
+#define _CLIP_SE_BREAK			65
+#define _CLIP_SE_RETURN			66
+#define _CLIP_SE_RETURN_ANS		67
 
-#define _CLIP_SE_FUNC			61
+#define _CLIP_SE_FUNC			68
 
 /*
  * エラー・コード

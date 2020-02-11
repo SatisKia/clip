@@ -66,9 +66,7 @@ function _XOR( a, b ){
 }
 
 // 符号付き整数値
-function _SIGNED( x, umax ){
-	var smax = umax / 2 - 1;
-	var smin = -umax / 2;
+function _SIGNED( x, umax, smin, smax ){
 	x = _MOD( x, umax );
 	if( x > smax ) return x - umax;
 	if( x < smin ) return x + umax;
@@ -87,14 +85,6 @@ function _CHAR( chr ){
 	return chr.charCodeAt( 0 );
 }
 var _CHAR_CODE_0     = _CHAR( '0' );
-var _CHAR_CODE_1     = _CHAR( '1' );
-var _CHAR_CODE_2     = _CHAR( '2' );
-var _CHAR_CODE_3     = _CHAR( '3' );
-var _CHAR_CODE_4     = _CHAR( '4' );
-var _CHAR_CODE_5     = _CHAR( '5' );
-var _CHAR_CODE_6     = _CHAR( '6' );
-var _CHAR_CODE_7     = _CHAR( '7' );
-var _CHAR_CODE_8     = _CHAR( '8' );
 var _CHAR_CODE_9     = _CHAR( '9' );
 var _CHAR_CODE_LA    = _CHAR( 'a' );	// Lowercase
 var _CHAR_CODE_UA    = _CHAR( 'A' );	// Uppercase

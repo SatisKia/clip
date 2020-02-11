@@ -639,8 +639,8 @@ _Value.prototype = {
 				e--;
 			}
 		}
-		exp.set( e );
 		if( m ) x = -x;
+		exp.set( e );
 		return floatToValue( x );
 	},
 	modf : function( _int/*_Float*/ ){

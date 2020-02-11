@@ -22,4 +22,12 @@
 #define _UMAX_24	16777216
 #define _UMAX_32	4294967296
 
+// _SIGNED 用
+#define _SMIN_8		-128
+#define _SMAX_8		 127
+#define _SMIN_16	-32768
+#define _SMAX_16	 32767
+#define _SMIN_32	-2147483648
+#define _SMAX_32	 2147483647
+
 #endif // _CLIP_MATH_H

@@ -69,12 +69,9 @@ _Label.prototype = {
 
 	// ラベルを検索する
 	checkLabel : function( label ){
-//		for( var i = 0; i < 256; i++ )
-//		{
-//			if( this._label[i] != null )
-//			{
-//				if( this._label[i] == label )
-//				{
+//		for( var i = 0; i < 256; i++ ){
+//			if( this._label[i] != null ){
+//				if( this._label[i] == label ){
 //					return i;
 //				}
 //			}

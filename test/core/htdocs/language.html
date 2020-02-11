@@ -1266,8 +1266,8 @@ CLIP式中にECLIPSE命令を含めることはできない。独立した行に
 </tr>
 <tr>
 <td>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
-</td><td><i>r</i><span class="pink"> = </span><i>x</i></td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET<br>$SETC<br>$SETF<br>$SETM</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>re</i><span class="pink">,</span><i>im</i><br><i>r</i><span class="pink">,</span><i>n</i><span class="pink">,</span><i>d</i><br><i>r</i><span class="pink">,</span><i>i</i><span class="pink">,</span><i>n</i><span class="pink">,</span><i>d</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>x</i><br><i>r</i><span class="pink"> = (</span><i>re</i><span class="pink"> </span><i>im</i><span class="pink">)</span><br><i>r</i><span class="pink"> = (</span><i>n</i><span class="pink"> </span><i>d</i><span class="pink">)</span><br><i>r</i><span class="pink"> = (</span><i>i</i><span class="pink"> </span></span><i>n</i><span class="pink"> </span><i>d</i><span class="pink">)</span></td>
 </tr>
 <tr>
 <td>
@@ -1371,6 +1371,29 @@ CLIP式中にECLIPSE命令を含めることはできない。独立した行に
 </tr>
 </table>
 <hr class="hr_border">
+飽和演算<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>ニーモニック</b></td><td width="220"><b>オペランド</b></td></tr></table>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$ADDS<br>$ADDS_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SUBS<br>$SUBS_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+</tr>
+</table>
+<hr class="hr">
+浮動小数点型または整数型で有効である。<br>
+<hr class="hr">
+加算または減算が行われた結果が<i>min</i>値を下回る場合<i>min</i>値に、<i>max</i>値を上回る場合<i>max</i>値に留めておく演算である。<br>
+<hr class="hr">
+整数型で、加算または減算することでアンダーフロー・オーバーフローする場合も、正しく<i>min</i>値・<i>max</i>値に留まる。<br>
+<hr class="hr_border">
 初期化命令<br>
 <hr class="hr">
 <table border="1" cellspacing="1" cellpadding="1">
@@ -1437,13 +1460,13 @@ CLIP式中にECLIPSE命令を含めることはできない。独立した行に
 <hr class="hr">
 <i>stop</i>、<i>step</i>は整数。<i>step</i>に0は指定できない。<br>
 <hr class="hr">
-<span class="pink">$LOOPEND</span>では、まず<i>count</i><span class="pink">+=</span><i>step</i>が計算され、次の条件でループを抜ける。<br>
+<span class="pink">$LOOPEND</span>では、まず<i>count</i>に<i>step</i>が加算され、次の条件でループを抜ける。<br>
 A) <i>step</i>が正の値の場合、<i>count</i>の値が<i>stop</i>以上<br>
 B) <i>step</i>が負の値の場合、<i>count</i>の値が<i>stop</i>以下<br>
 <hr class="hr">
-<span class="pink">$LOOPEND_I</span>では、まず<span class="pink">[++]</span><i>count</i>が計算され、<i>count</i>の値が<i>stop</i>以上でループを抜ける。<br>
+<span class="pink">$LOOPEND_I</span>では、まず<i>count</i>がインクリメントされ、<i>count</i>の値が<i>stop</i>以上でループを抜ける。<br>
 <hr class="hr">
-<span class="pink">$LOOPEND_D</span>では、まず<span class="pink">[--]</span><i>count</i>が計算され、<i>count</i>の値が<i>stop</i>以下でループを抜ける。<br>
+<span class="pink">$LOOPEND_D</span>では、まず<i>count</i>がデクリメントされ、<i>count</i>の値が<i>stop</i>以下でループを抜ける。<br>
 <hr class="hr">
 <span class="pink">$LOOPENDE</span>、<span class="pink">$LOOPENDE_I</span>、<span class="pink">$LOOPENDE_D</span>では、<i>count</i>の値が<i>stop</i>に等しい場合もループ処理が実行される。<br>
 <hr class="hr">

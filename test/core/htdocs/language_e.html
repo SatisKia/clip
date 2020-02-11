@@ -1259,8 +1259,8 @@ Arithmetic instruction<br>
 </tr>
 <tr>
 <td>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET</span></td><td><i>r</i><span class="pink">,</span><i>x</i></td></tr></table>
-</td><td><i>r</i><span class="pink"> = </span><i>x</i></td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SET<br>$SETC<br>$SETF<br>$SETM</span></td><td><i>r</i><span class="pink">,</span><i>x</i><br><i>r</i><span class="pink">,</span><i>re</i><span class="pink">,</span><i>im</i><br><i>r</i><span class="pink">,</span><i>n</i><span class="pink">,</span><i>d</i><br><i>r</i><span class="pink">,</span><i>i</i><span class="pink">,</span><i>n</i><span class="pink">,</span><i>d</i></td></tr></table>
+</td><td><i>r</i><span class="pink"> = </span><i>x</i><br><i>r</i><span class="pink"> = (</span><i>re</i><span class="pink"> </span><i>im</i><span class="pink">)</span><br><i>r</i><span class="pink"> = (</span><i>n</i><span class="pink"> </span><i>d</i><span class="pink">)</span><br><i>r</i><span class="pink"> = (</span><i>i</i><span class="pink"> </span></span><i>n</i><span class="pink"> </span><i>d</i><span class="pink">)</span></td>
 </tr>
 <tr>
 <td>
@@ -1364,6 +1364,29 @@ Arithmetic instruction<br>
 </tr>
 </table>
 <hr class="hr_border">
+Saturate calculation<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><b>Mnemonic</b></td><td width="220"><b>Operand</b></td></tr></table>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$ADDS<br>$ADDS_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+</tr>
+<tr>
+<td>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SUBS<br>$SUBS_A</span></td><td><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>y</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+</tr>
+</table>
+<hr class="hr">
+Valid for floating-point and integer types.<br>
+<hr class="hr">
+This is an operation in which the result of addition or subtraction is kept at the <i>min</i> value when the result is less than the <i>min</i> value, and is kept at the <i>max</i> value when the result exceeds the <i>max</i> value.<br>
+<hr class="hr">
+In the case of an integer type, if an underflow or overflow occurs due to addition or subtraction, it correctly stays at the <i>min</i> or <i>max</i> value.<br>
+<hr class="hr_border">
 Initialization instruction<br>
 <hr class="hr">
 <table border="1" cellspacing="1" cellpadding="1">
@@ -1430,13 +1453,13 @@ Loop instruction<br>
 <hr class="hr">
 <i>stop</i>, <i>step</i> is integer. 0 can not be specified for <i>step</i>.<br>
 <hr class="hr">
-In <span class="pink">$LOOPEND</span>, <i>count</i><span class="pink">+=</span><i>step</i> is calculated first, and it exits the loop under the following conditions.<br>
+In <span class="pink">$LOOPEND</span>, <i>step</i> is added to <i>count</i> first, and loop exits under the following conditions.<br>
 A) If <i>step</i> is a positive value, it exits when the value of <i>count</i> is greater than or equal to <i>stop</i>.<br>
 B) If <i>step</i> is a negative value, it exits when the value of <i>count</i> is less than or equal to <i>stop</i>.<br>
 <hr class="hr">
-In <span class="pink">$LOOPEND_I</span>, <span class="pink">[++]</span><i>count</i> is calculated first, and when the value of <i>count</i> is greater than or equal to <i>stop</i>, exit the loop.<br>
+In <span class="pink">$LOOPEND_I</span>, <i>count</i> is incremented first, and when the value of <i>count</i> is greater than or equal to <i>stop</i>, exit the loop.<br>
 <hr class="hr">
-In <span class="pink">$LOOPEND_D</span>, <span class="pink">[--]</span><i>count</i> is calculated first, and when the value of <i>count</i> is less than or equal to <i>stop</i>, exit the loop.<br>
+In <span class="pink">$LOOPEND_D</span>, <i>count</i> is decremented first, and when the value of <i>count</i> is less than or equal to <i>stop</i>, exit the loop.<br>
 <hr class="hr">
 In <span class="pink">$LOOPENDE</span>, <span class="pink">$LOOPENDE_I</span> and <span class="pink">$LOOPENDE_D</span>, loop processing is also executed even if the value of <i>count</i> is equal to <i>stop</i>.<br>
 <hr class="hr">

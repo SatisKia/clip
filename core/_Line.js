@@ -48,9 +48,10 @@ _Line.prototype = {
 		var dst = new _Line();
 
 		var line;
-		this.beginGetLine();
-		while( (line = this.getLine()) != null ){
-			dst.regLine( line );
+		this._get = this._top;
+		while( this._get != null ){
+			dst.regLine( this._get );
+			this._get = this._get._next;
 		}
 
 		dst._nextNum = this._nextNum;

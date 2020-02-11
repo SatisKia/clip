@@ -3070,11 +3070,13 @@ function printMatrix( param, array, indent ){
  con.println( getMatrixString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
 function printAnsMatrix( param, array ){
+ con.newLine();
  con.setBold( true );
  printMatrix( param, array, 0 );
  con.setBold( false );
 }
 function printAnsComplex( real, imag ){
+ con.newLine();
  con.setBold( true );
  con.println( real + imag );
  con.setBold( false );
@@ -3108,14 +3110,14 @@ function doFuncGColor( rgb ){
  var r = (rgb & 0xFF0000) >> 16;
  var g = (rgb & 0x00FF00) >> 8;
  var b = rgb & 0x0000FF;
- var rr, gg, bb;
- var d, tmp;
- for( i = 0, j = -1; i < 256; i++ ){
+ var rr, gg, bb, tmp;
+ var d = 766 ;
+ for( i = 0, j = 0; i < 256; i++ ){
   rr = COLOR_WIN[i] & 0x0000FF;
   gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
   bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
   tmp = Math.abs( rr - r ) + Math.abs( gg - g ) + Math.abs( bb - b );
-  if( (j < 0) || (tmp < d) ){
+  if( tmp < d ){
    j = i;
    d = tmp;
   }
@@ -3384,285 +3386,261 @@ function doCustomCommand( _this, param, code, token ){
   preference.set( "_CLIP_" + "ENV_Language", englishFlag ? "" + 1 : "" + 0 );
   break;
  case _CLIP_COMMAND_CUSTOM:
-  {
-   con.setColor( "0000ff" );
-   con.println( "calculator " + (param.isCalculator() ? "TRUE" : "FALSE") );
-   con.println( (param.base() == 0) ? "zero-based" : "one-based" );
-   switch( param.mode() ){
-   case _CLIP_MODE_E_FLOAT: con.print( "efloat" ); break;
-   case _CLIP_MODE_F_FLOAT: con.print( "float" ); break;
-   case _CLIP_MODE_G_FLOAT: con.print( "gfloat" ); break;
-   case _CLIP_MODE_E_COMPLEX: con.print( "ecomplex" ); break;
-   case _CLIP_MODE_F_COMPLEX: con.print( "complex" ); break;
-   case _CLIP_MODE_G_COMPLEX: con.print( "gcomplex" ); break;
-   case _CLIP_MODE_I_FRACT: con.print( "fract" ); break;
-   case _CLIP_MODE_M_FRACT: con.print( "mfract" ); break;
-   case _CLIP_MODE_H_TIME: con.print( "htime" ); break;
-   case _CLIP_MODE_M_TIME: con.print( "mtime" ); break;
-   case _CLIP_MODE_S_TIME: con.print( "time" ); break;
-   case _CLIP_MODE_F_TIME: con.print( "ftime" ); break;
-   case _CLIP_MODE_S_CHAR: con.print( "char" ); break;
-   case _CLIP_MODE_U_CHAR: con.print( "uchar" ); break;
-   case _CLIP_MODE_S_SHORT: con.print( "short" ); break;
-   case _CLIP_MODE_U_SHORT: con.print( "ushort" ); break;
-   case _CLIP_MODE_S_LONG: con.print( "long" ); break;
-   case _CLIP_MODE_U_LONG: con.print( "ulong" ); break;
-   }
-   con.print( ", " ); con.print( "fps " + param.fps() );
-   con.print( ", " ); con.print( "prec " + param.prec() );
-   con.print( ", " ); con.print( "radix " + param.radix() );
-   con.print( ", " );
-   var type = new _Integer();
-   var updateFlag = new _Boolean();
-   _this.getAngType( type, updateFlag );
-   switch( type.val() ){
-   case _ANG_TYPE_RAD: con.print( "rad" ); break;
-   case _ANG_TYPE_DEG: con.print( "deg" ); break;
-   case _ANG_TYPE_GRAD: con.print( "grad" ); break;
-   }
-   con.println();
-   con.print( "assert " + (_this.assertFlag() ? "TRUE" : "FALSE") );
-   con.print( ", " ); con.print( "warn " + (_this.warnFlag() ? "TRUE" : "FALSE") );
-   con.println();
-   var left = _this.gWorld().wndPosX( 0 );
-   var top = _this.gWorld().wndPosY( 0 );
-   var right = _this.gWorld().wndPosX( _this.gWorld().width () );
-   var bottom = _this.gWorld().wndPosY( _this.gWorld().height() );
-   con.println( "gworld " + _this.gWorld().width() + " " + _this.gWorld().height() );
-   con.println( "window " + left + " " + bottom + " " + right + " " + top );
-   switch( _this.graph().mode() ){
-   case _GRAPH_MODE_RECT: con.print( "rectangular" ); break;
-   case _GRAPH_MODE_PARAM: con.print( "parametric" ); break;
-   case _GRAPH_MODE_POLAR: con.print( "polar" ); break;
-   }
-   con.print( ", " );
-   if( _this.graph().isLogScaleX() ){
-    con.print( "logscale x " + _this.graph().logBaseX() );
-   } else {
-    con.print( "nologscale x" );
-   }
-   con.print( ", " );
-   if( _this.graph().isLogScaleY() ){
-    con.print( "logscale y " + _this.graph().logBaseY() );
-   } else {
-    con.print( "nologscale y" );
-   }
-   con.println();
-   con.setColor();
+  con.setColor( "0000ff" );
+  con.println( "calculator " + (param.isCalculator() ? "TRUE" : "FALSE") );
+  con.println( (param.base() == 0) ? "zero-based" : "one-based" );
+  switch( param.mode() ){
+  case _CLIP_MODE_E_FLOAT: con.print( "efloat" ); break;
+  case _CLIP_MODE_F_FLOAT: con.print( "float" ); break;
+  case _CLIP_MODE_G_FLOAT: con.print( "gfloat" ); break;
+  case _CLIP_MODE_E_COMPLEX: con.print( "ecomplex" ); break;
+  case _CLIP_MODE_F_COMPLEX: con.print( "complex" ); break;
+  case _CLIP_MODE_G_COMPLEX: con.print( "gcomplex" ); break;
+  case _CLIP_MODE_I_FRACT: con.print( "fract" ); break;
+  case _CLIP_MODE_M_FRACT: con.print( "mfract" ); break;
+  case _CLIP_MODE_H_TIME: con.print( "htime" ); break;
+  case _CLIP_MODE_M_TIME: con.print( "mtime" ); break;
+  case _CLIP_MODE_S_TIME: con.print( "time" ); break;
+  case _CLIP_MODE_F_TIME: con.print( "ftime" ); break;
+  case _CLIP_MODE_S_CHAR: con.print( "char" ); break;
+  case _CLIP_MODE_U_CHAR: con.print( "uchar" ); break;
+  case _CLIP_MODE_S_SHORT: con.print( "short" ); break;
+  case _CLIP_MODE_U_SHORT: con.print( "ushort" ); break;
+  case _CLIP_MODE_S_LONG: con.print( "long" ); break;
+  case _CLIP_MODE_U_LONG: con.print( "ulong" ); break;
   }
+  con.print( ", " ); con.print( "fps " + param.fps() );
+  con.print( ", " ); con.print( "prec " + param.prec() );
+  con.print( ", " ); con.print( "radix " + param.radix() );
+  con.print( ", " );
+  var type = new _Integer();
+  var updateFlag = new _Boolean();
+  _this.getAngType( type, updateFlag );
+  switch( type.val() ){
+  case _ANG_TYPE_RAD: con.print( "rad" ); break;
+  case _ANG_TYPE_DEG: con.print( "deg" ); break;
+  case _ANG_TYPE_GRAD: con.print( "grad" ); break;
+  }
+  con.println();
+  con.print( "assert " + (_this.assertFlag() ? "TRUE" : "FALSE") );
+  con.print( ", " ); con.print( "warn " + (_this.warnFlag() ? "TRUE" : "FALSE") );
+  con.println();
+  var left = _this.gWorld().wndPosX( 0 );
+  var top = _this.gWorld().wndPosY( 0 );
+  var right = _this.gWorld().wndPosX( _this.gWorld().width () );
+  var bottom = _this.gWorld().wndPosY( _this.gWorld().height() );
+  con.println( "gworld " + _this.gWorld().width() + " " + _this.gWorld().height() );
+  con.println( "window " + left + " " + bottom + " " + right + " " + top );
+  switch( _this.graph().mode() ){
+  case _GRAPH_MODE_RECT: con.print( "rectangular" ); break;
+  case _GRAPH_MODE_PARAM: con.print( "parametric" ); break;
+  case _GRAPH_MODE_POLAR: con.print( "polar" ); break;
+  }
+  con.print( ", " );
+  if( _this.graph().isLogScaleX() ){
+   con.print( "logscale x " + _this.graph().logBaseX() );
+  } else {
+   con.print( "nologscale x" );
+  }
+  con.print( ", " );
+  if( _this.graph().isLogScaleY() ){
+   con.print( "logscale y " + _this.graph().logBaseY() );
+  } else {
+   con.print( "nologscale y" );
+  }
+  con.println();
+  con.setColor();
   break;
  case (_CLIP_COMMAND_CUSTOM + 1):
  case (_CLIP_COMMAND_CUSTOM + 2):
-  {
-   var newCode = new _Integer();
-   var newToken = new _Void();
-   if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-    if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
-     if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
-      param = globalParam();
+  var newCode = new _Integer();
+  var newToken = new _Void();
+  if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+   if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+    if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
+     param = globalParam();
+    }
+    var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+    var array = new _Token();
+    var label;
+    var string = "";
+    param._array.makeToken( array, index );
+    if( (label = param._array._label._label[index]) != null ){
+     string = label;
+     if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
+      string += "(@@" + String.fromCharCode( index ) + ")";
+     } else if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
+      string += "(@@:" + index + ")";
      }
-     var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
-     var array = new _Token();
-     var label;
-     var string = "";
-     param._array.makeToken( array, index );
-     if( (label = param._array._label._label[index]) != null ){
-      string = label;
-      if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
-       string += "(@@" + String.fromCharCode( index ) + ")";
-      } else if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
-       string += "(@@:" + index + ")";
-      }
-     } else {
-      string = "@@" + String.fromCharCode( index );
-     }
-     string += " ";
+    } else {
+     string = "@@" + String.fromCharCode( index );
+    }
+    string += " ";
+    con.setColor( "0000ff" );
+    con.print( string );
+    printMatrix( param, array, string.length );
+    con.setColor();
+    break;
+   } else if( newCode.val() == _CLIP_CODE_EXTFUNC ){
+    var func = new _String( newToken.obj() );
+    var data = _this.getExtFuncData( func, null );
+    if( data != null ){
      con.setColor( "0000ff" );
-     con.print( string );
-     printMatrix( param, array, string.length );
+     for( var i = 0; i < data.length; i++ ){
+      con.println( (new _String( data[i] )).escape().str() );
+     }
      con.setColor();
      break;
-    } else if( newCode.val() == _CLIP_CODE_EXTFUNC ){
-     var func = new _String( newToken.obj() );
-     var data = _this.getExtFuncData( func, null );
-     if( data != null ){
-      con.setColor( "0000ff" );
-      for( var i = 0; i < data.length; i++ ){
-       con.println( (new _String( data[i] )).escape().str() );
-      }
-      con.setColor();
-      break;
-     }
     }
-   } else {
-    var _token = new _Token();
-    var index;
-    var real = new _String();
-    var imag = new _String();
-    var label;
-    con.setColor( "0000ff" );
-    for( var step = 0; step < 4; step++ ){
-     var tmp = new Array();
-     var i = 0;
-     for( index = 0; index < 256; index++ ){
-      switch( index ){
-      case 0:
-       if( step == 3 ){
-        if( (label = param._var._label._label[index]) != null ){
+   }
+  } else {
+   var _token = new _Token();
+   var index;
+   var real = new _String();
+   var imag = new _String();
+   var label;
+   con.setColor( "0000ff" );
+   for( var step = 0; step < 4; step++ ){
+    var tmp = new Array();
+    var i = 0;
+    for( index = 0; index < 256; index++ ){
+     if( index == 0 ){
+      if( step == 3 ){
+       if( (label = param._var._label._label[index]) != null ){
+        _token.valueToString( param, param.val( index ), real, imag );
+        tmp[i] = label + "(@)=" + real.str() + imag.str();
+        i++;
+       } else if( !(param.isZero( index )) ){
+        _token.valueToString( param, param.val( index ), real, imag );
+        tmp[i] = "@ =" + real.str() + imag.str();
+        i++;
+       }
+      }
+     } else if(
+      (index == _CHAR_CODE_EX) ||
+      ((index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9))
+     ){
+      if( step == 1 ){
+       if( (label = param._var._label._label[index]) != null ){
+        _token.valueToString( param, param.val( index ), real, imag );
+        tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
+        i++;
+       } else if( !(param.isZero( index )) ){
+        _token.valueToString( param, param.val( index ), real, imag );
+        tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+        i++;
+       }
+      }
+     } else {
+      if( step == 0 ){
+       if( (label = param._var._label._label[index]) != null ){
+        if( param._var._label.flag( index ) == _LABEL_MOVABLE ){
          _token.valueToString( param, param.val( index ), real, imag );
-         tmp[i] = label + "(@)=" + real.str() + imag.str();
-         i++;
-        } else if( !(param.isZero( index )) ){
-         _token.valueToString( param, param.val( index ), real, imag );
-         tmp[i] = "@ =" + real.str() + imag.str();
+         if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
+          tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
+         } else {
+          tmp[i] = label + "=" + real.str() + imag.str();
+         }
          i++;
         }
        }
-       break;
-      case _CHAR_CODE_EX:
-      case _CHAR_CODE_0:
-      case _CHAR_CODE_1:
-      case _CHAR_CODE_2:
-      case _CHAR_CODE_3:
-      case _CHAR_CODE_4:
-      case _CHAR_CODE_5:
-      case _CHAR_CODE_6:
-      case _CHAR_CODE_7:
-      case _CHAR_CODE_8:
-      case _CHAR_CODE_9:
-       if( step == 1 ){
-        if( (label = param._var._label._label[index]) != null ){
+      }
+      if( step == 2 ){
+       if( (label = param._var._label._label[index]) != null ){
+        if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
          _token.valueToString( param, param.val( index ), real, imag );
          tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
          i++;
-        } else if( !(param.isZero( index )) ){
-         _token.valueToString( param, param.val( index ), real, imag );
-         tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
-         i++;
         }
+       } else if( !(param.isZero( index )) ){
+        _token.valueToString( param, param.val( index ), real, imag );
+        tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+        i++;
        }
-       break;
-      default:
-       if( step == 0 ){
-        if( (label = param._var._label._label[index]) != null ){
-         if( param._var._label.flag( index ) == _LABEL_MOVABLE ){
-          _token.valueToString( param, param.val( index ), real, imag );
-          if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
-           tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
-          } else {
-           tmp[i] = label + "=" + real.str() + imag.str();
-          }
-          i++;
-         }
-        }
-       }
-       if( step == 2 ){
-        if( (label = param._var._label._label[index]) != null ){
-         if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
-          _token.valueToString( param, param.val( index ), real, imag );
-          tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
-          i++;
-         }
-        } else if( !(param.isZero( index )) ){
-         _token.valueToString( param, param.val( index ), real, imag );
-         tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
-         i++;
-        }
-       }
-       break;
       }
      }
-     tmp.sort( function( a, b ){
-      a = a.toLowerCase();
-      b = b.toLowerCase();
-      if( a < b ){
-       return -1;
-      } else if( a > b ){
-       return 1;
-      }
-      return 0;
-     } );
-     for( i = 0; i < tmp.length; i++ ){
-      con.println( tmp[i] );
+    }
+    tmp.sort( function( a, b ){
+     a = a.toLowerCase();
+     b = b.toLowerCase();
+     if( a < b ){
+      return -1;
+     } else if( a > b ){
+      return 1;
      }
-    }
-    con.setColor();
-    break;
-   }
-  }
-  return _CLIP_PROC_ERR_COMMAND_NULL;
- case (_CLIP_COMMAND_CUSTOM + 3):
-  {
-   var i, j;
-   addExtFuncList = true;
-   con.setColor( "0000ff" );
-   var tmp = new Array();
-   for( i = 0, j = 0; i < extFuncData.length; i++ ){
-    var name = extFuncName( extFuncFile[i] );
-    if( name.length > 0 ){
-     tmp[j] = name;
-     j++;
-    }
-   }
-   tmp.sort( function( a, b ){
-    a = a.toLowerCase();
-    b = b.toLowerCase();
-    if( a < b ){
-     return -1;
-    } else if( a > b ){
-     return 1;
-    }
-    return 0;
-   } );
-   for( i = 0; i < tmp.length; i++ ){
-    if( tmp[i].indexOf( ".inc" ) >= 0 ){
-     con.println( "<i>" + tmp[i] + "</i>" );
-    } else {
-     con.print( tmp[i] + "&nbsp;-&nbsp;" );
-     _this.usage( tmp[i], param, false );
-     con.println();
+     return 0;
+    } );
+    for( i = 0; i < tmp.length; i++ ){
+     con.println( tmp[i] );
     }
    }
    con.setColor();
-   addExtFuncList = false;
    break;
   }
   return _CLIP_PROC_ERR_COMMAND_NULL;
+ case (_CLIP_COMMAND_CUSTOM + 3):
+  var i, j;
+  addExtFuncList = true;
+  con.setColor( "0000ff" );
+  var tmp = new Array();
+  for( i = 0, j = 0; i < extFuncData.length; i++ ){
+   var name = extFuncName( extFuncFile[i] );
+   if( name.length > 0 ){
+    tmp[j] = name;
+    j++;
+   }
+  }
+  tmp.sort( function( a, b ){
+   a = a.toLowerCase();
+   b = b.toLowerCase();
+   if( a < b ){
+    return -1;
+   } else if( a > b ){
+    return 1;
+   }
+   return 0;
+  } );
+  for( i = 0; i < tmp.length; i++ ){
+   if( tmp[i].indexOf( ".inc" ) >= 0 ){
+    con.println( "<i>" + tmp[i] + "</i>" );
+   } else {
+    con.print( tmp[i] + "&nbsp;-&nbsp;" );
+    _this.usage( tmp[i], param, false );
+    con.println();
+   }
+  }
+  con.setColor();
+  addExtFuncList = false;
+  break;
  case (_CLIP_COMMAND_CUSTOM + 4):
-  {
-   var newCode = new _Integer();
-   var newToken = new _Void();
-   if( _this.curLine().getToken( newCode, newToken ) ){
-    if( newCode.val() == _CLIP_CODE_EXTFUNC ){
-     _this.usage( newToken.obj(), param, true );
-     break;
-    }
+  var newCode = new _Integer();
+  var newToken = new _Void();
+  if( _this.curLine().getToken( newCode, newToken ) ){
+   if( newCode.val() == _CLIP_CODE_EXTFUNC ){
+    _this.usage( newToken.obj(), param, true );
+    break;
    }
   }
   return _CLIP_PROC_ERR_COMMAND_NULL;
  case (_CLIP_COMMAND_CUSTOM + 7):
-  {
-   var value = new _Matrix();
-   if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-    testFlag = (_INT( value.toFloat( 0, 0 ) ) != 0);
-    break;
-   }
+  var value = new _Matrix();
+  if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+   testFlag = (_INT( value.toFloat( 0, 0 ) ) != 0);
+   break;
   }
   return _CLIP_PROC_ERR_COMMAND_NULL;
  case (_CLIP_COMMAND_CUSTOM + 8):
-  {
-   var value = new _Matrix();
-   if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-    if( (traceLevel > 0) && (traceString.length > 0) ){
-     if( canUseWriteFile() ){
-      writeFile( "clip_trace_" + time() + ".log", traceString );
-     }
+  var value = new _Matrix();
+  if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+   if( (traceLevel > 0) && (traceString.length > 0) ){
+    if( canUseWriteFile() ){
+     writeFile( "clip_trace_" + time() + ".log", traceString );
     }
-    traceString = "";
-    traceLevel = _INT( value.toFloat( 0, 0 ) );
-    setProcTraceFlag( traceLevel > 0 );
-    break;
    }
+   traceString = "";
+   traceLevel = _INT( value.toFloat( 0, 0 ) );
+   setProcTraceFlag( traceLevel > 0 );
+   break;
   }
   return _CLIP_PROC_ERR_COMMAND_NULL;
  default:

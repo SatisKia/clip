@@ -272,11 +272,16 @@ var _TOKEN_SE = [
 	"not",
 	"minus",
 	"set",
+	"setc",
+	"setf",
+	"setm",
 	"mul",
 	"div",
 	"mod",
 	"add",
+	"adds",	// saturate
 	"sub",
+	"subs",	// saturate
 	"pow",
 	"shiftl",
 	"shiftr",
@@ -295,7 +300,9 @@ var _TOKEN_SE = [
 	"div_a",
 	"mod_a",
 	"add_a",
+	"adds_a",	// saturate
 	"sub_a",
+	"subs_a",	// saturate
 	"pow_a",
 	"shiftl_a",
 	"shiftr_a",
@@ -977,7 +984,7 @@ _Token.prototype = {
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_CHAR:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_8 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_8, _SMIN_8, _SMAX_8 ), param.radix() ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_CHAR:
@@ -985,7 +992,7 @@ _Token.prototype = {
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_SHORT:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_16 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_16, _SMIN_16, _SMAX_16 ), param.radix() ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_SHORT:
@@ -993,7 +1000,7 @@ _Token.prototype = {
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_LONG:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_32 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_32, _SMIN_32, _SMAX_32 ), param.radix() ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_LONG:
@@ -1084,28 +1091,21 @@ _Token.prototype = {
 	},
 
 	// トークン文字列を確保する
-	newToken : function( code, token, newCode/*_Integer*/, newToken/*_Void*/ ){
-		newCode.set( code );
-		switch( newCode.val() ){
+	newToken : function( code, token ){
+		switch( code ){
 		case _CLIP_CODE_TOP:
 		case _CLIP_CODE_END:
 		case _CLIP_CODE_ARRAY_TOP:
 		case _CLIP_CODE_ARRAY_END:
 		case _CLIP_CODE_PARAM_ANS:
 		case _CLIP_CODE_PARAM_ARRAY:
-			newToken.set( null );
-			break;
+			return null;
 		case _CLIP_CODE_CONSTANT:
-			newToken.set( dupValue( token ) );
-			break;
+			return dupValue( token );
 		case _CLIP_CODE_MATRIX:
-			newToken.set( dupMatrix( token ) );
-			break;
-		default:
-			newToken.set( token );
-			break;
+			return dupMatrix( token );
 		}
-		return _CLIP_NO_ERR;
+		return token;
 	},
 
 	// トークン文字列を解放する
@@ -1136,7 +1136,7 @@ _Token.prototype = {
 		case _CLIP_CODE_PARAM_ARRAY:
 			cur._code  = token.charCodeAt( 0 );
 			cur._token = null;
-			return _CLIP_NO_ERR;
+			break;
 		case _CLIP_CODE_OPERATOR:
 			cur._code  = token.charCodeAt( 0 );
 			cur._token = token.charCodeAt( 1 );
@@ -1160,7 +1160,7 @@ _Token.prototype = {
 				if( len == 1 ){
 					cur._code  = _CLIP_CODE_PARAM_ANS;
 					cur._token = null;
-					return _CLIP_NO_ERR;
+					break;
 				}
 				// そのまま下に流す
 			}
@@ -1168,8 +1168,7 @@ _Token.prototype = {
 			tmp = token.substring( 0, len );
 
 			if( tmp.charAt( 0 ) == '$' ){
-				var tmp2 = tmp.substring( 1, len ).toLowerCase();
-				if( this.checkSe( tmp2, code ) ){
+				if( this.checkSe( tmp.substring( 1, len ).toLowerCase(), code ) ){
 					switch( code.val() ){
 					case _CLIP_SE_LOOPSTART:
 						cur._code  = _CLIP_CODE_STATEMENT;
@@ -1229,8 +1228,7 @@ _Token.prototype = {
 				cur._token = code.val();
 			} else if( tmp.charAt( 0 ) == ':' ){
 				cur._code = _CLIP_CODE_COMMAND;
-				var tmp2 = tmp.substring( 1, len );
-				if( this.checkCommand( tmp2, code ) ){
+				if( this.checkCommand( tmp.substring( 1, len ), code ) ){
 					cur._token = code.val();
 				} else {
 					cur._token = _CLIP_COMMAND_NULL;
@@ -1283,18 +1281,14 @@ _Token.prototype = {
 
 			break;
 		}
-
-		return _CLIP_NO_ERR;
 	},
 	_newTokenValue : function( cur, value ){
 		cur._code  = _CLIP_CODE_CONSTANT;
 		cur._token = dupValue( value );
-		return _CLIP_NO_ERR;
 	},
 	_newTokenMatrix : function( cur, value ){
 		cur._code  = _CLIP_CODE_MATRIX;
 		cur._token = dupMatrix( value );
-		return _CLIP_NO_ERR;
 	},
 
 	// トークン文字列を解放する
@@ -1337,24 +1331,20 @@ _Token.prototype = {
 	},
 	add : function( param, token, len, strToVal ){
 		var tmp = this._addToken();
-		return this._newToken( tmp, param, token, len, strToVal );
+		this._newToken( tmp, param, token, len, strToVal );
 	},
 	addValue : function( value ){
 		var tmp = this._addToken();
-		return this._newTokenValue( tmp, value );
+		this._newTokenValue( tmp, value );
 	},
 	addMatrix : function( value ){
 		var tmp = this._addToken();
-		return this._newTokenMatrix( tmp, value );
+		this._newTokenMatrix( tmp, value );
 	},
 	addCode : function( code, token ){
 		var tmp = this._addToken();
-		var tmpCode  = new _Integer();
-		var tmpToken = new _Void();
-		var ret = this.newToken( code, token, tmpCode, tmpToken );
-		tmp._code  = tmpCode .val();
-		tmp._token = tmpToken.obj();
-		return ret;
+		tmp._code  = code;
+		tmp._token = this.newToken( code, token );
 	},
 
 	// トークンを挿入する
@@ -1372,52 +1362,48 @@ _Token.prototype = {
 	},
 	_ins : function( cur, param, token, len, strToVal ){
 		if( cur == null ){
-			return this.add( param, token, len, strToVal );
-		}
-
+			this.add( param, token, len, strToVal );
+		} else {
 		var tmp = this._insToken( cur );
-		return this._newToken( tmp, param, token, len, strToVal );
+		this._newToken( tmp, param, token, len, strToVal );
+		}
 	},
 	_insValue : function( cur, value ){
 		if( cur == null ){
-			return this.addValue( value );
-		}
-
+			this.addValue( value );
+		} else {
 		var tmp = this._insToken( cur );
-		return this._newTokenValue( tmp, value );
+		this._newTokenValue( tmp, value );
+		}
 	},
 	_insMatrix : function( cur, value ){
 		if( cur == null ){
-			return this.addMatrix( value );
-		}
-
+			this.addMatrix( value );
+		} else {
 		var tmp = this._insToken( cur );
-		return this._newTokenMatrix( tmp, value );
+		this._newTokenMatrix( tmp, value );
+		}
 	},
 	_insCode : function( cur, code, token ){
 		if( cur == null ){
-			return this.addCode( code, token );
-		}
-
+			this.addCode( code, token );
+		} else {
 		var tmp = this._insToken( cur );
-		var tmpCode  = new _Integer();
-		var tmpToken = new _Void();
-		var ret = this.newToken( code, token, tmpCode, tmpToken );
-		tmp._code  = tmpCode .val();
-		tmp._token = tmpToken.obj();
-		return ret;
+		tmp._code  = code;
+		tmp._token = this.newToken( code, token );
+		}
 	},
 	ins : function( num, param, token, len, strToVal ){
-		return this._ins( this._searchList( num ), param, token, len, strToVal );
+		this._ins( this._searchList( num ), param, token, len, strToVal );
 	},
 	insValue : function( num, value ){
-		return this._insValue( this._searchList( num ), value );
+		this._insValue( this._searchList( num ), value );
 	},
 	insMatrix : function( num, value ){
-		return this._insMatrix( this._searchList( num ), value );
+		this._insMatrix( this._searchList( num ), value );
 	},
 	insCode : function( num, code, token ){
-		return this._insCode( this._searchList( num ), code, token );
+		this._insCode( this._searchList( num ), code, token );
 	},
 
 	// トークンを削除する
@@ -1466,9 +1452,9 @@ _Token.prototype = {
 		var cur;
 		var token = new String();
 		var len = 0;
-		var ret;
 		var strFlag = false;
 		var topCount = 0;
+		var formatSeFlag = false;
 
 		// 全トークンを削除する
 		this.delAll();
@@ -1515,22 +1501,16 @@ _Token.prototype = {
 				len++;
 			} else if( (line.charAt( cur ) == '[') && !strFlag ){
 				if( len > 0 ){
-					if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, len, strToVal );
 					len = 0;
 				}
 				strFlag = true;
 			} else if( (line.charAt( cur ) == ']') && strFlag ){
 				if( len == 0 ){
 					token = String.fromCharCode( _CLIP_CODE_PARAM_ARRAY );
-					if( (ret = this.add( param, token, 1, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 1, strToVal );
 				} else {
-					if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, len, strToVal );
 					len = 0;
 				}
 				strFlag = false;
@@ -1549,9 +1529,7 @@ _Token.prototype = {
 				case '\r':
 				case '\n':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					break;
@@ -1560,37 +1538,41 @@ _Token.prototype = {
 				case '{':
 				case '}':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					switch( curChar ){
 					case '(':
 						token = String.fromCharCode( _CLIP_CODE_TOP );
-						if( topCount >= 0 ){
-							topCount++;
+						if( !formatSeFlag ){
+							if( topCount >= 0 ){
+								topCount++;
+							}
 						}
 						break;
 					case ')':
 						token = String.fromCharCode( _CLIP_CODE_END );
-						topCount--;
+						if( !formatSeFlag ){
+							topCount--;
+						}
 						break;
-					case '{': token = String.fromCharCode( _CLIP_CODE_ARRAY_TOP ); break;
-					case '}': token = String.fromCharCode( _CLIP_CODE_ARRAY_END ); break;
+					case '{':
+						token = String.fromCharCode( _CLIP_CODE_ARRAY_TOP );
+						formatSeFlag = true;
+						break;
+					case '}':
+						token = String.fromCharCode( _CLIP_CODE_ARRAY_END );
+						formatSeFlag = false;
+						break;
 					}
-					if( (ret = this.add( param, token, 1, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 1, strToVal );
 					break;
 				case ':':
 					if( len == 0 ) token = new String();
 					token += curChar;
 					len++;
 					if( token.charAt( 0 ) == '@' ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					break;
@@ -1598,9 +1580,7 @@ _Token.prototype = {
 				case '=':
 				case ',':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1616,15 +1596,11 @@ _Token.prototype = {
 						}
 						break;
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '&':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1633,15 +1609,11 @@ _Token.prototype = {
 					case '=': token += String.fromCharCode( _CLIP_OP_ANDANDASS ); cur++; break;
 					default : token += String.fromCharCode( _CLIP_OP_AND       );        break;
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '|':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1650,18 +1622,14 @@ _Token.prototype = {
 					case '=': token += String.fromCharCode( _CLIP_OP_ORANDASS ); cur++; break;
 					default : token += String.fromCharCode( _CLIP_OP_OR       );        break;
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '*':
 				case '/':
 				case '%':
 				case '^':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1705,15 +1673,11 @@ _Token.prototype = {
 							break;
 						}
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '+':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1722,15 +1686,11 @@ _Token.prototype = {
 					case '+': token += String.fromCharCode( _CLIP_OP_POSTFIXINC ); cur++; break;
 					default : token += String.fromCharCode( _CLIP_OP_ADD        );        break;
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '-':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1739,16 +1699,12 @@ _Token.prototype = {
 					case '-': token += String.fromCharCode( _CLIP_OP_POSTFIXDEC ); cur++; break;
 					default : token += String.fromCharCode( _CLIP_OP_SUB        );        break;
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '<':
 				case '>':
 					if( len > 0 ){
-						if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, len, strToVal );
 						len = 0;
 					}
 					token = String.fromCharCode( _CLIP_CODE_OPERATOR );
@@ -1780,23 +1736,17 @@ _Token.prototype = {
 							}
 						}
 					}
-					if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this.add( param, token, 2, strToVal );
 					break;
 				case '!':
 					if( line.charAt( cur + 1 ) == '=' ){
 						if( len > 0 ){
-							if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-								return ret;
-							}
+							this.add( param, token, len, strToVal );
 							len = 0;
 						}
 						token = String.fromCharCode( _CLIP_CODE_OPERATOR ) + String.fromCharCode( _CLIP_OP_NOTEQUAL );
 						cur++;
-						if( (ret = this.add( param, token, 2, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this.add( param, token, 2, strToVal );
 					} else {
 						if( len == 0 ) token = new String();
 						token += curChar;
@@ -1852,9 +1802,7 @@ _Token.prototype = {
 			cur++;
 		}
 		if( len > 0 ){
-			if( (ret = this.add( param, token, len, strToVal )) != _CLIP_NO_ERR ){
-				return ret;
-			}
+			this.add( param, token, len, strToVal );
 		}
 
 		if( this._top != null ){
@@ -1930,56 +1878,16 @@ _Token.prototype = {
 		}
 		return 0;
 	},
-	format : function( param, strToVal ){
-		var i;
-		var cur;
+	_format : function( top, param, strToVal ){
 		var level, topLevel;
 		var assLevel = this._checkOp( _CLIP_OP_ASS );
 		var retTop, retEnd;
 		var tmpTop;
 		var tmpEnd;
-		var ret;
-
-		if( this._top != null ){
-			if( this._top._code == _CLIP_CODE_SE ){
-				// 単一式は括弧を整える必要がない
-				return _CLIP_NO_ERR;
-			} else if( this._top._code == _CLIP_CODE_STATEMENT ){
-				switch( this._top._token ){
-				case _CLIP_STAT_START:
-				case _CLIP_STAT_END:
-				case _CLIP_STAT_END_INC:
-				case _CLIP_STAT_END_DEC:
-				case _CLIP_STAT_ENDEQ:
-				case _CLIP_STAT_ENDEQ_INC:
-				case _CLIP_STAT_ENDEQ_DEC:
-				case _CLIP_STAT_CONTINUE2:
-				case _CLIP_STAT_BREAK2:
-				case _CLIP_STAT_RETURN2:
-				case _CLIP_STAT_RETURN3:
-					// 単一式は括弧を整える必要がない
-					return _CLIP_NO_ERR;
-				case _CLIP_STAT_DO:
-				case _CLIP_STAT_ENDWHILE:
-				case _CLIP_STAT_NEXT:
-				case _CLIP_STAT_ENDFUNC:
-				case _CLIP_STAT_ELSE:
-				case _CLIP_STAT_ENDIF:
-				case _CLIP_STAT_DEFAULT:
-				case _CLIP_STAT_ENDSWI:
-				case _CLIP_STAT_BREAKSWI:
-				case _CLIP_STAT_CONTINUE:
-				case _CLIP_STAT_BREAK:
-					if( this._top._next != null ){
-						return _CLIP_PROC_WARN_DEAD_TOKEN;
-					}
-					return _CLIP_NO_ERR;
-				}
-			}
-		}
 
 		// 演算子の優先順位に従って括弧を付ける
-		cur = this._top;
+		var i;
+		var cur = top;
 		while( cur != null ){
 			if( cur._code == _CLIP_CODE_OPERATOR ){
 				// 自分自身の演算子の優先レベルを調べておく
@@ -2004,9 +1912,7 @@ _Token.prototype = {
 						i++;
 						break;
 					case _CLIP_CODE_STATEMENT:
-						if( (ret = this._ins( tmpTop._next, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this._ins( tmpTop._next, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal );
 						retTop = 1;
 						break;
 					case _CLIP_CODE_OPERATOR:
@@ -2050,13 +1956,9 @@ _Token.prototype = {
 							tmpEnd = tmpEnd._next;
 						}
 
-						if( (ret = this._ins( tmpTop._next, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal )) != _CLIP_NO_ERR ){
-							return ret;
-						}
+						this._ins( tmpTop._next, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal );
 						if( retEnd > 0 ){
-							if( (ret = this._ins( tmpEnd, param, String.fromCharCode( _CLIP_CODE_END ), 1, strToVal )) != _CLIP_NO_ERR ){
-								return ret;
-							}
+							this._ins( tmpEnd, param, String.fromCharCode( _CLIP_CODE_END ), 1, strToVal );
 						}
 					}
 
@@ -2069,9 +1971,118 @@ _Token.prototype = {
 			cur = cur._next;
 		}
 
+		return _CLIP_NO_ERR;
+	},
+	_formatSe : function( param, strToVal ){
+		var i;
+		var tmpTop = null;
+		var saveBefore;
+		var saveNext;
+		var ret;
+
+		var cur = this._top;
+		var cur2;
+		while( cur != null ){
+			if( cur._code == _CLIP_CODE_ARRAY_TOP ){
+				cur._code = _CLIP_CODE_TOP;
+				tmpTop = cur._next;
+			} else if( cur._code == _CLIP_CODE_ARRAY_END ){
+				cur._code = _CLIP_CODE_END;
+				if( tmpTop == null ){
+					return _CLIP_PROC_ERR_SE_OPERAND;
+				} else {
+					saveBefore = tmpTop._before;
+					tmpTop._before = null;
+					saveNext = cur._before._next;
+					cur._before._next = null;
+					if( (ret = this._format( tmpTop, param, strToVal )) != _CLIP_NO_ERR ){
+						return ret;
+					}
+					tmpTop._before = saveBefore;
+
+					// 括弧開きを整える
+					i = 0;
+					cur2 = tmpTop;
+					while( cur2 != null ){
+						switch( cur2._code ){
+						case _CLIP_CODE_TOP:
+							i++;
+							break;
+						case _CLIP_CODE_END:
+							i--;
+							for( ; i < 0; i++ ){
+								this._ins( tmpTop, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal );
+							}
+							break;
+						}
+						cur2 = cur2._next;
+					}
+
+					cur._before._next = saveNext;
+
+					// 括弧閉じを整える
+					for( ; i > 0; i-- ){
+						this._ins( cur, param, String.fromCharCode( _CLIP_CODE_END ), 1, strToVal );
+					}
+
+					tmpTop = null;
+				}
+			}
+			cur = cur._next;
+		}
+		if( tmpTop != null ){
+			return _CLIP_PROC_ERR_SE_OPERAND;
+		}
+
+		return _CLIP_NO_ERR;
+	},
+	format : function( param, strToVal ){
+		var ret;
+
+		if( this._top != null ){
+			if( this._top._code == _CLIP_CODE_SE ){
+				return this._formatSe( param, strToVal );
+			} else if( this._top._code == _CLIP_CODE_STATEMENT ){
+				switch( this._top._token ){
+				case _CLIP_STAT_START:
+				case _CLIP_STAT_END:
+				case _CLIP_STAT_END_INC:
+				case _CLIP_STAT_END_DEC:
+				case _CLIP_STAT_ENDEQ:
+				case _CLIP_STAT_ENDEQ_INC:
+				case _CLIP_STAT_ENDEQ_DEC:
+				case _CLIP_STAT_CONTINUE2:
+				case _CLIP_STAT_BREAK2:
+				case _CLIP_STAT_RETURN2:
+				case _CLIP_STAT_RETURN3:
+					return this._formatSe( param, strToVal );
+				case _CLIP_STAT_DO:
+				case _CLIP_STAT_ENDWHILE:
+				case _CLIP_STAT_NEXT:
+				case _CLIP_STAT_ENDFUNC:
+				case _CLIP_STAT_ELSE:
+				case _CLIP_STAT_ENDIF:
+				case _CLIP_STAT_DEFAULT:
+				case _CLIP_STAT_ENDSWI:
+				case _CLIP_STAT_BREAKSWI:
+				case _CLIP_STAT_CONTINUE:
+				case _CLIP_STAT_BREAK:
+					if( this._top._next != null ){
+						return _CLIP_PROC_WARN_DEAD_TOKEN;
+					}
+					return _CLIP_NO_ERR;
+				}
+			}
+		}
+
+		// 演算子の優先順位に従って括弧を付ける
+		if( (ret = this._format( this._top, param, strToVal )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
 		// 括弧を整える
-		i = 0;
-		cur = this._top;
+		var i = 0;
+		var cur = this._top;
 		while( cur != null ){
 			switch( cur._code ){
 			case _CLIP_CODE_TOP:
@@ -2080,18 +2091,14 @@ _Token.prototype = {
 			case _CLIP_CODE_END:
 				i--;
 				for( ; i < 0; i++ ){
-					if( (ret = this._ins( this._top, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal )) != _CLIP_NO_ERR ){
-						return ret;
-					}
+					this._ins( this._top, param, String.fromCharCode( _CLIP_CODE_TOP ), 1, strToVal );
 				}
 				break;
 			}
 			cur = cur._next;
 		}
 		for( ; i > 0; i-- ){
-			if( (ret = this.add( param, String.fromCharCode( _CLIP_CODE_END ), 1, strToVal )) != _CLIP_NO_ERR ){
-				return ret;
-			}
+			this.add( param, String.fromCharCode( _CLIP_CODE_END ), 1, strToVal );
 		}
 
 		return _CLIP_NO_ERR;
@@ -2114,9 +2121,6 @@ _Token.prototype = {
 		var srcCur;
 		var dstCur;
 		var tmp;
-		var ret;
-		var tmpCode  = new _Integer();
-		var tmpToken = new _Void();
 
 		// 初期化
 		dst._top = null;
@@ -2128,11 +2132,8 @@ _Token.prototype = {
 			dstCur   = new __Token();
 			dst._top = dstCur;
 
-			if( (ret = this.newToken( this._top._code, this._top._token, tmpCode, tmpToken )) != _CLIP_NO_ERR ){
-				return ret;
-			}
-			dstCur._code  = tmpCode .val();
-			dstCur._token = tmpToken.obj();
+			dstCur._code  = this._top._code;
+			dstCur._token = this.newToken( this._top._code, this._top._token );
 
 			srcCur = this._top._next;
 
@@ -2143,11 +2144,8 @@ _Token.prototype = {
 				dstCur._next = tmp;
 				dstCur       = tmp;
 
-				if( (ret = this.newToken( srcCur._code, srcCur._token, tmpCode, tmpToken )) != _CLIP_NO_ERR ){
-					return ret;
-				}
-				dstCur._code  = tmpCode .val();
-				dstCur._token = tmpToken.obj();
+				dstCur._code  = srcCur._code;
+				dstCur._token = this.newToken( srcCur._code, srcCur._token );
 
 				srcCur = srcCur._next;
 			}
@@ -2239,14 +2237,9 @@ _Token.prototype = {
 		}
 	},
 	skipComma : function(){
-		if( this._get == null ){
+		if( (this._get == null) || (this._get._code != _CLIP_CODE_OPERATOR) || (this._get._token != _CLIP_OP_COMMA) ){
 			return false;
 		}
-
-		if( (this._get._code != _CLIP_CODE_OPERATOR) || (this._get._token != _CLIP_OP_COMMA) ){
-			return false;
-		}
-
 		this._get = this._get._next;
 		return true;
 	},

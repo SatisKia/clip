@@ -195,7 +195,7 @@ __ArrayNode.prototype = {
 			if( index[0] < this._nodeNum ){
 				return this._node[index[0]].val( this._copyArray( index, 1 ) );
 			}
-			return this._vector[this._vectorNum]/*番人*/;
+			return this._vector[this._vectorNum];	// 番人
 		}
 		return this._vector[(index < this._vectorNum) ? index : this._vectorNum/*番人*/];
 	}
