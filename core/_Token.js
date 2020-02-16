@@ -144,6 +144,7 @@ var _TOKEN_STAT = [
 	"$LOOPENDE",
 	"$LOOPENDE_I",
 	"$LOOPENDE_D",
+	"$LOOPCONT",
 	"do",
 	"until",
 	"while",
@@ -328,6 +329,7 @@ var _TOKEN_SE = [
 	"loopende",
 	"loopende_i",
 	"loopende_d",
+	"loopcont",
 	"continue",
 	"break",
 	"return",
@@ -1198,6 +1200,10 @@ _Token.prototype = {
 						cur._code  = _CLIP_CODE_STATEMENT;
 						cur._token = _CLIP_STAT_ENDEQ_DEC;
 						break;
+					case _CLIP_SE_LOOPCONT:
+						cur._code  = _CLIP_CODE_STATEMENT;
+						cur._token = _CLIP_STAT_CONT;
+						break;
 					case _CLIP_SE_CONTINUE:
 						cur._code  = _CLIP_CODE_STATEMENT;
 						cur._token = _CLIP_STAT_CONTINUE2;
@@ -1364,33 +1370,33 @@ _Token.prototype = {
 		if( cur == null ){
 			this.add( param, token, len, strToVal );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newToken( tmp, param, token, len, strToVal );
+			var tmp = this._insToken( cur );
+			this._newToken( tmp, param, token, len, strToVal );
 		}
 	},
 	_insValue : function( cur, value ){
 		if( cur == null ){
 			this.addValue( value );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newTokenValue( tmp, value );
+			var tmp = this._insToken( cur );
+			this._newTokenValue( tmp, value );
 		}
 	},
 	_insMatrix : function( cur, value ){
 		if( cur == null ){
 			this.addMatrix( value );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newTokenMatrix( tmp, value );
+			var tmp = this._insToken( cur );
+			this._newTokenMatrix( tmp, value );
 		}
 	},
 	_insCode : function( cur, code, token ){
 		if( cur == null ){
 			this.addCode( code, token );
 		} else {
-		var tmp = this._insToken( cur );
-		tmp._code  = code;
-		tmp._token = this.newToken( code, token );
+			var tmp = this._insToken( cur );
+			tmp._code  = code;
+			tmp._token = this.newToken( code, token );
 		}
 	},
 	ins : function( num, param, token, len, strToVal ){
@@ -1410,7 +1416,14 @@ _Token.prototype = {
 	del : function( num ){
 		var tmp;
 
-		if( (tmp = this._searchList( num )) == null ){
+		if( num == 0 ){
+			tmp = this._top;
+		} else if( num < 0 ){
+			tmp = this._end;
+		} else {
+			tmp = this._searchList( num );
+		}
+		if( tmp == null ){
 			return _CLIP_ERR_TOKEN;
 		}
 
@@ -2051,6 +2064,7 @@ _Token.prototype = {
 				case _CLIP_STAT_ENDEQ:
 				case _CLIP_STAT_ENDEQ_INC:
 				case _CLIP_STAT_ENDEQ_DEC:
+				case _CLIP_STAT_CONT:
 				case _CLIP_STAT_CONTINUE2:
 				case _CLIP_STAT_BREAK2:
 				case _CLIP_STAT_RETURN2:

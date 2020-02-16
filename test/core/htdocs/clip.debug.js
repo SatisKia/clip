@@ -2498,6 +2498,7 @@ function _Loop(){
 		this._loopEnd,
 		this._loopEnd,
 		this._loopEnd,
+		this._loopCont,
 		this._loopDo,
 		this._loopUntil,
 		this._loopWhile,
@@ -2611,6 +2612,12 @@ _Loop.prototype = {
 		}
 		return 0x00;
 	},
+	_loopCont : function( _this, line , beforeFlag ){
+		if( _this._curLoop._loopType == 1 ){
+			beforeFlag.set( true );
+		}
+		return 0x00;
+	},
 	_loopUntil : function( _this, line , beforeFlag ){
 		if( _this._curLoop._loopType == 2 ){
 			beforeFlag.set( true );
@@ -2630,7 +2637,7 @@ _Loop.prototype = {
 			tmp = _this._curLoop._top._line._line;
 			tmp.del( 0 );
 			tmp.del( 0 );
-			tmp.del( tmp.count() - 1 );
+			tmp.del( -1 );
 			if( _this._curLoop._top._next == _this._curLoop._end ){
 				return 0x2126;
 			} else if( _this._curLoop._top._next._subFlag ){
@@ -2638,12 +2645,11 @@ _Loop.prototype = {
 			}
 			tmp = _this._curLoop._top._next._line._line;
 			if( tmp.count() > 0 ){
-				var stat = 11;
-				tmp.insCode( 0, 10, stat );
+				tmp.insCode( 0, 10, 12 );
 				tmp.insCode( 1, 0, null );
 				tmp.addCode( 15, null );
 			} else {
-				tmp.insCode( 0, 10, 12 );
+				tmp.insCode( 0, 10, 13 );
 			}
 			if( _this._curLoop._top._next._next == _this._curLoop._end ){
 				return 0x2127;
@@ -2672,7 +2678,7 @@ _Loop.prototype = {
 		var beforeFlag = new _Boolean( false );
 		line._line.beginGetToken();
 		if( line._line.getToken( code, token ) ){
-			if( (code.val() == 10) && (token.obj() < 16) ){
+			if( (code.val() == 10) && (token.obj() < 17) ){
 				if( (ret = this._loopSub[token.obj()]( this, tmp, beforeFlag )) != 0x00 ){
 					return ret;
 				}
@@ -3372,6 +3378,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._loopEnd,
 		this._loopEnd,
 		this._loopEnd,
+		this._loopCont,
 		this._loopBegin,
 		this._loopUntil,
 		this._loopBegin,
@@ -3407,6 +3414,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._statEndEq,
 		this._statEndEqInc,
 		this._statEndEqDec,
+		this._statCont,
 		this._statDo,
 		this._statUntil,
 		this._statWhile,
@@ -4508,10 +4516,10 @@ _Proc.prototype = {
 		}
 		var saveArray = this._curInfo._curArray;
 		var saveArraySize = this._curInfo._curArraySize;
-		if( param._seToken < 68 ){
+		if( param._seToken < 69 ){
 			ret = this._procSubSe[param._seToken]( this, param, 22, param._seToken, value );
 		} else {
-			ret = this._procFuncSe( this, param, 12, param._seToken - 68, value );
+			ret = this._procFuncSe( this, param, 12, param._seToken - 69, value );
 		}
 		if( ret == 0x00 ){
 			if( this.curLine()._get != null ){
@@ -4525,6 +4533,10 @@ _Proc.prototype = {
 		return ret;
 	},
 	_processFirst : function( param, ret ){
+		if( this.curLine()._top == null ){
+			ret.set( 0x04 );
+			return false;
+		}
 		this._delInc();
 		if( _proc_trace ){
 			printTrace( param, this.curLine(), this.curNum(), this.curComment(), this._checkSkip() );
@@ -4569,7 +4581,6 @@ _Proc.prototype = {
 				}
 			}
 		}
-		return false;
 	},
 	_regProcess : function( line, err ){
 		this._curLine = line;
@@ -4589,25 +4600,25 @@ _Proc.prototype = {
 		return true;
 	},
 	_process : function( param, err ){
-		var line;
 		switch( this._statMode ){
 		case 0:
 			if( this._processFirst( param, err ) ){
-				while( this._processNext( param, err ) ){}
-			}
-			if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
-				return false;
+				this._processNext( param, err );
+				if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
+					return false;
+				}
 			}
 			break;
 		case 2:
+			var line;
 			while( (line = this._stat.getLine()) != null ){
 				this._curLine = line;
 				if( this._processFirst( param, err ) ){
-					while( this._processNext( param, err ) ){}
-				}
-				if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
-					this._statMode = 0;
-					return false;
+					this._processNext( param, err );
+					if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
+						this._statMode = 0;
+						return false;
+					}
 				}
 			}
 			this._statMode = 0;
@@ -7470,6 +7481,16 @@ _Proc.prototype = {
 		}
 		return 0x00;
 	},
+	_loopCont : function( _this ){
+		if( _this._statMode == 2 ){
+			if( _this._checkSkip() ){
+				_this._stat.doBreak();
+				_this._stat.doEnd();
+				return 0x03;
+			}
+		}
+		return 0x00;
+	},
 	_loopUntil : function( _this ){
 		if( _this._statMode == 2 ){
 			if( _this._checkSkip() ){
@@ -7853,6 +7874,16 @@ _Proc.prototype = {
 				_this._doStatBreak();
 			}
 			_this._stat.doEnd();
+		}
+		return 0x03;
+	},
+	_statCont : function( _this, param, code, token ){
+		switch( _this._statMode ){
+		case 0:
+			return 0x2185;
+		case 2:
+			_this._stat.doEnd();
+			break;
 		}
 		return 0x03;
 	},
@@ -10549,6 +10580,7 @@ var _TOKEN_STAT = [
 	"$LOOPENDE",
 	"$LOOPENDE_I",
 	"$LOOPENDE_D",
+	"$LOOPCONT",
 	"do",
 	"until",
 	"while",
@@ -10731,6 +10763,7 @@ var _TOKEN_SE = [
 	"loopende",
 	"loopende_i",
 	"loopende_d",
+	"loopcont",
 	"continue",
 	"break",
 	"return",
@@ -10866,7 +10899,7 @@ _Token.prototype = {
 				return true;
 		}
 		if( this.checkFunc( string, se ) ){
-			se.set( 68 + se.val() );
+			se.set( 69 + se.val() );
 			return true;
 		}
 		return false;
@@ -11541,7 +11574,7 @@ _Token.prototype = {
 						break;
 					case 64:
 						cur._code = 10;
-						cur._token = 27;
+						cur._token = 7;
 						break;
 					case 65:
 						cur._code = 10;
@@ -11549,11 +11582,15 @@ _Token.prototype = {
 						break;
 					case 66:
 						cur._code = 10;
-						cur._token = 31;
+						cur._token = 29;
 						break;
 					case 67:
 						cur._code = 10;
 						cur._token = 32;
+						break;
+					case 68:
+						cur._code = 10;
+						cur._token = 33;
 						break;
 					default:
 						cur._code = 22;
@@ -11694,33 +11731,33 @@ _Token.prototype = {
 		if( cur == null ){
 			this.add( param, token, len, strToVal );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newToken( tmp, param, token, len, strToVal );
+			var tmp = this._insToken( cur );
+			this._newToken( tmp, param, token, len, strToVal );
 		}
 	},
 	_insValue : function( cur, value ){
 		if( cur == null ){
 			this.addValue( value );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newTokenValue( tmp, value );
+			var tmp = this._insToken( cur );
+			this._newTokenValue( tmp, value );
 		}
 	},
 	_insMatrix : function( cur, value ){
 		if( cur == null ){
 			this.addMatrix( value );
 		} else {
-		var tmp = this._insToken( cur );
-		this._newTokenMatrix( tmp, value );
+			var tmp = this._insToken( cur );
+			this._newTokenMatrix( tmp, value );
 		}
 	},
 	_insCode : function( cur, code, token ){
 		if( cur == null ){
 			this.addCode( code, token );
 		} else {
-		var tmp = this._insToken( cur );
-		tmp._code = code;
-		tmp._token = this.newToken( code, token );
+			var tmp = this._insToken( cur );
+			tmp._code = code;
+			tmp._token = this.newToken( code, token );
 		}
 	},
 	ins : function( num, param, token, len, strToVal ){
@@ -11737,7 +11774,14 @@ _Token.prototype = {
 	},
 	del : function( num ){
 		var tmp;
-		if( (tmp = this._searchList( num )) == null ){
+		if( num == 0 ){
+			tmp = this._top;
+		} else if( num < 0 ){
+			tmp = this._end;
+		} else {
+			tmp = this._searchList( num );
+		}
+		if( tmp == null ){
 			return 0x2000;
 		}
 		if( tmp._before != null ){
@@ -12337,22 +12381,23 @@ _Token.prototype = {
 				case 4:
 				case 5:
 				case 6:
-				case 27:
-				case 28:
-				case 31:
-				case 32:
-					return this._formatSe( param, strToVal );
 				case 7:
-				case 10:
-				case 13:
-				case 15:
-				case 18:
+				case 28:
+				case 29:
+				case 32:
+				case 33:
+					return this._formatSe( param, strToVal );
+				case 8:
+				case 11:
+				case 14:
+				case 16:
 				case 19:
-				case 22:
+				case 20:
 				case 23:
 				case 24:
 				case 25:
 				case 26:
+				case 27:
 					if( this._top._next != null ){
 						return 0x100D;
 					}
@@ -12560,7 +12605,7 @@ _Token.prototype = {
 				string += _TOKEN_SE[token - 1];
 				break;
 			}
-			token -= 68;
+			token -= 69;
 		case 12:
 			string += _TOKEN_FUNC[token];
 			break;
@@ -16102,33 +16147,34 @@ window._CLIP_STAT_END_DEC = 3;
 window._CLIP_STAT_ENDEQ = 4;
 window._CLIP_STAT_ENDEQ_INC = 5;
 window._CLIP_STAT_ENDEQ_DEC = 6;
-window._CLIP_STAT_DO = 7;
-window._CLIP_STAT_UNTIL = 8;
-window._CLIP_STAT_WHILE = 9;
-window._CLIP_STAT_ENDWHILE = 10;
-window._CLIP_STAT_FOR = 11;
-window._CLIP_STAT_FOR2 = 12;
-window._CLIP_STAT_NEXT = 13;
-window._CLIP_STAT_FUNC = 14;
-window._CLIP_STAT_ENDFUNC = 15;
-window._CLIP_STAT_LOOP_END = 16;
-window._CLIP_STAT_IF = 16 ;
-window._CLIP_STAT_ELIF = 17;
-window._CLIP_STAT_ELSE = 18;
-window._CLIP_STAT_ENDIF = 19;
-window._CLIP_STAT_SWITCH = 20;
-window._CLIP_STAT_CASE = 21;
-window._CLIP_STAT_DEFAULT = 22;
-window._CLIP_STAT_ENDSWI = 23;
-window._CLIP_STAT_BREAKSWI = 24;
-window._CLIP_STAT_CONTINUE = 25;
-window._CLIP_STAT_BREAK = 26;
-window._CLIP_STAT_CONTINUE2 = 27;
-window._CLIP_STAT_BREAK2 = 28;
-window._CLIP_STAT_ASSERT = 29;
-window._CLIP_STAT_RETURN = 30;
-window._CLIP_STAT_RETURN2 = 31;
-window._CLIP_STAT_RETURN3 = 32;
+window._CLIP_STAT_CONT = 7;
+window._CLIP_STAT_DO = 8;
+window._CLIP_STAT_UNTIL = 9;
+window._CLIP_STAT_WHILE = 10;
+window._CLIP_STAT_ENDWHILE = 11;
+window._CLIP_STAT_FOR = 12;
+window._CLIP_STAT_FOR2 = 13;
+window._CLIP_STAT_NEXT = 14;
+window._CLIP_STAT_FUNC = 15;
+window._CLIP_STAT_ENDFUNC = 16;
+window._CLIP_STAT_LOOP_END = 17;
+window._CLIP_STAT_IF = 17 ;
+window._CLIP_STAT_ELIF = 18;
+window._CLIP_STAT_ELSE = 19;
+window._CLIP_STAT_ENDIF = 20;
+window._CLIP_STAT_SWITCH = 21;
+window._CLIP_STAT_CASE = 22;
+window._CLIP_STAT_DEFAULT = 23;
+window._CLIP_STAT_ENDSWI = 24;
+window._CLIP_STAT_BREAKSWI = 25;
+window._CLIP_STAT_CONTINUE = 26;
+window._CLIP_STAT_BREAK = 27;
+window._CLIP_STAT_CONTINUE2 = 28;
+window._CLIP_STAT_BREAK2 = 29;
+window._CLIP_STAT_ASSERT = 30;
+window._CLIP_STAT_RETURN = 31;
+window._CLIP_STAT_RETURN2 = 32;
+window._CLIP_STAT_RETURN3 = 33;
 window._CLIP_COMMAND_NULL = 0;
 window._CLIP_COMMAND_EFLOAT = 1;
 window._CLIP_COMMAND_FFLOAT = 2;
@@ -16284,11 +16330,12 @@ window._CLIP_SE_LOOPEND_DEC = 60;
 window._CLIP_SE_LOOPENDEQ = 61;
 window._CLIP_SE_LOOPENDEQ_INC = 62;
 window._CLIP_SE_LOOPENDEQ_DEC = 63;
-window._CLIP_SE_CONTINUE = 64;
-window._CLIP_SE_BREAK = 65;
-window._CLIP_SE_RETURN = 66;
-window._CLIP_SE_RETURN_ANS = 67;
-window._CLIP_SE_FUNC = 68;
+window._CLIP_SE_LOOPCONT = 64;
+window._CLIP_SE_CONTINUE = 65;
+window._CLIP_SE_BREAK = 66;
+window._CLIP_SE_RETURN = 67;
+window._CLIP_SE_RETURN_ANS = 68;
+window._CLIP_SE_FUNC = 69;
 window._CLIP_NO_ERR = 0x00;
 window._CLIP_LOOP_STOP = 0x01;
 window._CLIP_LOOP_CONT = 0x02;
@@ -16365,6 +16412,7 @@ window._CLIP_PROC_ERR_SE_OPERAND = 0x2181
 window._CLIP_PROC_ERR_SE_LOOPEND = 0x2182
 window._CLIP_PROC_ERR_SE_CONTINUE = 0x2183
 window._CLIP_PROC_ERR_SE_BREAK = 0x2184
+window._CLIP_PROC_ERR_SE_LOOPCONT = 0x2185
 window._GRAPH_MODE_RECT = 0;
 window._GRAPH_MODE_PARAM = 1;
 window._GRAPH_MODE_POLAR = 2;

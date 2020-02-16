@@ -427,6 +427,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._loopEnd,
 		this._loopEnd,
 		this._loopEnd,
+		this._loopCont,
 
 		this._loopBegin,
 		this._loopUntil,
@@ -471,6 +472,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._statEndEq,
 		this._statEndEqInc,
 		this._statEndEqDec,
+		this._statCont,
 
 		this._statDo,
 		this._statUntil,
@@ -1738,6 +1740,11 @@ _Proc.prototype = {
 		return ret;
 	},
 	_processFirst : function( param, ret/*_Integer*/ ){
+		if( this.curLine()._top == null ){
+			ret.set( _CLIP_PROC_END );
+			return false;
+		}
+
 		// インクリメント情報を消去する
 		this._delInc();
 
@@ -1792,8 +1799,6 @@ _Proc.prototype = {
 				}
 			}
 		}
-
-		return false;
 	},
 	_regProcess : function( line, err/*_Integer*/ ){
 		this._curLine = line;
@@ -1814,26 +1819,25 @@ _Proc.prototype = {
 		return true;
 	},
 	_process : function( param, err/*_Integer*/ ){
-		var line;
-
 		switch( this._statMode ){
 		case _STAT_MODE_NOT_START:
 			if( this._processFirst( param, err ) ){
-				while( this._processNext( param, err ) ){}
-			}
-			if( ((err.val() != _CLIP_PROC_END) && (err.val() != _CLIP_PROC_SUB_END)) || this._quitFlag ){
-				return false;
+				this._processNext( param, err );
+				if( ((err.val() != _CLIP_PROC_END) && (err.val() != _CLIP_PROC_SUB_END)) || this._quitFlag ){
+					return false;
+				}
 			}
 			break;
 		case _STAT_MODE_PROCESSING:
+			var line;
 			while( (line = this._stat.getLine()) != null ){
 				this._curLine = line;
 				if( this._processFirst( param, err ) ){
-					while( this._processNext( param, err ) ){}
-				}
-				if( ((err.val() != _CLIP_PROC_END) && (err.val() != _CLIP_PROC_SUB_END)) || this._quitFlag ){
-					this._statMode = _STAT_MODE_NOT_START;
-					return false;
+					this._processNext( param, err );
+					if( ((err.val() != _CLIP_PROC_END) && (err.val() != _CLIP_PROC_SUB_END)) || this._quitFlag ){
+						this._statMode = _STAT_MODE_NOT_START;
+						return false;
+					}
 				}
 			}
 			this._statMode = _STAT_MODE_NOT_START;
@@ -5237,6 +5241,16 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_loopCont : function( _this ){
+		if( _this._statMode == _STAT_MODE_PROCESSING ){
+			if( _this._checkSkip() ){
+				_this._stat.doBreak();
+				_this._stat.doEnd();
+				return _CLIP_PROC_SUB_END;
+			}
+		}
+		return _CLIP_NO_ERR;
+	},
 	_loopUntil : function( _this ){
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
 			if( _this._checkSkip() ){
@@ -5686,6 +5700,16 @@ _Proc.prototype = {
 				_this._doStatBreak();
 			}
 			_this._stat.doEnd();
+		}
+		return _CLIP_PROC_SUB_END;
+	},
+	_statCont : function( _this, param, code, token ){
+		switch( _this._statMode ){
+		case _STAT_MODE_NOT_START:
+			return _CLIP_PROC_ERR_SE_LOOPCONT;
+		case _STAT_MODE_PROCESSING:
+			_this._stat.doEnd();
+			break;
 		}
 		return _CLIP_PROC_SUB_END;
 	},

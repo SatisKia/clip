@@ -260,42 +260,43 @@
 #define _CLIP_STAT_ENDEQ		4
 #define _CLIP_STAT_ENDEQ_INC	5
 #define _CLIP_STAT_ENDEQ_DEC	6
+#define _CLIP_STAT_CONT			7
 
-#define _CLIP_STAT_DO			7
-#define _CLIP_STAT_UNTIL		8
+#define _CLIP_STAT_DO			8
+#define _CLIP_STAT_UNTIL		9
 
-#define _CLIP_STAT_WHILE		9
-#define _CLIP_STAT_ENDWHILE		10
+#define _CLIP_STAT_WHILE		10
+#define _CLIP_STAT_ENDWHILE		11
 
-#define _CLIP_STAT_FOR			11
-#define _CLIP_STAT_FOR2			12
-#define _CLIP_STAT_NEXT			13
+#define _CLIP_STAT_FOR			12
+#define _CLIP_STAT_FOR2			13
+#define _CLIP_STAT_NEXT			14
 
-#define _CLIP_STAT_FUNC			14
-#define _CLIP_STAT_ENDFUNC		15
+#define _CLIP_STAT_FUNC			15
+#define _CLIP_STAT_ENDFUNC		16
 
-#define _CLIP_STAT_LOOP_END		16
+#define _CLIP_STAT_LOOP_END		17
 
-#define _CLIP_STAT_IF			16/*_CLIP_STAT_LOOP_END*/
-#define _CLIP_STAT_ELIF			17
-#define _CLIP_STAT_ELSE			18
-#define _CLIP_STAT_ENDIF		19
+#define _CLIP_STAT_IF			17/*_CLIP_STAT_LOOP_END*/
+#define _CLIP_STAT_ELIF			18
+#define _CLIP_STAT_ELSE			19
+#define _CLIP_STAT_ENDIF		20
 
-#define _CLIP_STAT_SWITCH		20
-#define _CLIP_STAT_CASE			21
-#define _CLIP_STAT_DEFAULT		22
-#define _CLIP_STAT_ENDSWI		23
-#define _CLIP_STAT_BREAKSWI		24
+#define _CLIP_STAT_SWITCH		21
+#define _CLIP_STAT_CASE			22
+#define _CLIP_STAT_DEFAULT		23
+#define _CLIP_STAT_ENDSWI		24
+#define _CLIP_STAT_BREAKSWI		25
 
-#define _CLIP_STAT_CONTINUE		25
-#define _CLIP_STAT_BREAK		26
-#define _CLIP_STAT_CONTINUE2	27
-#define _CLIP_STAT_BREAK2		28
+#define _CLIP_STAT_CONTINUE		26
+#define _CLIP_STAT_BREAK		27
+#define _CLIP_STAT_CONTINUE2	28
+#define _CLIP_STAT_BREAK2		29
 
-#define _CLIP_STAT_ASSERT		29
-#define _CLIP_STAT_RETURN		30
-#define _CLIP_STAT_RETURN2		31
-#define _CLIP_STAT_RETURN3		32
+#define _CLIP_STAT_ASSERT		30
+#define _CLIP_STAT_RETURN		31
+#define _CLIP_STAT_RETURN2		32
+#define _CLIP_STAT_RETURN3		33
 
 /*
  * コマンドの種類
@@ -495,12 +496,13 @@
 #define _CLIP_SE_LOOPENDEQ		61
 #define _CLIP_SE_LOOPENDEQ_INC	62
 #define _CLIP_SE_LOOPENDEQ_DEC	63
-#define _CLIP_SE_CONTINUE		64
-#define _CLIP_SE_BREAK			65
-#define _CLIP_SE_RETURN			66
-#define _CLIP_SE_RETURN_ANS		67
+#define _CLIP_SE_LOOPCONT		64
+#define _CLIP_SE_CONTINUE		65
+#define _CLIP_SE_BREAK			66
+#define _CLIP_SE_RETURN			67
+#define _CLIP_SE_RETURN_ANS		68
 
-#define _CLIP_SE_FUNC			68
+#define _CLIP_SE_FUNC			69
 
 /*
  * エラー・コード
@@ -595,6 +597,7 @@
 #define _CLIP_PROC_ERR_SE_LOOPEND		0x2182//(_CLIP_PROC_ERR | 0x82)		// $LOOPENDに対応する$LOOPSTARTがありません
 #define _CLIP_PROC_ERR_SE_CONTINUE		0x2183//(_CLIP_PROC_ERR | 0x83)		// $CONTINUEは無効です
 #define _CLIP_PROC_ERR_SE_BREAK			0x2184//(_CLIP_PROC_ERR | 0x84)		// $BREAKは無効です
+#define _CLIP_PROC_ERR_SE_LOOPCONT		0x2185//(_CLIP_PROC_ERR | 0x85)		// $LOOPCONTに対応する$LOOPSTARTがありません
 
 // グラフの種類
 #define _GRAPH_MODE_RECT	0	// 直交座標モード

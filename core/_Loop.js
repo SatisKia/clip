@@ -44,6 +44,7 @@ function _Loop(){
 		this._loopEnd,
 		this._loopEnd,
 		this._loopEnd,
+		this._loopCont,
 
 		this._loopDo,
 		this._loopUntil,
@@ -182,6 +183,12 @@ _Loop.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_loopCont : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
+		if( _this._curLoop._loopType == _LOOP_TYPE_SE ){
+			beforeFlag.set( true );
+		}
+		return _CLIP_NO_ERR;
+	},
 	_loopUntil : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
 		if( _this._curLoop._loopType == _LOOP_TYPE_DO ){
 			beforeFlag.set( true );
@@ -201,9 +208,9 @@ _Loop.prototype = {
 		if( _this._curLoop._loopType == _LOOP_TYPE_FOR ){
 			// for(<初期設定文>)を<初期設定文>に加工する
 			tmp = _this._curLoop._top._line._line;
-			tmp.del( 0               );	// "for"
-			tmp.del( 0               );	// "("
-			tmp.del( tmp.count() - 1 );	// ")"
+			tmp.del(  0 );	// "for"
+			tmp.del(  0 );	// "("
+			tmp.del( -1 );	// ")"
 
 			// <条件部>をfor(<条件部>)に加工する
 			if( _this._curLoop._top._next == _this._curLoop._end ){
@@ -213,10 +220,9 @@ _Loop.prototype = {
 			}
 			tmp = _this._curLoop._top._next._line._line;
 			if( tmp.count() > 0 ){
-				var stat = _CLIP_STAT_FOR;
-				tmp.insCode( 0, _CLIP_CODE_STATEMENT, stat );	// "for"
-				tmp.insCode( 1, _CLIP_CODE_TOP,       null );	// "("
-				tmp.addCode(    _CLIP_CODE_END,       null );	// ")"
+				tmp.insCode( 0, _CLIP_CODE_STATEMENT, _CLIP_STAT_FOR );	// "for"
+				tmp.insCode( 1, _CLIP_CODE_TOP,       null           );	// "("
+				tmp.addCode(    _CLIP_CODE_END,       null           );	// ")"
 			} else {
 				tmp.insCode( 0, _CLIP_CODE_STATEMENT, _CLIP_STAT_FOR2 );
 			}

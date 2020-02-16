@@ -358,6 +358,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
 		if( isEnglish ) error = "No \"$LOOPSTART\" corresponding to \"$LOOPEND\".";
 		else            error = "$LOOPENDに対応する$LOOPSTARTがありません";
 		break;
+	case _CLIP_PROC_ERR_SE_LOOPCONT:
+		if( isEnglish ) error = "No \"$LOOPSTART\" corresponding to \"$LOOPCONT\".";
+		else            error = "$LOOPCONTに対応する$LOOPSTARTがありません";
+		break;
 	case _CLIP_PROC_ERR_SE_CONTINUE:
 		if( isEnglish ) error = "\"$CONTINUE\" is invalid.";
 		else            error = "$CONTINUEは無効です";
