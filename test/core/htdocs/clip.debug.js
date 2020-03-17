@@ -98,7 +98,9 @@ window._CHAR = _CHAR;
 window._CHAR_CODE_0 = _CHAR_CODE_0;
 window._CHAR_CODE_9 = _CHAR_CODE_9;
 window._CHAR_CODE_LA = _CHAR_CODE_LA;
+window._CHAR_CODE_LZ = _CHAR_CODE_LZ;
 window._CHAR_CODE_UA = _CHAR_CODE_UA;
+window._CHAR_CODE_UZ = _CHAR_CODE_UZ;
 window._CHAR_CODE_EX = _CHAR_CODE_EX;
 window._CHAR_CODE_COLON = _CHAR_CODE_COLON;
 window._ISINF = _ISINF;
@@ -3310,6 +3312,9 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._funcRow,
 		this._funcCol,
 		this._funcTrans,
+		this._funcStrCmp,
+		this._funcStrCmp,
+		this._funcStrLen,
 		this._funcGWidth,
 		this._funcGHeight,
 		this._funcGColor,
@@ -3494,6 +3499,12 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._commandTrans,
 		this._commandSRand,
 		this._commandLocalTime,
+		this._commandArrayCopy,
+		this._commandArrayFill,
+		this._commandStrCpy,
+		this._commandStrCpy,
+		this._commandStrLwr,
+		this._commandStrUpr,
 		this._commandClear,
 		this._commandError,
 		this._commandPrint,
@@ -3806,13 +3817,39 @@ _Proc.prototype = {
 		str.set( tmp );
 	},
 	strLen : function( array, index ){
-		var i;
-		for( i = 0; ; i++ ){
-			if( array.val( index, i ).toFloat() == 0 ){
+		var len;
+		for( len = 0; ; len++ ){
+			if( array.val( index, len ).toFloat() == 0 ){
 				break;
 			}
 		}
-		return i;
+		return len;
+	},
+	strLwr : function( array, index ){
+		var chr;
+		var dst = new Array( 1 );
+		for( var i = 0; ; i++ ){
+			if( (chr = array.val( index, i ).toFloat()) == 0 ){
+				break;
+			}
+			if( (chr >= _CHAR_CODE_UA) && (chr <= _CHAR_CODE_UZ) ){
+				dst[0] = i;
+				array.set( index, dst, 1, chr - _CHAR_CODE_UA + _CHAR_CODE_LA, false );
+			}
+		}
+	},
+	strUpr : function( array, index ){
+		var chr;
+		var dst = new Array( 1 );
+		for( var i = 0; ; i++ ){
+			if( (chr = array.val( index, i ).toFloat()) == 0 ){
+				break;
+			}
+			if( (chr >= _CHAR_CODE_LA) && (chr <= _CHAR_CODE_LZ) ){
+				dst[0] = i;
+				array.set( index, dst, i, chr - _CHAR_CODE_LA + _CHAR_CODE_UA, false );
+			}
+		}
 	},
 	_setError : function( code, token ){
 		this._errCode = code;
@@ -6695,6 +6732,77 @@ _Proc.prototype = {
 		}
 		return 0x00;
 	},
+	_funcStrCmp : function( _this, param, code, token, value, seFlag ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( seFlag ){
+			if( !(_this.curLine().skipComma()) ){
+				return _this._retError( 0x2181, code, token );
+			}
+		}
+		var string1 = new _String();
+		if( _this._getString( param, newCode, newToken, string1 ) ){
+			if( seFlag ){
+				if( !(_this.curLine().skipComma()) ){
+					return _this._retError( 0x2181, code, token );
+				}
+			}
+			var string2 = new _String();
+			if( _this._getString( param, newCode, newToken, string2 ) ){
+				var str1 = string1.str();
+				var str2 = string2.str();
+				var val = str1.length - str2.length;
+				if( val == 0 ){
+					var i;
+					switch( token ){
+					case 68:
+						for( i = 0; i < str1.length; i++ ){
+							val = str1.charCodeAt( i ) - str2.charCodeAt( i );
+							if( val != 0 ){
+								break;
+							}
+						}
+						break;
+					case 69:
+						var chr1, chr2;
+						for( i = 0; i < str1.length; i++ ){
+							chr1 = str1.charCodeAt( i );
+							if( (chr1 >= _CHAR_CODE_UA) && (chr1 <= _CHAR_CODE_UZ) ){
+								chr1 = chr1 - _CHAR_CODE_UA + _CHAR_CODE_LA;
+							}
+							chr2 = str2.charCodeAt( i );
+							if( (chr2 >= _CHAR_CODE_UA) && (chr2 <= _CHAR_CODE_UZ) ){
+								chr2 = chr2 - _CHAR_CODE_UA + _CHAR_CODE_LA;
+							}
+							val = chr1 - chr2;
+							if( val != 0 ){
+								break;
+							}
+						}
+						break;
+					}
+				}
+				value.ass( val );
+				return 0x00;
+			}
+		}
+		return _this._retError( 0x2103, code, token );
+	},
+	_funcStrLen : function( _this, param, code, token, value, seFlag ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( seFlag ){
+			if( !(_this.curLine().skipComma()) ){
+				return _this._retError( 0x2181, code, token );
+			}
+		}
+		var string = new _String();
+		if( _this._getString( param, newCode, newToken, string ) ){
+			value.ass( string.str().length );
+			return 0x00;
+		}
+		return _this._retError( 0x2103, code, token );
+	},
 	_funcGWidth : function( _this, param, code, token, value, seFlag ){
 		value.ass( _proc_gworld.width() );
 		return 0x00;
@@ -6712,7 +6820,7 @@ _Proc.prototype = {
 		} else {
 			_this.curLine().unlock( lock );
 		}
-		value.ass( (token == 70) ? _proc_gworld.color() : doFuncGColor24( _proc_gworld.color() ) );
+		value.ass( (token == 73) ? _proc_gworld.color() : doFuncGColor24( _proc_gworld.color() ) );
 		return 0x00;
 	},
 	_funcGCX : function( _this, param, code, token, value, seFlag ){
@@ -9176,6 +9284,209 @@ _Proc.prototype = {
 		}
 		return 0x03;
 	},
+	_commandArrayCopy : function( _this, param, code, token ){
+		var i;
+		var lock;
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		var value = new _Matrix();
+		var srcCode;
+		var srcToken;
+		var srcIndex = new Array();
+		var dstCode;
+		var dstToken;
+		var dstIndex = new Array();
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
+			srcCode = newCode.val();
+			srcToken = newToken.obj();
+		} else {
+			return _this._retError( 0x2141, code, token );
+		}
+		i = 0;
+		if( _this._const( param, code, token, value ) == 0x00 ){
+			srcIndex[i] = _INT( value._mat[0].toFloat() );
+			i++;
+		} else {
+			return _this._retError( 0x2141, code, token );
+		}
+		while( true ){
+			lock = _this.curLine().lock();
+			if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
+				dstCode = newCode.val();
+				dstToken = newToken.obj();
+				break;
+			} else {
+				_this.curLine().unlock( lock );
+				if( _this._const( param, code, token, value ) == 0x00 ){
+					srcIndex[i] = _INT( value._mat[0].toFloat() );
+					i++;
+				} else {
+					return _this._retError( 0x2141, code, token );
+				}
+			}
+		}
+		i = 0;
+		while( true ){
+			if( _this._const( param, code, token, value ) == 0x00 ){
+				dstIndex[i] = _INT( value._mat[0].toFloat() );
+				i++;
+			} else {
+				if( i == 0 ){
+					return _this._retError( 0x2141, code, token );
+				}
+				break;
+			}
+		}
+		var dstIndexSize = dstIndex.length - 1;
+		var len = dstIndex[dstIndexSize];
+		if( len > 0 ){
+			var srcIndexSize = srcIndex.length;
+			var srcParam;
+			var srcValue = newValueArray( len );
+			for( i = 0; i < srcIndexSize; i++ ){
+				srcIndex[i] -= param.base();
+				if( srcIndex[i] < 0 ){
+					return _this._retError( 0x2141, code, token );
+				}
+			}
+			srcIndex[srcIndexSize] = -1;
+			for( i = 0; i < dstIndexSize; i++ ){
+				dstIndex[i] -= param.base();
+				if( dstIndex[i] < 0 ){
+					return _this._retError( 0x2141, code, token );
+				}
+			}
+			dstIndex[dstIndexSize] = -1;
+			srcIndex[srcIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				srcIndex[srcIndexSize - 1]--;
+				srcParam = (srcCode == 0x46) ? _global_param : param;
+				srcValue[i].ass( srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
+			}
+			dstIndex[dstIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				dstIndex[dstIndexSize - 1]--;
+				switch( dstCode ){
+				case 0x44:
+					param._array.set( _this._index( param, dstCode, dstToken ), dstIndex, dstIndexSize, srcValue[i], true );
+					break;
+				case 0x45:
+					param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
+					break;
+				case 0x46:
+					_global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
+					break;
+				}
+			}
+		}
+		return 0x03;
+	},
+	_commandArrayFill : function( _this, param, code, token ){
+		var i;
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		var srcValue = new _Matrix();
+		var tmpValue = new _Matrix();
+		var dstCode;
+		var dstToken;
+		var dstIndex = new Array();
+		if( _this._const( param, code, token, srcValue ) != 0x00 ){
+			return _this._retError( 0x2141, code, token );
+		}
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
+			dstCode = newCode.val();
+			dstToken = newToken.obj();
+		} else {
+			return _this._retError( 0x2141, code, token );
+		}
+		i = 0;
+		while( true ){
+			if( _this._const( param, code, token, tmpValue ) == 0x00 ){
+				dstIndex[i] = _INT( tmpValue._mat[0].toFloat() );
+				i++;
+			} else {
+				if( i == 0 ){
+					return _this._retError( 0x2141, code, token );
+				}
+				break;
+			}
+		}
+		var dstIndexSize = dstIndex.length - 1;
+		var len = dstIndex[dstIndexSize];
+		if( len > 0 ){
+			for( i = 0; i < dstIndexSize; i++ ){
+				dstIndex[i] -= param.base();
+				if( dstIndex[i] < 0 ){
+					return _this._retError( 0x2141, code, token );
+				}
+			}
+			dstIndex[dstIndexSize] = -1;
+			dstIndex[dstIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				dstIndex[dstIndexSize - 1]--;
+				switch( dstCode ){
+				case 0x44:
+					param._array.set( _this._index( param, dstCode, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], true );
+					break;
+				case 0x45:
+					param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
+					break;
+				case 0x46:
+					_global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
+					break;
+				}
+			}
+		}
+		return 0x03;
+	},
+	_commandStrCpy : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & 0x40) != 0 ){
+				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+				var string = new _String();
+				_this._getString( param, newCode, newToken, string );
+				switch( token ){
+				case 53:
+					_this.strSet( tmpParam._array, _arrayIndex, string.str() );
+					break;
+				case 54:
+					_this.strCat( tmpParam._array, _arrayIndex, string.str() );
+					break;
+				}
+				return 0x03;
+			}
+		}
+		return _this._retError( 0x2141, code, token );
+	},
+	_commandStrLwr : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & 0x40) != 0 ){
+				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+				_this.strLwr( tmpParam._array, _arrayIndex );
+				return 0x03;
+			}
+		}
+		return _this._retError( 0x2141, code, token );
+	},
+	_commandStrUpr : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & 0x40) != 0 ){
+				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+				_this.strUpr( tmpParam._array, _arrayIndex );
+				return 0x03;
+			}
+		}
+		return _this._retError( 0x2141, code, token );
+	},
 	_commandPrint : function( _this, param, code, token ){
 		var newCode = new _Integer();
 		var newToken = new _Void();
@@ -9189,7 +9500,7 @@ _Proc.prototype = {
 		var real = new _String();
 		var imag = new _String();
 		switch( token ){
-		case 55:
+		case 61:
 			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
 				if( (newCode.val() & 0x40) != 0 ){
 					if( newCode.val() == 0x46 ){
@@ -9204,10 +9515,10 @@ _Proc.prototype = {
 				return _this._retError( 0x2141, code, token );
 			}
 			break;
-		case 53:
-		case 54:
+		case 59:
+		case 60:
 			break;
-		case 89:
+		case 95:
 			if( skipCommandLog() ){
 				while( true ){
 					if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
@@ -9258,7 +9569,7 @@ _Proc.prototype = {
 		}
 		if( !errFlag ){
 			switch( token ){
-			case 55:
+			case 61:
 				_this.strSet( param._array, _arrayIndex[0], "" );
 				curPrint = topPrint;
 				while( curPrint != null ){
@@ -9268,13 +9579,13 @@ _Proc.prototype = {
 					curPrint = curPrint._next;
 				}
 				break;
-			case 53:
+			case 59:
 				doCommandPrint( topPrint, false );
 				break;
-			case 54:
+			case 60:
 				doCommandPrint( topPrint, true );
 				break;
-			case 89:
+			case 95:
 				doCommandLog( topPrint );
 				break;
 			}
@@ -10295,7 +10606,7 @@ _Proc.prototype = {
 	},
 	_procCommand : function( _this, param, code, token, value ){
 		var ret;
-		if( token < 90 ){
+		if( token < 96 ){
 			if( (ret = _this._procSubCommand[token]( _this, param, code, token )) != 0x03 ){
 				return ret;
 			}
@@ -10555,6 +10866,9 @@ var _TOKEN_FUNC = [
 	"row",
 	"col",
 	"trans",
+	"strcmp",
+	"stricmp",
+	"strlen",
 	"gwidth",
 	"gheight",
 	"gcolor",
@@ -10659,6 +10973,12 @@ var _TOKEN_COMMAND = [
 	"trans",
 	"srand",
 	"localtime",
+	"arraycopy",
+	"arrayfill",
+	"strcpy",
+	"strcat",
+	"strlwr",
+	"strupr",
 	"clear",
 	"error",
 	"print",
@@ -13944,7 +14264,9 @@ function _CHAR( chr ){
 var _CHAR_CODE_0 = _CHAR( '0' );
 var _CHAR_CODE_9 = _CHAR( '9' );
 var _CHAR_CODE_LA = _CHAR( 'a' );
+var _CHAR_CODE_LZ = _CHAR( 'z' );
 var _CHAR_CODE_UA = _CHAR( 'A' );
+var _CHAR_CODE_UZ = _CHAR( 'Z' );
 var _CHAR_CODE_EX = _CHAR( '!' );
 var _CHAR_CODE_COLON = _CHAR( ':' );
 Number.isFinite = Number.isFinite || function( x ){
@@ -16124,22 +16446,25 @@ window._CLIP_FUNC_DENOM = 64;
 window._CLIP_FUNC_ROW = 65;
 window._CLIP_FUNC_COL = 66;
 window._CLIP_FUNC_TRANS = 67;
-window._CLIP_FUNC_GWIDTH = 68;
-window._CLIP_FUNC_GHEIGHT = 69;
-window._CLIP_FUNC_GCOLOR = 70;
-window._CLIP_FUNC_GCOLOR24 = 71;
-window._CLIP_FUNC_GCX = 72;
-window._CLIP_FUNC_GCY = 73;
-window._CLIP_FUNC_WCX = 74;
-window._CLIP_FUNC_WCY = 75;
-window._CLIP_FUNC_GGET = 76;
-window._CLIP_FUNC_WGET = 77;
-window._CLIP_FUNC_GX = 78;
-window._CLIP_FUNC_GY = 79;
-window._CLIP_FUNC_WX = 80;
-window._CLIP_FUNC_WY = 81;
-window._CLIP_FUNC_CALL = 82;
-window._CLIP_FUNC_EVAL = 83;
+window._CLIP_FUNC_STRCMP = 68;
+window._CLIP_FUNC_STRICMP = 69;
+window._CLIP_FUNC_STRLEN = 70;
+window._CLIP_FUNC_GWIDTH = 71;
+window._CLIP_FUNC_GHEIGHT = 72;
+window._CLIP_FUNC_GCOLOR = 73;
+window._CLIP_FUNC_GCOLOR24 = 74;
+window._CLIP_FUNC_GCX = 75;
+window._CLIP_FUNC_GCY = 76;
+window._CLIP_FUNC_WCX = 77;
+window._CLIP_FUNC_WCY = 78;
+window._CLIP_FUNC_GGET = 79;
+window._CLIP_FUNC_WGET = 80;
+window._CLIP_FUNC_GX = 81;
+window._CLIP_FUNC_GY = 82;
+window._CLIP_FUNC_WX = 83;
+window._CLIP_FUNC_WY = 84;
+window._CLIP_FUNC_CALL = 85;
+window._CLIP_FUNC_EVAL = 86;
 window._CLIP_STAT_START = 0;
 window._CLIP_STAT_END = 1;
 window._CLIP_STAT_END_INC = 2;
@@ -16226,46 +16551,52 @@ window._CLIP_COMMAND_MAT = 47;
 window._CLIP_COMMAND_TRANS = 48;
 window._CLIP_COMMAND_SRAND = 49;
 window._CLIP_COMMAND_LOCALTIME = 50;
-window._CLIP_COMMAND_CLEAR = 51;
-window._CLIP_COMMAND_ERROR = 52;
-window._CLIP_COMMAND_PRINT = 53;
-window._CLIP_COMMAND_PRINTLN = 54;
-window._CLIP_COMMAND_SPRINT = 55;
-window._CLIP_COMMAND_SCAN = 56;
-window._CLIP_COMMAND_GWORLD = 57;
-window._CLIP_COMMAND_GCLEAR = 58;
-window._CLIP_COMMAND_GCOLOR = 59;
-window._CLIP_COMMAND_GFILL = 60;
-window._CLIP_COMMAND_GMOVE = 61;
-window._CLIP_COMMAND_GTEXT = 62;
-window._CLIP_COMMAND_GTEXTL = 63;
-window._CLIP_COMMAND_GLINE = 64;
-window._CLIP_COMMAND_GPUT = 65;
-window._CLIP_COMMAND_GGET = 66;
-window._CLIP_COMMAND_GGET24 = 67;
-window._CLIP_COMMAND_GUPDATE = 68;
-window._CLIP_COMMAND_WINDOW = 69;
-window._CLIP_COMMAND_WFILL = 70;
-window._CLIP_COMMAND_WMOVE = 71;
-window._CLIP_COMMAND_WTEXT = 72;
-window._CLIP_COMMAND_WTEXTL = 73;
-window._CLIP_COMMAND_WLINE = 74;
-window._CLIP_COMMAND_WPUT = 75;
-window._CLIP_COMMAND_WGET = 76;
-window._CLIP_COMMAND_RECTANGULAR = 77;
-window._CLIP_COMMAND_PARAMETRIC = 78;
-window._CLIP_COMMAND_POLAR = 79;
-window._CLIP_COMMAND_LOGSCALE = 80;
-window._CLIP_COMMAND_NOLOGSCALE = 81;
-window._CLIP_COMMAND_PLOT = 82;
-window._CLIP_COMMAND_REPLOT = 83;
-window._CLIP_COMMAND_CALCULATOR = 84;
-window._CLIP_COMMAND_INCLUDE = 85;
-window._CLIP_COMMAND_BASE = 86;
-window._CLIP_COMMAND_NAMESPACE = 87;
-window._CLIP_COMMAND_DUMP = 88;
-window._CLIP_COMMAND_LOG = 89;
-window._CLIP_COMMAND_CUSTOM = 90;
+window._CLIP_COMMAND_ARRAYCOPY = 51;
+window._CLIP_COMMAND_ARRAYFILL = 52;
+window._CLIP_COMMAND_STRCPY = 53;
+window._CLIP_COMMAND_STRCAT = 54;
+window._CLIP_COMMAND_STRLWR = 55;
+window._CLIP_COMMAND_STRUPR = 56;
+window._CLIP_COMMAND_CLEAR = 57;
+window._CLIP_COMMAND_ERROR = 58;
+window._CLIP_COMMAND_PRINT = 59;
+window._CLIP_COMMAND_PRINTLN = 60;
+window._CLIP_COMMAND_SPRINT = 61;
+window._CLIP_COMMAND_SCAN = 62;
+window._CLIP_COMMAND_GWORLD = 63;
+window._CLIP_COMMAND_GCLEAR = 64;
+window._CLIP_COMMAND_GCOLOR = 65;
+window._CLIP_COMMAND_GFILL = 66;
+window._CLIP_COMMAND_GMOVE = 67;
+window._CLIP_COMMAND_GTEXT = 68;
+window._CLIP_COMMAND_GTEXTL = 69;
+window._CLIP_COMMAND_GLINE = 70;
+window._CLIP_COMMAND_GPUT = 71;
+window._CLIP_COMMAND_GGET = 72;
+window._CLIP_COMMAND_GGET24 = 73;
+window._CLIP_COMMAND_GUPDATE = 74;
+window._CLIP_COMMAND_WINDOW = 75;
+window._CLIP_COMMAND_WFILL = 76;
+window._CLIP_COMMAND_WMOVE = 77;
+window._CLIP_COMMAND_WTEXT = 78;
+window._CLIP_COMMAND_WTEXTL = 79;
+window._CLIP_COMMAND_WLINE = 80;
+window._CLIP_COMMAND_WPUT = 81;
+window._CLIP_COMMAND_WGET = 82;
+window._CLIP_COMMAND_RECTANGULAR = 83;
+window._CLIP_COMMAND_PARAMETRIC = 84;
+window._CLIP_COMMAND_POLAR = 85;
+window._CLIP_COMMAND_LOGSCALE = 86;
+window._CLIP_COMMAND_NOLOGSCALE = 87;
+window._CLIP_COMMAND_PLOT = 88;
+window._CLIP_COMMAND_REPLOT = 89;
+window._CLIP_COMMAND_CALCULATOR = 90;
+window._CLIP_COMMAND_INCLUDE = 91;
+window._CLIP_COMMAND_BASE = 92;
+window._CLIP_COMMAND_NAMESPACE = 93;
+window._CLIP_COMMAND_DUMP = 94;
+window._CLIP_COMMAND_LOG = 95;
+window._CLIP_COMMAND_CUSTOM = 96;
 window._CLIP_SE_NULL = 0;
 window._CLIP_SE_INCREMENT = 1;
 window._CLIP_SE_DECREMENT = 2;

@@ -1304,7 +1304,9 @@ function _CHAR( chr ){
 var _CHAR_CODE_0 = _CHAR( '0' );
 var _CHAR_CODE_9 = _CHAR( '9' );
 var _CHAR_CODE_LA = _CHAR( 'a' );
+var _CHAR_CODE_LZ = _CHAR( 'z' );
 var _CHAR_CODE_UA = _CHAR( 'A' );
+var _CHAR_CODE_UZ = _CHAR( 'Z' );
 var _CHAR_CODE_EX = _CHAR( '!' );
 var _CHAR_CODE_COLON = _CHAR( ':' );
 Number.isFinite = Number.isFinite || function( x ){

@@ -341,6 +341,10 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._funcCol,
 		this._funcTrans,
 
+		this._funcStrCmp,
+		this._funcStrCmp,
+		this._funcStrLen,
+
 		this._funcGWidth,
 		this._funcGHeight,
 		this._funcGColor,
@@ -575,6 +579,13 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 
 		this._commandSRand,
 		this._commandLocalTime,
+		this._commandArrayCopy,
+		this._commandArrayFill,
+
+		this._commandStrCpy,
+		this._commandStrCpy,
+		this._commandStrLwr,
+		this._commandStrUpr,
 
 		this._commandClear,
 		this._commandError,
@@ -941,13 +952,43 @@ _Proc.prototype = {
 
 	// 文字列の長さを取得する
 	strLen : function( array, index ){
-		var i;
-		for( i = 0; ; i++ ){
-			if( array.val( index, i ).toFloat() == 0 ){
+		var len;
+		for( len = 0; ; len++ ){
+			if( array.val( index, len ).toFloat() == 0 ){
 				break;
 			}
 		}
-		return i;
+		return len;
+	},
+
+	// 文字列中の文字を小文字に変換する
+	strLwr : function( array, index ){
+		var chr;
+		var dst = new Array( 1 );
+		for( var i = 0; ; i++ ){
+			if( (chr = array.val( index, i ).toFloat()) == 0 ){
+				break;
+			}
+			if( (chr >= _CHAR_CODE_UA) && (chr <= _CHAR_CODE_UZ) ){
+				dst[0] = i;
+				array.set( index, dst, 1, chr - _CHAR_CODE_UA + _CHAR_CODE_LA, false );
+			}
+		}
+	},
+
+	// 文字列中の文字を大文字に変換する
+	strUpr : function( array, index ){
+		var chr;
+		var dst = new Array( 1 );
+		for( var i = 0; ; i++ ){
+			if( (chr = array.val( index, i ).toFloat()) == 0 ){
+				break;
+			}
+			if( (chr >= _CHAR_CODE_LA) && (chr <= _CHAR_CODE_LZ) ){
+				dst[0] = i;
+				array.set( index, dst, i, chr - _CHAR_CODE_LA + _CHAR_CODE_UA, false );
+			}
+		}
 	},
 
 	// 計算する
@@ -4313,6 +4354,82 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_funcStrCmp : function( _this, param, code, token, value, seFlag ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( seFlag ){
+			if( !(_this.curLine().skipComma()) ){
+				return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+			}
+		}
+
+		var string1 = new _String();
+		if( _this._getString( param, newCode, newToken, string1 ) ){
+			if( seFlag ){
+				if( !(_this.curLine().skipComma()) ){
+					return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+				}
+			}
+
+			var string2 = new _String();
+			if( _this._getString( param, newCode, newToken, string2 ) ){
+				var str1 = string1.str();
+				var str2 = string2.str();
+				var val = str1.length - str2.length;
+				if( val == 0 ){
+					var i;
+					switch( token ){
+					case _CLIP_FUNC_STRCMP:
+						for( i = 0; i < str1.length; i++ ){
+							val = str1.charCodeAt( i ) - str2.charCodeAt( i );
+							if( val != 0 ){
+								break;
+							}
+						}
+						break;
+					case _CLIP_FUNC_STRICMP:
+						var chr1, chr2;
+						for( i = 0; i < str1.length; i++ ){
+							chr1 = str1.charCodeAt( i );
+							if( (chr1 >= _CHAR_CODE_UA) && (chr1 <= _CHAR_CODE_UZ) ){
+								chr1 = chr1 - _CHAR_CODE_UA + _CHAR_CODE_LA;
+							}
+							chr2 = str2.charCodeAt( i );
+							if( (chr2 >= _CHAR_CODE_UA) && (chr2 <= _CHAR_CODE_UZ) ){
+								chr2 = chr2 - _CHAR_CODE_UA + _CHAR_CODE_LA;
+							}
+							val = chr1 - chr2;
+							if( val != 0 ){
+								break;
+							}
+						}
+						break;
+					}
+				}
+				value.ass( val );
+				return _CLIP_NO_ERR;
+			}
+		}
+		return _this._retError( _CLIP_PROC_ERR_FUNCTION, code, token );
+	},
+	_funcStrLen : function( _this, param, code, token, value, seFlag ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( seFlag ){
+			if( !(_this.curLine().skipComma()) ){
+				return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+			}
+		}
+
+		var string = new _String();
+		if( _this._getString( param, newCode, newToken, string ) ){
+			value.ass( string.str().length );
+			return _CLIP_NO_ERR;
+		}
+		return _this._retError( _CLIP_PROC_ERR_FUNCTION, code, token );
+	},
 	_funcGWidth : function( _this, param, code, token, value, seFlag ){
 		value.ass( _proc_gworld.width() );
 		return _CLIP_NO_ERR;
@@ -7132,6 +7249,235 @@ _Proc.prototype = {
 		}
 
 		return _CLIP_PROC_SUB_END;
+	},
+	_commandArrayCopy : function( _this, param, code, token ){
+		var i;
+		var lock;
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		var value = new _Matrix();
+		var srcCode;
+		var srcToken;
+		var srcIndex = new Array();
+		var dstCode;
+		var dstToken;
+		var dstIndex = new Array();
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0) ){
+			srcCode  = newCode.val();
+			srcToken = newToken.obj();
+		} else {
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+		}
+
+		i = 0;
+		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+			srcIndex[i] = _INT( value._mat[0].toFloat() );
+			i++;
+		} else {
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+		}
+
+		while( true ){
+			lock = _this.curLine().lock();
+			if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0) ){
+				dstCode  = newCode.val();
+				dstToken = newToken.obj();
+				break;
+			} else {
+				_this.curLine().unlock( lock );
+				if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+					srcIndex[i] = _INT( value._mat[0].toFloat() );
+					i++;
+				} else {
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			}
+		}
+
+		i = 0;
+		while( true ){
+			if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+				dstIndex[i] = _INT( value._mat[0].toFloat() );
+				i++;
+			} else {
+				if( i == 0 ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+				break;
+			}
+		}
+
+		var dstIndexSize = dstIndex.length - 1;
+		var len = dstIndex[dstIndexSize];
+		if( len > 0 ){
+			var srcIndexSize = srcIndex.length;
+			var srcParam;
+			var srcValue = newValueArray( len );
+
+			for( i = 0; i < srcIndexSize; i++ ){
+				srcIndex[i] -= param.base();
+				if( srcIndex[i] < 0 ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			}
+			srcIndex[srcIndexSize] = -1;
+
+			for( i = 0; i < dstIndexSize; i++ ){
+				dstIndex[i] -= param.base();
+				if( dstIndex[i] < 0 ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			}
+			dstIndex[dstIndexSize] = -1;
+
+			srcIndex[srcIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				srcIndex[srcIndexSize - 1]--;
+				srcParam = (srcCode == _CLIP_CODE_GLOBAL_ARRAY) ? _global_param : param;
+				srcValue[i].ass( srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
+			}
+
+			dstIndex[dstIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				dstIndex[dstIndexSize - 1]--;
+				switch( dstCode ){
+				case _CLIP_CODE_ARRAY:
+					param._array.set( _this._index( param, dstCode, dstToken ), dstIndex, dstIndexSize, srcValue[i], true );
+					break;
+				case _CLIP_CODE_AUTO_ARRAY:
+					param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
+					break;
+				case _CLIP_CODE_GLOBAL_ARRAY:
+					_global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
+					break;
+				}
+			}
+		}
+
+		return _CLIP_PROC_SUB_END;
+	},
+	_commandArrayFill : function( _this, param, code, token ){
+		var i;
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		var srcValue = new _Matrix();
+		var tmpValue = new _Matrix();
+		var dstCode;
+		var dstToken;
+		var dstIndex = new Array();
+
+		if( _this._const( param, code, token, srcValue ) != _CLIP_NO_ERR ){
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+		}
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0) ){
+			dstCode  = newCode.val();
+			dstToken = newToken.obj();
+		} else {
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+		}
+
+		i = 0;
+		while( true ){
+			if( _this._const( param, code, token, tmpValue ) == _CLIP_NO_ERR ){
+				dstIndex[i] = _INT( tmpValue._mat[0].toFloat() );
+				i++;
+			} else {
+				if( i == 0 ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+				break;
+			}
+		}
+
+		var dstIndexSize = dstIndex.length - 1;
+		var len = dstIndex[dstIndexSize];
+		if( len > 0 ){
+			for( i = 0; i < dstIndexSize; i++ ){
+				dstIndex[i] -= param.base();
+				if( dstIndex[i] < 0 ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			}
+			dstIndex[dstIndexSize] = -1;
+
+			dstIndex[dstIndexSize - 1] += len;
+			for( i = 0; i < len; i++ ){
+				dstIndex[dstIndexSize - 1]--;
+				switch( dstCode ){
+				case _CLIP_CODE_ARRAY:
+					param._array.set( _this._index( param, dstCode, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], true );
+					break;
+				case _CLIP_CODE_AUTO_ARRAY:
+					param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
+					break;
+				case _CLIP_CODE_GLOBAL_ARRAY:
+					_global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
+					break;
+				}
+			}
+		}
+
+		return _CLIP_PROC_SUB_END;
+	},
+	_commandStrCpy : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				var tmpParam = (newCode.val() == _CLIP_CODE_GLOBAL_ARRAY) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+
+				var string = new _String();
+				_this._getString( param, newCode, newToken, string );
+
+				switch( token ){
+				case _CLIP_COMMAND_STRCPY:
+					_this.strSet( tmpParam._array, _arrayIndex, string.str() );
+					break;
+				case _CLIP_COMMAND_STRCAT:
+					_this.strCat( tmpParam._array, _arrayIndex, string.str() );
+					break;
+				}
+
+				return _CLIP_PROC_SUB_END;
+			}
+		}
+		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+	},
+	_commandStrLwr : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				var tmpParam = (newCode.val() == _CLIP_CODE_GLOBAL_ARRAY) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+
+				_this.strLwr( tmpParam._array, _arrayIndex );
+
+				return _CLIP_PROC_SUB_END;
+			}
+		}
+		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+	},
+	_commandStrUpr : function( _this, param, code, token ){
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				var tmpParam = (newCode.val() == _CLIP_CODE_GLOBAL_ARRAY) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+
+				_this.strUpr( tmpParam._array, _arrayIndex );
+
+				return _CLIP_PROC_SUB_END;
+			}
+		}
+		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandPrint : function( _this, param, code, token ){
 		var newCode = new _Integer();

@@ -1207,7 +1207,11 @@ Mnemonics are case-insensitive.<br>
 <hr class="hr">
 Variable representation, array representation, matrix representation can be used for the first operand.<br>
 <hr class="hr">
-After the second operand, you can use constant expressions, variable expressions, array expressions, matrix expressions, character string expressions, and character string constants. In addition, the CLIP description enclosed in parentheses <span class="pink">()</span> can be used. However, if there are more parentheses in the operation in parentheses, priority is given to them, but in principle it is done from the left side to the right side. In ECLIPSE, parentheses need to be balanced.<br>
+After the second operand, you can use constant expressions, variable expressions, array expressions, matrix expressions, character string expressions, and character string constants.<br>
+<hr class="hr">
+CLIP description enclosed in parentheses <span class="pink">()</span> can be described from the second operand (including the first operand in a loop instruction and a return instruction). However, if there are more parentheses in the operation in parentheses, priority is given to them, but in principle it is done from the left side to the right side. In ECLIPSE, parentheses need to be balanced.<br>
+<hr class="hr">
+CLIP description enclosed in curly braces <span class="pink">{}</span> can be used from the second operand (including the first operand in a loop instruction and a return instruction). Within the curly braces, parentheses <span class="pink">()</span> can be used to specify the order of precedence of operations. Parentheses do not have to be balanced.<br>
 <hr class="hr">
 The escape character <span class="pink">\</span> (or <span class="pink">¥</span><!--C2A5-->) can be used.<br>
 <hr class="hr">
