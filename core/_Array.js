@@ -225,6 +225,17 @@ _Array.prototype = {
 //	node : function( index ){ return this._node[index]; },
 //	matrix : function( index ){ return this._mat[index]; },
 
+	// 未使用インデックスを検索し、使用状態にする
+	define : function( label ){
+		var index;
+		if( (index = this._label.define( label )) >= 0 ){
+			// 値を初期化する
+			this._node[index] = new __ArrayNode();
+			this._mat [index] = new _Matrix();
+		}
+		return index;
+	},
+
 	_moveData : function( index ){
 		var newIndex;
 

@@ -248,6 +248,7 @@ var _TOKEN_COMMAND = [
 	"gtextl",
 	"gline",
 	"gput",
+	"gput24",
 	"gget",
 	"gget24",
 	"gupdate",

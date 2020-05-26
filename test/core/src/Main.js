@@ -128,67 +128,68 @@ function canvasLine( x1, y1, x2, y2 ){
 // ファイル選択
 #include "_InputFile.js"
 var inputFile;
-var inputFileImage = null;
-function drawInputFileImage( w/*_Integer*/, h/*_Integer*/ ){
+function drawInputFileImage( image, w/*_Integer*/, h/*_Integer*/ ){
 	var width  = topProc.gWorld().width ();
 	var height = topProc.gWorld().height();
 	if( (width > 0) && (height > 0) ){
-		if( (inputFileImage.width <= width) && (inputFileImage.height <= height) ){
-			width  = inputFileImage.width;
-			height = inputFileImage.height;
-		} else if( inputFileImage.width / inputFileImage.height < width / height ){
-			width = _INT( inputFileImage.width * height / inputFileImage.height );
+		if( (image.width <= width) && (image.height <= height) ){
+			width  = image.width;
+			height = image.height;
+		} else if( image.width / image.height < width / height ){
+			width = _INT( image.width * height / image.height );
 		} else {
-			height = _INT( inputFileImage.height * width / inputFileImage.width );
+			height = _INT( image.height * width / image.width );
 		}
 		w.set( width  );
 		h.set( height );
-		canvas.drawImage( inputFileImage, width, height );
+		canvas.drawImage( image, width, height );
 		return canvas.imageData( width, height ).data;
 	}
 	return null;
 }
 function onInputFileLoadImage( name, image ){
-	inputFileImage = image;
-
 	var w = new _Integer();
 	var h = new _Integer();
-	var data = drawInputFileImage( w, h );
+	var data = drawInputFileImage( image, w, h );
 	if( data != null ){
 		var width  = w.val();
 		var height = h.val();
 
 		con.setBold( true );
 		con.println( "[" + name + "]" );
-		if( (width != inputFileImage.width) || (height != inputFileImage.height) ){
-			con.print( "" + inputFileImage.width + "x" + inputFileImage.height + " -&gt; " );
+		if( (width != image.width) || (height != image.height) ){
+			con.print( "" + image.width + "x" + image.height + " -&gt; " );
 		}
 		con.println( "" + width + "x" + height );
 		con.setBold( false );
 
-		var x, y, r, g, b;
-		var i = 0;
-		for( y = 0; y < height; y++ ){
-			for( x = 0; x < width; x++ ){
-				r = data[i++];
-				g = data[i++];
-				b = data[i++];
-				i++;
-				topProc.gWorld().putColor( x, y, doFuncGColor( (r << 16) + (g << 8) + b ) );
-			}
-		}
+//		var x, y, r, g, b;
+//		var i = 0;
+//		for( y = 0; y < height; y++ ){
+//			for( x = 0; x < width; x++ ){
+//				r = data[i++];
+//				g = data[i++];
+//				b = data[i++];
+//				i++;
+//				topProc.gWorld().putColor( x, y, doFuncGColor( (r << 16) + (g << 8) + b ) );
+//			}
+//		}
 
-		gUpdate( topProc.gWorld() );
+//		gUpdate( topProc.gWorld() );
 	}
 }
 function doCommandGGet24Begin( w/*_Integer*/, h/*_Integer*/ ){
-	if( inputFileImage != null ){
-		return drawInputFileImage( w, h );
+	var width  = topProc.gWorld().width ();
+	var height = topProc.gWorld().height();
+	if( (width > 0) && (height > 0) ){
+		w.set( width  );
+		h.set( height );
+		return canvas.imageData( width, height ).data;
 	}
 	return null;
 }
 function doCommandGGet24End(){
-	gUpdate( topProc.gWorld() );
+//	gUpdate( topProc.gWorld() );
 }
 
 // 計算エラー情報管理
@@ -1078,6 +1079,14 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
 function doCommandGColor( color, rgb ){
 	COLOR_WIN[color] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
 	needGUpdate = true;
+}
+function doCommandGPut24( x, y, rgb ){
+	canvas.setColor( (rgb & 0xFF0000) >> 16, (rgb & 0x00FF00) >> 8, rgb & 0x0000FF );
+	canvasPut( x, y );
+}
+function doCommandGPut24End(){
+	canvasSetColor( COLOR_WIN[topProc.gWorld().color()] );
+	needGUpdate = false;
 }
 function gUpdate( gWorld ){
 	canvasClear();

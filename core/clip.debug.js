@@ -341,6 +341,14 @@ function _Array(){
 	this._mat = newMatrixArray ( 256 );
 }
 _Array.prototype = {
+	define : function( label ){
+		var index;
+		if( (index = this._label.define( label )) >= 0 ){
+			this._node[index] = new __ArrayNode();
+			this._mat [index] = new _Matrix();
+		}
+		return index;
+	},
 	_moveData : function( index ){
 		var newIndex;
 		if( (newIndex = this._label.define( this._label._label[index] )) >= 0 ){
@@ -3520,6 +3528,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._commandGTextL,
 		this._commandGLine,
 		this._commandGPut,
+		this._commandGPut24,
 		this._commandGGet,
 		this._commandGGet24,
 		this._commandGUpdate,
@@ -8928,7 +8937,7 @@ _Proc.prototype = {
 			case 8:
 			case 0x23:
 			case 0x46:
-				param._array._label.define( newToken.obj() );
+				param._array.define( newToken.obj() );
 				break;
 			default:
 				return _this._retError( 0x2141, code, token );
@@ -8953,7 +8962,7 @@ _Proc.prototype = {
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
 					if( newCode.val() == 21 ){
-						param._array._label.define( label );
+						param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
 						param._var.define( label, 0.0, false );
@@ -8982,7 +8991,7 @@ _Proc.prototype = {
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
 					if( newCode.val() == 21 ){
-						_global_param._array._label.define( label );
+						_global_param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
 						_global_param._var.define( label, 0.0, false );
@@ -9185,12 +9194,15 @@ _Proc.prototype = {
 		if( _this._const( param, code, token, value[0] ) == 0x00 ){
 			if( _this._const( param, code, token, value[1] ) == 0x00 ){
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					if( (newCode.val() == 8) || (newCode.val() == 0x23) || (newCode.val() == 0x46) ){
-						var index = param._array._label.define( newToken.obj() );
+					if( (newCode.val() & 0x40) != 0 ){
+						if( newCode.val() == 0x46 ){
+							param = _global_param;
+						}
+						var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return 0x03;
-					} else if( (newCode.val() & 0x40) != 0 ){
-						var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+					} else if( (newCode.val() == 8) || (newCode.val() == 0x23) ){
+						var index = param._array.define( newToken.obj() );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return 0x03;
 					}
@@ -9518,7 +9530,7 @@ _Proc.prototype = {
 		case 59:
 		case 60:
 			break;
-		case 95:
+		case 96:
 			if( skipCommandLog() ){
 				while( true ){
 					if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
@@ -9585,7 +9597,7 @@ _Proc.prototype = {
 			case 60:
 				doCommandPrint( topPrint, true );
 				break;
-			case 95:
+			case 96:
 				doCommandLog( topPrint );
 				break;
 			}
@@ -9983,6 +9995,34 @@ _Proc.prototype = {
 					_proc_gworld.put( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 					return 0x03;
 				}
+			}
+		}
+		return _this._retError( 0x2141, code, token );
+	},
+	_commandGPut24 : function( _this, param, code, token ){
+		var x, y;
+		var newCode = new _Integer();
+		var newToken = new _Void();
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & 0x40) != 0 ){
+				if( newCode.val() == 0x46 ){
+					param = _global_param;
+				}
+				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var arrayList = new Array( 3 );
+				arrayList[2] = -1;
+				for( y = 0; y < _proc_gworld.height(); y++ ){
+					arrayList[0] = y;
+					for( x = 0; x < _proc_gworld.width(); x++ ){
+						arrayList[1] = x;
+						doCommandGPut24(
+							x, y,
+							_UNSIGNED( param._array.val( _arrayIndex, arrayList, 2 ).toFloat(), 16777216 )
+							);
+					}
+				}
+				doCommandGPut24End();
+				return 0x03;
 			}
 		}
 		return _this._retError( 0x2141, code, token );
@@ -10606,7 +10646,7 @@ _Proc.prototype = {
 	},
 	_procCommand : function( _this, param, code, token, value ){
 		var ret;
-		if( token < 96 ){
+		if( token < 97 ){
 			if( (ret = _this._procSubCommand[token]( _this, param, code, token )) != 0x03 ){
 				return ret;
 			}
@@ -10994,6 +11034,7 @@ var _TOKEN_COMMAND = [
 	"gtextl",
 	"gline",
 	"gput",
+	"gput24",
 	"gget",
 	"gget24",
 	"gupdate",
@@ -16572,31 +16613,32 @@ window._CLIP_COMMAND_GTEXT = 68;
 window._CLIP_COMMAND_GTEXTL = 69;
 window._CLIP_COMMAND_GLINE = 70;
 window._CLIP_COMMAND_GPUT = 71;
-window._CLIP_COMMAND_GGET = 72;
-window._CLIP_COMMAND_GGET24 = 73;
-window._CLIP_COMMAND_GUPDATE = 74;
-window._CLIP_COMMAND_WINDOW = 75;
-window._CLIP_COMMAND_WFILL = 76;
-window._CLIP_COMMAND_WMOVE = 77;
-window._CLIP_COMMAND_WTEXT = 78;
-window._CLIP_COMMAND_WTEXTL = 79;
-window._CLIP_COMMAND_WLINE = 80;
-window._CLIP_COMMAND_WPUT = 81;
-window._CLIP_COMMAND_WGET = 82;
-window._CLIP_COMMAND_RECTANGULAR = 83;
-window._CLIP_COMMAND_PARAMETRIC = 84;
-window._CLIP_COMMAND_POLAR = 85;
-window._CLIP_COMMAND_LOGSCALE = 86;
-window._CLIP_COMMAND_NOLOGSCALE = 87;
-window._CLIP_COMMAND_PLOT = 88;
-window._CLIP_COMMAND_REPLOT = 89;
-window._CLIP_COMMAND_CALCULATOR = 90;
-window._CLIP_COMMAND_INCLUDE = 91;
-window._CLIP_COMMAND_BASE = 92;
-window._CLIP_COMMAND_NAMESPACE = 93;
-window._CLIP_COMMAND_DUMP = 94;
-window._CLIP_COMMAND_LOG = 95;
-window._CLIP_COMMAND_CUSTOM = 96;
+window._CLIP_COMMAND_GPUT24 = 72;
+window._CLIP_COMMAND_GGET = 73;
+window._CLIP_COMMAND_GGET24 = 74;
+window._CLIP_COMMAND_GUPDATE = 75;
+window._CLIP_COMMAND_WINDOW = 76;
+window._CLIP_COMMAND_WFILL = 77;
+window._CLIP_COMMAND_WMOVE = 78;
+window._CLIP_COMMAND_WTEXT = 79;
+window._CLIP_COMMAND_WTEXTL = 80;
+window._CLIP_COMMAND_WLINE = 81;
+window._CLIP_COMMAND_WPUT = 82;
+window._CLIP_COMMAND_WGET = 83;
+window._CLIP_COMMAND_RECTANGULAR = 84;
+window._CLIP_COMMAND_PARAMETRIC = 85;
+window._CLIP_COMMAND_POLAR = 86;
+window._CLIP_COMMAND_LOGSCALE = 87;
+window._CLIP_COMMAND_NOLOGSCALE = 88;
+window._CLIP_COMMAND_PLOT = 89;
+window._CLIP_COMMAND_REPLOT = 90;
+window._CLIP_COMMAND_CALCULATOR = 91;
+window._CLIP_COMMAND_INCLUDE = 92;
+window._CLIP_COMMAND_BASE = 93;
+window._CLIP_COMMAND_NAMESPACE = 94;
+window._CLIP_COMMAND_DUMP = 95;
+window._CLIP_COMMAND_LOG = 96;
+window._CLIP_COMMAND_CUSTOM = 97;
 window._CLIP_SE_NULL = 0;
 window._CLIP_SE_INCREMENT = 1;
 window._CLIP_SE_DECREMENT = 2;

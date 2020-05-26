@@ -9,11 +9,11 @@
 html, body {
 	margin:0;
 	padding:0;
-	line-height:22px;
+	line-height:18px;
 }
 * {
 	font-family:"Helvetica";
-	font-size:18px;
+	font-size:16px;
 	color:#000000;
 }
 .div_body {
@@ -326,7 +326,7 @@ The comment start character is identified before <span class="pink">[]</span> or
 <hr class="hr_border">
 <span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> @@</span><i>index</i><br><dl><dd>Set a matrix<br></dl>
 <hr class="hr">
-<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> </span><i>array_name</i><br><dl><dd>Define a matrix<br></dl>
+<span class="pink">:mat </span><i>row</i><span class="pink"> </span><i>col</i><span class="pink"> </span><i>new_array_name</i><br><dl><dd>Define a matrix<br></dl>
 <hr class="hr">
 <span class="pink">:trans @@</span><i>index</i><br><dl><dd>Transpose of matrix<br></dl>
 <hr class="hr_border">
@@ -344,8 +344,25 @@ The comment start character is identified before <span class="pink">[]</span> or
 <dd><span class="pink">%y </span>Total number of days since the beginning of the year (0 ~ 365, January 1 is assumed to be 0)<br>
 </dl>
 </dl>
+<span class="pink">:arraycopy </span><i>src_array</i><span class="pink"> </span><span class="blue">[</span><i>index</i><span class="blue">...]</span><span class="pink"> </span><i>src_pos</i><span class="pink"> </span><i>dst_array</i><span class="pink"> </span><span class="blue">[</span><i>index</i><span class="blue">...]</span><span class="pink"> </span><i>dst_pos</i><span class="pink"> </span><i>len</i><br><dl><dd>Copy elements of array <i>src_array</i> to array <i>dst_array</i><br></dl>
+<dl>
+<dd>The same array can be specified for <i>src_array</i> and <i>dst_array</i>, and it will be copied correctly even if the copy areas overlap.<br>
+<dd>It can be performed on one-dimensional data inside a multidimensional array.<br>
+</dl>
+<span class="pink">:arrayfill </span><i>value</i><span class="pink"> </span><i>array</i><span class="pink"> </span><span class="blue">[</span><i>index</i><span class="blue">...]</span><span class="pink"> </span><i>pos</i><span class="pink"> </span><i>len</i><br><dl><dd>Assign the value <i>value</i> to an element of the array <i>array</i><br></dl>
+<dl>
+<dd>It can be performed on one-dimensional data inside a multidimensional array.<br>
+</dl>
 <hr class="hr_border">
 <span class="pink">:sprint @@</span><i>index</i><span class="pink"> </span><span class="blue">[</span><span class="pink">&quot;</span><i>str</i><span class="blue">]|[</span><i>val</i><span class="blue">]...</span><br><dl><dd>Output to character string<br></dl>
+<hr class="hr">
+<span class="pink">:strcat @@</span><i>index</i><span class="pink"> &quot;</span><i>str</i><br><dl><dd>Add string <i>str</i> to string <span class="pink">@@</span><i>index</i><br></dl>
+<hr class="hr">
+<span class="pink">:strcpy @@</span><i>index</i><span class="pink"> &quot;</span><i>str</i><br><dl><dd>Copy string <i>str</i> to string <span class="pink">@@</span><i>index</i><br></dl>
+<hr class="hr">
+<span class="pink">:strlwr @@</span><i>index</i><br><dl><dd>Convert characters in string <span class="pink">@@</span><i>index</i> to lowercase<br></dl>
+<hr class="hr">
+<span class="pink">:strupr @@</span><i>index</i><br><dl><dd>Convert characters in string <span class="pink">@@</span><i>index</i> to uppercase<br></dl>
 <hr class="hr_border">
 <span class="pink">:clear</span><br><dl><dd>Clear the screen<br></dl>
 <hr class="hr">
@@ -391,13 +408,15 @@ The comment start character is identified before <span class="pink">[]</span> or
 <dl>
 <dd>When <i>col</i> is specified, the current color index is set to <i>col</i>.<br>
 </dl>
-<span class="pink">:gput </span><i>array</i><br><dl><dd>Draw an image from a two-dimensional array<br></dl>
+<span class="pink">:gput </span><i>array</i><br><dl><dd>Draw image from two-dimensional array<br></dl>
+<hr class="hr">
+<span class="pink">:gput24 </span><i>array</i><br><dl><dd>Draw image from two-dimensional array of RGB color data<br></dl>
 <hr class="hr">
 <span class="pink">:gget </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>var</i><br><dl><dd>Store dot value in variable<br></dl>
 <hr class="hr">
-<span class="pink">:gget </span><i>array</i><br><dl><dd>Store the image in a two-dimensional array<br></dl>
+<span class="pink">:gget </span><i>array</i><br><dl><dd>Store the off-screen image in a two-dimensional array<br></dl>
 <hr class="hr">
-<span class="pink">:gget24 </span><i>array</i><br><dl><dd>Store RGB color data of loaded image in two-dimensional array<br></dl>
+<span class="pink">:gget24 </span><i>array</i><br><dl><dd>Store RGB color data of displayed image in two-dimensional array<br></dl>
 <!--
 <hr class="hr">
 <span class="pink">:gupdate </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">|</span><span class="pink">\-1</span><span class="blue">]</span><br><dl><dd><br></dl>
@@ -1124,6 +1143,19 @@ Substitution<br>
 <hr class="hr">
 <span class="pink">trans @@</span><i>index</i><br><dl><dd>Transpose matrix<br></dl>
 <hr class="hr_border">
+<span class="pink">strcmp &quot;</span><i>str1</i><span class="pink"> &quot;</span><i>str2</i><br>
+<span class="pink">stricmp &quot;</span><i>str1</i><span class="pink"> &quot;</span><i>str2</i><br>
+<dl><dd>Compare strings. The meaning of the return value is as follows.<br>
+<dl>
+<dd>less than zero - <i>str1</i> is less than <i>str2</i>.<br>
+<dd>zero - <i>str1</i> and <i>str2</i> are equal.<br>
+<dd>greater than zero - <i>str1</i> is greater than <i>str2</i>.<br>
+</dl>
+<dd><span class="pink">stricmp</span> is case insensitive.<br>
+</dl>
+<hr class="hr">
+<span class="pink">strlen &quot;</span><i>str</i><br><dl><dd>String length<br></dl>
+<hr class="hr_border">
 <span class="pink">gwidth</span><br><dl><dd>Off-screen width<br></dl>
 <hr class="hr">
 <span class="pink">gheight</span><br><dl><dd>Off-screen height<br></dl>
@@ -1471,6 +1503,8 @@ In <span class="pink">$LOOPEND_I</span>, <i>count</i> is incremented first, and 
 In <span class="pink">$LOOPEND_D</span>, <i>count</i> is decremented first, and when the value of <i>count</i> is less than or equal to <i>stop</i>, exit the loop.<br>
 <hr class="hr">
 In <span class="pink">$LOOPENDE</span>, <span class="pink">$LOOPENDE_I</span> and <span class="pink">$LOOPENDE_D</span>, loop processing is also executed even if the value of <i>count</i> is equal to <i>stop</i>.<br>
+<hr class="hr">
+<span class="pink">$LOOPCONT</span> returns immediately to the corresponding <span class="pink">$LOOPSTART</span>.<br>
 <hr class="hr">
 It is necessary to initialize the value of <i>count</i> before <span class="pink">$LOOPSTART</span>.<br>
 <hr class="hr">

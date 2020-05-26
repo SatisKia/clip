@@ -603,6 +603,7 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 		this._commandGTextL,
 		this._commandGLine,
 		this._commandGPut,
+		this._commandGPut24,
 		this._commandGGet,
 		this._commandGGet24,
 		this._commandGUpdate,
@@ -6857,7 +6858,7 @@ _Proc.prototype = {
 			case _CLIP_CODE_LABEL:
 			case _CLIP_CODE_GLOBAL_VAR:
 			case _CLIP_CODE_GLOBAL_ARRAY:
-				param._array._label.define( newToken.obj() );
+				param._array.define( newToken.obj() );
 				break;
 			default:
 				return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
@@ -6884,7 +6885,7 @@ _Proc.prototype = {
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
 					if( newCode.val() == _CLIP_CODE_PARAM_ARRAY ){
-						param._array._label.define( label );
+						param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
 						param._var.define( label, 0.0, false );
@@ -6916,7 +6917,7 @@ _Proc.prototype = {
 				lock = _this.curLine().lock();
 				if( _this.curLine().getToken( newCode, newToken ) ){
 					if( newCode.val() == _CLIP_CODE_PARAM_ARRAY ){
-						_global_param._array._label.define( label );
+						_global_param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
 						_global_param._var.define( label, 0.0, false );
@@ -7140,12 +7141,15 @@ _Proc.prototype = {
 		if( _this._const( param, code, token, value[0] ) == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
 				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					if( (newCode.val() == _CLIP_CODE_LABEL) || (newCode.val() == _CLIP_CODE_GLOBAL_VAR) || (newCode.val() == _CLIP_CODE_GLOBAL_ARRAY) ){
-						var index = param._array._label.define( newToken.obj() );
+					if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+						if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
+							param = _global_param;
+						}
+						var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return _CLIP_PROC_SUB_END;
-					} else if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
-						var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+					} else if( (newCode.val() == _CLIP_CODE_LABEL) || (newCode.val() == _CLIP_CODE_GLOBAL_VAR) ){
+						var index = param._array.define( newToken.obj() );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return _CLIP_PROC_SUB_END;
 					}
@@ -8063,6 +8067,39 @@ _Proc.prototype = {
 		}
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
+	_commandGPut24 : function( _this, param, code, token ){
+		var x, y;
+
+		var newCode = new _Integer();
+		var newToken = new _Void();
+
+		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+			if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
+					param = _global_param;
+				}
+
+				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var arrayList = new Array( 3 );
+
+				arrayList[2] = -1;
+				for( y = 0; y < _proc_gworld.height(); y++ ){
+					arrayList[0] = y;
+					for( x = 0; x < _proc_gworld.width(); x++ ){
+						arrayList[1] = x;
+						doCommandGPut24(
+							x, y,
+							_UNSIGNED( param._array.val( _arrayIndex, arrayList, 2 ).toFloat(), _UMAX_24 )
+							);
+					}
+				}
+				doCommandGPut24End();
+
+				return _CLIP_PROC_SUB_END;
+			}
+		}
+		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+	},
 	_commandWPut : function( _this, param, code, token ){
 		var i;
 		var ret = _CLIP_NO_ERR;
@@ -8955,6 +8992,8 @@ _Proc.prototype = {
 //function doCommandGWorld( gWorld, width, height ){}
 //function doCommandWindow( gWorld, left, bottom, right, top ){}
 //function doCommandGColor( color, rgb ){}
+//function doCommandGPut24( x, y, rgb ){}
+//function doCommandGPut24End(){}
 //function doCommandGGet24Begin( width/*_Integer*/, height/*_Integer*/ ){ return null; }
 //function doCommandGGet24End(){}
 //function doCommandGUpdate( gWorld ){}
