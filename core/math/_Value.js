@@ -737,9 +737,18 @@ function setValue( v, type, c, f, t ){
 	setTime( v._t, t._fps, t._minus, t._hour, t._min, t._sec, t._frame );
 	return v;
 }
-
+function copyValue( v, x ){
+	v._type = x._type;
+	switch( v._type ){
+	case _VALUE_TYPE_COMPLEX: setComplex( v._c, x._c._re, x._c._im ); break;
+	case _VALUE_TYPE_FRACT  : setFract( v._f, x._f._mi, x._f._nu, x._f._de ); break;
+	case _VALUE_TYPE_TIME   : setTime( v._t, x._t._fps, x._t._minus, x._t._hour, x._t._min, x._t._sec, x._t._frame ); break;
+	}
+	return v;
+}
 function dupValue( x ){
-	return setValue( new _Value(), x._type, x._c, x._f, x._t );
+//	return setValue( new _Value(), x._type, x._c, x._f, x._t );
+	return copyValue( new _Value(), x );
 }
 
 function floatToValue( x ){

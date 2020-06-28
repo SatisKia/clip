@@ -272,8 +272,8 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	con.setMaxLen( conMaxLen );
 
 	// 文字情報を登録する
-	regGWorldDefCharInfo();
-	regGWorldDefCharInfoLarge();
+	regGWorldDefCharInfo( 0 );
+	regGWorldDefCharInfoLarge( 1 );
 
 	// システムの背景色（canvasClearより前に設定）
 	regGWorldBgColor( 0xC0C0C0 );
@@ -600,11 +600,8 @@ function getExtFuncDataNameSpace( func ){
 	return null;
 }
 
-function mainProc( parentProc, func, childParam, funcParam, parentParam ){
+function mainProc( parentProc, parentParam, func, funcParam, childProc, childParam ){
 	var ret;
-
-	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
 _TRY
 	ret = childProc.mainLoop( func, childParam, funcParam, parentParam );
 _CATCH
@@ -620,35 +617,6 @@ _CATCH
 		}
 		resetProcLoopCount();
 	}
-	childProc.end();
-
-	return ret;
-}
-function mainProcCache( parentProc, func, internal, childParam, funcParam, parentParam ){
-	var ret;
-
-	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
-_TRY
-	if( internal ){
-		parentProc.initInternalProc( childProc, func, childParam, parentParam );
-	}
-	ret = childProc.mainLoop( func, childParam, funcParam, parentParam );
-_CATCH
-	if( (dispLoopCount > 0) && (procLoopCount() > 0) ){
-		if( dispLoopCount > 1 ){
-			con.newLine();
-			con.setColor( "0000ff" );
-			if( childParam._funcName != null ){
-				con.print( childParam._funcName + ": " );
-			}
-			con.println( "loop " + procLoopCount() );
-			con.setColor();
-		}
-		resetProcLoopCount();
-	}
-	childProc.end();
-
 	return ret;
 }
 function assertProc( num, func ){
@@ -682,9 +650,7 @@ function getErrorString( err, num, func, token ){
 }
 function errorProc( err, num, func, token ){
 	if( silentErr ){
-		if( err >= _CLIP_ERR_START ){
-			procError.add( err, num, func, token );
-		}
+		procError.add( err, num, func, token );
 	} else {
 		var string = getErrorString( err, num, func, token );
 		if( string.length > 0 ){
@@ -919,20 +885,11 @@ function doFuncGColor( rgb ){
 function doFuncGColor24( index ){
 	return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
 }
-function doFuncEval( parentProc, parentParam, string, value ){
+function doFuncEval( parentProc, childProc, childParam, string, value ){
 	var ret;
-
-	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
-	var childParam = new _Param( parentProc.curNum(), parentParam, true );
-	childParam.setEnableCommand( false );
-	childParam.setEnableStat( false );
 _TRY
 	ret = parentProc.doFuncEval( childProc, childParam, string, value );
 _CATCH
-	childParam.end();
-	childProc.end();
-
 	return ret;
 }
 
@@ -1182,7 +1139,7 @@ function doCommandDumpArray( param, index ){
 	var label;
 	var string = "";
 
-	param._array.makeToken( array, index );
+	param.getArrayToken( index, array );
 
 	if( (label = param._array._label._label[index]) != null ){
 		string = label;
@@ -1304,7 +1261,7 @@ function doCustomCommand( _this, param, code, token ){
 				var label;
 				var string = "";
 
-				param._array.makeToken( array, index );
+				param.getArrayToken( index, array );
 
 				if( (label = param._array._label._label[index]) != null ){
 					string = label;

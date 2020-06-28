@@ -38,10 +38,13 @@ __ArrayNode.prototype = {
 		}
 
 		if( this._vectorNum > 0 ){
-			dst._vector    = newValueArray( this._vectorNum + 1 );
+//			dst._vector = newValueArray( this._vectorNum + 1 );
+			for( i = this._vectorNum; i >= dst._vectorNum; i-- ){
+				dst._vector[i] = new _Value();
+			}
 			dst._vectorNum = this._vectorNum;
 			for( i = 0; i < this._vectorNum; i++ ){
-				dst._vector[i].ass( this._vector[i] );
+				copyValue( dst._vector[i], this._vector[i] );
 			}
 		} else {
 			dst._vector    = newValueArray( 1 );
@@ -78,23 +81,28 @@ __ArrayNode.prototype = {
 	// 値を代入する
 	_newVector : function( index ){
 		if( this._vectorNum == 0 ){
-			this._vectorNum = index + 1;
-			this._vector    = newValueArray( this._vectorNum + 1 );
+			this._vector = newValueArray( index + 2 );
 		} else {
+#if 0
 			var tmp = newValueArray( index + 2 );
 
 			// 既存の配列をコピーする
 			for( var i = 0; i < this._vectorNum; i++ ){
-				tmp[i].ass( this._vector[i] );
+				copyValue( tmp[i], this._vector[i] );
 			}
 
-			this._vector    = tmp;
-			this._vectorNum = index + 1;
+			this._vector = tmp;
+#endif
+			for( var i = index + 1; i >= this._vectorNum; i-- ){
+				this._vector[i] = new _Value();
+			}
 		}
+
+		this._vectorNum = index + 1;
 	},
 	_resizeVector : function( index ){
 		// 番人
-		this._vector[index + 1].ass( this._vector[this._vectorNum] );
+		copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
 
 		this._vectorNum = index + 1;
 	},
@@ -366,6 +374,8 @@ _Array.prototype = {
 		} else {
 			this._node[srcIndex].makeToken( dst, true );
 		}
+
+		return dst;
 	}
 
 };

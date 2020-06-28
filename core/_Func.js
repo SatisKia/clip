@@ -10,8 +10,8 @@ function _FuncInfo(){
 }
 
 // ユーザー定義関数データ
-function __Func(){
-	this._createFlag = true;
+function __Func( createFlag ){
+	this._createFlag = createFlag;
 	this._info       = new _FuncInfo();
 	this._label      = new _Token();	// 引数のラベル
 	this._line       = new _Line();
@@ -68,8 +68,8 @@ _Func.prototype = {
 		return (this._top != null);
 	},
 
-	_add : function(){
-		var tmp = new __Func();
+	_add : function( createFlag ){
+		var tmp = new __Func( createFlag );
 
 		if( this._top == null ){
 			// 先頭に登録する
@@ -84,8 +84,8 @@ _Func.prototype = {
 
 		return tmp;
 	},
-	_ins : function(){
-		var tmp = new __Func();
+	_ins : function( createFlag ){
+		var tmp = new __Func( createFlag );
 
 		if( this._top == null ){
 			// 先頭に登録する
@@ -111,9 +111,8 @@ _Func.prototype = {
 			this._del();
 		}
 
-		var tmp = this._ins();
+		var tmp = this._ins( true );
 
-		tmp._createFlag = true;
 		tmp._info._name = name;
 		tmp._info._cnt  = 0;
 		tmp._topNum     = (topNum == undefined) ? 1 : topNum;
@@ -133,13 +132,12 @@ _Func.prototype = {
 			this._del();
 		}
 
-		var tmp = this._ins();
+		var tmp = this._ins( false );
 
-		tmp._createFlag = false;
-		tmp._info       = srcFunc._info;
-		tmp._label      = srcFunc._label;
-		tmp._line       = srcFunc._line;
-		tmp._topNum     = srcFunc._topNum;
+		tmp._info   = srcFunc._info;
+		tmp._label  = srcFunc._label;
+		tmp._line   = srcFunc._line;
+		tmp._topNum = srcFunc._topNum;
 
 		this._funcNum++;
 
@@ -154,13 +152,12 @@ _Func.prototype = {
 
 		srcFunc = src._top;
 		while( srcFunc != null ){
-			dstFunc = this._add();
+			dstFunc = this._add( false );
 
-			dstFunc._createFlag = false;
-			dstFunc._info       = srcFunc._info;
-			dstFunc._label      = srcFunc._label;
-			dstFunc._line       = srcFunc._line;
-			dstFunc._topNum     = srcFunc._topNum;
+			dstFunc._info   = srcFunc._info;
+			dstFunc._label  = srcFunc._label;
+			dstFunc._line   = srcFunc._line;
+			dstFunc._topNum = srcFunc._topNum;
 
 			srcFunc = srcFunc._next;
 		}

@@ -742,9 +742,11 @@ _GWorld.prototype = {
 
 };
 
-//function gWorldClear( gWorld, color ){}
-//function gWorldSetColor( gWorld, color ){}
-//function gWorldPutColor( gWorld, x, y, color ){}
-//function gWorldPut( gWorld, x, y ){}
-//function gWorldFill( gWorld, x, y, w, h ){}
-//function gWorldLine( gWorld, x1, y1, x2, y2 ){}
+function defGWorldFunction(){
+	if( window.gWorldClear == undefined ) window.gWorldClear = function( gWorld, color ){};
+	if( window.gWorldSetColor == undefined ) window.gWorldSetColor = function( gWorld, color ){};
+	if( window.gWorldPutColor == undefined ) window.gWorldPutColor = function( gWorld, x, y, color ){};
+	if( window.gWorldPut == undefined ) window.gWorldPut = function( gWorld, x, y ){};
+	if( window.gWorldFill == undefined ) window.gWorldFill = function( gWorld, x, y, w, h ){};
+	if( window.gWorldLine == undefined ) window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){};
+}

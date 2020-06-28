@@ -18,6 +18,7 @@ window.regGWorldCharInfo = regGWorldCharInfo;
 window.regGWorldBgColor = regGWorldBgColor;
 window.gWorldBgColor = gWorldBgColor;
 window._GWorld = _GWorld;
+window.defGWorldFunction = defGWorldFunction;
 window._Label = _Label;
 window._Line = _Line;
 window._Loop = _Loop;
@@ -35,6 +36,7 @@ window.procLoopCount = procLoopCount;
 window.procLoopCountMax = procLoopCountMax;
 window.procLoopTotal = procLoopTotal;
 window._Proc = _Proc;
+window.defProcFunction = defProcFunction;
 window._TOKEN_OP = _TOKEN_OP;
 window._TOKEN_FUNC = _TOKEN_FUNC;
 window._TOKEN_STAT = _TOKEN_STAT;
@@ -145,6 +147,7 @@ window._Value = _Value;
 window.deleteValue = deleteValue;
 window.getValue = getValue;
 window.setValue = setValue;
+window.copyValue = copyValue;
 window.dupValue = dupValue;
 window.floatToValue = floatToValue;
 window.complexToValue = complexToValue;
@@ -185,10 +188,12 @@ __ArrayNode.prototype = {
 			dst._nodeNum = 0;
 		}
 		if( this._vectorNum > 0 ){
-			dst._vector = newValueArray( this._vectorNum + 1 );
+			for( i = this._vectorNum; i >= dst._vectorNum; i-- ){
+				dst._vector[i] = new _Value();
+			}
 			dst._vectorNum = this._vectorNum;
 			for( i = 0; i < this._vectorNum; i++ ){
-				dst._vector[i].ass( this._vector[i] );
+				copyValue( dst._vector[i], this._vector[i] );
 			}
 		} else {
 			dst._vector = newValueArray( 1 );
@@ -218,19 +223,16 @@ __ArrayNode.prototype = {
 	},
 	_newVector : function( index ){
 		if( this._vectorNum == 0 ){
-			this._vectorNum = index + 1;
-			this._vector = newValueArray( this._vectorNum + 1 );
+			this._vector = newValueArray( index + 2 );
 		} else {
-			var tmp = newValueArray( index + 2 );
-			for( var i = 0; i < this._vectorNum; i++ ){
-				tmp[i].ass( this._vector[i] );
+			for( var i = index + 1; i >= this._vectorNum; i-- ){
+				this._vector[i] = new _Value();
 			}
-			this._vector = tmp;
-			this._vectorNum = index + 1;
 		}
+		this._vectorNum = index + 1;
 	},
 	_resizeVector : function( index ){
-		this._vector[index + 1].ass( this._vector[this._vectorNum] );
+		copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
 		this._vectorNum = index + 1;
 	},
 	_newNode : function( index ){
@@ -466,14 +468,15 @@ _Array.prototype = {
 		} else {
 			this._node[srcIndex].makeToken( dst, true );
 		}
+		return dst;
 	}
 };
 function _FuncInfo(){
 	this._name = new String();
 	this._cnt = 0;
 }
-function __Func(){
-	this._createFlag = true;
+function __Func( createFlag ){
+	this._createFlag = createFlag;
 	this._info = new _FuncInfo();
 	this._label = new _Token();
 	this._line = new _Line();
@@ -519,8 +522,8 @@ _Func.prototype = {
 	canDel : function(){
 		return (this._top != null);
 	},
-	_add : function(){
-		var tmp = new __Func();
+	_add : function( createFlag ){
+		var tmp = new __Func( createFlag );
 		if( this._top == null ){
 			this._top = tmp;
 			this._end = tmp;
@@ -531,8 +534,8 @@ _Func.prototype = {
 		}
 		return tmp;
 	},
-	_ins : function(){
-		var tmp = new __Func();
+	_ins : function( createFlag ){
+		var tmp = new __Func( createFlag );
 		if( this._top == null ){
 			this._top = tmp;
 			this._end = tmp;
@@ -550,8 +553,7 @@ _Func.prototype = {
 		if( this._funcNum == this._funcMax ){
 			this._del();
 		}
-		var tmp = this._ins();
-		tmp._createFlag = true;
+		var tmp = this._ins( true );
 		tmp._info._name = name;
 		tmp._info._cnt = 0;
 		tmp._topNum = (topNum == undefined) ? 1 : topNum;
@@ -565,8 +567,7 @@ _Func.prototype = {
 		if( this._funcNum == this._funcMax ){
 			this._del();
 		}
-		var tmp = this._ins();
-		tmp._createFlag = false;
+		var tmp = this._ins( false );
 		tmp._info = srcFunc._info;
 		tmp._label = srcFunc._label;
 		tmp._line = srcFunc._line;
@@ -580,8 +581,7 @@ _Func.prototype = {
 		this.delAll();
 		srcFunc = src._top;
 		while( srcFunc != null ){
-			dstFunc = this._add();
-			dstFunc._createFlag = false;
+			dstFunc = this._add( false );
 			dstFunc._info = srcFunc._info;
 			dstFunc._label = srcFunc._label;
 			dstFunc._line = srcFunc._line;
@@ -2299,6 +2299,14 @@ _GWorld.prototype = {
 		return this._height;
 	}
 };
+function defGWorldFunction(){
+	if( window.gWorldClear == undefined ) window.gWorldClear = function( gWorld, color ){};
+	if( window.gWorldSetColor == undefined ) window.gWorldSetColor = function( gWorld, color ){};
+	if( window.gWorldPutColor == undefined ) window.gWorldPutColor = function( gWorld, x, y, color ){};
+	if( window.gWorldPut == undefined ) window.gWorldPut = function( gWorld, x, y ){};
+	if( window.gWorldFill == undefined ) window.gWorldFill = function( gWorld, x, y, w, h ){};
+	if( window.gWorldLine == undefined ) window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){};
+}
 function _Label( obj ){
 	this._obj = obj;
 	this._label = new Array( 256 );
@@ -2792,7 +2800,7 @@ _Loop.prototype = {
 function _Param( num, parentParam, inherit ){
 	var i;
 	this._parentNum = (parentParam == undefined) ? 0 : (
-		parentParam._fileFlag ? (num - parentParam._topNum + 1) : 0
+		parentParam._fileFlag ? ((parentParam._topNum > 0) ? num - parentParam._topNum + 1 : num) : 0
 		);
 	this._parentFunc = (parentParam == undefined) ? "" : (
 		(parentParam._funcName == null) ? "" : parentParam._funcName
@@ -3048,6 +3056,9 @@ _Param.prototype = {
 	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
+	},
+	getArrayToken : function( index, token ){
+		return this._array.makeToken( token, index );
 	}
 };
 var _MIN_VALUE = [ -128, 0 , -32768, 0 , -2147483648, 0 ];
@@ -3159,6 +3170,22 @@ function __ProcInfo(){
 	this._curArray = null;
 	this._curArraySize = 0;
 }
+function __Index(){
+	this._param = null;
+	this._index = -1;
+}
+__Index.prototype = {
+	set : function( param, index ){
+		this._param = param;
+		this._index = index;
+	},
+	param : function(){
+		return this._param;
+	},
+	val : function(){
+		return this._index;
+	}
+};
 var _proc_graph = null;
 var _proc_gworld = null;
 var _proc_func = null;
@@ -4697,11 +4724,13 @@ _Proc.prototype = {
 		if( !this._process( param, err ) ){
 			return false;
 		}
-		if( this._quitFlag ){
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
-		} else if( err.val() == 0x01 ){
-		} else {
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+		if( err.val() >= 0x100 ){
+			if( this._quitFlag ){
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			} else if( err.val() == 0x01 ){
+			} else {
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			}
 		}
 		if( (this._statMode == 0) && (this._stat != null) ){
 			this._stat = null;
@@ -4711,12 +4740,18 @@ _Proc.prototype = {
 	termProcess : function( param, err ){
 		var ret;
 		if( this._quitFlag ){
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			if( err.val() >= 0x100 ){
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			}
 			ret = 0x04;
 		} else if( err.val() == 0x01 ){
 			ret = 0x01;
 		} else {
-			ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+			if( err.val() >= 0x100 ){
+				ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+			} else {
+				ret = 0x02;
+			}
 		}
 		if( (this._statMode == 0) && (this._stat != null) ){
 			this._stat = null;
@@ -4758,7 +4793,11 @@ _Proc.prototype = {
 	},
 	termTestProcess : function( param, err ){
 		var ret;
-		ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+		if( err.val() >= 0x100 ){
+			ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+		} else {
+			ret = 0x02;
+		}
 		this._procLine = null;
 		return ret;
 	},
@@ -5065,9 +5104,7 @@ _Proc.prototype = {
 	},
 	printAns : function( childParam ){
 		if( childParam._array._mat[0]._len > 1 ){
-			var mat = new _Token();
-			childParam._array.makeToken( mat, 0 );
-			printAnsMatrix( childParam, mat );
+			printAnsMatrix( childParam, childParam.getArrayToken( 0, new _Token() ) );
 		} else {
 			var real = new _String();
 			var imag = new _String();
@@ -5234,7 +5271,7 @@ _Proc.prototype = {
 	},
 	_assertProc : function( num, param ){
 		return assertProc(
-			param._fileFlag ? (num - param._topNum + 1) : 0,
+			param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 			(param._funcName == null) ? "" : param._funcName
 			);
 	},
@@ -5245,21 +5282,21 @@ _Proc.prototype = {
 			}
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				this._token.tokenString( param, code, token )
 				);
 		} else if( (err & 0x2100) != 0 ){
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				this._token.tokenString( param, code, token )
 				);
-		} else {
+		} else if( err >= 0x100 ){
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				""
 				);
@@ -5986,13 +6023,13 @@ _Proc.prototype = {
 		}
 		switch( newCode.val() ){
 		case 0x21:
-			index.set( this.varIndexParam( param, newToken.obj() ) );
+			index.set( param, this.varIndexParam( param, newToken.obj() ) );
 			moveFlag.set( true );
 			break;
 		case 0x23:
 			param = _global_param;
 		case 0x22:
-			index.set( this.autoVarIndex( param, newToken.obj() ) );
+			index.set( param, this.autoVarIndex( param, newToken.obj() ) );
 			moveFlag.set( false );
 			break;
 		default:
@@ -6009,7 +6046,7 @@ _Proc.prototype = {
 		if( seFlag ){
 			if( !(this.curLine().skipComma()) ){
 				this.curLine().unlock( lock );
-				return -1;
+				return null;
 			}
 		}
 		if( this.curLine().getTokenParam( param, newCode, newToken ) ){
@@ -6034,8 +6071,9 @@ _Proc.prototype = {
 		}
 		if( index < 0 ){
 			this.curLine().unlock( lock );
+			return null;
 		}
-		return index;
+		return param._array._mat[index];
 	},
 	_funcDefined : function( _this, param, code, token, value, seFlag ){
 		var newCode = new _Integer();
@@ -6574,7 +6612,7 @@ _Proc.prototype = {
 	_funcFrexp : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		var tmpValue = new _Matrix();
-		var index = new _Integer();
+		var index = new __Index();
 		var moveFlag = new _Boolean();
 		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
 			return ret;
@@ -6584,7 +6622,7 @@ _Proc.prototype = {
 		}
 		var _n = new _Integer();
 		value.ass( tmpValue._mat[0].frexp( _n ) );
-		if( !(param.setVal( index.val(), _n.val(), moveFlag.val() )) ){
+		if( !(index.param().setVal( index.val(), _n.val(), moveFlag.val() )) ){
 			return _this._retError( 0x210E, code, token );
 		}
 		return 0x00;
@@ -6592,7 +6630,7 @@ _Proc.prototype = {
 	_funcModf : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		var tmpValue = new _Matrix();
-		var index = new _Integer();
+		var index = new __Index();
 		var moveFlag = new _Boolean();
 		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
 			return ret;
@@ -6602,7 +6640,7 @@ _Proc.prototype = {
 		}
 		var _f = new _Float();
 		value.ass( tmpValue._mat[0].modf( _f ) );
-		if( !(param.setVal( index.val(), _f.val(), moveFlag.val() )) ){
+		if( !(index.param().setVal( index.val(), _f.val(), moveFlag.val() )) ){
 			return _this._retError( 0x210E, code, token );
 		}
 		return 0x00;
@@ -6697,10 +6735,10 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_funcRow : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index]._row );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat._row );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -6712,10 +6750,10 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_funcCol : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index]._col );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat._col );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -6727,10 +6765,10 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_funcTrans : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index].trans() );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat.trans() );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -6948,7 +6986,14 @@ _Proc.prototype = {
 		if( string.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
-		return doFuncEval( _this, param, string.str(), value );
+		var childProc = new _Proc( param.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
+		var childParam = new _Param( _this.curNum(), param, true );
+		childParam.setEnableCommand( false );
+		childParam.setEnableStat( false );
+		ret = doFuncEval( _this, childProc, childParam, string.str(), value );
+		childProc.end();
+		childParam.end();
+		return ret;
 	},
 	doFuncEval : function( childProc, childParam, string, value ){
 		var ret;
@@ -9373,7 +9418,7 @@ _Proc.prototype = {
 			for( i = 0; i < len; i++ ){
 				srcIndex[srcIndexSize - 1]--;
 				srcParam = (srcCode == 0x46) ? _global_param : param;
-				srcValue[i].ass( srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
+				copyValue( srcValue[i], srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
 			}
 			dstIndex[dstIndexSize - 1] += len;
 			for( i = 0; i < len; i++ ){
@@ -10631,11 +10676,15 @@ _Proc.prototype = {
 		_this._getParams( parentParam, code, token, funcParam );
 		if( (func = parentParam._func.search( token, false, null )) != null ){
 			var ret;
+			var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
 			var childParam = new _Param( _this.curNum(), parentParam, false );
-			if( mainProcCache( _this, func, true, childParam, funcParam, parentParam ) == 0x04 ){
+			_this.initInternalProc( childProc, func, childParam, parentParam );
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = 0x00;
 			} else {
+				childProc.end();
 				ret = _this._retError( 0x2109, code, token );
 			}
 			childParam.end();
@@ -10705,25 +10754,32 @@ _Proc.prototype = {
 		var funcParam = new _Token();
 		var func;
 		_this._getParams( parentParam, code, token, funcParam );
+		var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
 		var childParam = new _Param( _this.curNum(), parentParam, false );
 		if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == 0x04 ){
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = 0x00;
 			} else {
+				childProc.end();
 				ret = _this._retError( 0x2108, code, token );
 			}
 		} else if( (func = _this.newFuncCache( token, childParam, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == 0x04 ){
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = 0x00;
 			} else {
+				childProc.end();
 				ret = _this._retError( 0x2108, code, token );
 			}
-		} else if( mainProc( _this, token, childParam, funcParam, parentParam ) == 0x04 ){
+		} else if( mainProc( _this, parentParam, token, funcParam, childProc, childParam ) == 0x04 ){
+			childProc.end();
 			_this.getAns( childParam, value, parentParam );
 			ret = 0x00;
 		} else {
+			childProc.end();
 			ret = _this._retError( 0x2108, code, token );
 		}
 		childParam.end();
@@ -10794,6 +10850,45 @@ _Proc.prototype = {
 		return true;
 	}
 };
+function defProcFunction(){
+	if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
+	if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
+	if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){};
+	if( window.assertProc == undefined ) window.assertProc = function( num, func ){ return false; };
+	if( window.errorProc == undefined ) window.errorProc = function( err, num, func, token ){};
+	if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
+	if( window.printTest == undefined ) window.printTest = function( param, line, num, comment ){};
+	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array ){};
+	if( window.printAnsComplex == undefined ) window.printAnsComplex = function( real, imag ){};
+	if( window.printWarn == undefined ) window.printWarn = function( warn, num, func ){};
+	if( window.printError == undefined ) window.printError = function( error, num, func ){};
+	if( window.doFuncGColor == undefined ) window.doFuncGColor = function( rgb ){ return 0; };
+	if( window.doFuncGColor24 == undefined ) window.doFuncGColor24 = function( index ){ return 0x000000; };
+if( window.doFuncEval == undefined ) window.doFuncEval = function( parentProc, childProc, childParam, string, value ){ return 0x00; };
+	if( window.doCommandClear == undefined ) window.doCommandClear = function(){};
+	if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
+	if( window.doCommandScan == undefined ) window.doCommandScan = function( _this, topScan, param ){};
+	if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( gWorld, width, height ){};
+	if( window.doCommandWindow == undefined ) window.doCommandWindow = function( gWorld, left, bottom, right, top ){};
+	if( window.doCommandGColor == undefined ) window.doCommandGColor = function( color, rgb ){};
+	if( window.doCommandGPut24 == undefined ) window.doCommandGPut24 = function( x, y, rgb ){};
+	if( window.doCommandGPut24End == undefined ) window.doCommandGPut24End = function(){};
+	if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width , height ){ return null; };
+	if( window.doCommandGGet24End == undefined ) window.doCommandGGet24End = function(){};
+	if( window.doCommandGUpdate == undefined ) window.doCommandGUpdate = function( gWorld ){};
+	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
+	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return 0x2140 ; };
+	if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
+	if( window.doCommandLog == undefined ) window.doCommandLog = function( topPrint ){};
+	if( window.doCommandDumpVar == undefined ) window.doCommandDumpVar = function( param, index ){};
+	if( window.doCommandDumpArray == undefined ) window.doCommandDumpArray = function( param, index ){};
+	if( window.onStartPlot == undefined ) window.onStartPlot = function(){};
+	if( window.onEndPlot == undefined ) window.onEndPlot = function(){};
+	if( window.onStartRePlot == undefined ) window.onStartRePlot = function(){};
+	if( window.onEndRePlot == undefined ) window.onEndRePlot = function(){};
+}
 var _TOKEN_OP = [
 	"[++]",
 	"[--]",
@@ -14621,7 +14716,7 @@ _Matrix.prototype = {
 			var n = (col < this._col) ? col : this._col;
 			for( i = 0; i < m; i++ ){
 				for( j = 0; j < n; j++ ){
-					mat[i * col + j].ass( this._val( i, j ) );
+					copyValue( mat[i * col + j], this._val( i, j ) );
 				}
 			}
 			this._mat = mat;
@@ -14633,9 +14728,11 @@ _Matrix.prototype = {
 	},
 	_resize : function( ini ){
 		if( ini._len > this._len ){
-			this._mat = newValueArray( ini._len + 1 );
+			for( var i = ini._len; i > this._len; i-- ){
+				this._mat[i] = new _Value();
+			}
 		} else {
-			this._mat[ini._len].ass( this._mat[this._len] );
+			copyValue( this._mat[ini._len], this._mat[this._len] );
 		}
 		this._row = ini._row;
 		this._col = ini._col;
@@ -14643,7 +14740,7 @@ _Matrix.prototype = {
 	},
 	_resize1 : function(){
 		if( this._len > 1 ){
-			this._mat[1].ass( this._mat[this._len] );
+			copyValue( this._mat[1], this._mat[this._len] );
 			this._row = 1;
 			this._col = 1;
 			this._len = 1;
@@ -14692,13 +14789,16 @@ assert( (row != undefined) && (col != undefined) );
 		if( r instanceof _Matrix ){
 			if( r._len == 1 ){
 				this._resize1();
-				this._mat[0].ass( r._mat[0] );
+				copyValue( this._mat[0], r._mat[0] );
 			} else {
 				this._resize( r );
 				for( var i = 0; i < this._len; i++ ){
-					this._mat[i].ass( r._mat[i] );
+					copyValue( this._mat[i], r._mat[i] );
 				}
 			}
+		} else if( r instanceof _Value ){
+			this._resize1();
+			copyValue( this._mat[0], r );
 		} else {
 			this._resize1();
 			this._mat[0].ass( r );
@@ -14708,7 +14808,7 @@ assert( (row != undefined) && (col != undefined) );
 	minus : function(){
 		var a = new _Matrix( this._row, this._col );
 		for( var i = 0; i < this._len; i++ ){
-			a._mat[i].ass( this._mat[i].minus() );
+			copyValue( a._mat[i], this._mat[i].minus() );
 		}
 		return a;
 	},
@@ -14724,7 +14824,7 @@ assert( (row != undefined) && (col != undefined) );
 				);
 			for( i = 0; i < a._row; i++ ){
 				for( j = 0; j < a._col; j++ ){
-					a._val( i, j ).ass( this.val( i, j ).add( r.val( i, j ) ) );
+					copyValue( a._val( i, j ), this.val( i, j ).add( r.val( i, j ) ) );
 				}
 			}
 			return a;
@@ -14766,7 +14866,7 @@ assert( (row != undefined) && (col != undefined) );
 				);
 			for( i = 0; i < a._row; i++ ){
 				for( j = 0; j < a._col; j++ ){
-					a._val( i, j ).ass( this.val( i, j ).sub( r.val( i, j ) ) );
+					copyValue( a._val( i, j ), this.val( i, j ).sub( r.val( i, j ) ) );
 				}
 			}
 			return a;
@@ -14804,7 +14904,7 @@ assert( (row != undefined) && (col != undefined) );
 			if( r._len == 1 ){
 				var a = new _Matrix( this._row, this._col );
 				for( var i = 0; i < this._len; i++ ){
-					a._mat[i].ass( this._mat[i].mul( r._mat[0] ) );
+					copyValue( a._mat[i], this._mat[i].mul( r._mat[0] ) );
 				}
 				return a;
 			}
@@ -14820,14 +14920,14 @@ assert( (row != undefined) && (col != undefined) );
 					for( k = 0; k < m; k++ ){
 						t.addAndAss( this.val( i, k ).mul( r.val( k, j ) ) );
 					}
-					a._val( i, j ).ass( t );
+					copyValue( a._val( i, j ), t );
 				}
 			}
 			return a;
 		}
 		var a = new _Matrix( this._row, this._col );
 		for( var i = 0; i < this._len; i++ ){
-			a._mat[i].ass( this._mat[i].mul( r ) );
+			copyValue( a._mat[i], this._mat[i].mul( r ) );
 		}
 		return a;
 	},
@@ -14857,11 +14957,11 @@ assert( (row != undefined) && (col != undefined) );
 		var a = new _Matrix( this._row, this._col );
 		if( r instanceof _Matrix ){
 			for( var i = 0; i < this._len; i++ ){
-				a._mat[i].ass( this._mat[i].div( r._mat[0] ) );
+				copyValue( a._mat[i], this._mat[i].div( r._mat[0] ) );
 			}
 		} else {
 			for( var i = 0; i < this._len; i++ ){
-				a._mat[i].ass( this._mat[i].div( r ) );
+				copyValue( a._mat[i], this._mat[i].div( r ) );
 			}
 		}
 		return a;
@@ -14940,7 +15040,7 @@ assert( (row != undefined) && (col != undefined) );
 		var a = new _Matrix( this._col, this._row );
 		for( i = 0; i < a._row; i++ ){
 			for( j = 0; j < a._col; j++ ){
-				a._val( i, j ).ass( this._val( j, i ) );
+				copyValue( a._val( i, j ), this._val( j, i ) );
 			}
 		}
 		return a;
@@ -14955,7 +15055,7 @@ function deleteMatrix( x ){
 function dupMatrix( x ){
 	var a = new _Matrix( x._row, x._col );
 	for( var i = 0; i < x._len; i++ ){
-		a._mat[i].ass( x._mat[i] );
+		copyValue( a._mat[i], x._mat[i] );
 	}
 	return a;
 }
@@ -14978,7 +15078,7 @@ function arrayToMatrix( x ){
 }
 function valueToMatrix( x ){
 	var a = new _Matrix();
-	a._mat[0].ass( x );
+	copyValue( a._mat[0], x );
 	return a;
 }
 function floatToMatrix( x ){
@@ -16096,8 +16196,17 @@ function setValue( v, type, c, f, t ){
 	setTime( v._t, t._fps, t._minus, t._hour, t._min, t._sec, t._frame );
 	return v;
 }
+function copyValue( v, x ){
+	v._type = x._type;
+	switch( v._type ){
+	case 0: setComplex( v._c, x._c._re, x._c._im ); break;
+	case 1 : setFract( v._f, x._f._mi, x._f._nu, x._f._de ); break;
+	case 2 : setTime( v._t, x._t._fps, x._t._minus, x._t._hour, x._t._min, x._t._sec, x._t._frame ); break;
+	}
+	return v;
+}
 function dupValue( x ){
-	return setValue( new _Value(), x._type, x._c, x._f, x._t );
+	return copyValue( new _Value(), x );
 }
 function floatToValue( x ){
 	return (new _Value()).setFloat( x );

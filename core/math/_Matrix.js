@@ -39,7 +39,7 @@ _Matrix.prototype = {
 			var n = (col < this._col) ? col : this._col;
 			for( i = 0; i < m; i++ ){
 				for( j = 0; j < n; j++ ){
-					mat[i * col + j].ass( this._val( i, j ) );
+					copyValue( mat[i * col + j], this._val( i, j ) );
 				}
 			}
 
@@ -53,10 +53,13 @@ _Matrix.prototype = {
 	},
 	_resize : function( ini ){
 		if( ini._len > this._len ){
-			this._mat = newValueArray( ini._len + 1/*番人*/ );
+//			this._mat = newValueArray( ini._len + 1/*番人*/ );
+			for( var i = ini._len; i > this._len; i-- ){
+				this._mat[i] = new _Value();
+			}
 		} else {
 			// 番人
-			this._mat[ini._len].ass( this._mat[this._len] );
+			copyValue( this._mat[ini._len], this._mat[this._len] );
 		}
 		this._row = ini._row;
 		this._col = ini._col;
@@ -65,7 +68,7 @@ _Matrix.prototype = {
 	_resize1 : function(){
 		if( this._len > 1 ){
 			// 番人
-			this._mat[1].ass( this._mat[this._len] );
+			copyValue( this._mat[1], this._mat[this._len] );
 
 			this._row = 1;
 			this._col = 1;
@@ -134,13 +137,16 @@ assert( (row != undefined) && (col != undefined) );
 		if( r instanceof _Matrix ){
 			if( r._len == 1 ){
 				this._resize1();
-				this._mat[0].ass( r._mat[0] );
+				copyValue( this._mat[0], r._mat[0] );
 			} else {
 				this._resize( r );
 				for( var i = 0; i < this._len; i++ ){
-					this._mat[i].ass( r._mat[i] );
+					copyValue( this._mat[i], r._mat[i] );
 				}
 			}
+		} else if( r instanceof _Value ){
+			this._resize1();
+			copyValue( this._mat[0], r );
 		} else {
 			this._resize1();
 			this._mat[0].ass( r );
@@ -152,7 +158,7 @@ assert( (row != undefined) && (col != undefined) );
 	minus : function(){
 		var a = new _Matrix( this._row, this._col );
 		for( var i = 0; i < this._len; i++ ){
-			a._mat[i].ass( this._mat[i].minus() );
+			copyValue( a._mat[i], this._mat[i].minus() );
 		}
 		return a;
 	},
@@ -170,7 +176,7 @@ assert( (row != undefined) && (col != undefined) );
 				);
 			for( i = 0; i < a._row; i++ ){
 				for( j = 0; j < a._col; j++ ){
-					a._val( i, j ).ass( this.val( i, j ).add( r.val( i, j ) ) );
+					copyValue( a._val( i, j ), this.val( i, j ).add( r.val( i, j ) ) );
 				}
 			}
 			return a;
@@ -214,7 +220,7 @@ assert( (row != undefined) && (col != undefined) );
 				);
 			for( i = 0; i < a._row; i++ ){
 				for( j = 0; j < a._col; j++ ){
-					a._val( i, j ).ass( this.val( i, j ).sub( r.val( i, j ) ) );
+					copyValue( a._val( i, j ), this.val( i, j ).sub( r.val( i, j ) ) );
 				}
 			}
 			return a;
@@ -254,7 +260,7 @@ assert( (row != undefined) && (col != undefined) );
 			if( r._len == 1 ){
 				var a = new _Matrix( this._row, this._col );
 				for( var i = 0; i < this._len; i++ ){
-					a._mat[i].ass( this._mat[i].mul( r._mat[0] ) );
+					copyValue( a._mat[i], this._mat[i].mul( r._mat[0] ) );
 				}
 				return a;
 			}
@@ -270,14 +276,14 @@ assert( (row != undefined) && (col != undefined) );
 					for( k = 0; k < m; k++ ){
 						t.addAndAss( this.val( i, k ).mul( r.val( k, j ) ) );
 					}
-					a._val( i, j ).ass( t );
+					copyValue( a._val( i, j ), t );
 				}
 			}
 			return a;
 		}
 		var a = new _Matrix( this._row, this._col );
 		for( var i = 0; i < this._len; i++ ){
-			a._mat[i].ass( this._mat[i].mul( r ) );
+			copyValue( a._mat[i], this._mat[i].mul( r ) );
 		}
 		return a;
 	},
@@ -309,11 +315,11 @@ assert( (row != undefined) && (col != undefined) );
 		var a = new _Matrix( this._row, this._col );
 		if( r instanceof _Matrix ){
 			for( var i = 0; i < this._len; i++ ){
-				a._mat[i].ass( this._mat[i].div( r._mat[0] ) );
+				copyValue( a._mat[i], this._mat[i].div( r._mat[0] ) );
 			}
 		} else {
 			for( var i = 0; i < this._len; i++ ){
-				a._mat[i].ass( this._mat[i].div( r ) );
+				copyValue( a._mat[i], this._mat[i].div( r ) );
 			}
 		}
 		return a;
@@ -398,7 +404,7 @@ assert( (row != undefined) && (col != undefined) );
 		var a = new _Matrix( this._col, this._row );
 		for( i = 0; i < a._row; i++ ){
 			for( j = 0; j < a._col; j++ ){
-				a._val( i, j ).ass( this._val( j, i ) );
+				copyValue( a._val( i, j ), this._val( j, i ) );
 			}
 		}
 		return a;
@@ -416,7 +422,7 @@ function deleteMatrix( x ){
 function dupMatrix( x ){
 	var a = new _Matrix( x._row, x._col );
 	for( var i = 0; i < x._len; i++ ){
-		a._mat[i].ass( x._mat[i] );
+		copyValue( a._mat[i], x._mat[i] );
 	}
 	return a;
 }
@@ -440,7 +446,7 @@ function arrayToMatrix( x ){
 }
 function valueToMatrix( x ){
 	var a = new _Matrix();
-	a._mat[0].ass( x );
+	copyValue( a._mat[0], x );
 	return a;
 }
 function floatToMatrix( x ){

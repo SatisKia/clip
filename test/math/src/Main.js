@@ -87,14 +87,13 @@ function toString( x ){
 	return s;
 }
 
-var start, end;
+var time;
 function startTest( str ){
-	start = (new Date()).getTime();
+	time = (new Date()).getTime();
 	printBold( str );
 }
 function endTest(){
-	end = (new Date()).getTime();
-	printBold( "" + ((end - start) / 1000) + " sec" );
+	printBold( "" + ((new Date()).getTime() - time) + " ms" );
 	con.println();
 }
 

@@ -11,7 +11,7 @@ function _Param( num, parentParam, inherit ){
 
 	// 呼び出し元情報
 	this._parentNum = (parentParam == undefined) ? 0 : (
-		parentParam._fileFlag ? (num - parentParam._topNum + 1) : 0
+		parentParam._fileFlag ? ((parentParam._topNum > 0) ? num - parentParam._topNum + 1 : num) : 0
 		);
 	this._parentFunc = (parentParam == undefined) ? "" : (
 		(parentParam._funcName == null) ? "" : parentParam._funcName
@@ -317,6 +317,10 @@ _Param.prototype = {
 	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
+	},
+
+	getArrayToken : function( index, token/*_Token*/ ){
+		return this._array.makeToken( token, index );
 	}
 
 };

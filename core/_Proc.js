@@ -128,6 +128,23 @@ function __ProcInfo(){
 	this._curArraySize = 0;
 }
 
+function __Index(){
+	this._param = null;
+	this._index = -1;
+}
+__Index.prototype = {
+	set : function( param, index ){
+		this._param = param;
+		this._index = index;
+	},
+	param : function(){
+		return this._param;
+	},
+	val : function(){
+		return this._index;
+	}
+};
+
 var _proc_graph  = null;	// グラフ描画サポート
 var _proc_gworld = null;	// グラフィック描画サポート
 var _proc_func   = null;	// 外部関数キャッシュ
@@ -1918,11 +1935,13 @@ _Proc.prototype = {
 			return false;
 		}
 
-		if( this._quitFlag ){
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
-		} else if( err.val() == _CLIP_LOOP_STOP ){
-		} else {
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+		if( err.val() >= _CLIP_ERR_START ){
+			if( this._quitFlag ){
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			} else if( err.val() == _CLIP_LOOP_STOP ){
+			} else {
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			}
 		}
 
 		if( (this._statMode == _STAT_MODE_NOT_START) && (this._stat != null) ){
@@ -1936,12 +1955,18 @@ _Proc.prototype = {
 		var ret;
 
 		if( this._quitFlag ){
-			this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			if( err.val() >= _CLIP_ERR_START ){
+				this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+			}
 			ret = _CLIP_PROC_END;
 		} else if( err.val() == _CLIP_LOOP_STOP ){
 			ret = _CLIP_LOOP_STOP;
 		} else {
-			ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? _CLIP_LOOP_STOP : _CLIP_LOOP_CONT;
+			if( err.val() >= _CLIP_ERR_START ){
+				ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? _CLIP_LOOP_STOP : _CLIP_LOOP_CONT;
+			} else {
+				ret = _CLIP_LOOP_CONT;
+			}
 		}
 
 		if( (this._statMode == _STAT_MODE_NOT_START) && (this._stat != null) ){
@@ -1997,7 +2022,11 @@ _Proc.prototype = {
 	termTestProcess : function( param, err/*_Integer*/ ){
 		var ret;
 
-		ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? _CLIP_LOOP_STOP : _CLIP_LOOP_CONT;
+		if( err.val() >= _CLIP_ERR_START ){
+			ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? _CLIP_LOOP_STOP : _CLIP_LOOP_CONT;
+		} else {
+			ret = _CLIP_LOOP_CONT;
+		}
 
 		this._procLine = null;
 
@@ -2365,9 +2394,7 @@ _Proc.prototype = {
 	},
 	printAns : function( childParam ){
 		if( childParam._array._mat[0]._len > 1 ){
-			var mat = new _Token();
-			childParam._array.makeToken( mat, 0 );
-			printAnsMatrix( childParam, mat );
+			printAnsMatrix( childParam, childParam.getArrayToken( 0, new _Token() ) );
 		} else {
 			var real = new _String();
 			var imag = new _String();
@@ -2557,7 +2584,7 @@ _Proc.prototype = {
 
 	_assertProc : function( num, param ){
 		return assertProc(
-			param._fileFlag ? (num - param._topNum + 1) : 0,
+			param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 			(param._funcName == null) ? "" : param._funcName
 			);
 	},
@@ -2569,21 +2596,21 @@ _Proc.prototype = {
 			}
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				this._token.tokenString( param, code, token )
 				);
 		} else if( (err & _CLIP_PROC_ERR) != 0 ){
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				this._token.tokenString( param, code, token )
 				);
-		} else {
+		} else if( err >= _CLIP_ERR_START ){
 			errorProc(
 				err,
-				param._fileFlag ? (num - param._topNum + 1) : 0,
+				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
 				""
 				);
@@ -3445,7 +3472,7 @@ _Proc.prototype = {
 		}
 		return ret;
 	},
-	_getFuncParamIndex : function( param, code, token, index/*_Integer*/, moveFlag/*_Boolean*/, seFlag ){
+	_getFuncParamIndex : function( param, code, token, index/*__Index*/, moveFlag/*_Boolean*/, seFlag ){
 		var newCode = new _Integer();
 		var newToken = new _Void();
 
@@ -3460,14 +3487,14 @@ _Proc.prototype = {
 		}
 		switch( newCode.val() ){
 		case _CLIP_CODE_VARIABLE:
-			index.set( this.varIndexParam( param, newToken.obj() ) );
+			index.set( param, this.varIndexParam( param, newToken.obj() ) );
 			moveFlag.set( true );
 			break;
 		case _CLIP_CODE_GLOBAL_VAR:
 			param = _global_param;
 			// そのまま下に流す
 		case _CLIP_CODE_AUTO_VAR:
-			index.set( this.autoVarIndex( param, newToken.obj() ) );
+			index.set( param, this.autoVarIndex( param, newToken.obj() ) );
 			moveFlag.set( false );
 			break;
 		default:
@@ -3486,7 +3513,7 @@ _Proc.prototype = {
 		if( seFlag ){
 			if( !(this.curLine().skipComma()) ){
 				this.curLine().unlock( lock );
-				return -1;
+				return null;
 			}
 		}
 		if( this.curLine().getTokenParam( param, newCode, newToken ) ){
@@ -3512,8 +3539,9 @@ _Proc.prototype = {
 		}
 		if( index < 0 ){
 			this.curLine().unlock( lock );
+			return null;
 		}
-		return index;
+		return param._array._mat[index];
 	},
 
 	_funcDefined : function( _this, param, code, token, value, seFlag ){
@@ -4154,7 +4182,7 @@ _Proc.prototype = {
 	_funcFrexp : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		var tmpValue = new _Matrix();
-		var index = new _Integer();
+		var index = new __Index();
 		var moveFlag = new _Boolean();
 
 		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
@@ -4167,7 +4195,7 @@ _Proc.prototype = {
 
 		var _n = new _Integer();
 		value.ass( tmpValue._mat[0].frexp( _n ) );
-		if( !(param.setVal( index.val(), _n.val(), moveFlag.val() )) ){
+		if( !(index.param().setVal( index.val(), _n.val(), moveFlag.val() )) ){
 			return _this._retError( _CLIP_PROC_ERR_ASS, code, token );
 		}
 		return _CLIP_NO_ERR;
@@ -4175,7 +4203,7 @@ _Proc.prototype = {
 	_funcModf : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		var tmpValue = new _Matrix();
-		var index = new _Integer();
+		var index = new __Index();
 		var moveFlag = new _Boolean();
 
 		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
@@ -4188,7 +4216,7 @@ _Proc.prototype = {
 
 		var _f = new _Float();
 		value.ass( tmpValue._mat[0].modf( _f ) );
-		if( !(param.setVal( index.val(), _f.val(), moveFlag.val() )) ){
+		if( !(index.param().setVal( index.val(), _f.val(), moveFlag.val() )) ){
 			return _this._retError( _CLIP_PROC_ERR_ASS, code, token );
 		}
 		return _CLIP_NO_ERR;
@@ -4302,11 +4330,11 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_funcRow : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index]._row );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat._row );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -4320,11 +4348,11 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_funcCol : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index]._col );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat._col );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -4338,11 +4366,11 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_funcTrans : function( _this, param, code, token, value, seFlag ){
-		var index;
+		var mat;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.ass( param._array._mat[index].trans() );
+		if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+			value.ass( mat.trans() );
 		} else {
 			var ret;
 			var tmpValue = new _Matrix();
@@ -4589,7 +4617,16 @@ _Proc.prototype = {
 			return _this._retError( _CLIP_PROC_ERR_STRING, code, token );
 		}
 
-		return doFuncEval( _this, param, string.str(), value );
+		// 親プロセスの環境を受け継いで、子プロセスを実行する
+		var childProc = new _Proc( param.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
+		var childParam = new _Param( _this.curNum(), param, true );
+		childParam.setEnableCommand( false );
+		childParam.setEnableStat( false );
+		ret = doFuncEval( _this, childProc, childParam, string.str(), value );
+		childProc.end();
+		childParam.end();
+
+		return ret;
 	},
 	doFuncEval : function( childProc, childParam, string, value ){
 		var ret;
@@ -7339,7 +7376,7 @@ _Proc.prototype = {
 			for( i = 0; i < len; i++ ){
 				srcIndex[srcIndexSize - 1]--;
 				srcParam = (srcCode == _CLIP_CODE_GLOBAL_ARRAY) ? _global_param : param;
-				srcValue[i].ass( srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
+				copyValue( srcValue[i], srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
 			}
 
 			dstIndex[dstIndexSize - 1] += len;
@@ -8778,14 +8815,21 @@ _Proc.prototype = {
 
 		if( (func = parentParam._func.search( token, false, null )) != null ){
 			var ret;
+
+			// 親プロセスの環境を受け継いで、子プロセスを実行する
+			var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
 			var childParam = new _Param( _this.curNum(), parentParam, false );
-			if( mainProcCache( _this, func, true, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
+			_this.initInternalProc( childProc, func, childParam, parentParam );
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == _CLIP_PROC_END ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = _CLIP_NO_ERR;
 			} else {
+				childProc.end();
 				ret = _this._retError( _CLIP_PROC_ERR_USERFUNC, code, token );
 			}
 			childParam.end();
+
 			return ret;
 		} else {
 			return _this._retError( _CLIP_PROC_ERR_CONSTANT, code, token );
@@ -8867,26 +8911,34 @@ _Proc.prototype = {
 		// 関数のパラメータを取得する
 		_this._getParams( parentParam, code, token, funcParam );
 
+		// 親プロセスの環境を受け継いで、子プロセスを実行する
+		var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
 		var childParam = new _Param( _this.curNum(), parentParam, false );
 
 		if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == _CLIP_PROC_END ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = _CLIP_NO_ERR;
 			} else {
+				childProc.end();
 				ret = _this._retError( _CLIP_PROC_ERR_EXTFUNC, code, token );
 			}
 		} else if( (func = _this.newFuncCache( token, childParam, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-			if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
+			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == _CLIP_PROC_END ){
+				childProc.end();
 				_this.getAns( childParam, value, parentParam );
 				ret = _CLIP_NO_ERR;
 			} else {
+				childProc.end();
 				ret = _this._retError( _CLIP_PROC_ERR_EXTFUNC, code, token );
 			}
-		} else if( mainProc( _this, token, childParam, funcParam, parentParam ) == _CLIP_PROC_END ){
+		} else if( mainProc( _this, parentParam, token, funcParam, childProc, childParam ) == _CLIP_PROC_END ){
+			childProc.end();
 			_this.getAns( childParam, value, parentParam );
 			ret = _CLIP_NO_ERR;
 		} else {
+			childProc.end();
 			ret = _this._retError( _CLIP_PROC_ERR_EXTFUNC, code, token );
 		}
 
@@ -8967,47 +9019,48 @@ _Proc.prototype = {
 
 };
 
-//function getExtFuncDataDirect( func ){ return null; }
-//function getExtFuncDataNameSpace( func ){ return null; }
+function defProcFunction(){
+	if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
+	if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
 
-//function mainProc( parentProc, func, childParam, funcParam, parentParam ){}
-//function mainProcCache( parentProc, func, internal, childParam, funcParam, parentParam ){}
-//function assertProc( num, func ){ return false; }
-//function errorProc( err, num, func, token ){}
+	if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){};
+	if( window.assertProc == undefined ) window.assertProc = function( num, func ){ return false; };
+	if( window.errorProc == undefined ) window.errorProc = function( err, num, func, token ){};
 
-//function printTrace( param, line, num, comment, skipFlag ){}
-//function printTest( param, line, num, comment ){}
-//function printAnsMatrix( param, array ){}
-//function printAnsComplex( real, imag ){}
-//function printWarn( warn, num, func ){}
-//function printError( error, num, func ){}
+	if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
+	if( window.printTest == undefined ) window.printTest = function( param, line, num, comment ){};
+	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array ){};
+	if( window.printAnsComplex == undefined ) window.printAnsComplex = function( real, imag ){};
+	if( window.printWarn == undefined ) window.printWarn = function( warn, num, func ){};
+	if( window.printError == undefined ) window.printError = function( error, num, func ){};
 
-//function doFuncGColor( rgb ){ return 0; }
-//function doFuncGColor24( index ){ return 0x000000; }
-//function doFuncEval( parentProc, parentParam, string, value ){ return _CLIP_NO_ERR; }
+	if( window.doFuncGColor == undefined ) window.doFuncGColor = function( rgb ){ return 0; };
+	if( window.doFuncGColor24 == undefined ) window.doFuncGColor24 = function( index ){ return 0x000000; };
+if( window.doFuncEval == undefined ) window.doFuncEval = function( parentProc, childProc, childParam, string, value ){ return _CLIP_NO_ERR; };
 
-//function doCommandClear(){}
-//function doCommandPrint( topPrint, flag ){}
-//function doCommandScan( _this, topScan, param ){}
-//function doCommandGWorld( gWorld, width, height ){}
-//function doCommandWindow( gWorld, left, bottom, right, top ){}
-//function doCommandGColor( color, rgb ){}
-//function doCommandGPut24( x, y, rgb ){}
-//function doCommandGPut24End(){}
-//function doCommandGGet24Begin( width/*_Integer*/, height/*_Integer*/ ){ return null; }
-//function doCommandGGet24End(){}
-//function doCommandGUpdate( gWorld ){}
-//function doCommandPlot( parentProc, parentParam, graph, start, end, step ){}
-//function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){}
-//function doCommandUsage( topUsage ){}
-//function doCustomCommand( _this, param, code, token ){ return _CLIP_PROC_ERR_COMMAND_NULL/*_CLIP_NO_ERR*/; }
+	if( window.doCommandClear == undefined ) window.doCommandClear = function(){};
+	if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
+	if( window.doCommandScan == undefined ) window.doCommandScan = function( _this, topScan, param ){};
+	if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( gWorld, width, height ){};
+	if( window.doCommandWindow == undefined ) window.doCommandWindow = function( gWorld, left, bottom, right, top ){};
+	if( window.doCommandGColor == undefined ) window.doCommandGColor = function( color, rgb ){};
+	if( window.doCommandGPut24 == undefined ) window.doCommandGPut24 = function( x, y, rgb ){};
+	if( window.doCommandGPut24End == undefined ) window.doCommandGPut24End = function(){};
+	if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width/*_Integer*/, height/*_Integer*/ ){ return null; };
+	if( window.doCommandGGet24End == undefined ) window.doCommandGGet24End = function(){};
+	if( window.doCommandGUpdate == undefined ) window.doCommandGUpdate = function( gWorld ){};
+	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
+	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return _CLIP_PROC_ERR_COMMAND_NULL/*_CLIP_NO_ERR*/; };
 
-//function skipCommandLog(){ return true; }
-//function doCommandLog( topPrint ){}
-//function doCommandDumpVar( param, index ){}
-//function doCommandDumpArray( param, index ){}
+	if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
+	if( window.doCommandLog == undefined ) window.doCommandLog = function( topPrint ){};
+	if( window.doCommandDumpVar == undefined ) window.doCommandDumpVar = function( param, index ){};
+	if( window.doCommandDumpArray == undefined ) window.doCommandDumpArray = function( param, index ){};
 
-//function onStartPlot(){}
-//function onEndPlot(){}
-//function onStartRePlot(){}
-//function onEndRePlot(){}
+	if( window.onStartPlot == undefined ) window.onStartPlot = function(){};
+	if( window.onEndPlot == undefined ) window.onEndPlot = function(){};
+	if( window.onStartRePlot == undefined ) window.onStartRePlot = function(){};
+	if( window.onEndRePlot == undefined ) window.onEndRePlot = function(){};
+}

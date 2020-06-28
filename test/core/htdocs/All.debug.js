@@ -1623,7 +1623,7 @@ _Matrix.prototype = {
    var n = (col < this._col) ? col : this._col;
    for( i = 0; i < m; i++ ){
     for( j = 0; j < n; j++ ){
-     mat[i * col + j].ass( this._val( i, j ) );
+     copyValue( mat[i * col + j], this._val( i, j ) );
     }
    }
    this._mat = mat;
@@ -1635,9 +1635,11 @@ _Matrix.prototype = {
  },
  _resize : function( ini ){
   if( ini._len > this._len ){
-   this._mat = newValueArray( ini._len + 1 );
+   for( var i = ini._len; i > this._len; i-- ){
+    this._mat[i] = new _Value();
+   }
   } else {
-   this._mat[ini._len].ass( this._mat[this._len] );
+   copyValue( this._mat[ini._len], this._mat[this._len] );
   }
   this._row = ini._row;
   this._col = ini._col;
@@ -1645,7 +1647,7 @@ _Matrix.prototype = {
  },
  _resize1 : function(){
   if( this._len > 1 ){
-   this._mat[1].ass( this._mat[this._len] );
+   copyValue( this._mat[1], this._mat[this._len] );
    this._row = 1;
    this._col = 1;
    this._len = 1;
@@ -1694,13 +1696,16 @@ assert( (row != undefined) && (col != undefined) );
   if( r instanceof _Matrix ){
    if( r._len == 1 ){
     this._resize1();
-    this._mat[0].ass( r._mat[0] );
+    copyValue( this._mat[0], r._mat[0] );
    } else {
     this._resize( r );
     for( var i = 0; i < this._len; i++ ){
-     this._mat[i].ass( r._mat[i] );
+     copyValue( this._mat[i], r._mat[i] );
     }
    }
+  } else if( r instanceof _Value ){
+   this._resize1();
+   copyValue( this._mat[0], r );
   } else {
    this._resize1();
    this._mat[0].ass( r );
@@ -1710,7 +1715,7 @@ assert( (row != undefined) && (col != undefined) );
  minus : function(){
   var a = new _Matrix( this._row, this._col );
   for( var i = 0; i < this._len; i++ ){
-   a._mat[i].ass( this._mat[i].minus() );
+   copyValue( a._mat[i], this._mat[i].minus() );
   }
   return a;
  },
@@ -1726,7 +1731,7 @@ assert( (row != undefined) && (col != undefined) );
     );
    for( i = 0; i < a._row; i++ ){
     for( j = 0; j < a._col; j++ ){
-     a._val( i, j ).ass( this.val( i, j ).add( r.val( i, j ) ) );
+     copyValue( a._val( i, j ), this.val( i, j ).add( r.val( i, j ) ) );
     }
    }
    return a;
@@ -1768,7 +1773,7 @@ assert( (row != undefined) && (col != undefined) );
     );
    for( i = 0; i < a._row; i++ ){
     for( j = 0; j < a._col; j++ ){
-     a._val( i, j ).ass( this.val( i, j ).sub( r.val( i, j ) ) );
+     copyValue( a._val( i, j ), this.val( i, j ).sub( r.val( i, j ) ) );
     }
    }
    return a;
@@ -1806,7 +1811,7 @@ assert( (row != undefined) && (col != undefined) );
    if( r._len == 1 ){
     var a = new _Matrix( this._row, this._col );
     for( var i = 0; i < this._len; i++ ){
-     a._mat[i].ass( this._mat[i].mul( r._mat[0] ) );
+     copyValue( a._mat[i], this._mat[i].mul( r._mat[0] ) );
     }
     return a;
    }
@@ -1822,14 +1827,14 @@ assert( (row != undefined) && (col != undefined) );
      for( k = 0; k < m; k++ ){
       t.addAndAss( this.val( i, k ).mul( r.val( k, j ) ) );
      }
-     a._val( i, j ).ass( t );
+     copyValue( a._val( i, j ), t );
     }
    }
    return a;
   }
   var a = new _Matrix( this._row, this._col );
   for( var i = 0; i < this._len; i++ ){
-   a._mat[i].ass( this._mat[i].mul( r ) );
+   copyValue( a._mat[i], this._mat[i].mul( r ) );
   }
   return a;
  },
@@ -1859,11 +1864,11 @@ assert( (row != undefined) && (col != undefined) );
   var a = new _Matrix( this._row, this._col );
   if( r instanceof _Matrix ){
    for( var i = 0; i < this._len; i++ ){
-    a._mat[i].ass( this._mat[i].div( r._mat[0] ) );
+    copyValue( a._mat[i], this._mat[i].div( r._mat[0] ) );
    }
   } else {
    for( var i = 0; i < this._len; i++ ){
-    a._mat[i].ass( this._mat[i].div( r ) );
+    copyValue( a._mat[i], this._mat[i].div( r ) );
    }
   }
   return a;
@@ -1942,7 +1947,7 @@ assert( (row != undefined) && (col != undefined) );
   var a = new _Matrix( this._col, this._row );
   for( i = 0; i < a._row; i++ ){
    for( j = 0; j < a._col; j++ ){
-    a._val( i, j ).ass( this._val( j, i ) );
+    copyValue( a._val( i, j ), this._val( j, i ) );
    }
   }
   return a;
@@ -1957,7 +1962,7 @@ function deleteMatrix( x ){
 function dupMatrix( x ){
  var a = new _Matrix( x._row, x._col );
  for( var i = 0; i < x._len; i++ ){
-  a._mat[i].ass( x._mat[i] );
+  copyValue( a._mat[i], x._mat[i] );
  }
  return a;
 }
@@ -1980,7 +1985,7 @@ function arrayToMatrix( x ){
 }
 function valueToMatrix( x ){
  var a = new _Matrix();
- a._mat[0].ass( x );
+ copyValue( a._mat[0], x );
  return a;
 }
 function floatToMatrix( x ){
@@ -3098,8 +3103,17 @@ function setValue( v, type, c, f, t ){
  setTime( v._t, t._fps, t._minus, t._hour, t._min, t._sec, t._frame );
  return v;
 }
+function copyValue( v, x ){
+ v._type = x._type;
+ switch( v._type ){
+ case 0: setComplex( v._c, x._c._re, x._c._im ); break;
+ case 1 : setFract( v._f, x._f._mi, x._f._nu, x._f._de ); break;
+ case 2 : setTime( v._t, x._t._fps, x._t._minus, x._t._hour, x._t._min, x._t._sec, x._t._frame ); break;
+ }
+ return v;
+}
 function dupValue( x ){
- return setValue( new _Value(), x._type, x._c, x._f, x._t );
+ return copyValue( new _Value(), x );
 }
 function floatToValue( x ){
  return (new _Value()).setFloat( x );
@@ -3342,10 +3356,12 @@ __ArrayNode.prototype = {
    dst._nodeNum = 0;
   }
   if( this._vectorNum > 0 ){
-   dst._vector = newValueArray( this._vectorNum + 1 );
+   for( i = this._vectorNum; i >= dst._vectorNum; i-- ){
+    dst._vector[i] = new _Value();
+   }
    dst._vectorNum = this._vectorNum;
    for( i = 0; i < this._vectorNum; i++ ){
-    dst._vector[i].ass( this._vector[i] );
+    copyValue( dst._vector[i], this._vector[i] );
    }
   } else {
    dst._vector = newValueArray( 1 );
@@ -3375,19 +3391,16 @@ __ArrayNode.prototype = {
  },
  _newVector : function( index ){
   if( this._vectorNum == 0 ){
-   this._vectorNum = index + 1;
-   this._vector = newValueArray( this._vectorNum + 1 );
+   this._vector = newValueArray( index + 2 );
   } else {
-   var tmp = newValueArray( index + 2 );
-   for( var i = 0; i < this._vectorNum; i++ ){
-    tmp[i].ass( this._vector[i] );
+   for( var i = index + 1; i >= this._vectorNum; i-- ){
+    this._vector[i] = new _Value();
    }
-   this._vector = tmp;
-   this._vectorNum = index + 1;
   }
+  this._vectorNum = index + 1;
  },
  _resizeVector : function( index ){
-  this._vector[index + 1].ass( this._vector[this._vectorNum] );
+  copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
   this._vectorNum = index + 1;
  },
  _newNode : function( index ){
@@ -3623,14 +3636,15 @@ _Array.prototype = {
   } else {
    this._node[srcIndex].makeToken( dst, true );
   }
+  return dst;
  }
 };
 function _FuncInfo(){
  this._name = new String();
  this._cnt = 0;
 }
-function __Func(){
- this._createFlag = true;
+function __Func( createFlag ){
+ this._createFlag = createFlag;
  this._info = new _FuncInfo();
  this._label = new _Token();
  this._line = new _Line();
@@ -3676,8 +3690,8 @@ _Func.prototype = {
  canDel : function(){
   return (this._top != null);
  },
- _add : function(){
-  var tmp = new __Func();
+ _add : function( createFlag ){
+  var tmp = new __Func( createFlag );
   if( this._top == null ){
    this._top = tmp;
    this._end = tmp;
@@ -3688,8 +3702,8 @@ _Func.prototype = {
   }
   return tmp;
  },
- _ins : function(){
-  var tmp = new __Func();
+ _ins : function( createFlag ){
+  var tmp = new __Func( createFlag );
   if( this._top == null ){
    this._top = tmp;
    this._end = tmp;
@@ -3707,8 +3721,7 @@ _Func.prototype = {
   if( this._funcNum == this._funcMax ){
    this._del();
   }
-  var tmp = this._ins();
-  tmp._createFlag = true;
+  var tmp = this._ins( true );
   tmp._info._name = name;
   tmp._info._cnt = 0;
   tmp._topNum = (topNum == undefined) ? 1 : topNum;
@@ -3722,8 +3735,7 @@ _Func.prototype = {
   if( this._funcNum == this._funcMax ){
    this._del();
   }
-  var tmp = this._ins();
-  tmp._createFlag = false;
+  var tmp = this._ins( false );
   tmp._info = srcFunc._info;
   tmp._label = srcFunc._label;
   tmp._line = srcFunc._line;
@@ -3737,8 +3749,7 @@ _Func.prototype = {
   this.delAll();
   srcFunc = src._top;
   while( srcFunc != null ){
-   dstFunc = this._add();
-   dstFunc._createFlag = false;
+   dstFunc = this._add( false );
    dstFunc._info = srcFunc._info;
    dstFunc._label = srcFunc._label;
    dstFunc._line = srcFunc._line;
@@ -5456,6 +5467,14 @@ _GWorld.prototype = {
   return this._height;
  }
 };
+function defGWorldFunction(){
+ if( window.gWorldClear == undefined ) window.gWorldClear = function( gWorld, color ){};
+ if( window.gWorldSetColor == undefined ) window.gWorldSetColor = function( gWorld, color ){};
+ if( window.gWorldPutColor == undefined ) window.gWorldPutColor = function( gWorld, x, y, color ){};
+ if( window.gWorldPut == undefined ) window.gWorldPut = function( gWorld, x, y ){};
+ if( window.gWorldFill == undefined ) window.gWorldFill = function( gWorld, x, y, w, h ){};
+ if( window.gWorldLine == undefined ) window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){};
+}
 function _Label( obj ){
  this._obj = obj;
  this._label = new Array( 256 );
@@ -5949,7 +5968,7 @@ _Loop.prototype = {
 function _Param( num, parentParam, inherit ){
  var i;
  this._parentNum = (parentParam == undefined) ? 0 : (
-  parentParam._fileFlag ? (num - parentParam._topNum + 1) : 0
+  parentParam._fileFlag ? ((parentParam._topNum > 0) ? num - parentParam._topNum + 1 : num) : 0
   );
  this._parentFunc = (parentParam == undefined) ? "" : (
   (parentParam._funcName == null) ? "" : parentParam._funcName
@@ -6205,6 +6224,9 @@ _Param.prototype = {
  },
  resetNameSpace : function(){
   this._nameSpace = this._defNameSpace;
+ },
+ getArrayToken : function( index, token ){
+  return this._array.makeToken( token, index );
  }
 };
 var _MIN_VALUE = [ -128, 0 , -32768, 0 , -2147483648, 0 ];
@@ -6316,6 +6338,22 @@ function __ProcInfo(){
  this._curArray = null;
  this._curArraySize = 0;
 }
+function __Index(){
+ this._param = null;
+ this._index = -1;
+}
+__Index.prototype = {
+ set : function( param, index ){
+  this._param = param;
+  this._index = index;
+ },
+ param : function(){
+  return this._param;
+ },
+ val : function(){
+  return this._index;
+ }
+};
 var _proc_graph = null;
 var _proc_gworld = null;
 var _proc_func = null;
@@ -7854,11 +7892,13 @@ _Proc.prototype = {
   if( !this._process( param, err ) ){
    return false;
   }
-  if( this._quitFlag ){
-   this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
-  } else if( err.val() == 0x01 ){
-  } else {
-   this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+  if( err.val() >= 0x100 ){
+   if( this._quitFlag ){
+    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+   } else if( err.val() == 0x01 ){
+   } else {
+    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+   }
   }
   if( (this._statMode == 0) && (this._stat != null) ){
    this._stat = null;
@@ -7868,12 +7908,18 @@ _Proc.prototype = {
  termProcess : function( param, err ){
   var ret;
   if( this._quitFlag ){
-   this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+   if( err.val() >= 0x100 ){
+    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+   }
    ret = 0x04;
   } else if( err.val() == 0x01 ){
    ret = 0x01;
   } else {
-   ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+   if( err.val() >= 0x100 ){
+    ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+   } else {
+    ret = 0x02;
+   }
   }
   if( (this._statMode == 0) && (this._stat != null) ){
    this._stat = null;
@@ -7915,7 +7961,11 @@ _Proc.prototype = {
  },
  termTestProcess : function( param, err ){
   var ret;
-  ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+  if( err.val() >= 0x100 ){
+   ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+  } else {
+   ret = 0x02;
+  }
   this._procLine = null;
   return ret;
  },
@@ -8222,9 +8272,7 @@ _Proc.prototype = {
  },
  printAns : function( childParam ){
   if( childParam._array._mat[0]._len > 1 ){
-   var mat = new _Token();
-   childParam._array.makeToken( mat, 0 );
-   printAnsMatrix( childParam, mat );
+   printAnsMatrix( childParam, childParam.getArrayToken( 0, new _Token() ) );
   } else {
    var real = new _String();
    var imag = new _String();
@@ -8391,7 +8439,7 @@ _Proc.prototype = {
  },
  _assertProc : function( num, param ){
   return assertProc(
-   param._fileFlag ? (num - param._topNum + 1) : 0,
+   param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
    (param._funcName == null) ? "" : param._funcName
    );
  },
@@ -8402,21 +8450,21 @@ _Proc.prototype = {
    }
    errorProc(
     err,
-    param._fileFlag ? (num - param._topNum + 1) : 0,
+    param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
     (param._funcName == null) ? "" : param._funcName,
     this._token.tokenString( param, code, token )
     );
   } else if( (err & 0x2100) != 0 ){
    errorProc(
     err,
-    param._fileFlag ? (num - param._topNum + 1) : 0,
+    param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
     (param._funcName == null) ? "" : param._funcName,
     this._token.tokenString( param, code, token )
     );
-  } else {
+  } else if( err >= 0x100 ){
    errorProc(
     err,
-    param._fileFlag ? (num - param._topNum + 1) : 0,
+    param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
     (param._funcName == null) ? "" : param._funcName,
     ""
     );
@@ -9143,13 +9191,13 @@ _Proc.prototype = {
   }
   switch( newCode.val() ){
   case 0x21:
-   index.set( this.varIndexParam( param, newToken.obj() ) );
+   index.set( param, this.varIndexParam( param, newToken.obj() ) );
    moveFlag.set( true );
    break;
   case 0x23:
    param = _global_param;
   case 0x22:
-   index.set( this.autoVarIndex( param, newToken.obj() ) );
+   index.set( param, this.autoVarIndex( param, newToken.obj() ) );
    moveFlag.set( false );
    break;
   default:
@@ -9166,7 +9214,7 @@ _Proc.prototype = {
   if( seFlag ){
    if( !(this.curLine().skipComma()) ){
     this.curLine().unlock( lock );
-    return -1;
+    return null;
    }
   }
   if( this.curLine().getTokenParam( param, newCode, newToken ) ){
@@ -9191,8 +9239,9 @@ _Proc.prototype = {
   }
   if( index < 0 ){
    this.curLine().unlock( lock );
+   return null;
   }
-  return index;
+  return param._array._mat[index];
  },
  _funcDefined : function( _this, param, code, token, value, seFlag ){
   var newCode = new _Integer();
@@ -9731,7 +9780,7 @@ _Proc.prototype = {
  _funcFrexp : function( _this, param, code, token, value, seFlag ){
   var ret;
   var tmpValue = new _Matrix();
-  var index = new _Integer();
+  var index = new __Index();
   var moveFlag = new _Boolean();
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
@@ -9741,7 +9790,7 @@ _Proc.prototype = {
   }
   var _n = new _Integer();
   value.ass( tmpValue._mat[0].frexp( _n ) );
-  if( !(param.setVal( index.val(), _n.val(), moveFlag.val() )) ){
+  if( !(index.param().setVal( index.val(), _n.val(), moveFlag.val() )) ){
    return _this._retError( 0x210E, code, token );
   }
   return 0x00;
@@ -9749,7 +9798,7 @@ _Proc.prototype = {
  _funcModf : function( _this, param, code, token, value, seFlag ){
   var ret;
   var tmpValue = new _Matrix();
-  var index = new _Integer();
+  var index = new __Index();
   var moveFlag = new _Boolean();
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
@@ -9759,7 +9808,7 @@ _Proc.prototype = {
   }
   var _f = new _Float();
   value.ass( tmpValue._mat[0].modf( _f ) );
-  if( !(param.setVal( index.val(), _f.val(), moveFlag.val() )) ){
+  if( !(index.param().setVal( index.val(), _f.val(), moveFlag.val() )) ){
    return _this._retError( 0x210E, code, token );
   }
   return 0x00;
@@ -9854,10 +9903,10 @@ _Proc.prototype = {
   return 0x00;
  },
  _funcRow : function( _this, param, code, token, value, seFlag ){
-  var index;
+  var mat;
   var moveFlag = new _Boolean();
-  if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-   value.ass( param._array._mat[index]._row );
+  if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+   value.ass( mat._row );
   } else {
    var ret;
    var tmpValue = new _Matrix();
@@ -9869,10 +9918,10 @@ _Proc.prototype = {
   return 0x00;
  },
  _funcCol : function( _this, param, code, token, value, seFlag ){
-  var index;
+  var mat;
   var moveFlag = new _Boolean();
-  if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-   value.ass( param._array._mat[index]._col );
+  if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+   value.ass( mat._col );
   } else {
    var ret;
    var tmpValue = new _Matrix();
@@ -9884,10 +9933,10 @@ _Proc.prototype = {
   return 0x00;
  },
  _funcTrans : function( _this, param, code, token, value, seFlag ){
-  var index;
+  var mat;
   var moveFlag = new _Boolean();
-  if( (index = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) >= 0 ){
-   value.ass( param._array._mat[index].trans() );
+  if( (mat = _this._getFuncParamMatrix( param, code, token, moveFlag, seFlag )) != null ){
+   value.ass( mat.trans() );
   } else {
    var ret;
    var tmpValue = new _Matrix();
@@ -10105,7 +10154,14 @@ _Proc.prototype = {
   if( string.isNull() ){
    return _this._retError( 0x210B, code, token );
   }
-  return doFuncEval( _this, param, string.str(), value );
+  var childProc = new _Proc( param.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
+  var childParam = new _Param( _this.curNum(), param, true );
+  childParam.setEnableCommand( false );
+  childParam.setEnableStat( false );
+  ret = doFuncEval( _this, childProc, childParam, string.str(), value );
+  childProc.end();
+  childParam.end();
+  return ret;
  },
  doFuncEval : function( childProc, childParam, string, value ){
   var ret;
@@ -12530,7 +12586,7 @@ _Proc.prototype = {
    for( i = 0; i < len; i++ ){
     srcIndex[srcIndexSize - 1]--;
     srcParam = (srcCode == 0x46) ? _global_param : param;
-    srcValue[i].ass( srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
+    copyValue( srcValue[i], srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
    }
    dstIndex[dstIndexSize - 1] += len;
    for( i = 0; i < len; i++ ){
@@ -13788,11 +13844,15 @@ _Proc.prototype = {
   _this._getParams( parentParam, code, token, funcParam );
   if( (func = parentParam._func.search( token, false, null )) != null ){
    var ret;
+   var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
    var childParam = new _Param( _this.curNum(), parentParam, false );
-   if( mainProcCache( _this, func, true, childParam, funcParam, parentParam ) == 0x04 ){
+   _this.initInternalProc( childProc, func, childParam, parentParam );
+   if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+    childProc.end();
     _this.getAns( childParam, value, parentParam );
     ret = 0x00;
    } else {
+    childProc.end();
     ret = _this._retError( 0x2109, code, token );
    }
    childParam.end();
@@ -13862,25 +13922,32 @@ _Proc.prototype = {
   var funcParam = new _Token();
   var func;
   _this._getParams( parentParam, code, token, funcParam );
+  var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
   var childParam = new _Param( _this.curNum(), parentParam, false );
   if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-   if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == 0x04 ){
+   if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+    childProc.end();
     _this.getAns( childParam, value, parentParam );
     ret = 0x00;
    } else {
+    childProc.end();
     ret = _this._retError( 0x2108, code, token );
    }
   } else if( (func = _this.newFuncCache( token, childParam, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
-   if( mainProcCache( _this, func, false, childParam, funcParam, parentParam ) == 0x04 ){
+   if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
+    childProc.end();
     _this.getAns( childParam, value, parentParam );
     ret = 0x00;
    } else {
+    childProc.end();
     ret = _this._retError( 0x2108, code, token );
    }
-  } else if( mainProc( _this, token, childParam, funcParam, parentParam ) == 0x04 ){
+  } else if( mainProc( _this, parentParam, token, funcParam, childProc, childParam ) == 0x04 ){
+   childProc.end();
    _this.getAns( childParam, value, parentParam );
    ret = 0x00;
   } else {
+   childProc.end();
    ret = _this._retError( 0x2108, code, token );
   }
   childParam.end();
@@ -13951,6 +14018,45 @@ _Proc.prototype = {
   return true;
  }
 };
+function defProcFunction(){
+ if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
+ if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
+ if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){};
+ if( window.assertProc == undefined ) window.assertProc = function( num, func ){ return false; };
+ if( window.errorProc == undefined ) window.errorProc = function( err, num, func, token ){};
+ if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
+ if( window.printTest == undefined ) window.printTest = function( param, line, num, comment ){};
+ if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array ){};
+ if( window.printAnsComplex == undefined ) window.printAnsComplex = function( real, imag ){};
+ if( window.printWarn == undefined ) window.printWarn = function( warn, num, func ){};
+ if( window.printError == undefined ) window.printError = function( error, num, func ){};
+ if( window.doFuncGColor == undefined ) window.doFuncGColor = function( rgb ){ return 0; };
+ if( window.doFuncGColor24 == undefined ) window.doFuncGColor24 = function( index ){ return 0x000000; };
+if( window.doFuncEval == undefined ) window.doFuncEval = function( parentProc, childProc, childParam, string, value ){ return 0x00; };
+ if( window.doCommandClear == undefined ) window.doCommandClear = function(){};
+ if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
+ if( window.doCommandScan == undefined ) window.doCommandScan = function( _this, topScan, param ){};
+ if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( gWorld, width, height ){};
+ if( window.doCommandWindow == undefined ) window.doCommandWindow = function( gWorld, left, bottom, right, top ){};
+ if( window.doCommandGColor == undefined ) window.doCommandGColor = function( color, rgb ){};
+ if( window.doCommandGPut24 == undefined ) window.doCommandGPut24 = function( x, y, rgb ){};
+ if( window.doCommandGPut24End == undefined ) window.doCommandGPut24End = function(){};
+ if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width , height ){ return null; };
+ if( window.doCommandGGet24End == undefined ) window.doCommandGGet24End = function(){};
+ if( window.doCommandGUpdate == undefined ) window.doCommandGUpdate = function( gWorld ){};
+ if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){};
+ if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){};
+ if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
+ if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return 0x2140 ; };
+ if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
+ if( window.doCommandLog == undefined ) window.doCommandLog = function( topPrint ){};
+ if( window.doCommandDumpVar == undefined ) window.doCommandDumpVar = function( param, index ){};
+ if( window.doCommandDumpArray == undefined ) window.doCommandDumpArray = function( param, index ){};
+ if( window.onStartPlot == undefined ) window.onStartPlot = function(){};
+ if( window.onEndPlot == undefined ) window.onEndPlot = function(){};
+ if( window.onStartRePlot == undefined ) window.onStartRePlot = function(){};
+ if( window.onEndRePlot == undefined ) window.onEndRePlot = function(){};
+}
 var _TOKEN_OP = [
  "[++]",
  "[--]",
@@ -16328,107 +16434,107 @@ var COLOR_WIN = [
                                                              0xF0FBFF, 0xA4A0A0,
  0xC0C0C0, 0x0000FF, 0x00FF00, 0x00FFFF, 0xFF0000, 0xFF00FF, 0xFFFF00, 0xFFFFFF
 ];
-function regGWorldDefCharInfo(){
- newGWorldCharInfo( 0 );
- regGWorldCharInfo( 0, _CHAR( '0' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( 0, _CHAR( '1' ), 4, 7, 1, 2, 7, "01110101010101" );
- regGWorldCharInfo( 0, _CHAR( '2' ), 5, 7, 1, 4, 7, "0110100100010010010010001111" );
- regGWorldCharInfo( 0, _CHAR( '3' ), 5, 7, 1, 4, 7, "011010010001001000011001011" );
- regGWorldCharInfo( 0, _CHAR( '4' ), 5, 7, 1, 4, 7, "001001101010101011110010001" );
- regGWorldCharInfo( 0, _CHAR( '5' ), 5, 7, 1, 4, 7, "111110001110100100011001011" );
- regGWorldCharInfo( 0, _CHAR( '6' ), 5, 7, 1, 4, 7, "011010011000111010011001011" );
- regGWorldCharInfo( 0, _CHAR( '7' ), 5, 7, 1, 4, 7, "11110001000100100010010001" );
- regGWorldCharInfo( 0, _CHAR( '8' ), 5, 7, 1, 4, 7, "011010011001011010011001011" );
- regGWorldCharInfo( 0, _CHAR( '9' ), 5, 7, 1, 4, 7, "011010011001011100011001011" );
- regGWorldCharInfo( 0, _CHAR( 'A' ), 5, 7, 1, 4, 7, "0110100110011111100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'B' ), 5, 7, 1, 4, 7, "111010011001111010011001111" );
- regGWorldCharInfo( 0, _CHAR( 'C' ), 5, 7, 1, 4, 7, "011010011000100010001001011" );
- regGWorldCharInfo( 0, _CHAR( 'D' ), 5, 7, 1, 4, 7, "111010011001100110011001111" );
- regGWorldCharInfo( 0, _CHAR( 'E' ), 5, 7, 1, 4, 7, "1111100010001111100010001111" );
- regGWorldCharInfo( 0, _CHAR( 'F' ), 5, 7, 1, 4, 7, "1111100010001111100010001" );
- regGWorldCharInfo( 0, _CHAR( 'G' ), 5, 7, 1, 4, 7, "011010011000101110011001011" );
- regGWorldCharInfo( 0, _CHAR( 'H' ), 5, 7, 1, 4, 7, "1001100110011111100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'I' ), 4, 7, 1, 3, 7, "111010010010010010111" );
- regGWorldCharInfo( 0, _CHAR( 'J' ), 5, 7, 1, 4, 7, "000100010001000100011001011" );
- regGWorldCharInfo( 0, _CHAR( 'K' ), 5, 7, 1, 4, 7, "1001100110101100101010011001" );
- regGWorldCharInfo( 0, _CHAR( 'L' ), 5, 7, 1, 4, 7, "1000100010001000100010001111" );
- regGWorldCharInfo( 0, _CHAR( 'M' ), 6, 7, 1, 5, 7, "10001100011101111011101011010110101" );
- regGWorldCharInfo( 0, _CHAR( 'N' ), 5, 7, 1, 4, 7, "1001110111011011101110011001" );
- regGWorldCharInfo( 0, _CHAR( 'O' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( 0, _CHAR( 'P' ), 5, 7, 1, 4, 7, "1110100110011110100010001" );
- regGWorldCharInfo( 0, _CHAR( 'Q' ), 5, 7, 1, 4, 7, "0110100110011101101110110111" );
- regGWorldCharInfo( 0, _CHAR( 'R' ), 5, 7, 1, 4, 7, "1110100110011110100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'S' ), 5, 7, 1, 4, 7, "011010011000011000011001011" );
- regGWorldCharInfo( 0, _CHAR( 'T' ), 5, 7, 1, 4, 7, "111100100010001000100010001" );
- regGWorldCharInfo( 0, _CHAR( 'U' ), 5, 7, 1, 4, 7, "100110011001100110011001011" );
- regGWorldCharInfo( 0, _CHAR( 'V' ), 5, 7, 1, 4, 7, "100110011001010101010010001" );
- regGWorldCharInfo( 0, _CHAR( 'W' ), 6, 7, 1, 5, 7, "1010110101101011010101010010100101" );
- regGWorldCharInfo( 0, _CHAR( 'X' ), 5, 7, 1, 4, 7, "1001100110010110100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'Y' ), 5, 7, 1, 4, 7, "100110011001010100100010001" );
- regGWorldCharInfo( 0, _CHAR( 'Z' ), 5, 7, 1, 4, 7, "1111000100100100100010001111" );
- regGWorldCharInfo( 0, _CHAR( 'a' ), 5, 7, 1, 4, 5, "01100001011110010111" );
- regGWorldCharInfo( 0, _CHAR( 'b' ), 5, 7, 1, 4, 7, "100010001110100110011001111" );
- regGWorldCharInfo( 0, _CHAR( 'c' ), 5, 7, 1, 4, 5, "0110100110001001011" );
- regGWorldCharInfo( 0, _CHAR( 'd' ), 5, 7, 1, 4, 7, "0001000101111001100110010111" );
- regGWorldCharInfo( 0, _CHAR( 'e' ), 5, 7, 1, 4, 5, "01101001111110000111" );
- regGWorldCharInfo( 0, _CHAR( 'f' ), 4, 7, 1, 3, 7, "00101011101001001001" );
- regGWorldCharInfo( 0, _CHAR( 'g' ), 5, 7, 1, 4, 5, "01111001100101110001111" );
- regGWorldCharInfo( 0, _CHAR( 'h' ), 5, 7, 1, 4, 7, "1000100011101001100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'i' ), 3, 7, 1, 1, 7, "1011111" );
- regGWorldCharInfo( 0, _CHAR( 'j' ), 4, 7, 1, 2, 7, "010001010101011" );
- regGWorldCharInfo( 0, _CHAR( 'k' ), 5, 7, 1, 4, 7, "1000100010011010110010101001" );
- regGWorldCharInfo( 0, _CHAR( 'l' ), 3, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( 0, _CHAR( 'm' ), 6, 7, 1, 5, 5, "1101010101101011010110101" );
- regGWorldCharInfo( 0, _CHAR( 'n' ), 5, 7, 1, 4, 5, "11101001100110011001" );
- regGWorldCharInfo( 0, _CHAR( 'o' ), 5, 7, 1, 4, 5, "0110100110011001011" );
- regGWorldCharInfo( 0, _CHAR( 'p' ), 5, 7, 1, 4, 5, "111010011001111010001" );
- regGWorldCharInfo( 0, _CHAR( 'q' ), 5, 7, 1, 4, 5, "011110011001011100010001" );
- regGWorldCharInfo( 0, _CHAR( 'r' ), 5, 7, 1, 4, 5, "10111100100010001" );
- regGWorldCharInfo( 0, _CHAR( 's' ), 5, 7, 1, 4, 5, "0111100001100001111" );
- regGWorldCharInfo( 0, _CHAR( 't' ), 4, 7, 1, 3, 6, "010111010010010001" );
- regGWorldCharInfo( 0, _CHAR( 'u' ), 5, 7, 1, 4, 5, "10011001100110010111" );
- regGWorldCharInfo( 0, _CHAR( 'v' ), 5, 7, 1, 4, 5, "1001100101010101001" );
- regGWorldCharInfo( 0, _CHAR( 'w' ), 6, 7, 1, 5, 5, "101011010110101010100101" );
- regGWorldCharInfo( 0, _CHAR( 'x' ), 5, 7, 1, 4, 5, "10011001011010011001" );
- regGWorldCharInfo( 0, _CHAR( 'y' ), 5, 7, 1, 4, 5, "10011001100101110001111" );
- regGWorldCharInfo( 0, _CHAR( 'z' ), 5, 7, 1, 4, 5, "11110001011010001111" );
- regGWorldCharInfo( 0, _CHAR( ' ' ), 5, 7, 1, 4, 7, "" );
- regGWorldCharInfo( 0, _CHAR( '!' ), 2, 7, 1, 1, 7, "1111101" );
- regGWorldCharInfo( 0, _CHAR( '"' ), 5, 7, 1, 4, 7, "01010101101" );
- regGWorldCharInfo( 0, _CHAR( '#' ), 6, 7, 1, 5, 7, "0101011111010100101001010111110101" );
- regGWorldCharInfo( 0, _CHAR( '$' ), 6, 7, 1, 5, 7, "001000111110100011100010111110001" );
- regGWorldCharInfo( 0, _CHAR( '%' ), 6, 7, 1, 5, 7, "0100110110010100010001010011011001" );
- regGWorldCharInfo( 0, _CHAR( '&' ), 6, 7, 1, 5, 7, "01100100100110010101101011001001101" );
- regGWorldCharInfo( 0, _CHAR( '\'' ), 3, 7, 1, 2, 7, "01011" );
- regGWorldCharInfo( 0, _CHAR( '(' ), 4, 7, 1, 3, 7, "001010100100100010001" );
- regGWorldCharInfo( 0, _CHAR( ')' ), 4, 7, 1, 3, 7, "1000100010010010101" );
- regGWorldCharInfo( 0, _CHAR( '*' ), 6, 7, 1, 5, 6, "00100101010111010101001" );
- regGWorldCharInfo( 0, _CHAR( '+' ), 4, 7, 1, 3, 6, "01001011101001" );
- regGWorldCharInfo( 0, _CHAR( ',' ), 3, 7, 1, 2, 2, "01011" );
- regGWorldCharInfo( 0, _CHAR( '-' ), 4, 7, 1, 3, 4, "111" );
- regGWorldCharInfo( 0, _CHAR( '.' ), 2, 7, 1, 1, 1, "1" );
- regGWorldCharInfo( 0, _CHAR( '/' ), 6, 7, 1, 5, 7, "0000100010000100010001000010001" );
- regGWorldCharInfo( 0, _CHAR( ':' ), 2, 7, 1, 1, 5, "1001" );
- regGWorldCharInfo( 0, _CHAR( ';' ), 3, 7, 1, 2, 5, "010000011" );
- regGWorldCharInfo( 0, _CHAR( '<' ), 5, 7, 1, 4, 7, "0001001001001000010000100001" );
- regGWorldCharInfo( 0, _CHAR( '=' ), 4, 7, 1, 3, 5, "111000000111" );
- regGWorldCharInfo( 0, _CHAR( '>' ), 5, 7, 1, 4, 7, "1000010000100001001001001" );
- regGWorldCharInfo( 0, _CHAR( '?' ), 5, 7, 1, 4, 7, "01101001001001000100000001" );
- regGWorldCharInfo( 0, _CHAR( '@' ), 6, 7, 1, 5, 7, "0111010001111011010111110100000111" );
- regGWorldCharInfo( 0, _CHAR( '[' ), 4, 7, 1, 3, 7, "111100100100100100111" );
- regGWorldCharInfo( 0, _CHAR( '\\' ), 6, 7, 1, 5, 7, "100010101011111001001111100100001" );
- regGWorldCharInfo( 0, _CHAR( ']' ), 4, 7, 1, 3, 7, "111001001001001001111" );
- regGWorldCharInfo( 0, _CHAR( '^' ), 4, 7, 1, 3, 7, "010101" );
- regGWorldCharInfo( 0, _CHAR( '_' ), 5, 7, 1, 4, 1, "1111" );
- regGWorldCharInfo( 0, _CHAR( '`' ), 3, 7, 1, 2, 7, "101001" );
- regGWorldCharInfo( 0, _CHAR( '{' ), 4, 7, 1, 3, 7, "011010010100010010011" );
- regGWorldCharInfo( 0, _CHAR( '|' ), 2, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( 0, _CHAR( '}' ), 4, 7, 1, 3, 7, "11001001000101001011" );
- regGWorldCharInfo( 0, _CHAR( '~' ), 5, 7, 1, 4, 7, "0101101" );
+function regGWorldDefCharInfo( i ){
+ newGWorldCharInfo( i );
+ regGWorldCharInfo( i, _CHAR( '0' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
+ regGWorldCharInfo( i, _CHAR( '1' ), 4, 7, 1, 2, 7, "01110101010101" );
+ regGWorldCharInfo( i, _CHAR( '2' ), 5, 7, 1, 4, 7, "0110100100010010010010001111" );
+ regGWorldCharInfo( i, _CHAR( '3' ), 5, 7, 1, 4, 7, "011010010001001000011001011" );
+ regGWorldCharInfo( i, _CHAR( '4' ), 5, 7, 1, 4, 7, "001001101010101011110010001" );
+ regGWorldCharInfo( i, _CHAR( '5' ), 5, 7, 1, 4, 7, "111110001110100100011001011" );
+ regGWorldCharInfo( i, _CHAR( '6' ), 5, 7, 1, 4, 7, "011010011000111010011001011" );
+ regGWorldCharInfo( i, _CHAR( '7' ), 5, 7, 1, 4, 7, "11110001000100100010010001" );
+ regGWorldCharInfo( i, _CHAR( '8' ), 5, 7, 1, 4, 7, "011010011001011010011001011" );
+ regGWorldCharInfo( i, _CHAR( '9' ), 5, 7, 1, 4, 7, "011010011001011100011001011" );
+ regGWorldCharInfo( i, _CHAR( 'A' ), 5, 7, 1, 4, 7, "0110100110011111100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'B' ), 5, 7, 1, 4, 7, "111010011001111010011001111" );
+ regGWorldCharInfo( i, _CHAR( 'C' ), 5, 7, 1, 4, 7, "011010011000100010001001011" );
+ regGWorldCharInfo( i, _CHAR( 'D' ), 5, 7, 1, 4, 7, "111010011001100110011001111" );
+ regGWorldCharInfo( i, _CHAR( 'E' ), 5, 7, 1, 4, 7, "1111100010001111100010001111" );
+ regGWorldCharInfo( i, _CHAR( 'F' ), 5, 7, 1, 4, 7, "1111100010001111100010001" );
+ regGWorldCharInfo( i, _CHAR( 'G' ), 5, 7, 1, 4, 7, "011010011000101110011001011" );
+ regGWorldCharInfo( i, _CHAR( 'H' ), 5, 7, 1, 4, 7, "1001100110011111100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'I' ), 4, 7, 1, 3, 7, "111010010010010010111" );
+ regGWorldCharInfo( i, _CHAR( 'J' ), 5, 7, 1, 4, 7, "000100010001000100011001011" );
+ regGWorldCharInfo( i, _CHAR( 'K' ), 5, 7, 1, 4, 7, "1001100110101100101010011001" );
+ regGWorldCharInfo( i, _CHAR( 'L' ), 5, 7, 1, 4, 7, "1000100010001000100010001111" );
+ regGWorldCharInfo( i, _CHAR( 'M' ), 6, 7, 1, 5, 7, "10001100011101111011101011010110101" );
+ regGWorldCharInfo( i, _CHAR( 'N' ), 5, 7, 1, 4, 7, "1001110111011011101110011001" );
+ regGWorldCharInfo( i, _CHAR( 'O' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
+ regGWorldCharInfo( i, _CHAR( 'P' ), 5, 7, 1, 4, 7, "1110100110011110100010001" );
+ regGWorldCharInfo( i, _CHAR( 'Q' ), 5, 7, 1, 4, 7, "0110100110011101101110110111" );
+ regGWorldCharInfo( i, _CHAR( 'R' ), 5, 7, 1, 4, 7, "1110100110011110100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'S' ), 5, 7, 1, 4, 7, "011010011000011000011001011" );
+ regGWorldCharInfo( i, _CHAR( 'T' ), 5, 7, 1, 4, 7, "111100100010001000100010001" );
+ regGWorldCharInfo( i, _CHAR( 'U' ), 5, 7, 1, 4, 7, "100110011001100110011001011" );
+ regGWorldCharInfo( i, _CHAR( 'V' ), 5, 7, 1, 4, 7, "100110011001010101010010001" );
+ regGWorldCharInfo( i, _CHAR( 'W' ), 6, 7, 1, 5, 7, "1010110101101011010101010010100101" );
+ regGWorldCharInfo( i, _CHAR( 'X' ), 5, 7, 1, 4, 7, "1001100110010110100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'Y' ), 5, 7, 1, 4, 7, "100110011001010100100010001" );
+ regGWorldCharInfo( i, _CHAR( 'Z' ), 5, 7, 1, 4, 7, "1111000100100100100010001111" );
+ regGWorldCharInfo( i, _CHAR( 'a' ), 5, 7, 1, 4, 5, "01100001011110010111" );
+ regGWorldCharInfo( i, _CHAR( 'b' ), 5, 7, 1, 4, 7, "100010001110100110011001111" );
+ regGWorldCharInfo( i, _CHAR( 'c' ), 5, 7, 1, 4, 5, "0110100110001001011" );
+ regGWorldCharInfo( i, _CHAR( 'd' ), 5, 7, 1, 4, 7, "0001000101111001100110010111" );
+ regGWorldCharInfo( i, _CHAR( 'e' ), 5, 7, 1, 4, 5, "01101001111110000111" );
+ regGWorldCharInfo( i, _CHAR( 'f' ), 4, 7, 1, 3, 7, "00101011101001001001" );
+ regGWorldCharInfo( i, _CHAR( 'g' ), 5, 7, 1, 4, 5, "01111001100101110001111" );
+ regGWorldCharInfo( i, _CHAR( 'h' ), 5, 7, 1, 4, 7, "1000100011101001100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'i' ), 3, 7, 1, 1, 7, "1011111" );
+ regGWorldCharInfo( i, _CHAR( 'j' ), 4, 7, 1, 2, 7, "010001010101011" );
+ regGWorldCharInfo( i, _CHAR( 'k' ), 5, 7, 1, 4, 7, "1000100010011010110010101001" );
+ regGWorldCharInfo( i, _CHAR( 'l' ), 3, 7, 1, 1, 7, "1111111" );
+ regGWorldCharInfo( i, _CHAR( 'm' ), 6, 7, 1, 5, 5, "1101010101101011010110101" );
+ regGWorldCharInfo( i, _CHAR( 'n' ), 5, 7, 1, 4, 5, "11101001100110011001" );
+ regGWorldCharInfo( i, _CHAR( 'o' ), 5, 7, 1, 4, 5, "0110100110011001011" );
+ regGWorldCharInfo( i, _CHAR( 'p' ), 5, 7, 1, 4, 5, "111010011001111010001" );
+ regGWorldCharInfo( i, _CHAR( 'q' ), 5, 7, 1, 4, 5, "011110011001011100010001" );
+ regGWorldCharInfo( i, _CHAR( 'r' ), 5, 7, 1, 4, 5, "10111100100010001" );
+ regGWorldCharInfo( i, _CHAR( 's' ), 5, 7, 1, 4, 5, "0111100001100001111" );
+ regGWorldCharInfo( i, _CHAR( 't' ), 4, 7, 1, 3, 6, "010111010010010001" );
+ regGWorldCharInfo( i, _CHAR( 'u' ), 5, 7, 1, 4, 5, "10011001100110010111" );
+ regGWorldCharInfo( i, _CHAR( 'v' ), 5, 7, 1, 4, 5, "1001100101010101001" );
+ regGWorldCharInfo( i, _CHAR( 'w' ), 6, 7, 1, 5, 5, "101011010110101010100101" );
+ regGWorldCharInfo( i, _CHAR( 'x' ), 5, 7, 1, 4, 5, "10011001011010011001" );
+ regGWorldCharInfo( i, _CHAR( 'y' ), 5, 7, 1, 4, 5, "10011001100101110001111" );
+ regGWorldCharInfo( i, _CHAR( 'z' ), 5, 7, 1, 4, 5, "11110001011010001111" );
+ regGWorldCharInfo( i, _CHAR( ' ' ), 5, 7, 1, 4, 7, "" );
+ regGWorldCharInfo( i, _CHAR( '!' ), 2, 7, 1, 1, 7, "1111101" );
+ regGWorldCharInfo( i, _CHAR( '"' ), 5, 7, 1, 4, 7, "01010101101" );
+ regGWorldCharInfo( i, _CHAR( '#' ), 6, 7, 1, 5, 7, "0101011111010100101001010111110101" );
+ regGWorldCharInfo( i, _CHAR( '$' ), 6, 7, 1, 5, 7, "001000111110100011100010111110001" );
+ regGWorldCharInfo( i, _CHAR( '%' ), 6, 7, 1, 5, 7, "0100110110010100010001010011011001" );
+ regGWorldCharInfo( i, _CHAR( '&' ), 6, 7, 1, 5, 7, "01100100100110010101101011001001101" );
+ regGWorldCharInfo( i, _CHAR( '\'' ), 3, 7, 1, 2, 7, "01011" );
+ regGWorldCharInfo( i, _CHAR( '(' ), 4, 7, 1, 3, 7, "001010100100100010001" );
+ regGWorldCharInfo( i, _CHAR( ')' ), 4, 7, 1, 3, 7, "1000100010010010101" );
+ regGWorldCharInfo( i, _CHAR( '*' ), 6, 7, 1, 5, 6, "00100101010111010101001" );
+ regGWorldCharInfo( i, _CHAR( '+' ), 4, 7, 1, 3, 6, "01001011101001" );
+ regGWorldCharInfo( i, _CHAR( ',' ), 3, 7, 1, 2, 2, "01011" );
+ regGWorldCharInfo( i, _CHAR( '-' ), 4, 7, 1, 3, 4, "111" );
+ regGWorldCharInfo( i, _CHAR( '.' ), 2, 7, 1, 1, 1, "1" );
+ regGWorldCharInfo( i, _CHAR( '/' ), 6, 7, 1, 5, 7, "0000100010000100010001000010001" );
+ regGWorldCharInfo( i, _CHAR( ':' ), 2, 7, 1, 1, 5, "1001" );
+ regGWorldCharInfo( i, _CHAR( ';' ), 3, 7, 1, 2, 5, "010000011" );
+ regGWorldCharInfo( i, _CHAR( '<' ), 5, 7, 1, 4, 7, "0001001001001000010000100001" );
+ regGWorldCharInfo( i, _CHAR( '=' ), 4, 7, 1, 3, 5, "111000000111" );
+ regGWorldCharInfo( i, _CHAR( '>' ), 5, 7, 1, 4, 7, "1000010000100001001001001" );
+ regGWorldCharInfo( i, _CHAR( '?' ), 5, 7, 1, 4, 7, "01101001001001000100000001" );
+ regGWorldCharInfo( i, _CHAR( '@' ), 6, 7, 1, 5, 7, "0111010001111011010111110100000111" );
+ regGWorldCharInfo( i, _CHAR( '[' ), 4, 7, 1, 3, 7, "111100100100100100111" );
+ regGWorldCharInfo( i, _CHAR( '\\' ), 6, 7, 1, 5, 7, "100010101011111001001111100100001" );
+ regGWorldCharInfo( i, _CHAR( ']' ), 4, 7, 1, 3, 7, "111001001001001001111" );
+ regGWorldCharInfo( i, _CHAR( '^' ), 4, 7, 1, 3, 7, "010101" );
+ regGWorldCharInfo( i, _CHAR( '_' ), 5, 7, 1, 4, 1, "1111" );
+ regGWorldCharInfo( i, _CHAR( '`' ), 3, 7, 1, 2, 7, "101001" );
+ regGWorldCharInfo( i, _CHAR( '{' ), 4, 7, 1, 3, 7, "011010010100010010011" );
+ regGWorldCharInfo( i, _CHAR( '|' ), 2, 7, 1, 1, 7, "1111111" );
+ regGWorldCharInfo( i, _CHAR( '}' ), 4, 7, 1, 3, 7, "11001001000101001011" );
+ regGWorldCharInfo( i, _CHAR( '~' ), 5, 7, 1, 4, 7, "0101101" );
 }
-function regGWorldDefCharInfoLarge(){
- newGWorldCharInfo( 1 );
- regGWorldCharInfo( 1, _CHAR( '0' ), 11, 12, 4, 10, 11,
+function regGWorldDefCharInfoLarge( i ){
+ newGWorldCharInfo( i );
+ regGWorldCharInfo( i, _CHAR( '0' ), 11, 12, 4, 10, 11,
   "0001110000" +
   "0010001000" +
   "0100000100" +
@@ -16441,7 +16547,7 @@ function regGWorldDefCharInfoLarge(){
   "0010001000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '1' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '1' ), 11, 12, 4, 10, 11,
   "0000110000" +
   "0011010000" +
   "0000010000" +
@@ -16454,7 +16560,7 @@ function regGWorldDefCharInfoLarge(){
   "0000010000" +
   "0011111110"
   );
- regGWorldCharInfo( 1, _CHAR( '2' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '2' ), 11, 12, 4, 10, 11,
   "0001111000" +
   "0010000100" +
   "0100000010" +
@@ -16467,7 +16573,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000010" +
   "0111111110"
   );
- regGWorldCharInfo( 1, _CHAR( '3' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '3' ), 11, 12, 4, 10, 11,
   "0001111000" +
   "0010000100" +
   "0000000100" +
@@ -16480,7 +16586,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "0011111000"
   );
- regGWorldCharInfo( 1, _CHAR( '4' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '4' ), 11, 12, 4, 10, 11,
   "0000011000" +
   "0000101000" +
   "0000101000" +
@@ -16493,7 +16599,7 @@ function regGWorldDefCharInfoLarge(){
   "0000001000" +
   "0000111100"
   );
- regGWorldCharInfo( 1, _CHAR( '5' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '5' ), 11, 12, 4, 10, 11,
   "0011111100" +
   "0010000000" +
   "0010000000" +
@@ -16506,7 +16612,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000100" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( '6' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '6' ), 11, 12, 4, 10, 11,
   "0000011110" +
   "0001100000" +
   "0010000000" +
@@ -16519,7 +16625,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000100" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( '7' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '7' ), 11, 12, 4, 10, 11,
   "0111111100" +
   "0100000100" +
   "0000000100" +
@@ -16532,7 +16638,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( '8' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '8' ), 11, 12, 4, 10, 11,
   "0001110000" +
   "0010001000" +
   "0100000100" +
@@ -16545,7 +16651,7 @@ function regGWorldDefCharInfoLarge(){
   "0010001000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '9' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '9' ), 11, 12, 4, 10, 11,
   "0001110000" +
   "0010001000" +
   "0100000100" +
@@ -16558,7 +16664,7 @@ function regGWorldDefCharInfoLarge(){
   "0000110000" +
   "0111000000"
   );
- regGWorldCharInfo( 1, _CHAR( 'A' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'A' ), 11, 12, 4, 10, 10,
   "0111110000" +
   "0000110000" +
   "0001001000" +
@@ -16570,7 +16676,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000010" +
   "1111001111"
   );
- regGWorldCharInfo( 1, _CHAR( 'B' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'B' ), 11, 12, 4, 10, 10,
   "1111111000" +
   "0100000100" +
   "0100000100" +
@@ -16582,7 +16688,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000010" +
   "1111111100"
   );
- regGWorldCharInfo( 1, _CHAR( 'C' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'C' ), 11, 12, 4, 10, 10,
   "0001111010" +
   "0110000110" +
   "0100000010" +
@@ -16594,7 +16700,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000100" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'D' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'D' ), 11, 12, 4, 10, 10,
   "1111110000" +
   "0100001100" +
   "0100000100" +
@@ -16606,7 +16712,7 @@ function regGWorldDefCharInfoLarge(){
   "0100001100" +
   "1111110000"
   );
- regGWorldCharInfo( 1, _CHAR( 'E' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'E' ), 11, 12, 4, 10, 10,
   "1111111100" +
   "0100000100" +
   "0100000100" +
@@ -16618,7 +16724,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000010" +
   "1111111110"
   );
- regGWorldCharInfo( 1, _CHAR( 'F' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'F' ), 11, 12, 4, 10, 10,
   "1111111110" +
   "0100000010" +
   "0100000010" +
@@ -16630,7 +16736,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000000" +
   "1111100000"
   );
- regGWorldCharInfo( 1, _CHAR( 'G' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'G' ), 11, 12, 4, 10, 10,
   "0001111010" +
   "0110000110" +
   "0100000010" +
@@ -16642,7 +16748,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000110" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'H' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'H' ), 11, 12, 4, 10, 10,
   "1110001110" +
   "0100000100" +
   "0100000100" +
@@ -16654,7 +16760,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1110001110"
   );
- regGWorldCharInfo( 1, _CHAR( 'I' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'I' ), 11, 12, 4, 10, 10,
   "0111111100" +
   "0000100000" +
   "0000100000" +
@@ -16666,7 +16772,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0111111100"
   );
- regGWorldCharInfo( 1, _CHAR( 'J' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'J' ), 11, 12, 4, 10, 10,
   "0001111110" +
   "0000001000" +
   "0000001000" +
@@ -16678,7 +16784,7 @@ function regGWorldDefCharInfoLarge(){
   "0100011000" +
   "0011110000"
   );
- regGWorldCharInfo( 1, _CHAR( 'K' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'K' ), 11, 12, 4, 10, 10,
   "1111001110" +
   "0100000100" +
   "0100001000" +
@@ -16690,7 +16796,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1111000111"
   );
- regGWorldCharInfo( 1, _CHAR( 'L' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'L' ), 11, 12, 4, 10, 10,
   "1111100000" +
   "0010000000" +
   "0010000000" +
@@ -16702,7 +16808,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000010" +
   "1111111110"
   );
- regGWorldCharInfo( 1, _CHAR( 'M' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'M' ), 11, 12, 4, 10, 10,
   "1100000011" +
   "0110000110" +
   "0101000110" +
@@ -16714,7 +16820,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000010" +
   "1110000111"
   );
- regGWorldCharInfo( 1, _CHAR( 'N' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'N' ), 11, 12, 4, 10, 10,
   "1100001110" +
   "0110000100" +
   "0101000100" +
@@ -16726,7 +16832,7 @@ function regGWorldDefCharInfoLarge(){
   "0100001100" +
   "1110000100"
   );
- regGWorldCharInfo( 1, _CHAR( 'O' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'O' ), 11, 12, 4, 10, 10,
   "0001111000" +
   "0110000110" +
   "0100000010" +
@@ -16738,7 +16844,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000110" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'P' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'P' ), 11, 12, 4, 10, 10,
   "1111111000" +
   "0010000100" +
   "0010000010" +
@@ -16750,7 +16856,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000000" +
   "1111110000"
   );
- regGWorldCharInfo( 1, _CHAR( 'Q' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'Q' ), 11, 12, 4, 10, 10,
   "0001111000" +
   "0110000110" +
   "0100000010" +
@@ -16765,7 +16871,7 @@ function regGWorldDefCharInfoLarge(){
   "0001111001" +
   "0010000110"
   );
- regGWorldCharInfo( 1, _CHAR( 'R' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'R' ), 11, 12, 4, 10, 10,
   "1111110000" +
   "0100001000" +
   "0100000100" +
@@ -16777,7 +16883,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1111000110"
   );
- regGWorldCharInfo( 1, _CHAR( 'S' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'S' ), 11, 12, 4, 10, 10,
   "0011110100" +
   "0100001100" +
   "1000000100" +
@@ -16789,7 +16895,7 @@ function regGWorldDefCharInfoLarge(){
   "1100000100" +
   "1011111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'T' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'T' ), 11, 12, 4, 10, 10,
   "1111111110" +
   "1000100010" +
   "1000100010" +
@@ -16801,7 +16907,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0011111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'U' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'U' ), 11, 12, 4, 10, 10,
   "1111001111" +
   "0100000010" +
   "0100000010" +
@@ -16813,7 +16919,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000100" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'V' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'V' ), 11, 12, 4, 10, 10,
   "1111001111" +
   "0100000010" +
   "0100000010" +
@@ -16825,7 +16931,7 @@ function regGWorldDefCharInfoLarge(){
   "0000110000" +
   "0000110000"
   );
- regGWorldCharInfo( 1, _CHAR( 'W' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'W' ), 11, 12, 4, 10, 10,
   "1111000111" +
   "0100000001" +
   "0100010001" +
@@ -16837,7 +16943,7 @@ function regGWorldDefCharInfoLarge(){
   "0011000110" +
   "0001000100"
   );
- regGWorldCharInfo( 1, _CHAR( 'X' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'X' ), 11, 12, 4, 10, 10,
   "1110001110" +
   "0100000100" +
   "0010001000" +
@@ -16849,7 +16955,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1110001110"
   );
- regGWorldCharInfo( 1, _CHAR( 'Y' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'Y' ), 11, 12, 4, 10, 10,
   "1110001110" +
   "0100000100" +
   "0010001000" +
@@ -16861,7 +16967,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0011111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'Z' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 'Z' ), 11, 12, 4, 10, 10,
   "0111111110" +
   "0100000010" +
   "0100000100" +
@@ -16873,7 +16979,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000010" +
   "0111111110"
   );
- regGWorldCharInfo( 1, _CHAR( 'a' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'a' ), 11, 12, 4, 10, 8,
   "0001111000" +
   "0110000100" +
   "0000000100" +
@@ -16883,7 +16989,7 @@ function regGWorldDefCharInfoLarge(){
   "0100001100" +
   "0011110110"
   );
- regGWorldCharInfo( 1, _CHAR( 'b' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'b' ), 11, 12, 4, 10, 11,
   "1100000000" +
   "0100000000" +
   "0100000000" +
@@ -16896,7 +17002,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000100" +
   "1101111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'c' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'c' ), 11, 12, 4, 10, 8,
   "0001111010" +
   "0010000110" +
   "0100000000" +
@@ -16906,7 +17012,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000110" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'd' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'd' ), 11, 12, 4, 10, 11,
   "0000011100" +
   "0000000100" +
   "0000000100" +
@@ -16919,7 +17025,7 @@ function regGWorldDefCharInfoLarge(){
   "0100001100" +
   "0011110110"
   );
- regGWorldCharInfo( 1, _CHAR( 'e' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'e' ), 11, 12, 4, 10, 8,
   "0011111000" +
   "0100000100" +
   "1000000010" +
@@ -16929,7 +17035,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000110" +
   "0011111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'f' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'f' ), 11, 12, 4, 10, 11,
   "0000111000" +
   "0001000110" +
   "0001000000" +
@@ -16942,7 +17048,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000000" +
   "0111111100"
   );
- regGWorldCharInfo( 1, _CHAR( 'g' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'g' ), 11, 12, 4, 10, 8,
   "0011110110" +
   "0100001100" +
   "1000000100" +
@@ -16955,7 +17061,7 @@ function regGWorldDefCharInfoLarge(){
   "0000000100" +
   "0011111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'h' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'h' ), 11, 12, 4, 10, 11,
   "1100000000" +
   "0100000000" +
   "0100000000" +
@@ -16968,7 +17074,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1111011110"
   );
- regGWorldCharInfo( 1, _CHAR( 'i' ), 11, 12, 4, 10, 12,
+ regGWorldCharInfo( i, _CHAR( 'i' ), 11, 12, 4, 10, 12,
   "0000100000" +
   "0000100000" +
   "0000000000" +
@@ -16982,7 +17088,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0111111100"
   );
- regGWorldCharInfo( 1, _CHAR( 'j' ), 11, 12, 4, 10, 12,
+ regGWorldCharInfo( i, _CHAR( 'j' ), 11, 12, 4, 10, 12,
   "0000010000" +
   "0000010000" +
   "0000000000" +
@@ -16999,7 +17105,7 @@ function regGWorldDefCharInfoLarge(){
   "0000010000" +
   "0111100000"
   );
- regGWorldCharInfo( 1, _CHAR( 'k' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'k' ), 11, 12, 4, 10, 11,
   "1110000000" +
   "0010000000" +
   "0010000000" +
@@ -17012,7 +17118,7 @@ function regGWorldDefCharInfoLarge(){
   "0010001000" +
   "1110011110"
   );
- regGWorldCharInfo( 1, _CHAR( 'l' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( 'l' ), 11, 12, 4, 10, 11,
   "0011110000" +
   "0000010000" +
   "0000010000" +
@@ -17025,7 +17131,7 @@ function regGWorldDefCharInfoLarge(){
   "0000010000" +
   "0111111110"
   );
- regGWorldCharInfo( 1, _CHAR( 'm' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'm' ), 11, 12, 4, 10, 8,
   "1101101100" +
   "0110010010" +
   "0100010010" +
@@ -17035,7 +17141,7 @@ function regGWorldDefCharInfoLarge(){
   "0100010010" +
   "1111011011"
   );
- regGWorldCharInfo( 1, _CHAR( 'n' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'n' ), 11, 12, 4, 10, 8,
   "1101111000" +
   "0110000100" +
   "0100000100" +
@@ -17045,7 +17151,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "1111001110"
   );
- regGWorldCharInfo( 1, _CHAR( 'o' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'o' ), 11, 12, 4, 10, 8,
   "0001111000" +
   "0010000100" +
   "0100000010" +
@@ -17055,7 +17161,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000100" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( 'p' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'p' ), 11, 12, 4, 10, 8,
   "1101111000" +
   "0110000100" +
   "0100000010" +
@@ -17068,7 +17174,7 @@ function regGWorldDefCharInfoLarge(){
   "0100000000" +
   "1111000000"
   );
- regGWorldCharInfo( 1, _CHAR( 'q' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'q' ), 11, 12, 4, 10, 8,
   "0011110110" +
   "0100001100" +
   "1000000100" +
@@ -17081,7 +17187,7 @@ function regGWorldDefCharInfoLarge(){
   "0000000100" +
   "0000011110"
   );
- regGWorldCharInfo( 1, _CHAR( 'r' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'r' ), 11, 12, 4, 10, 8,
   "0111011100" +
   "0001100010" +
   "0001000000" +
@@ -17091,7 +17197,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000000" +
   "0111111100"
   );
- regGWorldCharInfo( 1, _CHAR( 's' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 's' ), 11, 12, 4, 10, 8,
   "0011110100" +
   "0100001100" +
   "0100000000" +
@@ -17101,7 +17207,7 @@ function regGWorldDefCharInfoLarge(){
   "0110000100" +
   "0101111000"
   );
- regGWorldCharInfo( 1, _CHAR( 't' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( 't' ), 11, 12, 4, 10, 10,
   "0001000000" +
   "0001000000" +
   "0111111100" +
@@ -17113,7 +17219,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000010" +
   "0000111100"
   );
- regGWorldCharInfo( 1, _CHAR( 'u' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'u' ), 11, 12, 4, 10, 8,
   "0110011100" +
   "0010000100" +
   "0010000100" +
@@ -17123,7 +17229,7 @@ function regGWorldDefCharInfoLarge(){
   "0010001100" +
   "0001110110"
   );
- regGWorldCharInfo( 1, _CHAR( 'v' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'v' ), 11, 12, 4, 10, 8,
   "1110001110" +
   "0100000100" +
   "0100000100" +
@@ -17133,7 +17239,7 @@ function regGWorldDefCharInfoLarge(){
   "0001110000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( 'w' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'w' ), 11, 12, 4, 10, 8,
   "1110000111" +
   "0100000001" +
   "0100010001" +
@@ -17143,7 +17249,7 @@ function regGWorldDefCharInfoLarge(){
   "0001101100" +
   "0001000100"
   );
- regGWorldCharInfo( 1, _CHAR( 'x' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'x' ), 11, 12, 4, 10, 8,
   "0111001110" +
   "0010000100" +
   "0001001000" +
@@ -17153,7 +17259,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000100" +
   "0111001110"
   );
- regGWorldCharInfo( 1, _CHAR( 'y' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'y' ), 11, 12, 4, 10, 8,
   "1110000111" +
   "0100000010" +
   "0010000100" +
@@ -17166,7 +17272,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000000" +
   "0111100000"
   );
- regGWorldCharInfo( 1, _CHAR( 'z' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( 'z' ), 11, 12, 4, 10, 8,
   "0111111100" +
   "0100001000" +
   "0000010000" +
@@ -17176,10 +17282,10 @@ function regGWorldDefCharInfoLarge(){
   "0100000100" +
   "0111111100"
   );
- regGWorldCharInfo( 1, _CHAR( ' ' ), 11, 12, 4, 10, 12,
+ regGWorldCharInfo( i, _CHAR( ' ' ), 11, 12, 4, 10, 12,
   ""
   );
- regGWorldCharInfo( 1, _CHAR( '!' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '!' ), 11, 12, 4, 10, 11,
   "0001110000" +
   "0001110000" +
   "0001110000" +
@@ -17192,14 +17298,14 @@ function regGWorldDefCharInfoLarge(){
   "0001110000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '"' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '"' ), 11, 12, 4, 10, 11,
   "0111011100" +
   "0111011100" +
   "0010001000" +
   "0010001000" +
   "0010001000"
   );
- regGWorldCharInfo( 1, _CHAR( '#' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '#' ), 11, 12, 4, 10, 11,
   "0000101000" +
   "0000101000" +
   "0000101000" +
@@ -17212,7 +17318,7 @@ function regGWorldDefCharInfoLarge(){
   "0010100000" +
   "0010100000"
   );
- regGWorldCharInfo( 1, _CHAR( '$' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '$' ), 11, 12, 4, 10, 11,
   "0000100000" +
   "0001110100" +
   "0010001100" +
@@ -17227,7 +17333,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( '%' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '%' ), 11, 12, 4, 10, 11,
   "0011100000" +
   "0100010000" +
   "0100010000" +
@@ -17240,7 +17346,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100010" +
   "0000011100"
   );
- regGWorldCharInfo( 1, _CHAR( '&' ), 11, 12, 4, 10, 9,
+ regGWorldCharInfo( i, _CHAR( '&' ), 11, 12, 4, 10, 9,
   "0001110000" +
   "0010001000" +
   "0010000000" +
@@ -17251,14 +17357,14 @@ function regGWorldDefCharInfoLarge(){
   "0100010000" +
   "0011101100"
   );
- regGWorldCharInfo( 1, _CHAR( '\'' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '\'' ), 11, 12, 4, 10, 11,
   "0001110000" +
   "0001110000" +
   "0000100000" +
   "0000100000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( '(' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '(' ), 11, 12, 4, 10, 11,
   "0000000100" +
   "0000001000" +
   "0000010000" +
@@ -17273,7 +17379,7 @@ function regGWorldDefCharInfoLarge(){
   "0000001000" +
   "0000000100"
   );
- regGWorldCharInfo( 1, _CHAR( ')' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( ')' ), 11, 12, 4, 10, 11,
   "0010000000" +
   "0001000000" +
   "0000100000" +
@@ -17288,7 +17394,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000000" +
   "0010000000"
   );
- regGWorldCharInfo( 1, _CHAR( '*' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '*' ), 11, 12, 4, 10, 11,
   "0000100000" +
   "0000100000" +
   "0110101100" +
@@ -17297,7 +17403,7 @@ function regGWorldDefCharInfoLarge(){
   "0001010000" +
   "0010001000"
   );
- regGWorldCharInfo( 1, _CHAR( '+' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( '+' ), 11, 12, 4, 10, 10,
   "0000100000" +
   "0000100000" +
   "0000100000" +
@@ -17308,21 +17414,21 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( ',' ), 11, 12, 4, 10, 3,
+ regGWorldCharInfo( i, _CHAR( ',' ), 11, 12, 4, 10, 3,
   "0000111000" +
   "0000110000" +
   "0000110000" +
   "0001100000" +
   "0001000000"
   );
- regGWorldCharInfo( 1, _CHAR( '-' ), 11, 12, 4, 10, 5,
+ regGWorldCharInfo( i, _CHAR( '-' ), 11, 12, 4, 10, 5,
   "0111111110"
   );
- regGWorldCharInfo( 1, _CHAR( '.' ), 11, 12, 4, 10, 2,
+ regGWorldCharInfo( i, _CHAR( '.' ), 11, 12, 4, 10, 2,
   "0001110000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '/' ), 11, 12, 4, 10, 12,
+ regGWorldCharInfo( i, _CHAR( '/' ), 11, 12, 4, 10, 12,
   "0000000110" +
   "0000000100" +
   "0000001100" +
@@ -17337,7 +17443,7 @@ function regGWorldDefCharInfoLarge(){
   "0010000000" +
   "0110000000"
   );
- regGWorldCharInfo( 1, _CHAR( ':' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( ':' ), 11, 12, 4, 10, 8,
   "0001110000" +
   "0001110000" +
   "0000000000" +
@@ -17347,7 +17453,7 @@ function regGWorldDefCharInfoLarge(){
   "0001110000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( ';' ), 11, 12, 4, 10, 8,
+ regGWorldCharInfo( i, _CHAR( ';' ), 11, 12, 4, 10, 8,
   "0001110000" +
   "0001110000" +
   "0000000000" +
@@ -17358,7 +17464,7 @@ function regGWorldDefCharInfoLarge(){
   "0011000000" +
   "0010000000"
   );
- regGWorldCharInfo( 1, _CHAR( '<' ), 11, 12, 4, 10, 9,
+ regGWorldCharInfo( i, _CHAR( '<' ), 11, 12, 4, 10, 9,
   "0000000110" +
   "0000011000" +
   "0001100000" +
@@ -17368,13 +17474,13 @@ function regGWorldDefCharInfoLarge(){
   "0000011000" +
   "0000000110"
   );
- regGWorldCharInfo( 1, _CHAR( '=' ), 11, 12, 4, 10, 7,
+ regGWorldCharInfo( i, _CHAR( '=' ), 11, 12, 4, 10, 7,
   "0111111110" +
   "0000000000" +
   "0000000000" +
   "0111111110"
   );
- regGWorldCharInfo( 1, _CHAR( '>' ), 11, 12, 4, 10, 9,
+ regGWorldCharInfo( i, _CHAR( '>' ), 11, 12, 4, 10, 9,
   "0110000000" +
   "0001100000" +
   "0000011000" +
@@ -17384,7 +17490,7 @@ function regGWorldDefCharInfoLarge(){
   "0001100000" +
   "0110000000"
   );
- regGWorldCharInfo( 1, _CHAR( '?' ), 11, 12, 4, 10, 10,
+ regGWorldCharInfo( i, _CHAR( '?' ), 11, 12, 4, 10, 10,
   "0011111000" +
   "0100000100" +
   "0100000100" +
@@ -17396,7 +17502,7 @@ function regGWorldDefCharInfoLarge(){
   "0001110000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '@' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '@' ), 11, 12, 4, 10, 11,
   "0001111000" +
   "0010000100" +
   "0100000100" +
@@ -17410,7 +17516,7 @@ function regGWorldDefCharInfoLarge(){
   "0010001000" +
   "0001110000"
   );
- regGWorldCharInfo( 1, _CHAR( '[' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '[' ), 11, 12, 4, 10, 11,
   "0001111000" +
   "0001000000" +
   "0001000000" +
@@ -17425,7 +17531,7 @@ function regGWorldDefCharInfoLarge(){
   "0001000000" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( '\\' ), 11, 12, 4, 10, 12,
+ regGWorldCharInfo( i, _CHAR( '\\' ), 11, 12, 4, 10, 12,
   "0110000000" +
   "0010000000" +
   "0011000000" +
@@ -17440,7 +17546,7 @@ function regGWorldDefCharInfoLarge(){
   "0000000100" +
   "0000000110"
   );
- regGWorldCharInfo( 1, _CHAR( ']' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( ']' ), 11, 12, 4, 10, 11,
   "0001111000" +
   "0000001000" +
   "0000001000" +
@@ -17455,22 +17561,22 @@ function regGWorldDefCharInfoLarge(){
   "0000001000" +
   "0001111000"
   );
- regGWorldCharInfo( 1, _CHAR( '^' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '^' ), 11, 12, 4, 10, 11,
   "0000100000" +
   "0001110000" +
   "0011011000" +
   "0110001100" +
   "0100000100"
   );
- regGWorldCharInfo( 1, _CHAR( '_' ), 11, 12, 4, 11, -3,
+ regGWorldCharInfo( i, _CHAR( '_' ), 11, 12, 4, 11, -3,
   "11111111111"
   );
- regGWorldCharInfo( 1, _CHAR( '`' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '`' ), 11, 12, 4, 10, 11,
   "0011000000" +
   "0001100000" +
   "0000110000"
   );
- regGWorldCharInfo( 1, _CHAR( '{' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '{' ), 11, 12, 4, 10, 11,
   "0000011000" +
   "0000100000" +
   "0000100000" +
@@ -17485,7 +17591,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0000011000"
   );
- regGWorldCharInfo( 1, _CHAR( '|' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '|' ), 11, 12, 4, 10, 11,
   "0000100000" +
   "0000100000" +
   "0000100000" +
@@ -17500,7 +17606,7 @@ function regGWorldDefCharInfoLarge(){
   "0000100000" +
   "0000100000"
   );
- regGWorldCharInfo( 1, _CHAR( '}' ), 11, 12, 4, 10, 11,
+ regGWorldCharInfo( i, _CHAR( '}' ), 11, 12, 4, 10, 11,
   "0001100000" +
   "0000010000" +
   "0000010000" +
@@ -17515,7 +17621,7 @@ function regGWorldDefCharInfoLarge(){
   "0000010000" +
   "0001100000"
   );
- regGWorldCharInfo( 1, _CHAR( '~' ), 11, 12, 4, 10, 6,
+ regGWorldCharInfo( i, _CHAR( '~' ), 11, 12, 4, 10, 6,
   "0011000000" +
   "0100100100" +
   "0000011000"
@@ -18834,8 +18940,8 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  con = new _Console( divId );
  con.setMaxBlankLine( 1 );
  con.setMaxLen( conMaxLen );
- regGWorldDefCharInfo();
- regGWorldDefCharInfoLarge();
+ regGWorldDefCharInfo( 0 );
+ regGWorldDefCharInfoLarge( 1 );
  regGWorldBgColor( 0xC0C0C0 );
  canvas = new _Canvas( canvasId );
  canvasClear();
@@ -19096,9 +19202,8 @@ function getExtFuncDataNameSpace( func ){
  }
  return null;
 }
-function mainProc( parentProc, func, childParam, funcParam, parentParam ){
+function mainProc( parentProc, parentParam, func, funcParam, childProc, childParam ){
  var ret;
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
 try {
  ret = childProc.mainLoop( func, childParam, funcParam, parentParam );
 } catch( e ){ catchError( e ); }
@@ -19114,31 +19219,6 @@ try {
   }
   resetProcLoopCount();
  }
- childProc.end();
- return ret;
-}
-function mainProcCache( parentProc, func, internal, childParam, funcParam, parentParam ){
- var ret;
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
-try {
- if( internal ){
-  parentProc.initInternalProc( childProc, func, childParam, parentParam );
- }
- ret = childProc.mainLoop( func, childParam, funcParam, parentParam );
-} catch( e ){ catchError( e ); }
- if( (dispLoopCount > 0) && (procLoopCount() > 0) ){
-  if( dispLoopCount > 1 ){
-   con.newLine();
-   con.setColor( "0000ff" );
-   if( childParam._funcName != null ){
-    con.print( childParam._funcName + ": " );
-   }
-   con.println( "loop " + procLoopCount() );
-   con.setColor();
-  }
-  resetProcLoopCount();
- }
- childProc.end();
  return ret;
 }
 function assertProc( num, func ){
@@ -19172,9 +19252,7 @@ function getErrorString( err, num, func, token ){
 }
 function errorProc( err, num, func, token ){
  if( silentErr ){
-  if( err >= 0x100 ){
-   procError.add( err, num, func, token );
-  }
+  procError.add( err, num, func, token );
  } else {
   var string = getErrorString( err, num, func, token );
   if( string.length > 0 ){
@@ -19396,17 +19474,11 @@ function doFuncGColor( rgb ){
 function doFuncGColor24( index ){
  return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
 }
-function doFuncEval( parentProc, parentParam, string, value ){
+function doFuncEval( parentProc, childProc, childParam, string, value ){
  var ret;
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), parentProc.gUpdateFlag() );
- var childParam = new _Param( parentProc.curNum(), parentParam, true );
- childParam.setEnableCommand( false );
- childParam.setEnableStat( false );
 try {
  ret = parentProc.doFuncEval( childProc, childParam, string, value );
 } catch( e ){ catchError( e ); }
- childParam.end();
- childProc.end();
  return ret;
 }
 function doCommandClear(){
@@ -19636,7 +19708,7 @@ function doCommandDumpArray( param, index ){
  var array = new _Token();
  var label;
  var string = "";
- param._array.makeToken( array, index );
+ param.getArrayToken( index, array );
  if( (label = param._array._label._label[index]) != null ){
   string = label;
   if( param._array._label.flag( index ) != 2 ){
@@ -19741,7 +19813,7 @@ function doCustomCommand( _this, param, code, token ){
     var array = new _Token();
     var label;
     var string = "";
-    param._array.makeToken( array, index );
+    param.getArrayToken( index, array );
     if( (label = param._array._label._label[index]) != null ){
      string = label;
      if( param._array._label.flag( index ) != 2 ){
