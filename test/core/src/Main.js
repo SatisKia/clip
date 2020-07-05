@@ -298,6 +298,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	// 計算パラメータ・クラスを生成する
 	topParam = new _Param();
 	topParam.setEnableCommand( true );
+	topParam.setEnableOpPow( false );
 	topParam.setEnableStat( true );
 	setGlobalParam( topParam );
 
@@ -790,7 +791,7 @@ function printTest( param, line, num, comment ){
 		con.println();
 	}
 }
-function getMatrixString( param, array, indent, sp, br ){
+function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
 	var _token = new _Token();
 
 	var i;
@@ -823,10 +824,10 @@ function getMatrixString( param, array, indent, sp, br ){
 
 	return string;
 }
-function printMatrix( param, array, indent ){
-	con.println( getMatrixString( param, array, indent, "&nbsp;", consoleBreak() ) );
+function printMatrix( param, array/*_Token*/, indent ){
+	con.println( getArrayTokenString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
-function printAnsMatrix( param, array ){
+function printAnsMatrix( param, array/*_Token*/ ){
 	con.newLine();
 	con.setBold( true );
 	printMatrix( param, array, 0 );
@@ -1139,7 +1140,7 @@ function doCommandDumpArray( param, index ){
 	var label;
 	var string = "";
 
-	param.getArrayToken( index, array );
+	param._array.makeToken( array, index );
 
 	if( (label = param._array._label._label[index]) != null ){
 		string = label;
@@ -1151,7 +1152,7 @@ function doCommandDumpArray( param, index ){
 	}
 	string += " ";
 
-	traceString += string + getMatrixString( param, array, string.length, " ", "\n" );
+	traceString += string + getArrayTokenString( param, array, string.length, " ", "\n" );
 	traceString += "\n";
 }
 function doCustomCommand( _this, param, code, token ){
@@ -1261,7 +1262,7 @@ function doCustomCommand( _this, param, code, token ){
 				var label;
 				var string = "";
 
-				param.getArrayToken( index, array );
+				param._array.makeToken( array, index );
 
 				if( (label = param._array._label._label[index]) != null ){
 					string = label;

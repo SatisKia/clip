@@ -317,10 +317,6 @@ _Param.prototype = {
 	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
-	},
-
-	getArrayToken : function( index, token/*_Token*/ ){
-		return this._array.makeToken( token, index );
 	}
 
 };

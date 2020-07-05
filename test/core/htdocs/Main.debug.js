@@ -2572,6 +2572,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  setProcLoopMax( loopMax );
  topParam = new _Param();
  topParam.setEnableCommand( true );
+ topParam.setEnableOpPow( false );
  topParam.setEnableStat( true );
  setGlobalParam( topParam );
  regCustomCommand( "env" , _CLIP_COMMAND_CUSTOM );
@@ -3001,7 +3002,7 @@ function printTest( param, line, num, comment ){
   con.println();
  }
 }
-function getMatrixString( param, array, indent, sp, br ){
+function getArrayTokenString( param, array , indent, sp, br ){
  var _token = new _Token();
  var i;
  var code = new _Integer();
@@ -3031,8 +3032,8 @@ function getMatrixString( param, array, indent, sp, br ){
  }
  return string;
 }
-function printMatrix( param, array, indent ){
- con.println( getMatrixString( param, array, indent, "&nbsp;", consoleBreak() ) );
+function printMatrix( param, array , indent ){
+ con.println( getArrayTokenString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
 function printAnsMatrix( param, array ){
  con.newLine();
@@ -3326,7 +3327,7 @@ function doCommandDumpArray( param, index ){
  var array = new _Token();
  var label;
  var string = "";
- param.getArrayToken( index, array );
+ param._array.makeToken( array, index );
  if( (label = param._array._label._label[index]) != null ){
   string = label;
   if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
@@ -3336,7 +3337,7 @@ function doCommandDumpArray( param, index ){
   string = "@@" + String.fromCharCode( index );
  }
  string += " ";
- traceString += string + getMatrixString( param, array, string.length, " ", "\n" );
+ traceString += string + getArrayTokenString( param, array, string.length, " ", "\n" );
  traceString += "\n";
 }
 function doCustomCommand( _this, param, code, token ){
@@ -3431,7 +3432,7 @@ function doCustomCommand( _this, param, code, token ){
     var array = new _Token();
     var label;
     var string = "";
-    param.getArrayToken( index, array );
+    param._array.makeToken( array, index );
     if( (label = param._array._label._label[index]) != null ){
      string = label;
      if( param._array._label.flag( index ) != _LABEL_MOVABLE ){

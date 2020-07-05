@@ -2394,7 +2394,7 @@ _Proc.prototype = {
 	},
 	printAns : function( childParam ){
 		if( childParam._array._mat[0]._len > 1 ){
-			printAnsMatrix( childParam, childParam.getArrayToken( 0, new _Token() ) );
+			printAnsMatrix( childParam, childParam._array.makeToken( new _Token(), 0 ) );
 		} else {
 			var real = new _String();
 			var imag = new _String();
@@ -7808,11 +7808,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGWorld : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 2 );
 
-		for( i = 0; i < 2; i++ ){
+		for( var i = 0; i < 2; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7822,11 +7821,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandWindow : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 4 );
 
-		for( i = 0; i < 4; i++ ){
+		for( var i = 0; i < 4; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7859,11 +7857,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGFill : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 5 );
 
-		for( i = 0; i < 4; i++ ){
+		for( var i = 0; i < 4; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7879,11 +7876,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandWFill : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 5 );
 
-		for( i = 0; i < 4; i++ ){
+		for( var i = 0; i < 4; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7899,11 +7895,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGMove : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 2 );
 
-		for( i = 0; i < 2; i++ ){
+		for( var i = 0; i < 2; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7913,11 +7908,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandWMove : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 2 );
 
-		for( i = 0; i < 2; i++ ){
+		for( var i = 0; i < 2; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -7993,11 +7987,10 @@ _Proc.prototype = {
 		return ret;
 	},
 	_commandGLine : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 5 );
 
-		for( i = 0; i < 2; i++ ){
+		for( var i = 0; i < 2; i++ ){
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -8024,11 +8017,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandWLine : function( _this, param, code, token ){
-		var i;
 		var ret = _CLIP_NO_ERR;
 		var value = newMatrixArray( 5 );
 
-		for( i = 0; i < 2; i++ ){
+		for( var i = 0; i < 2; i++ ){
 			ret = _this._const(param, code, token, value[i] );
 		}
 		if( ret == _CLIP_NO_ERR ){
@@ -8055,9 +8047,6 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGPut : function( _this, param, code, token ){
-		var x, y;
-		var i;
-
 		var lock;
 		var newCode = new _Integer();
 		var newToken = new _Void();
@@ -8069,13 +8058,17 @@ _Proc.prototype = {
 					param = _global_param;
 				}
 
+				var width  = _proc_gworld.width ();
+				var height = _proc_gworld.height();
+
 				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
 				var arrayList = new Array( 3 );
-
 				arrayList[2] = -1;
-				for( y = 0; y < _proc_gworld.height(); y++ ){
+
+				var x, y;
+				for( y = 0; y < height; y++ ){
 					arrayList[0] = y;
-					for( x = 0; x < _proc_gworld.width(); x++ ){
+					for( x = 0; x < width; x++ ){
 						arrayList[1] = x;
 						_proc_gworld.putColor(
 							x, y,
@@ -8090,7 +8083,7 @@ _Proc.prototype = {
 				var value = newMatrixArray( 3 );
 
 				_this.curLine().unlock( lock );
-				for( i = 0; i < 2; i++ ){
+				for( var i = 0; i < 2; i++ ){
 					ret = _this._const( param, code, token, value[i] );
 				}
 				if( ret == _CLIP_NO_ERR ){
@@ -8105,8 +8098,6 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGPut24 : function( _this, param, code, token ){
-		var x, y;
-
 		var newCode = new _Integer();
 		var newToken = new _Void();
 
@@ -8116,13 +8107,17 @@ _Proc.prototype = {
 					param = _global_param;
 				}
 
+				var width  = _proc_gworld.width ();
+				var height = _proc_gworld.height();
+
 				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
 				var arrayList = new Array( 3 );
-
 				arrayList[2] = -1;
-				for( y = 0; y < _proc_gworld.height(); y++ ){
+
+				var x, y;
+				for( y = 0; y < height; y++ ){
 					arrayList[0] = y;
-					for( x = 0; x < _proc_gworld.width(); x++ ){
+					for( x = 0; x < width; x++ ){
 						arrayList[1] = x;
 						doCommandGPut24(
 							x, y,
@@ -8155,9 +8150,6 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGGet : function( _this, param, code, token ){
-		var x, y;
-		var i;
-
 		var lock;
 		var newCode = new _Integer();
 		var newToken = new _Void();
@@ -8169,19 +8161,22 @@ _Proc.prototype = {
 					param = _global_param;
 				}
 
+				var width  = _proc_gworld.width ();
+				var height = _proc_gworld.height();
+
 				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
 				var arrayList = new Array( 3 );
 				var resizeList = new Array( 3 );
-
-				var moveFlag = (newCode == _CLIP_CODE_ARRAY);
-
-				resizeList[0] = _proc_gworld.height() - 1;
-				resizeList[1] = _proc_gworld.width () - 1;
+				resizeList[0] = height - 1;
+				resizeList[1] = width  - 1;
 				resizeList[2] = -1;
 				arrayList [2] = -1;
-				for( y = 0; y < _proc_gworld.height(); y++ ){
+				var moveFlag = (newCode == _CLIP_CODE_ARRAY);
+
+				var x, y;
+				for( y = 0; y < height; y++ ){
 					arrayList[0] = y;
-					for( x = 0; x < _proc_gworld.width(); x++ ){
+					for( x = 0; x < width; x++ ){
 						arrayList[1] = x;
 						param._array.resize(
 							_arrayIndex, resizeList, arrayList, 2,
@@ -8196,7 +8191,7 @@ _Proc.prototype = {
 				var value = newMatrixArray( 2 );
 
 				_this.curLine().unlock( lock );
-				for( i = 0; i < 2; i++ ){
+				for( var i = 0; i < 2; i++ ){
 					ret = _this._const( param, code, token, value[i] );
 				}
 				if( ret == _CLIP_NO_ERR ){
@@ -8232,12 +8227,6 @@ _Proc.prototype = {
 					param = _global_param;
 				}
 
-				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
-				var arrayList = new Array( 3 );
-				var resizeList = new Array( 3 );
-
-				var moveFlag = (newCode == _CLIP_CODE_ARRAY);
-
 				var w = new _Integer();
 				var h = new _Integer();
 				var data = doCommandGGet24Begin( w, h );
@@ -8245,10 +8234,15 @@ _Proc.prototype = {
 					var width  = w.val();
 					var height = h.val();
 
+					var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+					var arrayList = new Array( 3 );
+					var resizeList = new Array( 3 );
 					resizeList[0] = height - 1;
 					resizeList[1] = width  - 1;
 					resizeList[2] = -1;
 					arrayList [2] = -1;
+					var moveFlag = (newCode == _CLIP_CODE_ARRAY);
+
 					var x, y, r, g, b;
 					var i = 0;
 					for( y = 0; y < height; y++ ){
@@ -9029,7 +9023,7 @@ function defProcFunction(){
 
 	if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
 	if( window.printTest == undefined ) window.printTest = function( param, line, num, comment ){};
-	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array ){};
+	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array/*_Token*/ ){};
 	if( window.printAnsComplex == undefined ) window.printAnsComplex = function( real, imag ){};
 	if( window.printWarn == undefined ) window.printWarn = function( warn, num, func ){};
 	if( window.printError == undefined ) window.printError = function( error, num, func ){};
