@@ -1,0 +1,26 @@
+#y年m月d日の正午から始まるユリウス日（Julian Day Number）を返す
+#\!- <m> <d> <y>
+:params mm id iyyy
+
+# 負の年は紀元前を表すものとする（西暦1年の前年は紀元前1年であることに注意）。
+
+:define IGREG (15+31*(10+12*1582)) # グレゴリオ暦は1582年10月15日に採用された
+
+:var jul
+:var ja jy jm
+jy=iyyy
+
+if jy == 0; return 0; endif
+if jy < 0; [++]jy; endif
+if mm > 2
+	jm=mm+1
+else
+	[--]jy
+	jm=mm+13
+endif
+jul = int (floor(365.25*jy)+floor(30.6001*jm)+id+1720995)
+if id+31*(mm+12*iyyy) >= IGREG # グレゴリオ暦にするかどうか調べる
+	ja=int(0.01*jy)
+	jul += 2-ja+int (0.25*ja)
+endif
+return jul

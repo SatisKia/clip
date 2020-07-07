@@ -1,0 +1,57 @@
+#満月の13日の金曜日の日付を見つける
+:params iybeg iyend
+
+:define ZON (TIME_ZONE/3600) # タイムゾーン
+:define IYBEG 1900 # 探す区間
+:define IYEND 2100
+
+:ans FALSE
+
+if @! < 2
+	iybeg = IYBEG
+	iyend = IYEND
+	:scan ["検索開始年? ] iybeg
+	:scan ["検索終了年? ] iyend
+endif
+
+:var ic icon idwk im iyyy n
+:var timzon frac
+timzon = ZON/24.0
+:var jd jday
+
+for iyyy=iybeg;iyyy<=iyend;iyyy++ # 各年について
+	for im=1;im<=12;im++ # 各月について
+		jday=!julday im 13 iyyy # 13日は金曜日か？
+		idwk=int ((jday+1) % 7)
+		if idwk == 5
+			n=int(12.37*(iyyy-1900+(im-0.5)/12.0))
+			# nは1990年以来の満月の回数の第1近似。これを月齢を計算するルーチンに入れ
+			# て上下に調整し、13日が満月かどうか確かめる。変数iconはこの調整の向きを
+			# 表す。
+			icon=0
+			for;;
+				!flmoon n 2 jd frac # 満月nの日付を求める
+				frac=24.0*(frac+timzon) # 時差を考慮し、時刻に変換
+				if frac < 0.0 # 正午から始まるユリウス日を、真夜中から始まる通常の日に変換
+					[--]jd
+					frac += 24.0
+				endif
+				if frac > 12.0
+					[++]jd
+					frac -= 12.0
+				else
+					frac += 12.0
+				endif
+				if jd == jday # 目的の日か？
+					:println iyyy ["年] im ["月13日] frac ["時]
+					break # 一致した場合
+				else
+					ic=(jday >= jd ? 1 ¥-1)
+					if ic == ([-]icon); break; endif # 一致しなかった場合
+					icon=ic
+					n += ic
+				endif
+			next
+		endif
+	next
+next

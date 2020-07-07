@@ -1,0 +1,26 @@
+#ユリウス日（Julian Day Number）の年月日（calendar date）を返す
+#\!- <julian> <m> <d> <y>
+:params julian &mm &id &iyyy
+
+:define IGREG 2299161
+
+:ans FALSE
+
+:var ja jalpha jb jc jd je
+
+if julian >= IGREG # グレゴリオ暦への変わり目の補正
+	jalpha=int(((julian-1867216)-0.25)/36524.25)
+	ja=julian+1+jalpha-int (0.25*jalpha)
+else # 補正不要の場合
+	ja=julian
+endif
+jb=ja+1524
+jc=int(6680.0+((jb-2439870)-122.1)/365.25)
+jd=int(365*jc+(0.25*jc))
+je=int((jb-jd)/30.6001)
+id=jb-jd-int (30.6001*je)
+mm=je-1
+if mm > 12; mm -= 12; endif
+iyyy=jc-4725
+if mm > 2; [--]iyyy; endif
+if iyyy <= 0; [--]iyyy; endif
