@@ -7048,7 +7048,7 @@ _Proc.prototype = {
    }
    if( (chr >= _CHAR_CODE_LA) && (chr <= _CHAR_CODE_LZ) ){
     dst[0] = i;
-    array.set( index, dst, i, chr - _CHAR_CODE_LA + _CHAR_CODE_UA, false );
+    array.set( index, dst, 1, chr - _CHAR_CODE_LA + _CHAR_CODE_UA, false );
    }
   }
  },

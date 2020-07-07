@@ -108,6 +108,9 @@ _EasyClip.prototype = {
 		subIndex[subIndex.length] = -1;
 		this._param._array.set( _CHAR( chr ), subIndex, subIndex.length - 1, value, false );
 	},
+	setString : function( chr, string ){
+		this._proc.strSet( this._param._array, _CHAR( chr ), string );
+	},
 
 	// 変数・配列の値を確認する
 	getAnsValue : function(){
@@ -232,6 +235,11 @@ _EasyClip.prototype = {
 	},
 	getArrayString : function( chr, indent ){
 		return this.getArrayTokenString( this._param, this._param._array.makeToken( new _Token(), _CHAR( chr ) ), indent );
+	},
+	getString : function( chr ){
+		var string = new _String();
+		this._proc.strGet( this._param._array, _CHAR( chr ), string );
+		return string.str();
 	},
 
 	// 各種設定

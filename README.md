@@ -53,6 +53,7 @@ clip.setArrayValue( 'b', [0, 0], 12 ); // CLIPでの@@b 0 0
 clip.setArrayValue( 'b', [0, 1], 34 ); // CLIPでの@@b 0 1
 clip.setArrayValue( 'b', [1, 0], 56 ); // CLIPでの@@b 1 0
 clip.setArrayValue( 'b', [1, 1], 78 ); // CLIPでの@@b 1 1
+clip.setString( 's', "Hello World!!" ); // CLIPでの@@s
 ```
 
 ### 計算結果の値を確認する
@@ -95,6 +96,10 @@ var array4 = clip.getArray( 'a', n ); // n次元要素のみを取り出す
 
 ```javascript
 var string = "@@b = " + clip.getArrayString( 'b', 6 );
+```
+
+```javascript
+var string = clip.getString( 's' );
 ```
 
 ### 各種設定
