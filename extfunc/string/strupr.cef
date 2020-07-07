@@ -1,0 +1,10 @@
+#文字列str中の文字を大文字に変換する
+#\!- <str>
+:params &str[]
+:ans FALSE
+@l = !strlen str
+for @i = 0; @i < @l; @i++
+	if str @i >= 'a && str @i <= 'z
+		str @i = 'A + (str @i - 'a)
+	endif
+next

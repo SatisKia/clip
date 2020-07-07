@@ -1,0 +1,14 @@
+#\!- <array> <array_num>
+:ans FALSE
+:int
+for @i = 0; @i < @1; @i++
+	@t = @@0 @i
+	:print (@t / 1000)
+	if @i == 0
+		:print [".]
+	endif
+	:print ((@t / 100) % 10)
+	:print ((@t / 10) % 10)
+	:print (@t % 10)
+next
+:println

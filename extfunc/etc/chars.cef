@@ -1,0 +1,41 @@
+:ans 0
+:gworld 143 192
+:gfill 0 0 143 192 255
+
+:gfill 0 7 143 1 9
+:gfill 0 15 143 1 9
+:gfill 0 23 143 1 9
+:gfill 0 31 143 1 9
+:gfill 0 39 143 1 9
+:gfill 0 47 143 1 9
+:gfill 0 55 143 1 9
+:gfill 0 63 143 1 9
+
+:gfill 0 (64+12) 143 4 9
+:gfill 0 (64+28) 143 4 9
+:gfill 0 (64+44) 143 4 9
+:gfill 0 (64+60) 143 4 9
+:gfill 0 (64+76) 143 4 9
+:gfill 0 (64+92) 143 4 9
+:gfill 0 (64+108) 143 4 9
+:gfill 0 (64+124) 143 4 9
+
+:gcolor 0
+
+:gtext ["0123456789] 0 7
+:gtext ["ABCDEFGHIJKLM] 0 15
+:gtext ["NOPQRSTUVWXYZ] 0 23
+:gtext ["abcdefghijklm] 0 31
+:gtext ["nopqrstuvwxyz] 0 39
+:gtext [" !"\#$%&'()*+,] 0 47
+:gtext ["-./:\;<=>?@[\\\]] 0 55
+:gtext ["^_`{|}~] 0 63
+
+:gtextl ["0123456789] 0 (64+12)
+:gtextl ["ABCDEFGHIJKLM] 0 (64+28)
+:gtextl ["NOPQRSTUVWXYZ] 0 (64+44)
+:gtextl ["abcdefghijklm] 0 (64+60)
+:gtextl ["nopqrstuvwxyz] 0 (64+76)
+:gtextl [" !"\#$%&'()*+,] 0 (64+92)
+:gtextl ["-./:\;<=>?@[\\\]] 0 (64+108)
+:gtextl ["^_`{|}~] 0 (64+124)

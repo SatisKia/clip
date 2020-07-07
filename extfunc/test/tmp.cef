@@ -1,0 +1,63 @@
+func print a[] b
+	:ans FALSE
+	:float 14
+	!mp:num2str @@s a; :println @@s
+	:println (modf b @t,@t)
+endfunc
+
+:ans FALSE
+:float 14
+
+@a=@0; @b=@1
+:sprint @@0 @0; !mp:str2num @@a @@0
+:sprint @@1 @1; !mp:str2num @@b @@1
+
+:println @a [" + ] @b
+!mp:add @@c @@a @@b
+print @@c (@a+@b)
+
+:println @b [" + ] @a
+!mp:add @@d @@b @@a
+print @@d (@b+@a)
+
+:println @a [" - ] @b
+!mp:sub @@e @@a @@b
+print @@e (@a-@b)
+
+:println @b [" - ] @a
+!mp:sub @@f @@b @@a
+print @@f (@b-@a)
+
+:println @a [" * ] @b
+!mp:mul @@g @@a @@b
+print @@g (@a*@b)
+
+:println @b [" * ] @a
+!mp:mul @@h @@b @@a
+print @@h (@b*@a)
+
+:println @a [" / ] @b
+!mp:div @@i @@a @@b @@j
+print @@i (@a/@b)
+print @@j (@a%@b)
+
+:println @b [" / ] @a
+!mp:div @@k @@b @@a @@l
+print @@k (@b/@a)
+print @@l (@b%@a)
+
+:println ["|] @a ["|]
+!mp:abs @@m @@a
+print @@m (abs @a)
+
+:println ["|] @b ["|]
+!mp:abs @@n @@b
+print @@n (abs @b)
+
+:println ["-(] @a [")]
+!mp:neg @@o @@a
+print @@o ([-]@a)
+
+:println ["-(] @b [")]
+!mp:neg @@p @@b
+print @@p ([-]@b)

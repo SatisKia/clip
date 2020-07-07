@@ -1,0 +1,157 @@
+#多倍長演算 multiple-precision arithmetic
+#\!- <prec> <e_out> <pi_out>
+
+:define RADIXBITS 15             # 基数のビット数
+:define RADIX (1 << RADIXBITS)   # 基数
+:define N (int ((@0 + 15) / 4.5) # RADIX進法で小数第N位まで
+:define M (int ((@0 + 3) / 4))   # 10進で小数第4×M位まで
+
+# c[0..N]←a[0..N]＋b[0..N]
+func add a[] b[] &c[]
+	:ulong
+	@u = 0
+	for @i = N; ; @i--
+		@u += a @i + b @i
+		c @i = @u & (RADIX - 1); @u >>= RADIXBITS
+		if @i == 0; break; endif
+	next
+	if @u; :println ["オーバーフローしました]; return TRUE; endif
+	return FALSE
+endfunc
+
+# c[0..N]←a[0..N]－b[0..N]
+func sub a[] b[] &c[]
+	:ulong
+	@u = 0
+	for @i = N; ; @i--
+		@u = a @i - b @i - @u
+		c @i = @u & (RADIX - 1)
+		@u = (@u >> RADIXBITS) & 1
+		if @i == 0; break; endif
+	next
+	if @u; :println ["オーバーフローしました]; return TRUE; endif
+	return FALSE
+endfunc
+
+# b[0..N]←a[0..N]×x
+func muls a[] x &b[]
+	:ulong
+	@t = 0
+	for @i = N; ; @i--
+		@t += a @i * x
+		b @i = @t & (RADIX - 1); @t >>= RADIXBITS
+		if @i == 0; break; endif
+	next
+	if @t; :println ["オーバーフローしました]; return TRUE; endif
+	return FALSE
+endfunc
+
+# b[m..N]←a[m..N]/x
+func divs m a[] x &b[]
+	:ulong
+	@t = 0
+	for @i = m; @i <= N; @i++
+		@t = (@t << RADIXBITS) + a @i
+		b @i = @t / x; @t %= x
+	next
+	if 2 * @t >= x # 四捨五入
+		for @i = N; [++]b @i & RADIX; @i--; b @i &= RADIX - 1; next
+	endif
+	return (b m != 0) ? m (m + 1) # 0でない最左位置
+endfunc
+
+# a[0..N]を10進に直して出力
+func print a[]
+	:ulong
+	@t = a 0
+	for @i = 0; @i < 5; @i++
+		@@t @i = '0 + (@t % 10); @t /= 10
+	next
+	@j = 0
+	for @i--; ; @i--
+		if @@t @i != '0 || @j > 0
+			@@s (@j++) = @@t @i
+		endif
+		if @i == 0; break; endif
+	next
+	@@s (@j++) = '.
+	for @i = 0; @i < M; @i++
+		a 0 = 0; muls a 10000 a
+		@@s (@j++) = '0 + ((a 0 / 1000) % 10)
+		@@s (@j++) = '0 + ((a 0 / 100 ) % 10)
+		@@s (@j++) = '0 + ((a 0 / 10  ) % 10)
+		@@s (@j++) = '0 + ( a 0         % 10)
+	next
+	@@s @j = 0
+	:println @@s
+endfunc
+
+#
+# 自然対数の底
+#
+func e &a[]
+	:ulong
+	for @m = 0; @m <= N; @m++; a @m = @@t @m = 0; next # a←t←0
+	a 0 = 2; a 1 = @@t 1 = RADIX / 2                   # a←2.5,t←0.5
+	@k = 3; @m = 1
+	while (@m = divs @m @@t @k @@t) <= N               # t←t/k
+		if add a @@t a; return TRUE; endif             # a←a+t
+		if [++]@k == RADIX; :println ["桁数が多すぎます]; return TRUE; endif
+	endwhile
+	return FALSE
+endfunc
+
+#
+# 円周率(Machin の公式)
+#
+func pi &a[]
+	:ulong
+	@@t 0 = 16; for @i = 1; @i <= N; @i++; @@t @i = 0; next # t←16
+	divs 0 @@t 5 @@t                                        # t←t/5
+	for @i = 0; @i <= N; @i++; a @i = @@t @i; next          # a←t
+	@i = @m = 0; @k = 1
+	for;;
+		if (@m = divs @m @@t 25 @@t) > N; break; endif      # t←t/25
+		if (@k += 2) >= RADIX; :println ["桁数が多すぎます]; return TRUE; endif
+		while @i < @m; @@u (@i++) = 0; endwhile
+		if divs @m @@t @k @@u > N; break; endif             # u←t/k
+		if @k & 2
+			if sub a @@u a; return TRUE; endif              # a←a-u
+		else
+			if add a @@u a; return TRUE; endif              # a←a+u
+		endif
+	next
+	@@t 0 = 4; for @i = 1; @i <= N; @i++; @@t @i = 0; next  # t←4
+	divs 0 @@t 239 @@t                                      # t←t/239
+	if sub a @@t a; return TRUE; endif                      # a←a-t
+	@i = @m = 0; @k = 1
+	for;;
+		if (@m = divs @m @@t 239 @@t) > N; break; endif     # t←t/239
+		if (@m = divs @m @@t 239 @@t) > N; break; endif     # t←t/239
+		if (@k += 2) >= RADIX; :println ["桁数が多すぎます]; return TRUE; endif
+		while @i < @m; @@u (@i++) = 0; endwhile
+		if divs @m @@t @k @@u > N; break; endif             # u←t/k
+		if @k & 2
+			if add a @@u a; return TRUE; endif              # a←a+u
+		else
+			if sub a @@u a; return TRUE; endif              # a←a-u
+		endif
+	next
+	return FALSE
+endfunc
+
+:param 1 TRUE
+:param 2 TRUE
+:ans FALSE
+
+:println ["e]
+@s = time
+e @@1
+!time @s
+print @@1
+
+:println ["pi]
+@s = time
+pi @@2
+!time @s
+print @@2

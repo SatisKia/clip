@@ -1,0 +1,6 @@
+#!/usr/local/bin/clip
+#値の交換 exchange of values
+#\!- <var> <var>
+:params 1 1
+:ans 0
+@t = @0; @0 = @1; @1 = @t

@@ -1,0 +1,10 @@
+#\!- <val>
+:ptype
+:rad 1
+
+@E = 0.001	# DBL_EPSILON の1/5乗程度
+
+if !abs @0 > @E
+	return 0.5 * !log ((1 + @0) / (1 - @0))
+endif
+@0 * (1 + @0 * @0 / 3.0)

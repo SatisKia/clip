@@ -1,0 +1,15 @@
+#!/usr/local/bin/clip
+#\!- <val>
+
+if @0 < 1
+	:warn "外部関数\-の引数が0または負の値になりました
+	return
+endif
+
+:uint \10
+
+@t = 0
+for @d = 0; @d < @0; @d++
+	if !gcd @d @0 == 1; @t++; endif
+next
+@t

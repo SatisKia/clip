@@ -1,0 +1,17 @@
+#\!- <num> [<array>]
+#arrayの要素数を返す
+:param 1 TRUE
+:array a
+:var b c d f g h j k
+:int
+c=(@0+3)/4*2*14,f=10000
+for;b=c-=14;
+	for j=d%=f;g=[--]b*2;d/=g
+		if b<0;break;endif
+		d=d*b+f*(h?(a b)(f/5)),a b=d%[--]g
+	next
+	if b<0;break;endif
+	@@1(k++)=j+d/f,h=4
+next
+if @!<2;!pi_print @@1 k;endif
+return k

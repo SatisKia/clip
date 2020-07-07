@@ -1,0 +1,109 @@
+#文字コードを出力します
+#\!- <val>
+:ans 0
+:uint
+@f=0
+for @i=0;@i<4;@i++
+	@c=(@0>>(8*(3-@i)))&\xff
+	if @c!=\x00;@f=1;endif
+	if @f
+		switch @c
+		case '\ ;:print "\ ;breakswi
+		case '! ;:print "! ;breakswi
+		case '" ;:print "" ;breakswi
+		case '\#;:print "\#;breakswi
+		case '$ ;:print "$ ;breakswi
+		case '\%;:print "\%;breakswi
+		case '\&;:print "\&;breakswi
+		case '' ;:print "' ;breakswi
+		case '\(;:print "\(;breakswi
+		case '\);:print "\);breakswi
+		case '\*;:print "\*;breakswi
+		case '\+;:print "\+;breakswi
+		case '\,;:print "\,;breakswi
+		case '\-;:print "\-;breakswi
+		case '. ;:print ". ;breakswi
+		case '\/;:print "\/;breakswi
+		case '0 ;:print "0 ;breakswi
+		case '1 ;:print "1 ;breakswi
+		case '2 ;:print "2 ;breakswi
+		case '3 ;:print "3 ;breakswi
+		case '4 ;:print "4 ;breakswi
+		case '5 ;:print "5 ;breakswi
+		case '6 ;:print "6 ;breakswi
+		case '7 ;:print "7 ;breakswi
+		case '8 ;:print "8 ;breakswi
+		case '9 ;:print "9 ;breakswi
+		case ': ;:print ": ;breakswi
+		case '\;;:print "\;;breakswi
+		case '\<;:print "\<;breakswi
+		case '\=;:print "\=;breakswi
+		case '\>;:print "\>;breakswi
+		case '\?;:print "\?;breakswi
+		case '@ ;:print "@ ;breakswi
+		case 'A ;:print "A ;breakswi
+		case 'B ;:print "B ;breakswi
+		case 'C ;:print "C ;breakswi
+		case 'D ;:print "D ;breakswi
+		case 'E ;:print "E ;breakswi
+		case 'F ;:print "F ;breakswi
+		case 'G ;:print "G ;breakswi
+		case 'H ;:print "H ;breakswi
+		case 'I ;:print "I ;breakswi
+		case 'J ;:print "J ;breakswi
+		case 'K ;:print "K ;breakswi
+		case 'L ;:print "L ;breakswi
+		case 'M ;:print "M ;breakswi
+		case 'N ;:print "N ;breakswi
+		case 'O ;:print "O ;breakswi
+		case 'P ;:print "P ;breakswi
+		case 'Q ;:print "Q ;breakswi
+		case 'R ;:print "R ;breakswi
+		case 'S ;:print "S ;breakswi
+		case 'T ;:print "T ;breakswi
+		case 'U ;:print "U ;breakswi
+		case 'V ;:print "V ;breakswi
+		case 'W ;:print "W ;breakswi
+		case 'X ;:print "X ;breakswi
+		case 'Y ;:print "Y ;breakswi
+		case 'Z ;:print "Z ;breakswi
+		case '\[;:print "\[;breakswi
+		case '\\;:print "\\;breakswi
+		case '] ;:print "] ;breakswi
+		case '\^;:print "\^;breakswi
+		case '_ ;:print "_ ;breakswi
+		case '` ;:print "` ;breakswi
+		case 'a ;:print "a ;breakswi
+		case 'b ;:print "b ;breakswi
+		case 'c ;:print "c ;breakswi
+		case 'd ;:print "d ;breakswi
+		case 'e ;:print "e ;breakswi
+		case 'f ;:print "f ;breakswi
+		case 'g ;:print "g ;breakswi
+		case 'h ;:print "h ;breakswi
+		case 'i ;:print "i ;breakswi
+		case 'j ;:print "j ;breakswi
+		case 'k ;:print "k ;breakswi
+		case 'l ;:print "l ;breakswi
+		case 'm ;:print "m ;breakswi
+		case 'n ;:print "n ;breakswi
+		case 'o ;:print "o ;breakswi
+		case 'p ;:print "p ;breakswi
+		case 'q ;:print "q ;breakswi
+		case 'r ;:print "r ;breakswi
+		case 's ;:print "s ;breakswi
+		case 't ;:print "t ;breakswi
+		case 'u ;:print "u ;breakswi
+		case 'v ;:print "v ;breakswi
+		case 'w ;:print "w ;breakswi
+		case 'x ;:print "x ;breakswi
+		case 'y ;:print "y ;breakswi
+		case 'z ;:print "z ;breakswi
+		case '\{;:print "\{;breakswi
+		case '\|;:print "\|;breakswi
+		case '\};:print "\};breakswi
+		case '~ ;:print "~ ;breakswi
+		default ;:print ". ;breakswi
+		endswi
+	endif
+next

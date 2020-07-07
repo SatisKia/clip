@@ -1,0 +1,74 @@
+#対称行列の固有値計算：累乗法
+#@n = !- @@a @m @@e @@v
+:params a0[] m &evv[] &vv[]
+
+for @i = 0; @i < row a0; @i++
+	evv @i = 0.0
+next
+vv = @@Z
+
+if row a0 != col a0
+	return 0
+endif
+
+:include !pm
+
+:var n
+n = row a0
+if m > n; m = n; endif
+
+:var l j k ban kmax
+kmax = 753
+:array y x
+:var rmax rmin rrq
+:var eps
+eps = 0.000001
+:array a u
+:var ev s
+
+# もとのAを保存
+a = a0
+# 固有値がm個得られるまで反復
+for ban = 0; ban < m; [++]ban
+	# 出発値を設定
+	inival x n
+	for k = 0; k < kmax; [++]k
+		# Ax＝y
+		mxv a x y n
+		# 固有値計算(1)
+		rat x y rmin rmax rrq n
+		# 収束判定(1)
+		if (rmax - rmin) <= eps
+			break
+		endif
+		# yをxに移す
+		copyv y x n
+		# 長さを1に正規化
+		normal x n
+	next
+	# yをxに移す
+	copyv y x n
+	# 長さを1に正規化
+	normal x n
+	# 固有値の精度改良
+	s = 0.0
+	for l = 0; l < n; [++]l
+		for j = 0; j < n; [++]j
+			s += a0 l j * x l * x j
+		next
+	next
+	ev = s
+	# 結果を配列に書き込む
+	evv ban = rrq
+	for l = 0; l < n; [++]l
+		vv ban l = x l
+	next
+	# 減次する
+	for l = 0; l < n; [++]l
+		for j = 0; j < n; [++]j
+			a l j = a l j - ev * x l * x j
+		next
+	next
+next
+
+return ban

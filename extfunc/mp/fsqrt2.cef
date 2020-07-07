@@ -1,0 +1,69 @@
+#!NAMESPACE mp
+#平方根 square root
+#\!- <ret> <val> <prec> <order>
+#valが負の値の場合TRUEを返す。
+:include !mp:mpf
+
+:params &ret[] a[] prec order
+
+:array x h g
+:array m n o p q
+
+mpf_param a
+
+if !fcmp a "0 > 0
+	if !fcmp a "1 > 0
+		!fdiv @@t "1 a prec
+		!fset x @@t
+	else
+		!fset x "1
+	endif
+	!fmul @@t x x prec
+	!fmul @@t a @@t prec
+	!fsub h "1 @@t
+	!fset g "1
+	!fdiv m "1 "2 prec
+	if order >= 3; !fdiv n "3  "8   prec; endif
+	if order >= 4; !fdiv o "5  "16  prec; endif
+	if order >= 5; !fdiv p "35 "128 prec; endif
+	if order == 6; !fdiv q "63 "256 prec; endif
+	do
+		switch order
+		case 6 ; !fset @@t q; breakswi
+		case 5 ; !fset @@t p; breakswi
+		case 4 ; !fset @@t o; breakswi
+		case 3 ; !fset @@t n; breakswi
+		default; !fset @@t m; breakswi
+		endswi
+		switch order
+		case 6
+			!fmul @@t h @@t prec
+			!fadd @@t p @@t
+			# そのまま下に流す
+		case 5
+			!fmul @@t h @@t prec
+			!fadd @@t o @@t
+			# そのまま下に流す
+		case 4
+			!fmul @@t h @@t prec
+			!fadd @@t n @@t
+			# そのまま下に流す
+		case 3
+			!fmul @@t h @@t prec
+			!fadd @@t m @@t
+		endswi
+		!fmul @@t h @@t prec
+		!fmul @@t x @@t prec
+		!fadd x x @@t
+		!fset g h
+		!fmul @@t x x prec
+		!fmul @@t a @@t prec
+		!fsub h "1 @@t
+		!fabs @@r h
+		!fabs @@s g
+	until !fcmp @@r @@s < 0
+	!fmul ret a x prec
+	return FALSE
+endif
+!fset ret "0
+return (!fcmp a "0 != 0)

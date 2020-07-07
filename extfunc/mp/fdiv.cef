@@ -1,0 +1,41 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数同士の除算
+#\!- <ret> <a> <b> <prec>
+#除数bが0のときはTRUEを返す。
+:include !mp:mp
+:include !mp:mpf
+
+:params &ret[] a[] b[] prec
+
+mpf_param a
+mpf_param b
+
+$SET @p,mpf_match_prec a b
+$CND @k,(b 0 < 0),\-1,1
+$SET @l,mp_get_len b
+$SET @i,@l
+if @i > 0
+	$LOOPSTART	# @i
+	$BREAK		(b @i != 0)
+	$LOOPEND_D	@i,0
+endif
+$RETURN_A (@i == 0),TRUE
+if @i != @l
+	@p -= (@l - @i) * MP_DIGIT
+	mpf_set_prec a @p
+	mpf_set_prec b @p
+	mp_set_len b (@i * @k)
+endif
+
+!div @@q a b @@r
+$SET @t,mpf_mul @@q prec
+mpf_mul @@r prec
+if @t > 0
+	mpf_coef @@k @t
+	!mul @@q @@q @@k
+	!mul @@r @@r @@k
+endif
+!div @@r @@r b
+!add ret @@q @@r
+mpf_set_prec ret prec
+return FALSE

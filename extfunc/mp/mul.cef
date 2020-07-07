@@ -1,0 +1,69 @@
+#!NAMESPACE mp
+#多倍長整数同士の乗算
+#\!- <ret> <a> <b>
+:include !mp:mp
+
+func mp_mul1 &ret[] a[] b n
+	:long
+	$SET_Z ret (n + 1) # 配列の確保
+#	$SET_Z @c
+#	$SET_Z @a
+#	$SET_Z @r
+#	$SET_Z @i
+	if @i < n
+		$LOOPSTART	# @i
+		@x = a ([++]@a) * b + @c
+		$MOD_A		ret ([++]@r),@x,MP_ELEMENT
+		$DIV_A		@c,@x,MP_ELEMENT
+		$LOOPEND_I	@i,n
+	endif
+	$SET ret ([++]@r),@c
+	return @c
+endfunc
+
+:params &ret[] a[] b[]
+:ans FALSE
+
+mp_param a
+mp_param b
+
+$CND @k,(a 0 < 0 && (b 0 >= 0) || (b 0 < 0 && (a 0 >= 0))),\-1,1
+
+:var la lb
+$SET la,mp_get_len a
+$SET lb,mp_get_len b
+
+if la == 0 || lb == 0
+	$SET_Z ret 0
+	return
+endif
+
+if la == 1
+	$SET @c,mp_mul1 ret b (a 1) lb
+elif lb == 1
+	$SET @c,mp_mul1 ret a (b 1) la
+else
+	:long
+	:arrayfill 0 ret 1 (la + lb)
+#	$SET_Z @b
+	$SET   @j,1
+	if @j <= lb
+		$LOOPSTART	# @j
+		$SET_Z		@c
+		$INC		@b
+		$SET_Z		@a
+		$SET		@i,1
+		if @i <= la
+			$LOOPSTART	# @i
+			@x = a ([++]@a) * b @b + ret (@i + @j - 1) + @c
+			$MOD_A		ret (@i + @j - 1),@x,MP_ELEMENT
+			$DIV_A		@c,@x,MP_ELEMENT
+			$LOOPENDE_I	@i,la
+		endif
+		$SET		ret (@i + @j - 1),@c
+		$LOOPENDE_I	@j,lb
+	endif
+endif
+
+:float
+mp_set_len ret ((@c != 0 ? (la + lb) (la + lb - 1)) * @k)

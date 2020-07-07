@@ -1,0 +1,14 @@
+#!NAMESPACE image
+#近い色に合わせ込む描画
+#\!- <array>
+:ans FALSE
+:gclear (gcolor \xFFFFFF)
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+:gput @x @y (gcolor (@@0 @y @x))
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

@@ -1,0 +1,86 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数同士の除算
+#\!- <ret> <a> <b> <prec> [<digit>]
+#除数bが0のときはTRUEを返す。
+:include !mp:mp
+:include !mp:mpf
+
+:params &ret[] a[] b[] prec &digit
+
+mpf_param a
+mpf_param b
+
+$SET @P,mpf_get_prec a
+
+#
+# 被除数の整数部の桁数を求める
+#
+$SET		@l,mp_get_len a
+$SET		@k,10
+$SET		@i,1
+$LOOPSTART	# @i
+$BREAK		(a @l < @k)
+$MUL		@k,10
+$LOOPENDE_I	@i,MP_DIGIT
+digit = ((@l - 1) * MP_DIGIT + @i) - @P
+
+if prec < digit
+	$SET prec,digit
+endif
+
+#
+# @@b = 1 / b
+#
+mp_set_len @@a 1
+$SET @@a 1,1
+$SET @p,mpf_match_prec @@a b
+$CND @k,(b 0 < 0),\-1,1
+$SET @l,mp_get_len b
+$SET @i,@l
+if @i > 0
+	$LOOPSTART	# @i
+	$BREAK		(b @i != 0)
+	$LOOPEND_D	@i,0
+endif
+$RETURN_A (@i == 0),TRUE
+if @i != @l
+	@p -= (@l - @i) * MP_DIGIT
+	mpf_set_prec @@a @p
+	mpf_set_prec b @p
+	mp_set_len b (@i * @k)
+endif
+!div @@q @@a b @@r
+@p = prec * 2 + 1 # 精度を保つために桁数を増やす
+$SET @t,mpf_mul @@q @p
+mpf_mul @@r @p
+if @t > 0
+	mpf_coef @@k @t
+	!mul @@q @@q @@k
+	!mul @@r @@r @@k
+endif
+!div @@r @@r b
+if mp_get_len a == 1 && a 1 == 1
+	!add ret @@q @@r
+	if a 0 < 0
+		$NEG ret 0
+	endif
+	mpf_set_prec ret @p
+	return FALSE
+else
+	!add @@b @@q @@r
+	mpf_set_prec @@b @p
+endif
+
+#
+# ret = a * @@b
+#
+!mul ret a @@b
+$ADD @p,@P
+@n = int ((@p - (prec + MP_DIGIT)) / MP_DIGIT)
+if @n > 0
+	@p -= @n * MP_DIGIT
+	mpf_div ret @n
+endif
+mpf_set_prec ret @p
+
+return FALSE

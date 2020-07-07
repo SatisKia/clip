@@ -1,0 +1,106 @@
+#循環小数を分数に変換する
+#\!- <x> <ret_num> <ret_denom> <debug_flag>
+#変換できた場合TRUEを、できなかった場合FALSE返す。
+
+func approx
+	return (@1 ? (abs ((@1 - @0) / @1)) (abs @0)) < (DBL_EPSILON * 4.0)
+endfunc
+
+func pure x keta &nu &de debug_flag
+	if x == 0
+		return \-1
+	endif
+
+	@k = \-1
+	do
+		@k++
+		x *= 10
+	until x < 1
+
+	:float 20
+	:sprint @@x x
+	for @i = 0, @j = 0; @i <= keta; @i++
+		if @@x @i == 0
+			break
+		elif @@x @i != '.
+			@@y (@j++) = @@x @i
+		endif
+	next
+	if @j < keta
+		return \-1
+	endif
+	@@y @j = 0
+	if debug_flag; :println @k [" ] @@x [" ] @@y; endif
+
+	for @p = int (keta / 2); @p > 0; @p--
+		for @i = 0; @i < @p; @i++
+			@b = FALSE
+			for @j = 1; ; @j++
+				if @i + @p * @j >= keta
+					break
+				elif @@y @i != @@y (@i + @p * @j)
+					@b = TRUE
+					break
+				endif
+			next
+			if @b; break; endif
+		next
+		if @i >= @p
+			break
+		endif
+	next
+	if @p > 0
+		nu = 0
+		for @i = 0; @i < @p; @i++
+			nu = nu * 10 + (@@y @i - '0)
+		next
+		de = (pow 10 @p - 1) * (pow 10 @k)
+		return 1
+	endif
+	return 0
+endfunc
+
+:params x &nu &de debug_flag
+:float 15
+if debug_flag; :println x; endif
+
+@m = 1; if x < 0; @m = \-1; x = [-]x; endif
+@X = x
+
+@k = 1
+for @i = 0; ; @i++
+	if @X / (pow 10 @i) < 10
+		@k = pow 10 @i
+		@X /= @k
+		break
+	endif
+next
+
+for @i = 0; ; @i++
+	@I = int @X
+	if (@r = pure (@X - @I) 14 @N @D debug_flag) < 0
+		break
+	endif
+	if @r > 0
+		nu = (@I * @D + @N) * @k
+		de = @D * pow 10 @i
+		if debug_flag; :println nu [" / ] de; endif
+
+		if [!]approx x (nu / de)
+			return FALSE
+		endif
+
+		# 約分する
+		if (@g = !gcd nu de) != 0
+			nu /= @g; de /= @g
+			if debug_flag; :println nu [" / ] de; endif
+		endif
+
+		nu *= @m
+
+		if debug_flag; :println (nu / de); endif
+		return TRUE
+	endif
+	@X *= 10
+next
+return FALSE

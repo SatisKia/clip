@@ -1,0 +1,171 @@
+#行列のテスト
+
+:include !tmatrix
+
+:ans FALSE
+:assert TRUE
+:gcomplex 16
+
+# LU分解
+func dec
+	:gcomplex 16
+
+	:println ["dec]
+	@r = !dec @@0 @@l @@u
+	print_b @r
+	print_m @@0
+	print_m @@l
+	print_m @@u
+	assert approx @@l @@1
+	assert approx @@u @@2
+	print_m (@@l*@@u)
+	assert approx (@@l*@@u) @@0
+
+	:println ["dec2]
+	@@a = !dec2 @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@3
+
+endfunc
+@@a{{2 14}{3 26}}
+@@l{{2 0}{3 5}}
+@@u{{1 7}{0 1}}
+@@b{{2 7}{3 5}}
+dec @@a @@l @@u @@b
+@@a{{2 4 8}{5 13 29}{7 20 50}}
+@@l{{2 0 0}{5 3 0}{7 6 4}}
+@@u{{1 2 4}{0 1 3}{0 0 1}}
+@@b{{2 2 4}{5 3 3}{7 6 4}}
+dec @@a @@l @@u @@b
+#@@a{{2 5 7}{4 13 20}{8 29 50}}
+#@@l{{1 0 0}{2 1 0}{4 3 1}}
+#@@u{{2 5 7}{0 3 6}{0 0 4}}
+
+# QR分解
+func qrdec
+	:gcomplex 16
+
+	:println ["houdec]
+	@r = !houdec @@0 @@q @@r
+	print_b @r
+	print_m @@0
+	print_m @@q
+	print_m @@r
+#	assert approx @@q @@1
+#	assert approx @@r @@2
+	print_m (@@q*@@r)
+	assert approx (@@q*@@r) @@0
+
+	:println ["qrdec]
+	@r = !qrdec @@0 @@q @@r
+	print_b @r
+	print_m @@0
+	print_m @@q
+	print_m @@r
+#	assert approx @@q @@1
+#	assert approx @@r @@2
+	print_m (@@q*@@r)
+	assert approx (@@q*@@r) @@0
+
+endfunc
+@@a{{6 1 8}{7 5 3}{2 9 4}}
+@@q{{\-0.6359987 0.3613770 0.6818448}
+    {\-0.7419985 \-0.0436380 \-0.6689798}
+    {\-0.2119996 \-0.9313981 0.2958949}}
+@@r{{\-9.4339811 \-6.2539875 \-8.1619837}
+    {0 \-8.2393956 \-0.9654903}
+    {0 0 4.6313984}}
+qrdec @@a @@q @@r
+
+# 同じ固有値を持つバランスのとれた行列
+func balanc
+	:gcomplex 16
+
+	:println ["balanc]
+	@@a = !balanc @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@1
+
+endfunc
+@@a{{1 100 10000}
+    {.01 1 100}
+    {.0001 .01 1}}
+@@b{{1.0000 1.5625 1.2207}
+    {0.6400 1.0000 0.7813}
+    {0.8192 1.2800 1.0000}}
+balanc @@a @@b
+
+# ヘッセンベルグ行列への変換
+func hes
+	:gcomplex 16
+
+	:println ["hes]
+	@@a = !hes @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@1
+
+endfunc
+@@a{{1 1 1 1}
+    {(1/2) (1/3) (1/4) (1/5)}
+    {(1/3) (1/4) (1/5) (1/6)}
+    {(1/4) (1/5) (1/6) (1/7)}}
+@@b{{1 1.664 0.476 0.054}
+    {0.651 0.651 0.064 0}
+    {0 0.064 0.025 0.001}
+    {0 0 0.001 0}}
+hes @@a @@b
+
+func hes2
+	:gcomplex 16
+
+	:println ["hes]
+	@@a = !hes @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@1
+
+	:println ["hes2]
+	@@a = !balanc @@0
+	@@b = !hes2 @@a
+	print_m @@0
+	print_m @@a
+	print_m @@b
+	assert approx @@b @@1
+
+	:println ["hes3]
+	@@a = !hes3 @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@1
+
+endfunc
+@@a{{\-149 \-50 \-154}
+    {537 180 546}
+    {\-27 \-9 \-25}}
+@@b{{\-149.0000 42.2037 \-156.3165}
+    {\-537.6783 152.5511 \-554.9272}
+    {0 0.0728 2.4489}}
+hes2 @@a @@b
+
+# 実対称行列を3重対角行列に変換
+func hh
+	:gcomplex 16
+
+	:println ["hh]
+	@@a = !hh @@0
+	print_m @@0
+	print_m @@a
+	assert approx @@a @@1
+
+endfunc
+@@a{{11 \-5 1 \-3}{\-5 11 \-3 1}{1 \-3 11 \-5}{\-3 1 \-5 11}}
+@@b{{11 \-5.9160 0 0}
+    {\-5.9160 13.5714 \-4.7945 0}
+    {0 \-4.7945 10.3376 \-2.5815}
+    {0 0 \-2.5815 9.0909}}
+hh @@a @@b
+
+:println ["SUCCESS testing matrix, part 2]

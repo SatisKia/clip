@@ -1,0 +1,131 @@
+#対称行列の固有値計算：ヤコビ法
+#@n = !- @@a @@e @@v
+:params a[] &e[] &v[]
+
+for @i = 0; @i < row a; @i++
+	e @i = 0.0
+next
+v = @@Z
+
+if row a != col a
+	return 0
+endif
+
+:var n
+n = row a
+:mat n n v
+
+:var l j k kmax kaisuu
+kmax = 100
+:var p q
+:var eps eps2 bunbo c s
+:var apq apqmax gmax wa sa
+:var apj aqj vlp vlq
+
+# 収束判定定数の算定
+gmax = 0.0
+for l = 0; l < n; [++]l
+	s = 0.0
+	for j = 0; j < n; [++]j
+		s += abs (a l j)
+	next
+	if s > gmax; gmax = s; endif
+next
+eps  = 0.000001 * gmax
+eps2 = 0.001 * eps
+
+# 固有ベクトルの計算の準備
+for l = 0; l < n; [++]l
+	for j = 0; j < n; [++]j
+		v l j = 0.0
+	next
+	v l l = 1.0
+next
+
+# メイン･ループ
+for kaisuu = 1; kaisuu <= kmax; [++]kaisuu
+	# 収束判定
+	apqmax = 0.0
+	for p = 0; p < n - 1; [++]p
+		for q = p + 1; q < n; [++]q
+			apq = abs (a p q)
+			if apq > apqmax; apqmax = apq; endif
+		next
+	next
+	if apqmax < eps; break; endif
+	# 走査
+	for p = 0; p < n - 1; [++]p
+		for q = p + 1; q < n; [++]q
+			apq = a p q
+			if abs apq < eps; break; endif
+			# sとcの算定
+			wa = (a p p + a q q) * 0.5
+			sa = (a p p - a q q) * 0.5
+			bunbo = sqrt (sa * sa + a p q * a p q)
+			if sa > 0.0
+				c = sqrt (1.0 + sa / bunbo) / 1.41421356
+				s = apq / (2.0 * c * bunbo)
+				# 対角要素
+				a p p = wa + bunbo
+				a q q = wa - bunbo
+			else
+				c = sqrt (1.0 - sa / bunbo) / 1.41421356
+				s = ([-]apq) / (2.0 * c * bunbo)
+				# 対角要素
+				a p p = wa - bunbo
+				a q q = wa + bunbo
+			endif
+			# 非対角要素
+			a p q = a q p = 0.0
+			for j = 0; j < p; [++]j
+				apj = a p j
+				aqj = a q j
+				a j p = a p j =     apj * c + aqj * s
+				a j q = a q j = ([-]apj * s + aqj * c)
+			next
+			for j = p + 1; j < q; [++]j
+				apj = a p j
+				aqj = a q j
+				a j p = a p j =     apj * c + aqj * s
+				a j q = a q j = ([-]apj * s + aqj * c)
+			next
+			for j = q + 1; j < n; [++]j
+				apj = a p j
+				aqj = a q j
+				a j p = a p j =     apj * c + aqj * s
+				a j q = a q j = ([-]apj * s + aqj * c)
+			next
+			for l = 0; l < n; [++]l
+				vlp = v l p
+				vlq = v l q
+				v l p =     vlp * c + vlq * s
+				v l q = ([-]vlp * s + vlq * c)
+			next
+		next
+	next
+	eps = eps * 1.05
+next
+for l = 0; l < n; [++]l
+	e l = a l l
+next
+
+# 固有値の整列
+:var w
+for l = 0; l < n - 1; [++]l
+	k = l
+	for j = l + 1; j < n; [++]j
+		if abs (e j) > abs (e k); k = j; endif
+	next
+	if k != l
+		w   = e l
+		e l = e k
+		e k = w
+		for j = 0; j < n; [++]j
+			w     = v j l
+			v j l = v j k
+			v j k = w
+		next
+	endif
+next
+
+return n

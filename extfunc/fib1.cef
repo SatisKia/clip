@@ -1,0 +1,5 @@
+#!/usr/local/bin/clip
+#フィボナッチ数列 Fibonacci sequence
+#\!- <n>
+@0 = int @0
+int ((pow ((1 + sqrt 5) / 2) @0) / sqrt 5 + 0.5)

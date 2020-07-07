@@ -1,0 +1,107 @@
+#!NAMESPACE vector
+
+func vector_text3d_x
+	:ans FALSE
+	:sprint @@s @0
+	:gtext @@s (gx @1 - 4) (gy @2 + 9) @3
+endfunc
+func vector_text3d_y
+	:ans FALSE
+	:sprint @@s @0
+	:gtext @@s 0 (gheight + 8) 0 # 画面外に描画
+	:gtext @@s (gx @1 - gcx) (gy @2 + 3) @3
+endfunc
+func vector_text3d_z
+	:ans FALSE
+	:sprint @@s @0
+	:gtext @@s (gx @1 + 3) (gy @2 + 7) @3
+endfunc
+func vector_window3d l b r t x y z
+	:ans FALSE
+	:window l b r t
+	:gclear \xFF
+	for @i = [-]x, @j = 1; @i >= l; @i -= x, @j++
+		if (@j % 2) == 0
+			vector_text3d_x @i @i 0 \xF7
+		endif
+	next
+	for @i = x, @j = 1; @i <= r; @i += x, @j++
+		if (@j % 2) == 0
+			vector_text3d_x @i @i 0 \xF7
+		endif
+	next
+	for @i = [-]y, @j = 1; @i >= b; @i -= y, @j++
+		if (@j % 2) == 0
+			vector_text3d_y @i 0 @i \xF7
+		endif
+	next
+	for @i = y, @j = 1; @i <= t; @i += y, @j++
+		if (@j % 2) == 0
+			vector_text3d_y @i 0 @i \xF7
+		endif
+	next
+	for @i = [-]z, @j = 1; ; @i -= z, @j++
+		if (@j % 2) == 0
+			vector_text3d_z @i (@i * \-0.5) (@i * \-0.5) \xF7
+			if gcx < 0 || gcx >= gwidth || gcy < 0 || gcy >= gheight
+				break
+			endif
+		endif
+	next
+	for @i = z, @j = 1; ; @i += z, @j++
+		if (@j % 2) == 0
+			vector_text3d_z @i (@i * \-0.5) (@i * \-0.5) \xF7
+			if gcx < 0 || gcx >= gwidth || gcy < 0 || gcy >= gheight
+				break
+			endif
+		endif
+	next
+	:wline l 0 r 0 \xF7
+	:wline 0 b 0 t \xF7
+	if b < 0 && t > 0
+		:wline b b 0 0 \xF7
+		:wline 0 0 t t \xF7
+	else
+		:wline b b t t \xF7
+	endif
+	:gtext ["0] (gx 0 + 2) (gy 0 + 9) \xF7
+endfunc
+
+func vector_guide3d a[] color
+	:ans FALSE
+	@x = a 1; @y = a 2; @z = a 3 * \-0.5
+	@X = @x + @z; @Y = @y + @z
+	:wline @z @z @X @z color
+	:wline @X @Y       color
+	:wline @z @Y       color
+	:wline @z @z       color
+	:wline @x 0  @X @z color
+	:wline 0  @y @z @Y color
+endfunc
+
+func vector_proj2d &ret[] a[]
+	:ans FALSE
+	a 3 *= \-0.5
+	!set ret (a 1 + a 3) (a 2 + a 3)
+endfunc
+
+func vector_draw2d a[] b[] size color &c[]
+	:ans FALSE
+	:deg
+	@a = cos   25 * b 1 - sin   25 * b 2
+	@b = sin   25 * b 1 + cos   25 * b 2
+	@c = cos \-25 * b 1 - sin \-25 * b 2
+	@d = sin \-25 * b 1 + cos \-25 * b 2
+	@e = sqrt (!norm b) / size
+	!add c a b
+	:wline (a 1) (a 2) (c 1) (c 2) color
+	:wline (c 1) (c 2) (c 1 - @a / @e) (c 2 - @b / @e) color
+	:wline (c 1) (c 2) (c 1 - @c / @e) (c 2 - @d / @e) color
+endfunc
+
+func vector_draw3d a[] b[] size color &c[] &d[]
+	:ans FALSE
+	vector_proj2d c a
+	vector_proj2d d b
+	vector_draw2d c d size color d
+endfunc

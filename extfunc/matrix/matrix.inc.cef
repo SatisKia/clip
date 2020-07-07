@@ -1,0 +1,136 @@
+:define NEARLY_ZERO 1.0e-16 # ゼロ
+:define ZERO_TOLERANCE 1.0e-6 # ゼロ
+
+func vect_squared n x[]
+	return vect_prod n x x
+endfunc
+
+func L2_norm n x[]
+	return sqrt (vect_squared n x)
+endfunc
+
+# ベクトルの内積
+func vect_prod n x[] y[]
+	:var l
+	:var prod
+	prod = 0.0
+	for l = 0; l < n; l++
+		prod += x l * y l
+	next
+	return prod
+endfunc
+
+# 行列とベクトルの積
+func mat_vect m n A[] x[] &b[]
+	:var l j
+	for l = 0; l < m; l++
+		b l = 0.0
+		for j = 0; j < n; j++
+			b l += A l j * x j
+		next
+	next
+endfunc
+
+# ベクトルと行列の積
+func vect_mat m n x[] A[] &b[]
+	:var l j
+	for j = 0; j < n; j++
+		b j = 0.0
+		for l = 0; l < m; l++
+			b j += x l * A l j
+		next
+	next
+endfunc
+
+# ベクトルのコピー
+func vect_copy &b[] a[] n
+	:var l
+	for l = 0; l < n; l++
+		b l = a l
+	next
+endfunc
+
+# 微小要素の消去
+func cleanup n &A[]
+	:var l j
+	:var max_norm
+	max_norm = 0.0
+	for l = 0; l < n; l++
+		for j = 0; j < n; j++
+			if abs (A l j) > max_norm; max_norm = abs (A l j); endif
+		next
+	next
+	if max_norm > NEARLY_ZERO
+		for l = 0; l < n; l++
+			for j = 0; j < n; j++
+				if abs (A l j) / max_norm < ZERO_TOLERANCE
+					A l j = 0.0
+				endif
+			next
+		next
+	endif
+	return max_norm
+endfunc
+
+# n次元ベクトルvの第1成分を0に変換する
+# ハウスホルダー行列を求めPに返す
+func Householder n v[] &P[]
+	:var l j
+	:var v2
+	if (v2 = vect_squared n v) < NEARLY_ZERO
+		return
+	endif
+	for l = 0; l < n; l++
+		P l l = 1.0 - 2.0 * v l * v l / v2
+		for j = l + 1; j < n; j++
+			P l j = P j l = ¥-2.0 * v l * v j / v2
+		next
+	next
+endfunc
+
+# ヘッセンベルグ型への変換
+# n*n行列Aをハウスホルダー行列による相似変換で
+# ヘッセンベルグ型に変換し、結果をAに上書きする
+func Hessenberg n &A[]
+	:var m j k l o
+	:array a S W b a2 A2
+	:var anorm
+	for k = 1; k < n; k++
+		for m = k; m < n; m++
+			a (m-k) = A m (k-1)
+		next
+		for m = 0; m < n-k-1; m++; a2 m = a (m + 1); next
+		if (anorm = L2_norm (n-k) a) < NEARLY_ZERO || L2_norm (n-k-1) a2 < NEARLY_ZERO
+			continue
+		endif
+		anorm = a 0 < 0.0 ? ([-]anorm) anorm
+		a 0 += anorm
+		Householder (n-k) a S # ハウスホルダー行列をSに
+		for m = 0; m < k; m++
+			for o = 0; o < n-k; o++; A2 o = A m (k+o); next
+			vect_mat (n-k) (n-k) A2 S a # A12*S
+			vect_copy A2 a (n-k)
+			for o = 0; o < n-k; o++; A m (k+o) = A2 o; next
+		next
+		for m = k; m < n; m++
+			for o = 0; o < n-k; o++; A2 o = A m (k+o); next
+			vect_mat (n-k) (n-k) A2 S a # A22*S
+			vect_copy A2 a (n-k)
+			for o = 0; o < n-k; o++; A m (k+o) = A2 o; next
+		next
+		for m = k; m < n; m++
+			A m (k-1) = 0.0
+		next
+		A k (k-1) = [-]anorm
+		for j = 0; j < n-k; j++
+			for m = 0; m < n-k; m++
+				a m = A (k+m) (k+j)
+			next
+			mat_vect (n-k) (n-k) S a b
+			for m = 0; m < n-k; m++
+				A (k+m) (k+j) = b m
+			next
+		next
+	next
+	cleanup n A
+endfunc

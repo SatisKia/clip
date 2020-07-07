@@ -1,0 +1,21 @@
+#!/usr/local/bin/clip
+#約数 divisor
+#\!- <val>
+:ans 0
+:gfloat \16
+@C = 0
+for @c = 1; (@m = @0 / @c, @c) <= @m; @c++
+	if modf @m @f == 0
+		@@d @C = @c; @C++
+		:print @c [" ]
+	endif
+next
+for @c = @C - 1; @c >= 0; @c--
+	@d = @@d @c
+	@a = @0 / @d
+	if @a != @d
+		@@d @C = @a; @C++
+		:print @a [" ]
+	endif
+next
+:println

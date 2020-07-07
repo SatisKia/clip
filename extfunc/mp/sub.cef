@@ -1,0 +1,69 @@
+#!NAMESPACE mp
+#多倍長整数同士の減算
+#\!- <ret> <a> <b>
+:include !mp:mp
+
+func sub &ret[] a[] b[]
+	:ans FALSE
+
+	:var la lb
+	$SET   la,mp_get_len a
+	$SET   lb,mp_get_len b
+	$SET_Z ret la # 配列の確保
+
+	:long
+#	$SET_Z @r
+#	$SET_Z @a
+#	$SET_Z @b
+#	$SET_Z @x
+	$SET   @i,1
+	if @i <= la
+		$LOOPSTART	# @i
+		$ADD		@x,a ([++]@a)
+		if @i <= lb
+			$SUB @x,b ([++]@b)
+		endif
+		if @x >= 0
+			$SET   ret ([++]@r),@x
+			$SET_Z @x
+		else
+			$ADD_A ret ([++]@r),@x,MP_ELEMENT
+			$SET   @x,\-1
+		endif
+		$LOOPENDE_I @i,la
+	endif
+	while [--]@i > 0
+		$BREAK (ret (@r--) != 0)
+	endwhile
+
+	:float
+	mp_set_len ret @i
+endfunc
+
+:params &ret[] a[] b[]
+:ans FALSE
+
+mp_param a
+mp_param b
+
+if a 0 < 0 && b 0 >= 0
+	$NEG b 0
+	!add ret a b
+	return
+elif a 0 >= 0 && b 0 < 0
+	$NEG b 0
+	!add ret a b
+	return
+elif a 0 < 0 && b 0 < 0
+	$NEG a 0
+	$NEG b 0
+	!sub ret b a
+	return
+endif
+
+if !cmp a b < 0
+	sub ret b a
+	$NEG ret 0
+else
+	sub ret a b
+endif

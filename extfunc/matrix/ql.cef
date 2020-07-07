@@ -1,0 +1,162 @@
+#陰的シフトつきQL法
+#@n = !- @@a @@e @@v
+:params a[] &d[] &z[]
+
+for @i = 0; @i < row a; @i++
+	d @i = 0.0
+next
+z = @@Z
+
+if row a != col a
+	return 0
+endif
+
+# 実対称行列a[1..n][1..n]のHouseholder変換。
+# 出力でaは変換の直交行列Qに置き換えられる。
+# d[1..]は3重対角行列の対角要素を、e[1..n]は副対角要素を返す（e[1]＝0）。
+func tred2 &a[] n &d[] &e[]
+	:base 1
+	:var l k j m
+	:var scale hh h g f
+
+	for m=n;m>=2;m--
+		l=m-1
+		h=scale=0.0
+		if l > 1
+			for k=1;k<=l;k++
+				scale += abs(a m k)
+			next
+			if scale == 0.0 # 変換をしないで飛ばす
+				e m=a m l
+			else
+				for k=1;k<=l;k++
+					a m k /= scale # スケールされたαを使って変換する
+					h += a m k*a m k # hにσを求める
+				next
+				f=a m l
+				g=(f >= 0.0 ? ([-]sqrt h) (sqrt h)
+				e m=scale*g
+				h -= f*g
+				a m l=f-g # aのm行目にuを格納
+				f=0.0
+				for j=1;j<=l;j++
+					a j m=a m j/h # aのm列目にu/Hを格納
+					g=0.0 # gでA・uの要素を求める
+					for k=1;k<=j;k++
+						g += a j k*a m k
+					next
+					for k=j+1;k<=l;k++
+						g += a k j*a m k
+					next
+					e j=g/h # eの未使用の場所にpの要素を求める
+					f += e j*a m j
+				next
+				hh=f/(h+h)
+				for j=1;j<=l;j++ # qをeに格納してpを上書きする
+					f=a m j # e[l]＝e[m-1]は生き残ることに注意
+					e j=g=e j-hh*f
+					for k=1;k<=j;k++
+						a j k -= f*e k+g*a m k
+					next
+				next
+			endif
+		else
+			e m=a m l
+		endif
+		d m=h
+	next
+	d 1=0.0
+	e 1=0.0
+	for m=1;m<=n;m++ # 変換行列の累積を開始
+		l=m-1
+		if d m # m＝1のとき、このブロックはスキップ
+			for j=1;j<=l;j++
+				g=0.0
+				for k=1;k<=l;k++ # aに格納されたuとu/Hを使ってP・Qを求める
+					g += a m k*a k j
+				next
+				for k=1;k<=l;k++
+					a k j -= g*a k m
+				next
+			next
+		endif
+		d m=a m m
+		a m m=1.0 # 次の反復のためaの行と列を単位行列の形にする
+		for j=1;j<=l;j++; a j m=a m j=0.0; next
+	next
+endfunc
+
+# (a^2+b^2)^(1/2)を計算する。悪いアンダーフローやオーバーフローをしない。
+func pythag a b
+	:var absa absb
+	absa = abs a
+	absb = abs b
+	if absa > absb; return absa*sqrt(1.0+sqr(absb/absa))
+	else; return (absb == 0.0 ? 0.0 (absb*sqrt(1.0+sqr(absa/absb))))
+	endif
+endfunc
+
+func SIGN a b
+	return b >= 0.0 ? (abs a) ([-]abs a)
+endfunc
+
+# 陰的シフトつきQL法。実対称3重対角行列の固有値、固有ベクトルを求める。
+func tqli &d[] e[] n &z[]
+	:base 1
+	:var m l iter j k
+	:var s r p g f dd c b
+
+	for j=2;j<=n;j++; e(j-1)=e j; next # eの要素の番号を付け直した方が都合がよい
+	e n=0.0
+	for l=1;l<=n;l++
+		iter=0
+		do
+			for m=l;m<=n-1;m++ # 行列を分割するため、小さな下副対角要素を一つ捜す
+				dd=abs(d m)+abs(d(m+1))
+				if (abs(e m)+dd) == dd; break; endif
+			next
+			if m != l
+				if iter++ == 30; return FALSE; endif
+				g=(d(l + 1)-d l)/(2.0*e l) # シフトを求める
+				r=pythag g 1.0
+				g=d m-d l+e l/(g+SIGN r g)
+				s=c=1.0
+				p=0.0
+				for j=m-1;j>=l;j-- # 元のQL法と同じ平面回転に続いて、3重対角形に戻
+					f=s*e j        # すためのGivens回転を行う
+					b=c*e j
+					e(j+1)=(r=pythag f g)
+					if r == 0.0 # アンダーフローの回避
+						d(j+1) -= p
+						e m=0.0
+						break
+					endif
+					s=f/r
+					c=g/r
+					g=d(j+1)-p
+					r=(d j-g)*s+2.0*c*b
+					d(j+1)=g+(p=s*r)
+					g=c*r-b
+					for k=1;k<=n;k++ # 固有ベクトルを求める
+						f=z k(j+1)
+						z k(j+1)=s*z k j+c*f
+						z k j=c*z k j-s*f
+					next
+				next
+				if r == 0.0 && j >= l; continue; endif
+				d l -= p
+				e l=g
+				e m=0.0
+			endif
+		until m != l
+	next
+	return TRUE
+endfunc
+
+:var n
+n = row a
+:array e
+tred2 a n d e
+z = a
+if tqli d e n z; return n; endif
+return 0

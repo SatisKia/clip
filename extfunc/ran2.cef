@@ -1,0 +1,52 @@
+#\!- <idum> <idum2> <iy> <array_iv>
+:params &idum &idum2 &iy &iv[]
+
+# L'Ecuyerの長周期（＞2×10^18）の乱数生成法とBays-Durhamの切り混ぜに安全機構を付けたもの。
+# 0.0と1.0の間（両端を除く）の一様乱数を返す。初期化にはidumを負の値にして呼び出す。
+# それ以降は呼び出しごとにidumを変えてはならない。
+
+:define IM1 2147483563
+:define IM2 2147483399
+:define AM (1.0/IM1)
+:define IMM1 (IM1-1)
+:define IA1 40014
+:define IA2 40692
+:define IQ1 53668
+:define IQ2 52774
+:define IR1 12211
+:define IR2 3791
+:define NTAB 32
+:define NDIV (1+IMM1/NTAB)
+:define EPS 1.2e-7
+:define RNMX (1.0-EPS)
+
+:var j
+:var k
+:var temp
+
+if idum <= 0 # 初期化
+	if [-]idum < 1; idum=1 # idum=0を防ぐ
+	else; idum = [-]idum
+	endif
+	idum2=idum
+	for j=NTAB+7;j>=0;j-- # 切り混ぜ表を埋める（ウォームアップ8回の後）
+		k=int(idum/IQ1
+		idum=int(IA1*(idum-k*IQ1)-k*IR1
+		if idum < 0; idum += IM1; endif
+		if j < NTAB; iv j = idum; endif
+	next
+	iy=iv 0
+endif
+k=int(idum/IQ1
+idum=int(IA1*(idum-k*IQ1)-k*IR1 # idum=(IA1*idum)%IM1をSchrageの方法で桁あふれなしに計算
+if idum < 0; idum += IM1; endif
+k=int(idum2/IQ2
+idum2=int(IA2*(idum2-k*IQ2)-k*IR2 # idum2=(IA2*idum)%IM2も同様に計算
+if idum2 < 0; idum2 += IM2; endif
+j=int(iy/NDIV # 0..NTAB-1の範囲に入る
+iy=iv j-idum2 # ここでidumを切り混ぜ、idumとidum2を組み合わせて出力を作る
+iv j = idum
+if iy < 1; iy += IMM1; endif
+if (temp=AM*iy) > RNMX; return RNMX # 利用者は両端の値（0.0と1.0）を予期しないので
+else; return temp
+endif

@@ -1,0 +1,36 @@
+:ans FALSE
+
+:println ["pi_out1]
+@n = !pi_out1 100 @@p
+!pi_print @@p @n
+
+:println ["pi_out2]
+@n = !pi_out2 100 @@p
+!pi_print @@p @n
+
+:println ["pi_out3]
+!pi_out3 100
+
+:println ["pi_out4]
+!pi_out4 100
+
+:println ["pi]
+!fract2str (!pi) @@p 100
+:println @@p
+
+:println ["pi2]
+!fract2str (!pi2) @@p 100
+:println @@p
+
+:println ["pi3]
+!fract2str (!pi3) @@p 100
+:println @@p
+
+:println ["pi4]
+!fract2str (!pi4 100) @@p 100
+:println @@p
+
+:println ["pi5]
+:fract
+!fract2str (!pi5 100) @@p 100
+:println @@p

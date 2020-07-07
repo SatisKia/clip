@@ -1,0 +1,62 @@
+#非対称行列の固有値計算
+
+:include !tmatrix
+
+:ans FALSE
+:assert TRUE
+:gcomplex 16
+
+func eigen
+	:gcomplex 16
+
+	:println ["dqr]
+	@@h = !hes @@0 # ヘッセンベルグ行列への変換
+	@n = !dqr @@h @@e
+	:println @n
+	print_m @@0
+	print_m @@h
+	print_a @@e @n
+	assert approx @@h @@1
+	for @i = 0; @i < @n; @i++
+		assert approx_d (@@e @i) (@@2 @i)
+	next
+
+	:println ["hqr]
+	@@h = !hes @@0 # ヘッセンベルグ行列への変換
+	@r = !hqr @@h @@e
+	print_b @r
+	print_m @@0
+	print_m @@h
+	print_a @@e (row @@h)
+	assert approx @@h @@1
+	for @i = 0; @i < (row @@h); @i++
+		assert approx_d (@@e @i) (@@2 @i)
+	next
+
+	:println ["iit]
+	@n = !iit @@0 10 @@e @@v
+	:println @n
+	print_m @@0
+	print_a @@e @n
+	print_m @@v
+	product_t @@0 @n @@e @@v
+
+	:println ["qr2]
+	@n = !qr2 @@0 @@e
+	:println @n
+	print_m @@0
+	print_a @@e @n
+
+endfunc
+@@a{{1 1 1 1}
+    {(1/2) (1/3) (1/4) (1/5)}
+    {(1/3) (1/4) (1/5) (1/6)}
+    {(1/4) (1/5) (1/6) (1/7)}}
+@@b{{1 1.664 0.476 0.054}
+    {0.651 0.651 0.064 0}
+    {0 0.064 0.025 0.001}
+    {0 0 0.001 0}}
+@@c{1.88678 \-0.19758 ¥-0.012815 \-0.00038}
+eigen @@a @@b @@c
+
+:println ["SUCCESS testing matrix, part 3]

@@ -1,0 +1,17 @@
+#!NAMESPACE ft
+#逆離散フーリエ変換
+#\!- <ret_array> <ret_num> <src_array> <src_num>
+:params &ret[] ret_num src[] src_num
+:ans FALSE
+:complex
+$DIV_A		@T,6.28318530717958647692i,ret_num
+$SUB_A		@x,ret_num,1
+$LOOPSTART	# @x
+$MUL_A		@U,@T,@x
+$SET_Z		ret @x
+$SET_Z		@t
+$LOOPSTART	# @t
+ret @x += src @t * exp (@U * @t)
+$LOOPEND_I	@t,src_num
+$DIV		ret @x,ret_num
+$LOOPENDE_D	@x,0

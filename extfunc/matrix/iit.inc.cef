@@ -1,0 +1,267 @@
+# 固有ベクトルの計算(1)
+func vec1 a0[] ev x[] n ban &index[]
+	:parent @@A evr
+	:parent @@B evi
+	:parent @@C vr
+	:parent @@D vi
+	:parent @@E vtr
+	:parent @@F vti
+	:var j k s t newev oldev
+	:array u v w
+	oldev = ev
+	copyv x u n
+	copyv x v n
+	for k = 0; k < 20; [++]k
+		avec2 a0 ev u n index
+		tvec2 a0 ev v n index
+		normal u n
+		normal v n
+		s = sp u v n
+		if s < 0.0
+			for j = 0; j < n; [++]j
+				v j = [-]v j
+			next
+			s = [-]s
+		endif
+		mxv a0 u w n
+		t = sp v w n
+		newev = t / s
+		if abs (newev - oldev) < 0.001; break; endif
+		if abs (newev - ev) < 0.00001; break; endif
+		ev = newev
+	next
+	# 結果を配列に書き込む
+	evr ban = newev
+	evi ban = 0.0
+	for j = 0; j < n; [++]j
+		vr  ban j = u j
+		vi  ban j = 0.0
+		vtr ban j = v j
+		vti ban j = 0.0
+	next
+endfunc
+
+# 固有ベクトルの計算(2)
+func vec2 a0[] beta gamma x[] y[] &z[] n ban &index[]
+	:parent @@A evr
+	:parent @@B evi
+	:parent @@C vr
+	:parent @@D vi
+	:parent @@E vtr
+	:parent @@F vti
+	:var j ba2 d s t ev ev2 apr
+	:array u v w pr pi qr qi
+	ba2 = ban + 1
+	d = beta * beta - 4.0 * gamma
+	s = sqrt (abs d) / 2.0
+	t = [-]beta / 2.0
+	if d >= 0
+		# 実根の場合
+		if beta > 0.0; s = [-]s; endif
+		# 固有値#1
+		ev = t + s
+		vec1 a0 ev x n ban index
+		# 固有値#2
+		ev2 = gamma / ev
+		vec1 a0 ev2 x n ba2 index
+	else
+		# 虚根の場合
+		evr ban = t; evi ban = s
+		evr ba2 = t; evi ba2 = [-]s
+		apr = 0.0
+		for j = 0; j < n; [++]j
+			u j = z j - t * y j
+			v j =       s * y j
+			apr += u j * u j + v j * v j
+		next
+		apr = sqrt apr
+		for j = 0; j < n; [++]j
+			vr ban j = pr j = u j / apr
+			vi ban j = pi j = v j / apr
+			vr ba2 j = qr j = pr j
+			vi ba2 j = qi j = [-]pi j
+		next
+		# tAの固有ベクトルの計算
+		mtxv a0 y z n
+		apr = 0.0
+		for j = 0; j < n; [++]j
+			u j = z j - t * y j
+			v j =       s * y j
+			apr += u j * u j + v j * v j
+		next
+		apr = sqrt apr
+		for j = 0; j < n; [++]j
+			vtr ban j = pr j = u j / apr
+			vti ban j = pi j = v j / apr
+			vtr ba2 j = qr j = pr j
+			vti ba2 j = qi j = [-]pi j
+		next
+	endif
+endfunc
+
+# 反復ベクトルから固有値を算出
+func rati x[] y[] &pmin &pmax &prq n
+	:var j q rmin rmax eps bignum
+	eps = 1.0e-10
+	bignum = 1.0e20
+	rmin = bignum
+	rmax = [-]bignum
+	for j = 0; j < n; [++]j
+		if abs (x j) > eps
+			q = y j / x j
+			if q < rmin; rmin = q; endif
+			if q > rmax; rmax = q; endif
+		endif
+	next
+	prq = sp x y n / sp x x n
+	pmin = rmin
+	pmax = rmax
+endfunc
+
+# 転置行列とベクトルの積
+func mtxv a[] x[] &y[] n
+	:var k j s
+	for k = 0; k < n; [++]k
+		s = 0.0
+		for j = 0; j < n; [++]j
+			s += a j k * x j
+		next
+		y k = s
+	next
+endfunc
+
+# 固有ベクトルの計算
+func avec2 a[] qev &x[] n &index[]
+	:var k j
+	:array c b
+	for k = 0; k < n; [++]k
+		for j = 0; j < n; [++]j
+			c k j = a k j
+		next
+		c k k = a k k - qev
+		b k = x k
+	next
+	ludec c index n
+	solve c b x index n
+endfunc
+
+# 転置行列の固有ベクトル
+func tvec2 a[] qev &x[] n &index[]
+	:var k j
+	:array c b
+	for k = 0; k < n; [++]k
+		for j = 0; j < n; [++]j
+			c k j = a j k
+		next
+		c k k = a k k - qev
+		b k = x k
+	next
+	ludec c index n
+	solve c b x index n
+endfunc
+
+# LU分解
+func ludec &a[] &index[] n
+	:var p q eps
+	eps = 1.0e-20
+	:var l j k
+	for l = 0; l < n; [++]l
+		index l = l
+	next
+	for k = 0; k < n - 1; [++]k
+		pivot a index k n
+		p = a k k
+		if abs p < eps; p = eps; endif
+		for j = k + 1; j < n; [++]j
+			a k j /= p
+		next
+		for l = k + 1; l < n; [++]l
+			q = a l k
+			for j = k + 1; j < n; [++]j
+				a l j -= q * a k j
+			next
+		next
+	next
+endfunc
+
+# 方程式を解く
+func solve a[] &b[] &x[] index[] n
+	:var p q s eps w
+	eps = 1.0e-30
+	:var l j k imax
+	for k = 0; k < n - 1; [++]k
+		imax = index k
+		if k != imax
+			w      = b k
+			b k    = b imax
+			b imax = w
+		endif
+		p = a k k
+		if abs p < eps; p = eps; endif
+		b k /= p
+		for l = k + 1; l < n; [++]l
+			q = a l k
+			b l -= q * b k
+		next
+	next
+	p = a (n - 1) (n - 1)
+	if abs p < eps; p = eps; endif
+	x (n - 1) = b (n - 1) / p
+	for k = n - 2; k >= 0; [--]k
+		s = b k
+		for j = k + 1; j < n; [++]j
+			s -= a k j * x j
+		next
+		x k = s
+	next
+endfunc
+
+# フィルター
+func filter &x[] ban n
+	:parent @@A evr
+	:parent @@B evi
+	:parent @@C vr
+	:parent @@D vi
+	:parent @@E vtr
+	:parent @@F vti
+	:var k j
+	:array p q u v
+	:var pq s t eps
+	t = 0.0
+	eps = 1.0e-20
+	if ban < 1; return; endif
+	for j = 0; j < ban; [++]j
+		for k = 0; k < n; [++]k
+			p k = vr  j k
+			q k = vtr j k
+			u k = vi  j k
+			v k = vti j k
+		next
+		pq = sp p q n
+		if evi j < eps
+			s = sp x q n / pq
+			for k = 0; k < n; [++]k
+				x k -= s * p k
+			next
+		else
+			s = sp x q n / pq
+			t = sp x v n / pq
+			for k = 0; k < n; [++]k
+				x k -= 2.0 * (s * p k - t * u k)
+			next
+		endif
+	next
+endfunc
+
+func lsf x[] y[] z[] &pbeta &pgamma n
+	:var a11 a12 a21 a22 b1 b2 bunbo
+	a11 = sp y y n
+	a12 = a21 = sp z y n
+	a22 = sp z z n
+	b1 = [-]sp y x n
+	b2 = [-]sp z x n
+	bunbo = a11 * a22 - a12 * a21
+#assert (bunbo == 0)
+	pbeta  = (a22 * b1 - a12 * b2) / bunbo
+	pgamma = (a11 * b2 - a21 * b1) / bunbo
+endfunc

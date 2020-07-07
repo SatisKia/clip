@@ -1,0 +1,105 @@
+#実対称行列のすべての固有値および固有ベクトルを計算
+#@n = !- @@a @@e @@v
+:params a[] &d[] &v[]
+
+for @i = 0; @i < row a; @i++
+	d @i = 0.0
+next
+v = @@Z
+
+if row a != col a
+	return \-1
+endif
+
+func ROTATE &a[] m j k l
+	:parent @A tau
+	:parent @B s
+	:parent @C h
+	:parent @D g
+	:base 1
+	g=a m j;h=a k l;a m j=g-s*(h+g*tau);a k l=h+s*(g-h*tau)
+endfunc
+
+:var n nrot
+n = row a
+
+:base 1
+:var j iq ip k
+:var tresh theta t sm c
+:label tau @A
+:label s @B
+:label h @C
+:label g @D
+:array b z
+
+for ip=1;ip<=n;ip++ # 単位行列に初期化
+	for iq=1;iq<=n;iq++; v ip iq=0.0; next
+	v ip ip=1.0
+next
+for ip=1;ip<=n;ip++
+	b ip=d ip=a ip ip # bとdをaの対角要素に初期化
+	z ip=0.0
+next
+nrot=0
+for k=1;k<=50;k++
+	sm=0.0
+	for ip=1;ip<=n-1;ip++ # 非対角要素の総和
+		for iq=ip+1;iq<=n;iq++
+			sm += abs(a ip iq)
+		next
+	next
+	if sm == 0.0 # 正常終了。2次収束のためアンダーフローを利用
+		return nrot # 必要としたJacobi回転の回数
+	endif
+	if k < 4
+		tresh=0.2*sm/(n*n) # 最初の3回の走査
+	else
+		tresh=0.0 # 4回目以降の走査
+	endif
+	for ip=1;ip<=n-1;ip++
+		for iq=ip+1;iq<=n;iq++
+			g=100.0*abs(a ip iq)
+			# 4回目の走査以降、非対角要素が小さいとき、回転をしないで飛ばす
+			if k > 4 && (abs(d ip)+g) == abs(d ip) && (abs(d iq)+g) == abs(d iq)
+				a ip iq=0.0
+			elif abs(a ip iq) > tresh
+				h=d iq-d ip
+				if (abs h+g) == abs h
+					t=(a ip iq)/h # t=1/(2θ)
+				else
+					theta=0.5*h/(a ip iq)
+					t=1.0/(abs theta+sqrt(1.0+theta*theta))
+					if theta < 0.0; t = [-]t; endif
+				endif
+				c=1.0/sqrt(1+t*t)
+				s=t*c
+				tau=s/(1.0+c)
+				h=t*a ip iq
+				z ip -= h
+				z iq += h
+				d ip -= h
+				d iq += h
+				a ip iq=0.0
+				for j=1;j<=ip-1;j++ # 1≦j＜pの場合の回転
+					ROTATE a j ip j iq
+				next
+				for j=ip+1;j<=iq-1;j++ # p＜j＜qの場合の回転
+					ROTATE a ip j j iq
+				next
+				for j=iq+1;j<=n;j++ # q＜j＜nの場合の回転
+					ROTATE a ip j iq j
+				next
+				for j=1;j<=n;j++
+					ROTATE v j ip j iq
+				next
+				[++]nrot
+			endif
+		next
+	next
+	for ip=1;ip<=n;ip++
+		b ip += z ip
+		d ip=b ip
+		z ip=0.0
+	next
+next
+return \-1

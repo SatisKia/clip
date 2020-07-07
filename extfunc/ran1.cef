@@ -1,0 +1,42 @@
+#\!- <idum> <iy> <array_iv>
+:params &idum &iy &iv[]
+
+# Park and Millerの「最小」乱数生成法とBays-Durhamの切り混ぜに安全機構を付けたもの。
+# 0.0と1.0の間（両端を除く）の一様乱数を返す。初期化にはidumを負の値にして呼び出す。
+# それ以降は呼び出しごとにidumを変えてはならない。
+
+:define IA 16807
+:define IM 2147483647
+:define AM (1.0/IM)
+:define IQ 127773
+:define IR 2836
+:define NTAB 32
+:define NDIV (1+(IM-1)/NTAB)
+:define EPS 1.2e-7
+:define RNMX (1.0-EPS)
+
+:var j
+:var k
+:var temp
+
+if idum <= 0 || [!]iy # 初期化
+	if [-]idum < 1; idum=1 # idum=0を防ぐ
+	else; idum = [-]idum
+	endif
+	for j=NTAB+7;j>=0;j-- # 切り混ぜ表を埋める（ウォームアップ8回の後）
+		k=int(idum/IQ
+		idum=int(IA*(idum-k*IQ)-IR*k
+		if idum < 0; idum += IM; endif
+		if j < NTAB; iv j = idum; endif
+	next
+	iy=iv 0
+endif
+k=int(idum/IQ
+idum=int(IA*(idum-k*IQ)-IR*k # idum=(IA*idum)%IMをSchrageの方法で桁あふれなしに計算
+if idum < 0; idum += IM; endif
+j=int(iy/NDIV # 0..NTAB-1の範囲に入る
+iy=iv j # 以前に保存した値を出力し、切り混ぜ表を埋める
+iv j = idum
+if (temp=AM*iy) > RNMX; return RNMX # 利用者は両端の値（0.0と1.0）を予期しないので
+else; return temp
+endif

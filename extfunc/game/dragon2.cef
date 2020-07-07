@@ -1,0 +1,52 @@
+#!/usr/local/bin/clip
+#ドラゴンカーブ(非再帰版) dragon curve
+#\!- <backcolor> <order>
+
+func draw_rel dx dy backcolor
+	:ans 0
+
+	# 現在色を更新する
+	@C = gcolor + 1
+	if @C == backcolor; @C++; endif
+	if @C > 255
+		@C = (backcolor == 0) ? 1 0
+	endif
+
+	:gline (gcx+dx) (gcy+dy) @C
+endfunc
+
+:params backcolor order
+:ans 0
+:enum RIGHT LEFT
+
+:var k ii p q dx dy dx1 dy1
+:array fold
+
+if @! < 2
+	backcolor =   0; :scan ["背景色? ] backcolor
+	order     =  10; :scan ["位数? ]   order
+endif
+
+:gworld 640 400
+:gclear backcolor
+
+:gmove 200 140
+:gcolor 0
+dx = 0; dy = 2; draw_rel (3 * dx) (3 * dy) backcolor; p = 0
+for k = 1; k <= order; k++
+	fold p = LEFT; q = 2 * p
+	for ii = p; ii <= q; ii++
+		switch fold (q - ii)
+		case RIGHT
+			fold ii = LEFT; dx1 = [-]dy; dy1 = dx
+			breakswi
+		case LEFT
+			fold ii = RIGHT; dx1 = dy; dy1 = [-]dx
+			breakswi
+		endswi
+		draw_rel (dx + dx1) (dy + dy1) backcolor
+		draw_rel (3 * dx1) (3 * dy1) backcolor
+		dx = dx1; dy = dy1
+	next
+	p = q + 1
+next

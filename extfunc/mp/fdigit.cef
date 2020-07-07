@@ -1,0 +1,18 @@
+#!NAMESPACE mp
+:include !mp:mp
+:include !mp:mpf
+
+mpf_param @@0
+
+$SET		@l,mp_get_len @@0
+$RETURN_A	(@l == 0),0
+
+$SET		@k,10
+$SET		@i,1
+$LOOPSTART	# @i
+$BREAK		(@@0 @l < @k)
+$MUL		@k,10
+$LOOPENDE_I	@i,MP_DIGIT
+@d = (@l - 1) * MP_DIGIT + @i
+
+return @d - mpf_get_prec @@0

@@ -1,0 +1,11 @@
+#!/usr/local/bin/clip
+#立方根(Newton 法) cube root
+#\!- <val>
+:ptype
+if @0 == 0; return 0; endif
+if @0 > 0; @p = 1; else; @p = 0; @0 = [-]@0; endif
+@s = @0 > 1 ? @0 1
+do
+	@S = @s; @s = (@0 / (@s * @s) + 2 * @s) / 3
+until @s < @S
+@p ? @S ([-]@S)

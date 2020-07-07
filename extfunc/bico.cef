@@ -1,0 +1,5 @@
+#2項係数 binomial coefficients function
+#\!- <n> <k>
+:params n k
+
+return floor(0.5+exp(!factln n-!factln k-!factln(n-k)))

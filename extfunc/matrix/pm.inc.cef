@@ -1,0 +1,95 @@
+# 内積
+func sp x[] y[] n
+	:var j s
+	s = 0.0
+	for j = 0; j < n; [++]j
+		s += x j * y j
+	next
+	return s
+endfunc
+
+# 出発値の設定
+func inival &x[] n
+	:var j
+	for j = 0; j < n; [++]j
+		x j = (rand & 2047) - 4096
+	next
+	normal x n
+endfunc
+
+# 反復ベクトルから固有値を算出
+func rat x[] y[] &pmin &pmax &prq n
+	:var j q rmin rmax eps bignum
+	eps = 1.0e-20
+	bignum = 1.0e20
+	rmin = bignum
+	rmax = [-]bignum
+	for j = 0; j < n; [++]j
+		if abs (y j) < eps
+			rmin = eps
+		else
+			if abs (x j) > eps
+				q = y j / x j
+				if q < rmin; rmin = q; endif
+				if q > rmax; rmax = q; endif
+			else
+				rmax = bignum
+			endif
+		endif
+	next
+	prq = sp x y n / sp x x n
+	pmin = rmin
+	pmax = rmax
+endfunc
+
+# 正規化
+func normal &x[] n
+	:var j s
+	s = sqrt (sp x x n)
+	for j = 0; j < n; [++]j
+		x j = x j / s
+	next
+endfunc
+
+# ベクトルの転送
+func copyv a[] &b[] n
+	:var j
+	for j = 0; j < n; [++]j
+		b j = a j
+	next
+endfunc
+
+# 行列とベクトルの積
+func mxv a[] x[] &y[] n
+	:var k j s
+	for k = 0; k < n; [++]k
+		s = 0.0
+		for j = 0; j < n; [++]j
+			s += a k j * x j
+		next
+		y k = s
+	next
+endfunc
+
+# ピボット選択
+func pivot &a[] &b[] k n
+	:var l j imax g aik w
+	g = abs (a k k)
+	imax = k
+	for l = k + 1; l < n; [++]l
+		aik = abs (a l k)
+		if aik > g
+			g = aik
+			imax = l
+		endif
+	next
+	if imax == k; return; endif
+	for j = k; j < n; [++]j
+		w        = a k    j
+		a k    j = a imax j
+		a imax j = w
+	next
+	w      = b k
+	b k    = b imax
+	b imax = w
+endfunc

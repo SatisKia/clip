@@ -1,0 +1,64 @@
+#QR分解（ハウスホルダー法）
+#@r = !- @@a @@q @@r
+:params a[] &q[] &r[]
+
+q = @@Z
+r = @@Z
+
+if row a != col a
+	return FALSE
+endif
+
+:var n
+n = row a
+:mat n n q
+:mat n n r
+
+:var l j k
+:var aik c s ss uu w
+:array u v
+for l = 0; l < n; [++]l
+	for j = 0; j < n; [++]j
+		r l j = a l j
+		q l j = 0.0
+	next
+	q l l = 1.0
+next
+for k = 0; k < n - 1; [++]k
+	ss = 0.0
+	for l = k; l < n; [++]l
+		u l = aik = r l k
+		ss += aik * aik
+	next
+	s = sqrt ss
+	if r k k > 0.0; s = [-]s; endif
+	u k -= s
+	uu = 2.0 * (ss - r k k * s)
+	c = 2.0 / uu
+	for j = k; j < n; [++]j
+		w = 0.0
+		for l = k; l < n; [++]l
+			w += u l * r l j
+		next
+		v j = c * w
+	next
+	for l = k; l < n; [++]l
+		for j = k; j < n; [++]j
+			r l j -= u l * v j
+		next
+	next
+	for l = 0; l < n; [++]l
+		w = 0.0
+		for j = k; j < n; [++]j
+			w += q l j * u j
+		next
+		v l = c * w
+	next
+	for l = 0; l < n; [++]l
+		for j = k; j < n; [++]j
+			q l j -= v l * u j
+		next
+	next
+next
+
+return TRUE

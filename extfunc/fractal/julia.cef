@@ -1,0 +1,89 @@
+#!/usr/local/bin/clip
+#ジュリア集合 Julia set
+#\!-
+
+:ans 0
+:gcomplex
+
+:label KS @0	# 複素平面の縦横の分割数
+:label CS @1	# カラーの始点
+:label CE @2	# カラーの終点
+:label KL @3	# 最大繰り返し回数
+:label RS @4	# 複素平面の実部の始点
+:label RE @5	# 複素平面の実部の終点
+:label IS @6	# 複素平面の虚部の始点
+:label IE @7	# 複素平面の虚部の終点
+
+if @! < 8
+	KS = 100
+	CS = 1
+	CE = 255
+	KL = 30
+	RS = \-1.5
+	RE = 1.5
+	IS = \-1.5
+	IE = 1.5
+
+	:scan ["複素平面の縦横の分割数? ] KS
+	:scan ["カラーの始点? ]           CS
+	:scan ["カラーの終点? ]           CE
+	:scan ["最大繰り返し回数? ]       KL
+	:scan ["実部の始点? ]             RS
+	:scan ["実部の終点? ]             RE
+	:scan ["虚部の始点? ]             IS
+	:scan ["虚部の終点? ]             IE
+endif
+
+:define MIN 5e\-6		# 収束誤差上限
+
+:var rr ii
+:var zabs1 zabs2
+
+@r = (RE - RS) / KS		# 実部の増分
+@i = (IE - IS) / KS		# 虚部の増分
+
+@c = CE - CS + 1		# 使用する色数
+
+:clear
+:println ["最大繰り返し回数: ] KL
+:println ["実部: ] RS ["～] RE
+:println ["虚部: ] IS ["～] IE
+@t = time
+
+:gworld KS KS
+:gclear 0
+
+for @x = 0; @x < KS; @x++				# 実軸方向ループ
+	for @y = 0; @y < KS; @y++			# 虚軸方向ループ
+		@z = ((@x * @r + RS) (@y * @i + IS))
+
+		if abs (real @z) >= MIN || abs (imag @z) >= MIN	# divide by 0 防止
+			zabs1 = 0.0		# 複素数の大きさを表わす変数
+
+			for @k = 0; @k <= KL; @k++	# 収束計算のループ
+				rr = real @z * real @z
+				ii = imag @z * imag @z
+
+				@d = 1.0 / ((rr + ii) * (rr + ii) * 3.0)
+
+				:real @Z (0.67 * real @z + (rr - ii) * @d)
+				:imag @Z (0.67 * imag @z - 2.0 * real @z * imag @z * @d)
+
+				if @k != 1	# 1回目は比較対象がないためキャンセル
+					zabs2 = abs (@Z - @z)	# 差の大きさ
+					if abs (zabs2 - zabs1) < MIN	# 1回前の値との差が小さくなって
+													# いれば収束する点とみなし、表示。
+						:gput @x (KS - 1 - @y) (@k % @c + CS)
+						break
+					endif
+				endif
+
+				# 収束しない場合、初期値、解の大きさの差をリセットし、繰り返し
+				@z = @Z			# 初期値
+				zabs1 = zabs2	# 解の大きさの差
+			next
+		endif
+	next
+next
+
+!time @t

@@ -1,0 +1,12 @@
+#!/usr/local/bin/clip
+#\!- <val>
+:ptype
+:rad
+:angle 0
+
+:define EPS5 0.001	# DBL_EPSILON の1/5乗程度
+
+if   @0>   EPS5;2/(1+!exp(\-2*@0))-1
+elif @0<[-]EPS5;1-2/(!exp(  2*@0)+1)
+else;@0*(1-@0*@0/3)
+endif

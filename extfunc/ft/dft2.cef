@@ -1,0 +1,18 @@
+#!NAMESPACE ft
+#離散フーリエ変換
+#\!- <ret_r_array> <ret_i_array> <ret_num> <src_r_array> <src_i_array> <src_num>
+:params &ret_r[] &ret_i[] ret_num src_r[] src_i[] src_num
+:ans FALSE
+$DIV_A		@T,6.28318530717958647692,ret_num
+$SUB_A		@t,ret_num,1
+$LOOPSTART	# @t
+$MUL_A		@U,@T,@t
+$SET_Z		ret_r @t
+$SET_Z		ret_i @t
+$SET_Z		@x
+$LOOPSTART	# @x
+$MUL_A		@V,@U,@x
+ret_r @t += src_r @x * cos @V + src_i @x * sin @V
+ret_i @t += src_i @x * cos @V - src_r @x * sin @V
+$LOOPEND_I	@x,src_num
+$LOOPENDE_D	@t,0

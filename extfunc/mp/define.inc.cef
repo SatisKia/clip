@@ -1,0 +1,10 @@
+#!NAMESPACE mp
+if [!]defined MP_DEFINE
+	:define MP_DEFINE
+
+	:define MP_DIGIT     4
+	:define MP_ELEMENT   (pow 10 MP_DIGIT)
+	:define MP_PREC_MASK \xFFFFFFFF
+	:define MP_LEN_COEF  (MP_PREC_MASK + 1)
+
+endif

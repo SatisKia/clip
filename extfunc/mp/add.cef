@@ -1,0 +1,58 @@
+#!NAMESPACE mp
+#多倍長整数同士の加算
+#\!- <ret> <a> <b>
+:include !mp:mp
+
+:params &ret[] a[] b[]
+:ans FALSE
+
+mp_param a
+mp_param b
+
+if a 0 < 0 && b 0 >= 0
+	$NEG a 0
+	!sub ret b a
+	return
+elif a 0 >= 0 && b 0 < 0
+	$NEG b 0
+	!sub ret a b
+	return
+endif
+$CND @k,(a 0 < 0 && (b 0 < 0)),\-1,1
+
+:var lr la lb
+$SET   la,mp_get_len a
+$SET   lb,mp_get_len b
+$CND   lr,(la >= lb),la,lb
+$SET_Z ret (lr + 1) # 配列の確保
+
+:long
+#SET_Z @r
+#SET_Z @a
+#SET_Z @b
+#SET_Z @x
+$SET   @i,1
+if @i <= lr
+	$LOOPSTART # @i
+	if @i <= la
+		$ADD @x,a ([++]@a)
+	endif
+	if @i <= lb
+		$ADD @x,b ([++]@b)
+	endif
+	if @x < MP_ELEMENT
+		$SET   ret ([++]@r),@x
+		$SET_Z @x
+	else
+		$SUB_A ret ([++]@r),@x,MP_ELEMENT
+		$SET   @x,1
+	endif
+	$LOOPENDE_I @i,lr
+endif
+if @x != 0
+	$SET ret ([++]@r),@x
+	$INC lr
+endif
+
+:float
+mp_set_len ret (lr * @k)

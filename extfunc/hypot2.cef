@@ -1,0 +1,12 @@
+#!/usr/local/bin/clip
+#直角三角形の斜辺の長さ(Moler\-Morrison 法) hypotenuse
+#\!- <val> <val>
+:float \16
+@x = abs @0; @y = abs @1
+if @x < @y; @t = @x; @x = @y; @y = @t; endif
+if @y == 0; return @x; endif
+for @i = 0; @i < 3; @i++
+	@t = @y / @x; @t *= @t; @t /= 4 + @t
+	@x += 2 * @x * @t; @y *= @t
+next
+@x

@@ -1,0 +1,24 @@
+#!NAMESPACE image
+#スケーリング
+#\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
+:ans FALSE
+:param 7 TRUE
+$SET		@W,(@3 - @1 + 1)
+$SET		@H,(@4 - @2 + 1)
+$SET		@w,@5
+$SET		@h,@6
+$CND		@M,(@W > @w),((@W - 1) / (@w - 1)),(@W / @w)
+$CND		@N,(@H > @h),((@H - 1) / (@h - 1)),(@H / @h)
+$SET_Z		@y
+$LOOPSTART	# @y
+$MUL_A		@n,@N,@y
+$ADD		@n,@2
+$INT		@n,@n
+$SET_Z		@x
+$LOOPSTART	# @x
+$MUL_A		@m,@M,@x
+$ADD		@m,@1
+$INT		@m,@m
+$SET		@@7 @y @x,@@0 @n @m
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

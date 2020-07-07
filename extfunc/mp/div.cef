@@ -1,0 +1,208 @@
+#!NAMESPACE mp
+#多倍長整数同士の除算。商qと余りrを得る。
+#\!- <q> <a> <b> <r>
+#除数bが0のときはTRUEを返す。
+:include !mp:mp
+
+func mp_mul1 &q[] a[] b
+	:long
+	$SET_Z q (a 0 + 1) # 配列の確保
+#	$SET_Z @c
+#	$SET_Z @a
+#	$SET_Z @q
+#	$SET_Z @i
+	if @i < a 0
+		$LOOPSTART	# @i
+		@x = a ([++]@a) * b + @c
+		$MOD_A		q ([++]@q),@x,MP_ELEMENT
+		$DIV_A		@c,@x,MP_ELEMENT
+		$LOOPEND_I	@i,a 0
+	endif
+	$SET q ([++]@q),@c
+	$SET q 0,@i
+	if @c > 0
+		$INC q 0
+	endif
+endfunc
+
+func mp_div1 &q[] a[] b
+	:long
+	$SET   q 0,a 0
+#	$SET_Z @c
+	$SET   @a,a 0
+	$SET   @q,q 0
+	$SET   @i,a 0
+	if @i > 0
+		$LOOPSTART	# @i
+		@x = MP_ELEMENT * @c + a (@a--)
+		$DIV_A		q (@q--),@x,b
+		$MOD_A		@c,@x,b
+		$LOOPEND_D	@i,0
+	endif
+	if q (q 0) == 0
+		$DEC q 0
+	endif
+	return @c
+endfunc
+
+func mp_sub &a[] b[] aa bb
+	:long
+#	$SET_Z @c
+	$ADD_A @t,bb,1
+	$SET   bb,1
+	if bb < @t
+		$LOOPSTART # bb
+		a ([++]aa) -= b bb + @c
+		$SET_Z @c
+		if a aa < 0
+			$ADD a aa,MP_ELEMENT
+			$SET @c,1
+		endif
+		$LOOPEND_I bb,@t
+	endif
+	while a aa == 0
+		$DEC aa
+	endwhile
+	$SET a 0,aa
+endfunc
+
+:params &q[] a[] b[] &r[]
+
+mp_param a
+mp_param b
+
+$CND @k,(a 0 < 0 && (b 0 >= 0) || (b 0 < 0 && (a 0 >= 0))),\-1,1
+$CND @l,(a 0 < 0),\-1,1
+
+$SET   a 0,mp_get_len a
+$SET   b 0,mp_get_len b
+$SET_Z q 0
+$SET_Z r 0
+
+:var lq lr
+:var K
+:var Q # 仮商
+
+$RETURN_A (b 0 == 0 || (b 0 == 1 && (b 1 == 0))),TRUE
+$RETURN_A (a 0 == 0 || (a 0 == 1 && (a 1 == 0))),FALSE
+
+if a 0 < b 0
+	:arraycopy a 0 r 0 (a 0 + 1)
+	$SET   lr,r 0
+	$SET_Z r 0
+	mp_set_len r (lr * @l)
+	return FALSE
+endif
+
+if b 0 == 1
+#	$SET_Z @r
+	$SET   @c,mp_div1 q a (b 1)
+	if @c > 0
+		$SET r (@r++),1
+		$SET r @r,@c
+	else
+		$SET_Z r @r
+	endif
+	$SET   lq,q 0
+	$SET_Z q 0
+	mp_set_len q (lq * @k)
+	$SET   lr,r 0
+	$SET_Z r 0
+	mp_set_len r (lr * @l)
+	return FALSE
+endif
+
+:long
+
+# 正規化
+if (K = MP_ELEMENT / (b (b 0) + 1)) > 1
+	mp_mul1 a a K
+	mp_mul1 b b K
+endif
+
+q 0 = a 0 - b 0 + 1
+$SET @i,q 0
+if @i > 0
+	$LOOPSTART	# @i
+	$SET_Z		q @i
+	$LOOPEND_D	@i,0
+endif
+$SET @n,b 0
+while (@m = a 0) >= @n
+	# 仮商Qを求める
+	if a (a 0) >= b (b 0)
+		$SET @a,a 0
+		$SET @b,b 0
+		if @b > 0
+			$LOOPSTART	# @b
+			$BREAK		(a @a != b @b)
+			$DEC		@a
+			$LOOPEND_D	@b,0
+		endif
+		if @b == 0
+			$SUB a 0,b 0
+			$INC q (@m - @n + 1)
+			continue
+		elif a @a > b @b
+			mp_sub a b (@m - @n) @b
+			$INC q (@m - @n + 1)
+			continue
+		endif
+		$SUB_A Q,MP_ELEMENT,1
+	else
+		Q = (MP_ELEMENT * a (a 0) + a (a 0 - 1)) / b (b 0)
+	endif
+	$BREAK (@m == @n)
+
+	$LOOPSTART
+
+	if Q == 1
+		# a=a-b
+		$SET_Z b (b 0 + 1)
+		mp_sub a b (a 0 - b 0 - 1) (b 0)
+		break
+	endif
+
+	# a=a-仮商(Q)*bを求める
+	mp_mul1 r b Q
+	$SET @a,a 0
+	$SET @r,r 0
+	if @r > 0
+		$LOOPSTART	# @r
+		$BREAK		(a @a != r @r)
+		$DEC		@a
+		$LOOPEND_D	@r,0
+	endif
+	if @r == 0
+		$SUB a 0,r 0
+		break
+	elif a @a > r @r
+		mp_sub a r (a 0 - r 0) @r
+		break
+	else
+		$DEC Q
+	endif
+
+	$LOOPCONT
+
+	$SET q (@m - @n),Q
+endwhile
+if q (q 0) == 0
+	$DEC q 0
+endif
+
+if K > 1
+	# 逆正規化
+	mp_div1 r a K
+else
+	:arraycopy a 0 r 0 (a 0 + 1)
+endif
+
+:float
+$SET   lq,q 0
+$SET_Z q 0
+mp_set_len q (lq * @k)
+$SET   lr,r 0
+$SET_Z r 0
+mp_set_len r (lr * @l)
+return FALSE

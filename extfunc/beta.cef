@@ -1,0 +1,5 @@
+#!/usr/local/bin/clip
+#ベータ関数 beta function
+#\!- <val> <val>
+:float \16
+exp (!loggamma @0 + !loggamma @1 - !loggamma (@0 + @1))

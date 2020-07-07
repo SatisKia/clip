@@ -1,0 +1,7 @@
+#引数の指数から1を引いた値
+#\!- <x>
+:label x @0
+if x < 1e-5 && x > \-1e-5
+	return x + 0.5 * x * x
+endif
+return exp x - 1.0

@@ -1,0 +1,45 @@
+#!/usr/local/bin/clip
+#IFS用データを作成します
+#\!- <array_data>
+:param 0 1
+:ans 0
+
+:var left bottom right top
+
+left   = @@0 0; :scan ["left? ]   left  ; @@0 0 = left
+bottom = @@0 1; :scan ["bottom? ] bottom; @@0 1 = bottom
+right  = @@0 2; :scan ["right? ]  right ; @@0 2 = right
+top    = @@0 3; :scan ["top? ]    top   ; @@0 3 = top
+
+if @@0 4 == 0
+	:scan ["配列a～fの,1配列のデータ数? ] @N; @@0 4 = @N
+endif
+
+@I = @N * 6
+for @i = 0; ; @i++
+	:clear
+	for @j = 0; @j < @I;
+		if @j == @i
+			:print ["\[] (@@0 (@j + 5)) ["\]]
+		else
+			:print [" ] (@@0 (@j + 5)) [" ]
+		endif
+		@j++
+		if @j % @N == 0
+			:println
+		endif
+	next
+
+	if @i >= @I; break; endif
+
+	[@?] = @@0 (@i + 5)
+	switch int (@i / @N)
+	case 0; :scan ["配列aのデータを入力してください: ] [@?]; breakswi
+	case 1; :scan ["配列bのデータを入力してください: ] [@?]; breakswi
+	case 2; :scan ["配列cのデータを入力してください: ] [@?]; breakswi
+	case 3; :scan ["配列dのデータを入力してください: ] [@?]; breakswi
+	case 4; :scan ["配列eのデータを入力してください: ] [@?]; breakswi
+	case 5; :scan ["配列fのデータを入力してください: ] [@?]; breakswi
+	endswi
+	@@0 (@i + 5) = [@?]
+next

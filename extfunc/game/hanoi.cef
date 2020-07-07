@@ -1,0 +1,21 @@
+#!/usr/local/bin/clip
+#ハノイの塔 Tower of Hanoi
+
+func movedisk
+	if @0 > 1; movedisk (@0 - 1) @1 (6 - @1 - @2) @3; endif
+	:param 3 1
+	:println (@3++) [": 円盤 ] @0 [" を ] @1 [" から ] @2 [" に移す]
+	if @0 > 1; movedisk (@0 - 1) (6 - @1 - @2) @2 @3; endif
+endfunc
+
+:ans 0		# この関数は戻り値を返さないタイプです
+:int \10	# 強制的に10進整数にします
+
+if @! == 0
+	:scan ["円盤の枚数? ] @n
+else
+	@n = @0
+endif
+:println ["円盤 ] @n [" 枚を柱 1 から柱 2 に移す方法は]
+:println ["次の ] ((1 << @n) - 1) [" 手です]
+movedisk @n 1 2 1

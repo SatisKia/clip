@@ -1,0 +1,75 @@
+#!NAMESPACE ft
+#高速フーリエ変換
+#\!- <array> <num> <inv_flag>
+#標本点の数numは2の整数乗に限る。
+:params &a[] m inv
+:ans FALSE
+
+:define PI 3.14159265358979323846
+
+#
+# ビットリバース
+#
+func bitreverse &a[] m
+	:ans FALSE
+	:complex
+	@j=0
+	for @i=0;@i<m-1;@i++
+		if @i<=@j
+			@t=a @i;a @i=a @j;a @j=@t
+		endif
+		@k=int(m/2)
+		while @k<=@j;@j-=@k;@k=int(@k/2);endwhile
+		@j+=@k
+	next
+endfunc
+
+#
+# バタフライ演算
+#
+func butterfly &a[] m inv
+	:ans FALSE
+	:complex
+	:var k j l n ie ia n1 n2 ar0 ar1
+	:var p theta th treal timag
+	:var wn
+	:array c s
+	n=int ceil(log m/log 2.0)
+	th=2.0*PI/m
+	theta=0.0
+	for k=0;k<int(m/2);k++
+		c k=cos theta;s k=sin theta
+		theta+=th
+	next
+	ie=1;n2=m
+	for ar0=0;ar0<n;ar0++
+		n1=n2;n2=int(n2/2);ia=j=0
+		for ar1=0;ar1<n2;ar1++
+			if inv
+				wn=((c ia)([-]s ia))
+			else
+				wn=((c ia)(s ia))
+			endif
+			ia+=ie
+			k=j
+			while k<m
+				l=k+n2
+				treal=real(a k)-real(a l)
+				timag=imag(a k)-imag(a l)
+				a k=((real(a k)+real(a l))(imag(a k)+imag(a l)))
+				a l=((treal*real wn+timag*imag wn)(timag*real wn-treal*imag wn))
+				k+=n1
+			endwhile
+			j++
+		next
+		ie*=2
+	next
+	if inv
+		p=1.0/m
+		for k=0;k<=m;k++;a k=((real(a k)*p)(imag(a k)*p));next
+	endif
+endfunc
+
+:complex
+butterfly a m inv
+bitreverse a m

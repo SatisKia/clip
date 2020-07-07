@@ -1,0 +1,12 @@
+#指数関数(級数展開) exponential function
+#\!- <val>
+:float \16
+@k=int(@0/!log 2+(@0>=0?0.5 \-0.5))
+@0-=@k*!log 2
+if @0>=0;@n=0;else;@n=1;@0=[-]@0;endif
+@e=1+@0;@a=@0;@i=2
+do
+	@p=@e;@a*=@0/@i;@e+=@a;@i++
+until @e!=@p
+if @n;@e=1/@e;endif
+!ldexp @e @k

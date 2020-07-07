@@ -1,0 +1,37 @@
+#!NAMESPACE mp
+#平方根 square root
+#\!- <ret> <val> <prec> <order>
+#valが負の値の場合TRUEを返す。
+:params &ret[] a[] prec order
+!fset @@a a
+if !fcmp @@a "0 > 0
+	:global MP_PREC
+	$SET MP_PREC,prec
+	if !fcmp @@a "1 > 0; !:mp ["x = 1 / a]
+	else;                !:mp ["x = 1]
+	endif
+	!:mp ["h = 1 - a * sqr(x)]
+	!:mp ["g = 1]
+	!:mp ["m = 1 / 2]
+	if order >= 3; !:mp ["n =  3 /   8]; endif
+	if order >= 4; !:mp ["o =  5 /  16]; endif
+	if order >= 5; !:mp ["p = 35 / 128]; endif
+	if order == 6; !:mp ["q = 63 / 256]; endif
+	do
+		switch order
+		case 6 ; !:mp ["x = x + x * h * (m + h * (n + h * (o + h * (p + h * q]; breakswi
+		case 5 ; !:mp ["x = x + x * h * (m + h * (n + h * (o + h * p         ]; breakswi
+		case 4 ; !:mp ["x = x + x * h * (m + h * (n + h * o                  ]; breakswi
+		case 3 ; !:mp ["x = x + x * h * (m + h * n                           ]; breakswi
+		default; !:mp ["x = x + x * h * m                                    ]; breakswi
+		endswi
+		!:mp ["g = h]
+		!:mp ["h = 1 - a * sqr(x)]
+		!:mp ["r = abs(h)]
+		!:mp ["s = abs(g)]
+	until !fcmp @@r @@s < 0
+	!fmul ret @@a @@x prec
+	return FALSE
+endif
+!fset ret "0
+return (!fcmp @@a "0 != 0)

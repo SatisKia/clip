@@ -1,0 +1,5 @@
+#ベータ関数Β(z,w)の値を返す
+#\!- <z> <w>
+:params z w
+
+return exp(!gammln z+!gammln w-!gammln(z+w))

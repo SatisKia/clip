@@ -1,0 +1,47 @@
+#!/usr/local/bin/clip
+#第2種ベッセル関数 Bessel function
+#\!- <n> <x>
+:params n x
+
+n = int n									# nは整数
+if x <= 0
+	:warn ["外部関数-の第二パラメータは正でなければなりません]
+	return 0
+endif
+
+:define EPS 1e\-10							# 許容相対誤差
+:define PI (!pi)							#
+:define EULER 0.577215664901532861			# Eulerの定数γ
+
+:define x_2 (x / 2)
+:define log_x_2 (log x_2)
+
+if n < 0
+	if n & 1; return [-]!y [-]n x
+	else;     return    !y [-]n x
+	endif
+endif
+@k = int x; @b = 1
+do; @k++; until (@b *= x_2 / @k) > EPS
+if @k & 1; @k++; endif						# 奇数なら偶数にする
+@a = 0										# a=J(k+1)(x)=0,b=J(k)(x),kは偶数
+@s = 0										# 規格化の因子
+@t = 0										# Y(0)(x)
+@u = 0										# Y(1)(x)
+while @k > 0
+	@s += @b; @t = @b / (@k / 2) - @t
+	@a = 2 * @k * @b / x - @a; @k--			# a=J(k)(x),kは奇数
+	if @k > 2; @u = (@k * @a) / ((@k / 2) * (@k / 2 + 1)) - @u; endif
+	@b = 2 * @k * @a / x - @b; @k--			# b=J(k)(x),kは偶数
+endwhile
+@s = 2 * @s + @b
+@a /= @s; @b /= @s; @t /= @s; @u /= @s		# a=J(1)(x),b=J(0)(x)
+@t = (2 / PI) * (2 * @t + (log_x_2 + EULER) * @b)
+											# Y(0)(x)
+if n == 0; return @t; endif
+@u = (2 / PI) * (@u + ((EULER - 1) + log_x_2) * @a - @b / x)
+											# Y(1)(x)
+for @k = 1; @k < n; @k++
+	@s = (2 * @k) * @u / x - @t; @t = @u; @u = @s
+next
+return @u

@@ -1,0 +1,5 @@
+#!/usr/local/bin/clip
+#\!- <val>
+:ptype
+:rad 1
+!pi/2-!asin @0

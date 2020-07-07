@@ -1,0 +1,88 @@
+#対称行列の固有値計算：ヤコビ法
+#@n = !- @@a @@e @@v
+:params a[] &l[] &w[]
+
+for @i = 0; @i < row a; @i++
+	l @i = 0.0
+next
+w = @@Z
+
+if row a != col a
+	return 0
+endif
+
+:define EPS 1e-6 # 許容誤差
+:define TINY 1e-20 # 0と見なしてよい値
+:define MAX_ITER 100 # 最大の繰返し数
+
+# 座標回転
+func rotate &a[] m j k l c s
+	@x = a m j; @y = a k l
+	a m j = @x * c - @y * s
+	a k l = @x * s + @y * c
+endfunc
+
+:var n
+n = row a
+
+:var m j k iter
+:var t c s tolerance offdiag
+
+s = offdiag = 0
+for j = 0; j < n; j++
+	for k = 0; k < n; k++
+		w j k = 0
+	next
+	w j j = 1; s += a j j * a j j
+	for k = j + 1; k < n; k++
+		offdiag += a j k * a j k
+	next
+next
+tolerance = EPS * EPS * (s / 2 + offdiag)
+for iter = 1; iter <= MAX_ITER; iter++
+	offdiag = 0
+	for j = 0; j < n - 1; j++
+		for k = j + 1; k < n; k++
+			offdiag += a j k * a j k
+		next
+	next
+	if offdiag < tolerance; break; endif
+	for j = 0; j < n - 1; j++
+		for k = j + 1; k < n; k++
+			if abs (a j k) < TINY; continue; endif
+			t = (a k k - a j j) / (2 * a j k)
+			if t >= 0; t = 1 / (t + sqrt (t * t + 1))
+			else;      t = 1 / (t - sqrt (t * t + 1))
+			endif
+			c = 1 / sqrt (t * t + 1)
+			s = t * c; t *= a j k
+			a j j -= t; a k k += t; a j k = 0
+			for m = 0    ; m < j; m++; rotate a m j m k c s; next
+			for m = j + 1; m < k; m++; rotate a j m m k c s; next
+			for m = k + 1; m < n; m++; rotate a j m k m c s; next
+			for m = 0    ; m < n; m++; rotate w j m k m c s; next
+		next
+	next
+next
+if iter > MAX_ITER
+	return 0 # 収束せず
+endif
+for m = 0; m < n - 1; m++
+	k = m; t = a k k
+	for j = m + 1; j < n; j++
+		if a j j > t
+			k = j; t = a k k
+		endif
+	next
+	a k k = a m m; a m m = t
+	for j = 0; j < n; j++
+		t     = w k j
+		w k j = w m j
+		w m j = t
+	next
+next
+# 固有値
+for k = 0; k < n; k++
+	l k = a k k
+next
+return n

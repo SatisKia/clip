@@ -1,0 +1,14 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数同士の減算
+#\!- <ret> <a> <b>
+:include !mp:mpf
+
+:params &ret[] a[] b[]
+:ans FALSE
+
+mpf_param a
+mpf_param b
+
+$SET @p,mpf_match_prec a b
+!sub ret a b
+mpf_set_prec ret @p

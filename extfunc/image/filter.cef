@@ -1,0 +1,58 @@
+#!NAMESPACE image
+#フィルター処理
+#\!- <in_array> <matrix> <out_array>
+
+func filter y x h w
+	:warn FALSE
+	:global filter_src[] filter_mat[]
+#	$SET_Z		@R
+#	$SET_Z		@G
+#	$SET_Z		@B
+#	$SET_Z		@y
+	$LOOPSTART	# @y
+	$ADD_A		@Y,y,@y
+	$SET_Z		@x
+	$LOOPSTART	# @x
+	$SET		@c,filter_src @Y (x + @x)
+	$SET		@k,filter_mat @y @x
+	$AND_A		@t,@c,\xFF0000
+	$SHIFTR		@t,16
+	$MUL		@t,@k
+	$ADD		@R,@t
+	$AND_A		@t,@c,\x00FF00
+	$SHIFTR		@t,8
+	$MUL		@t,@k
+	$ADD		@G,@t
+	$AND_A		@t,@c,\x0000FF
+	$MUL		@t,@k
+	$ADD		@B,@t
+	$LOOPEND_I	@x,w
+	$LOOPEND_I	@y,h
+#	$SET_Z		@r
+#	$SET_Z		@g
+#	$SET_Z		@b
+	$ADDS		@r,(int @R),0,255
+	$ADDS		@g,(int @G),0,255
+	$ADDS		@b,(int @B),0,255
+	return (@r << 16) + (@g << 8) + @b
+endfunc
+
+:ans FALSE
+:param 2 TRUE
+
+:global filter_src[] filter_mat[]
+$SET		filter_src,@@0
+$SET		filter_mat,@@1
+$COL		@W,filter_mat
+$ROW		@H,filter_mat
+$SET		@X,int (@W / 2)
+$SET		@Y,int (@H / 2)
+
+$COL		@w,filter_src
+$ROW		@h,filter_src
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@@2 @y @x,filter (@y - @Y) (@x - @X) @H @W
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

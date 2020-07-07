@@ -1,0 +1,12 @@
+:include !tplot
+
+:ans FALSE
+:gworld 256 256
+
+window 0 0 4 6 1 1
+:rectangular
+
+plot ["!bessk0 x]  1 160 @y
+plot ["!bessk1 x]  2 160 @y
+plot ["!bessk 2 x] 3 160 @y
+plot ["!bessk 3 x] 4 160 @y

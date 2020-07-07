@@ -1,0 +1,47 @@
+#逆行列
+#@@b = !- @@a
+:label a @@0
+
+if row a != col a
+	:error "逆行列が存在しません
+	return @@Z
+endif
+
+:base 1
+:complex
+:var n
+n = row a
+:array b
+:var m j k h h1 c
+for m = 1; m <= n; m++; b m m = 1.0; next
+k = 2
+for h = 1; h <= n; h++
+	if a h h == 0.0
+		h1 = h
+		while (a h1 h == 0.0) && ([++]h1 <= n); endwhile
+		if h1 > n
+			:error "逆行列が存在しません
+			return @@Z
+		endif
+		for j = 1; j <= n; j++
+			a h j += a h1 j; b h j += b h1 j
+		next
+	endif
+	c = 1.0 / a h h
+	for j = h; j <= n; j++; a h j *= c; next
+	for j = 1; j <= n; j++; b h j *= c; next
+	for m = k++; m <= n; m++
+		c = a m h
+		for j = h; j <= n; j++; a m j -= a h j * c; next
+		for j = 1; j <= n; j++; b m j -= b h j * c; next
+	next
+next
+for h = n; h >= 1; h--
+	h1 = h - 1
+	for k = 1; k <= h1; k++
+		m = h - k; c = a m h
+		for j = h; j <= n; j++; a m j -= a h j * c; next
+		for j = 1; j <= n; j++; b m j -= b h j * c; next
+	next
+next
+return b

@@ -1,0 +1,7 @@
+#!/usr/local/bin/clip
+#最小値 minimum
+#\!- <val> [<val> ...]
+for [@*] = 1; [@*] < @!; [@*]++
+	if @:('0 + [@*]) < @0; @0 = @:('0 + [@*]); endif
+next
+@0

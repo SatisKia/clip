@@ -1,0 +1,67 @@
+#島崎版3重対角QR法
+#@n = !- @@a @@e
+:params a[] &ev[]
+
+for @i = 0; @i < row a; @i++
+	ev @i = 0.0
+next
+
+if row a != col a
+	return 0
+endif
+
+:var n
+n = row a
+
+:var j k kmax m
+kmax = 100
+:array d ee
+:var cc ss g cc9 ss9 g9
+:var tt pp di dip lambda
+
+for j = 1; j < n; [++]j
+	d j = a (j - 1) (j - 1)
+	ee j = a (j - 1) j * a (j - 1) j
+next
+d n = a (n - 1) (n - 1); ee n = 0.0; ee 0 = 0.0
+lambda = 0.0
+
+for m = n; m >= 1; [--]m
+	for k = 1; k < kmax; [++]k
+		# 収束判定
+		if abs (ee (m - 1)) < 0.0000000001
+			ev (m - 1) = d m
+			break
+		endif
+		# QR分解
+		d (m + 1) = 0.0; ee (m + 1) = 0.0
+		cc9 = 1.0; ss9 = 0.0
+		di = d 1 - lambda
+		g9 = di; pp = di * di
+		for j = 1; j < m; [++]j
+			tt = pp + ee j
+			ee (j - 1) = ss9 * tt
+			ss = ee j / tt
+			cc = pp / tt
+			if j < m
+				dip = d (j + 1) - lambda
+			else
+				dip = 0.0
+			endif
+			pp = dip * dip * cc - 2.0 * dip * ss * g9 + ee j * ss * cc9
+			g = dip * cc - ss * g9
+			d j = dip + g9 - g + lambda
+			ss9 = ss; cc9 = cc; g9 = g
+		next
+		tt = pp
+		ee (m - 1) = ss9 * tt
+		ss = 0.0
+		cc = 1.0
+		dip = 0.0
+		g = 0.0
+		d m = g9 + lambda
+		lambda = d m
+	next
+next
+
+return n

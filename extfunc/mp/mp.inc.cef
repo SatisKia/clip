@@ -1,0 +1,25 @@
+#!NAMESPACE mp
+:include !mp:define
+
+func mp_param &a[]
+	:ans FALSE
+	if a 0 != 0 && abs a 0 < MP_LEN_COEF
+		!str2num a a
+	endif
+endfunc
+
+func mp_get_len a[]
+	int abs (a 0 / MP_LEN_COEF)
+endfunc
+
+func mp_set_len &a[] len
+	:ans FALSE
+	@p = abs a 0 & MP_PREC_MASK
+	if len == 0
+		# ゼロ値
+		$ADD_A a 0,MP_LEN_COEF,@p
+		$SET_Z a 1
+	else
+		a 0 = (abs len * MP_LEN_COEF + @p) * (len < 0 ? \-1 1)
+	endif
+endfunc

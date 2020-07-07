@@ -1,0 +1,11 @@
+#!/usr/local/bin/clip
+#最小公倍数 least common multiple
+#\!- <val> [<val> ...]
+for [@*] = 1; [@*] < @!; [@*]++
+	@x = @0; @y = @:('0 + [@*])
+	while @y != 0
+		@t = @x % @y; @x = @y; @y = @t
+	endwhile
+	@0 = abs (@0 * @:('0 + [@*])) / @x
+next
+@0

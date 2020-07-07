@@ -1,0 +1,165 @@
+#QR分解法
+#@n = !- @@a @@e
+:params A[] &eigen_value[]
+
+for @i = 0; @i < row A; @i++
+	eigen_value @i = 0.0
+next
+
+if row A != col A
+	return 0
+endif
+
+:include !matrix
+
+:define MAX_ITR 200 # 繰返し回数の上限
+
+# (ap,aq)-->(bp,0)に変換するギブンスの回転行列
+# の(c,s)を求める
+func Givens ap aq &c &s
+	:var phi
+	if abs aq < NEARLY_ZERO
+		c = 1.0; s = 0.0
+	elif abs aq > abs ap
+		phi = [-]ap / aq; s = 1.0 / sqrt (1.0 + phi * phi); c = s * phi
+	else
+		phi = [-]aq / ap; c = 1.0 / sqrt (1.0 + phi * phi); s = c * phi
+	endif
+endfunc
+
+# ギブンスの回転行列により、与えられたヘッセンベルグ行列
+# HのQR分解を求めQをQ[]に、RをH[]に返す
+func QR_decomp n &H[] &Q[]
+	:var l j k
+	:var c s
+	:var tmp0 tmp1
+	if cleanup n H < NEARLY_ZERO; return; endif
+	for l = 0; l < n; l++
+		for j = 0; j < n; j++
+			Q l j = 0.0
+		next
+		Q l l = 1.0
+	next
+	for k = 0; k < n-1; k++
+		Givens (H k k) (H (k+1) k) c s
+		for j = k; j < n; j++ # update H(R)
+			tmp0 = H k j; tmp1 = H (k+1) j
+			H  k    j = c * tmp0 - s * tmp1
+			H (k+1) j = s * tmp0 + c * tmp1
+		next
+		for l = 0; l < n; l++ # update Q
+			tmp0 = Q l k; tmp1 = Q l (k+1)
+			Q l  k    = tmp0 * c - tmp1 * s
+			Q l (k+1) = tmp0 * s + tmp1 * c
+		next
+	next
+	cleanup n H; cleanup n Q
+endfunc
+
+# 2次方程式a*x*x+b*x+c=0の2根を求め、qrootに返す
+func quadroot a b c &qroot[]
+	:var det sqrdet
+	det = b * b - 4.0 * a * c
+	:var R0 R1 I0 I1
+	if abs a < NEARLY_ZERO
+		if abs b < NEARLY_ZERO; return ¥-1; endif
+		R0 = R1 = [-]c / b
+		I0 = I1 = 0.0
+	elif det >= 0.0
+		sqrdet = sqrt det
+		I0 = I1 = 0.0
+		if b * b < 4.0e6 * a * c
+			R0 = ([-]b + sqrdet) / 2.0 / a
+			R1 = ([-]b - sqrdet) / 2.0 / a
+		elif b > NEARLY_ZERO
+			R0 = 2.0 * c / (sqrdet + b)
+			R1 = ([-]b - sqrdet) / 2.0 / a
+		elif b < [-]NEARLY_ZERO
+			R0 = ([-]b + sqrdet) / 2.0 / a
+			R1 = 2.0 * c / (sqrdet - b)
+		else
+			R0 = sqrt ([-]c / a)
+			R1 = [-]R0
+			I0 = I1 = 0.0
+		endif
+	else
+		sqrdet = sqrt ([-]det)
+		R0 = R1 = [-]b / 2.0 / a
+		I0 = sqrdet / 2.0 / a
+		I1 = [-]I0
+	endif
+	:complex
+	qroot 0 = (R0 I0)
+	qroot 1 = (R1 I1)
+	return 0
+endfunc
+
+# 行列Aの絶対値の小さいoff-diagonal要素の行番号を返す
+func check_offdiag n A[]
+	:var l
+	for l = 0; l < n - 1; l++
+		if abs (A (l+1) l) <= NEARLY_ZERO
+			return l + 1
+		endif
+	next
+	return 0
+endfunc
+
+# 与えられたn*n行列Aに対してQR法を適用。
+# 2*2以下の対角ブロック要素が生じたらそのブロックの
+# 固有値を解析的に求め、大域配列eigen_calue[]に格納する。
+# 2+2より大きい対角ブロックが生じたら、それと残りのブロックに
+# QR法を再帰的に適用する。
+:label eigen_value_R @@A
+:label eigen_value_I @@B
+:label n_eigen @A
+func QR_iteration n &A[]
+	:parent @@A eigen_value_R
+	:parent @@B eigen_value_I
+	:parent @A n_eigen
+	if n == 1 # 1*1 matrix
+		eigen_value_R n_eigen = A 0 0
+		eigen_value_I (n_eigen++) = 0.0
+		return 0
+	elif n == 2
+		:complex
+		:array qroot
+		quadroot 1.0 ([-](A 0 0 + A 1 1)) (A 0 0 * A 1 1 - A 0 1 * A 1 0) qroot
+		eigen_value_R n_eigen = real (qroot 0)
+		eigen_value_I (n_eigen++) = imag (qroot 0)
+		eigen_value_R n_eigen = real (qroot 1)
+		eigen_value_I (n_eigen++) = imag (qroot 1)
+		return 0
+	else
+		:var iteration
+		:array T Q A2
+		:var p l j
+		Hessenberg n A # Aをヘッセンベルグ化
+		for iteration = 0; iteration < MAX_ITR; iteration++
+			T = A
+			QR_decomp n T Q
+			A = T * Q
+			if (p = check_offdiag n A)
+				for l = p; l < n; l++
+					for j = p; j < n; j++
+						A2 (l-p) (j-p) = A l j
+					next
+				next
+				if QR_iteration p A; return 1; endif
+				if QR_iteration (n-p) A2; return 1; endif
+				if n_eigen >= n; return 0; endif
+			endif
+		next
+		return 1 # 2*2対角ブロック化失敗
+	endif
+endfunc
+
+n_eigen = 0
+QR_iteration (row A) A
+
+:complex
+for @i = 0; @i < n_eigen; @i++
+	eigen_value @i = ((eigen_value_R @i) (eigen_value_I @i))
+next
+
+return n_eigen

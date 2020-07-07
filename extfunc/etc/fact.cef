@@ -1,0 +1,18 @@
+#!/usr/local/bin/clip
+#素因数分解 factorization into primes
+#\!- <val>
+:ans 0
+:int
+:print @0 [" = ]
+while @0 >= 4 && @0 % 2 == 0
+	:print ["2 * ]; @0 /= 2
+endwhile
+@d = 3
+while (@q = @0 / @d) >= @d
+	if @0 % @d == 0
+		:print @d [" * ]; @0 = @q
+	else
+		@d += 2
+	endif
+endwhile
+:println @0

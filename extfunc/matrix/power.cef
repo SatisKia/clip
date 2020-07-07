@@ -1,0 +1,57 @@
+#べき乗法
+#@r = !- @@a @e @@v
+:params A[] &lambda &v[]
+
+lambda = 0.0
+v = @@Z
+
+if row A != col A
+	return 0
+endif
+
+:include !matrix
+
+:define EPSILON 1.0e-8 # vのノルムの変化がこれ以下になったら終了
+:define MAX_ITERATION 100 # 繰返し回数の上限
+
+:var n
+n = row A
+
+:var l j iteration
+iteration = 0
+:array u v_old dv
+:var mu unorm dv_norm
+dv_norm = EPSILON + 1.0
+for j = 0; j < n; j++
+	v_old j = 0.0
+next
+for j = 0; j < n; j++
+	v_old j = 1.0
+	mat_vect n n A v_old u
+	if L2_norm n u > NEARLY_ZERO
+		break # 初期推定発見
+	endif
+	v_old j = 0.0
+next
+if j == n
+	return ¥-1 # 初期推定発見失敗
+endif
+while dv_norm > EPSILON && iteration < MAX_ITERATION
+	iteration++
+	mat_vect n n A v_old u
+	mu = vect_prod n v_old u
+	if (unorm = L2_norm n u) < NEARLY_ZERO
+		return \-2 # 推定値がほぼゼロ
+	endif
+	for l = 0; l < n; l++
+		v l = u l / unorm
+		dv l = v l - v_old l
+	next
+	dv_norm = L2_norm n dv
+	vect_copy v_old v n
+endwhile
+if iteration == MAX_ITERATION
+	return ¥-3 # 繰返し回数の上限に達した
+endif
+lambda = mu
+return 1 # 正常終了

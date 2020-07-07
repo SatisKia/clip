@@ -1,0 +1,486 @@
+#多倍長計算を行う。エラー時はTRUEを返す。
+#\!- <expr> [<prec> [<print_flag> [<debug_flag>]]]
+#precに0を指定すると整数モードになる。
+#引数がexprのみの場合、桁数としてグローバル変数MP_PRECの値が参照される。
+#
+#書式:
+#  演算の優先順位を指定する括弧()を使用することができる。
+#  括弧は釣り合いがとれていなくても構わない。
+#
+#定数:
+#  12345      符号なし整数
+#  \-6789      符号付き整数
+#  12.345     小数点表記の浮動小数点数
+#  1.234e\-5   指数表記の浮動小数点数
+#  \-1.234e+5
+#  1.234e5    eの後ろの+は省略できる。
+#
+#変数:
+#  Ans   計算結果用変数（親プロセスでの@@:0）
+#  a～z  変数（親プロセスでの@@a～@@z）
+#
+#演算子:
+#  単項  \-
+#  二項  * / % + \-
+#  代入  =
+#
+#関数:
+#  abs(x)    絶対値
+#  sqr(x)    自乗
+#  sqrt(x)   平方根
+#  trunc(x)  小数点以下の切り捨て
+#
+#制限事項:
+#  %は整数モードのみ。
+#  sqrt,trunc関数は浮動小数点数モードのみ。
+
+func checkOp op
+	switch op
+	case 'N
+		return 4
+	case '\*
+	case '\/
+	case '\%
+		return 3
+	case '\+
+	case '\-
+		return 2
+	case '\=
+		return 1
+	endswi
+	return 0
+endfunc
+
+func isParenthesis token[] index
+	return token index (token index 0) == '\(
+endfunc
+
+func insToken &token[] &tokenNum pos
+	$SET @i,tokenNum
+	if @i > pos
+		$LOOPSTART	# @i
+		:arraycopy token (@i - 1) 0 token @i 0 (1 + token (@i - 1) 0)
+		$LOOPEND_D	@i,pos
+	endif
+	$INC tokenNum
+endfunc
+
+func makeToken expr[] &token[] &tokenNum
+	# 空白を取り除く
+	:var exprLen
+#	$SET_Z exprLen
+#	$SET_Z @l
+	while expr @l != 0
+		if expr @l != [' ]
+			$SET expr (exprLen++),expr @l
+		endif
+		$INC @l
+	endwhile
+	$SET_Z expr exprLen # 文字列終端
+
+#	$SET_Z @c
+	:var prev
+#	$SET_Z @i
+	$SET_Z token @i 0 # 文字数
+#	$SET_Z @t
+#	$SET_Z @j
+	if @j < exprLen
+		$LOOPSTART	# @j
+		$SET		prev,@c
+		$SET		@c,expr @j
+		switch @c
+		case '\(
+		case '\)
+		case '\*
+		case '\/
+		case '\%
+		case '\+
+		case '\-
+		case '\=
+			if (@c == '\() && (prev >= 'a && prev <= 'z)
+				$SET   token @i ([++]@t),@c
+				$SET   token @i 0,@t # 文字数
+				$INC   @i
+				$SET_Z token @i 0 # 文字数
+				$SET_Z @t
+				breakswi
+			endif
+			if (@c == '\+) || (@c == '\-)
+				if (prev == 'e) || (prev == 'E)
+					$SET token @i ([++]@t),@c
+					breakswi
+				endif
+			endif
+			if @t > 0
+				$SET   token @i 0,@t # 文字数
+				$INC   @i
+				$SET_Z token @i 0 # 文字数
+				$SET_Z @t
+			elif @c == '\-
+				if (@j < exprLen - 1) && ((expr (@j + 1) >= '0 && expr (@j + 1) <= '9) || expr (@j + 1) == '.)
+					$SET token @i ([++]@t),@c
+					breakswi
+				endif
+				$SET @c,'N
+			endif
+			$SET   token @i ([++]@t),@c
+			$SET   token @i 0,@t # 文字数
+			$INC   @i
+			$SET_Z token @i 0 # 文字数
+			$SET_Z @t
+			breakswi
+		default
+			$SET token @i ([++]@t),@c
+			breakswi
+		endswi
+		$LOOPEND_I @j,exprLen
+	endif
+	if @t > 0
+		$SET   token @i 0,@t # 文字数
+		$ADD_A tokenNum,@i,1
+	else
+		$SET tokenNum,@i
+	endif
+
+	:var cur top end
+	:var level topLevel assLevel
+	$SET assLevel,checkOp '\=
+	:var retTop retEnd
+
+	# 演算子の優先順位に従って括弧を付ける
+#	$SET_Z cur
+	if cur < tokenNum
+		$LOOPSTART # cur
+		if (token cur 0 == 1) && (checkOp (token cur 1) > 0)
+			# 自分自身の演算子の優先レベルを調べておく
+			$SET level,checkOp (token cur 1)
+
+			$SET_Z retTop
+			$SET_Z retEnd
+
+			# 前方検索
+			$SET_Z @i
+			$SUB_A top,cur,1
+			if top >= 0
+				$LOOPSTART # top
+
+				if isParenthesis token top # 括弧の始まりの場合
+					if @i > 0
+						$DEC @i
+					else
+						$SET retTop,1
+					endif
+				elif token top 1 == '\) # 括弧の終わりの場合
+					$INC @i
+				elif (token top 0 == 1) && (checkOp (token top 1) > 0)
+					if @i == 0
+						topLevel = checkOp (token top 1)
+						if ((topLevel == assLevel) && (level == assLevel)) || (topLevel < level)
+							$SET retTop,2
+						endif
+					endif
+				endif
+
+				if retTop == 2
+					# 後方検索
+					$SET_Z @i
+					$ADD_A end,cur,1
+					if end < tokenNum
+						$LOOPSTART # end
+						if isParenthesis token end # 括弧の始まりの場合
+							$INC @i
+						elif token end 1 == '\) # 括弧の終わりの場合
+							if @i > 0
+								$DEC @i
+							else
+								$SET retEnd,1
+							endif
+						elif (token end 0 == 1) && (checkOp (token end 1) > 0)
+							if @i == 0
+								if checkOp (token end 1) < topLevel
+									$SET retEnd,2
+								endif
+							endif
+						endif
+						$BREAK		(retEnd > 0)
+						$LOOPEND_I	end,tokenNum
+					endif
+
+					$ADD_A @t,top,1
+					insToken token tokenNum @t
+					$SET   token @t 1,'\(
+					$SET   token @t 0,1 # 文字数
+					$INC   cur
+					$INC   end
+
+					if retEnd > 0
+						insToken token tokenNum end
+						$SET token end 1,'\)
+						$SET token end 0,1 # 文字数
+					endif
+				endif
+
+				$BREAK		(retTop > 0)
+				$LOOPENDE_D	top,0
+			endif
+		endif
+		$LOOPEND_I cur,tokenNum
+	endif
+
+	# 括弧を整える
+#	$SET_Z @k
+	$SET_Z cur
+	if cur < tokenNum
+		$LOOPSTART # cur
+		if isParenthesis token cur # 括弧の始まりの場合
+			$INC @k
+		elif token cur 1 == '\) # 括弧の終わりの場合
+			$DEC @k
+			if @k < 0
+				$LOOPSTART	# @k
+				insToken token tokenNum 0
+				$SET		token 0 1,'\(
+				$SET		token 0 0,1 # 文字数
+				$INC		cur
+				$LOOPEND_I	@k,0
+			endif
+		endif
+		$LOOPEND_I cur,tokenNum
+	endif
+	if @k > 0
+		$LOOPSTART	# @k
+		$SET		token tokenNum 1,'\)
+		$SET		token tokenNum 0,1 # 文字数
+		$INC		tokenNum
+		$LOOPEND_D	@k,0
+	endif
+endfunc
+
+func tokenStr token[] index &str[]
+	:arraycopy token index 1 str 0 (token index 0)
+	$SET_Z str (token index 0) # 文字列終端
+endfunc
+
+func mp_abs &rop[]
+	if MP_PROC_INT; !mp:abs  rop
+	else;           !mp:fabs rop
+	endif
+endfunc
+func mp_add &ret[] a[] b[]
+	if MP_PROC_INT; !mp:add  ret a b
+	else;           !mp:fadd ret a b
+	endif
+endfunc
+func mp_div &q[] a[] b[]
+	if MP_PROC_INT; @r = !mp:div   q a b
+	else;           @r = !mp:fdiv2 q a b MP_PREC
+	endif
+	return @r
+endfunc
+func mp_mul &ret[] a[] b[]
+	if MP_PROC_INT; !mp:mul  ret a b
+	else;           !mp:fmul ret a b MP_PREC
+	endif
+endfunc
+func mp_neg &rop[]
+	if MP_PROC_INT; !mp:neg  rop
+	else;           !mp:fneg rop
+	endif
+endfunc
+func mp_num2str &s[] n[]
+	if MP_PROC_INT; !mp:num2str  s n
+	else;           !mp:fnum2str s n
+	endif
+endfunc
+func mp_set &rop[] op[]
+	if MP_PROC_INT; !mp:set  rop op
+	else;           !mp:fset rop op
+	endif
+endfunc
+func mp_sub &ret[] a[] b[]
+	if MP_PROC_INT; !mp:sub  ret a b
+	else;           !mp:fsub ret a b
+	endif
+endfunc
+
+func proc token[] tokenNum top &end &ans[]
+	:parent @@:0
+	$SET		@i,'a
+	$LOOPSTART	# @i
+	:parent @@:@i
+	$LOOPENDE_I	@i,'z
+
+	$SET_T @f # 初回かどうか
+	$SET   @l,\-1
+	$SET   @i,top
+	if @i < tokenNum
+		$LOOPSTART # @i
+		tokenStr token @i @@S
+		if @f
+			$SET_F @f
+			if @@S 0 == 'N
+				$SET @o,'N
+				$INC @i
+				if @i >= tokenNum
+					:println ["単項-の右辺がありません]
+					return TRUE
+				endif
+				tokenStr token @i @@S
+			endif
+		elif @@S 0 == '\) # 括弧の終わりの場合
+			$SET end,@i
+			mp_set ans @@L
+			return FALSE
+		else
+			$SET @o,@@S 0
+			$INC @i
+			if @i >= tokenNum
+				!putchar @o
+				:println ["の右辺がありません]
+				return TRUE
+			endif
+			tokenStr token @i @@S
+			if @@S 0 == '\) # 括弧の終わりの場合
+				!putchar @o
+				:println ["の右辺がありません]
+				return TRUE
+			endif
+		endif
+
+		# 左辺または右辺の値を取得する
+		if @@S (strlen @@S - 1) == '\( # 括弧の始まりの場合
+			if @l < 0
+				$SET @l,'\(
+				$SET @c,'L
+			else
+				$SET @c,'R
+			endif
+			$RETURN_A proc token tokenNum (@i + 1) @i @@:@c,TRUE
+			if strcmp @@S ["abs(] == 0
+				mp_abs @@:@c
+			elif strcmp @@S ["sqr(] == 0
+				mp_mul @@:@c @@:@c @@:@c
+			elif strcmp @@S ["sqrt(] == 0
+				if MP_PROC_INT
+					:println ["sqrtは浮動小数点数モードでしか使えません]
+					return TRUE
+				else
+					if !mp:fsqrt2 @@:@c @@:@c MP_PREC 4
+						:println ["sqrtの引数が負の値になりました]
+						return TRUE
+					endif
+				endif
+			elif strcmp @@S ["trunc(] == 0
+				if MP_PROC_INT
+					:println ["truncは浮動小数点数モードでしか使えません]
+					return TRUE
+				else
+					!mp:ftrunc @@:@c @@:@c
+				endif
+			endif
+		else
+			$STRCMP @a,@@S,["Ans]
+			if @l < 0
+				$CND @l,(@a == 0),0,@@S 0
+				$SET @c,'L
+			else
+				$SET @c,'R
+			endif
+			if @a == 0
+				mp_set @@:@c @@:0
+			elif @@S 0 >= 'a && @@S 0 <= 'z
+				mp_set @@:@c @@:(@@S 0)
+			else
+				mp_set @@:@c @@S
+			endif
+		endif
+		if @c == 'L
+			if @o == 'N
+				mp_neg @@L
+			endif
+			continue
+		endif
+
+		# 演算結果を左辺の値にする
+		switch @o
+		case '\*
+			mp_mul @@L @@L @@R
+			breakswi
+		case '\/
+			if mp_div @@L @@L @@R
+				:println ["ゼロで除算しました]
+				return TRUE
+			endif
+			breakswi
+		case '\%
+			if MP_PROC_INT
+				if !mp:div @@D @@L @@R @@L
+					:println ["ゼロで除算しました]
+					return TRUE
+				endif
+			else
+				:println ["%は整数モードでしか使えません]
+				return TRUE
+			endif
+			breakswi
+		case '\+
+			mp_add @@L @@L @@R
+			breakswi
+		case '\-
+			mp_sub @@L @@L @@R
+			breakswi
+		case '\=
+			if @l == 0 || (@l >= 'a && @l <= 'z)
+				mp_set @@:@l @@R
+				mp_set @@L @@:@l
+			else
+				:println ["=の左辺は変数でなければなりません]
+				return TRUE
+			endif
+			breakswi
+		endswi
+		$LOOPEND_I @i,tokenNum
+	endif
+
+	mp_set ans @@L
+	return FALSE
+endfunc
+
+:params expr[] prec print_flag debug_flag
+
+:global MP_PREC MP_PROC_INT
+if @! > 1
+	$SET MP_PREC,prec
+endif
+$EQ_A MP_PROC_INT,MP_PREC,0
+
+:parent @@:0
+$SET		@i,'a
+$LOOPSTART	# @i
+:parent @@:@i
+$LOOPENDE_I	@i,'z
+
+makeToken expr @@T @T
+if debug_flag
+#	$SET_Z @j
+	if @j < @T
+		$LOOPSTART # @j
+		if @j > 0; :print [" ]; endif
+		tokenStr @@T @j @@S
+		if strcmp @@S "N == 0; :print "\-
+		else;                  :print @@S
+		endif
+		$LOOPEND_I @j,@T
+	endif
+	:println
+endif
+
+$RETURN_A proc @@T @T 0 @t @@A,TRUE
+
+mp_set @@:0 @@A
+if print_flag
+	mp_num2str @@S @@:0
+	:println @@S
+endif
+
+return FALSE

@@ -1,0 +1,71 @@
+:include !mp:frmode
+
+func round a[] prec
+	for @i = 0; @i <= 6; @i++
+		if @i != 0; :print [" ]; endif
+		!mp:fset @@a a
+		!mp:fround @@a prec @i
+		!mp:fnum2str @@s @@a
+		if @@s 0 != ['-]; :print [" ]; endif
+		:print @@s
+	next
+	:println
+endfunc
+
+:label mode @0 # 丸め方式
+:ans FALSE
+
+:println ["     UP DOWN CEILING FLOOR H_UP H_DOWN H_EVEN]
+:print [" 5.5 ]; round ["5.5] 0
+:print [" 2.5 ]; round ["2.5] 0
+:print [" 1.6 ]; round ["1.6] 0
+:print [" 1.1 ]; round ["1.1] 0
+:print [" 1.0 ]; round ["1.0] 0
+:print ["-1.0 ]; round ["-1.0] 0
+:print ["-1.1 ]; round ["-1.1] 0
+:print ["-1.6 ]; round ["-1.6] 0
+:print ["-2.5 ]; round ["-2.5] 0
+:print ["-5.5 ]; round ["-5.5] 0
+
+:println
+
+!mp:fsqrt @@a ["2] 45
+!mp:fnum2str @@s @@a
+:println ["               ] @@s
+
+for @i = 0; @i <= 45; @i++
+	!mp:fset @@b @@a
+	!mp:fround @@b @i mode
+	!mp:fnum2str @@s @@b
+	:print ["round  ]
+	switch mode
+	case MP_FROUND_UP       ; :print ["UP     ]; breakswi
+	case MP_FROUND_DOWN     ; :print ["DOWN   ]; breakswi
+	case MP_FROUND_CEILING  ; :print ["CEILING]; breakswi
+	case MP_FROUND_FLOOR    ; :print ["FLOOR  ]; breakswi
+	case MP_FROUND_HALF_UP  ; :print ["H_UP   ]; breakswi
+	case MP_FROUND_HALF_DOWN; :print ["H_DOWN ]; breakswi
+	case MP_FROUND_HALF_EVEN; :print ["H_EVEN ]; breakswi
+	endswi
+	:println [" ] @@s
+
+	!mp:fset @@b @@a
+	!mp:fround @@b @i MP_FROUND_HALF_DOWN
+	!mp:fnum2str @@s @@b
+	:println ["round  even:0  ] @@s
+
+	!mp:fset @@b @@a
+	!mp:fround2 @@b @i FALSE
+	!mp:fnum2str @@s @@b
+	:println ["round2 even:0  ] @@s
+
+	!mp:fset @@b @@a
+	!mp:fround @@b @i MP_FROUND_HALF_EVEN
+	!mp:fnum2str @@s @@b
+	:println ["round  even:1  ] @@s
+
+	!mp:fset @@b @@a
+	!mp:fround2 @@b @i TRUE
+	!mp:fnum2str @@s @@b
+	:println ["round2 even:1  ] @@s
+next

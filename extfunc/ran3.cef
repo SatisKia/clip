@@ -1,0 +1,43 @@
+#\!- <idum> <iff> <inext> <inextp> <array_ma>
+:params &idum &iff &inext &inextp &ma[]
+
+# 0.0と1.0の間の一様乱数を返す。
+# 乱数列を初期化、再初期化するにはidumを任意の負の値にする。
+
+:define MBIG 1000000000
+:define MSEED 161803398
+:define MZ 0
+:define FAC (1.0/MBIG)
+
+:var mj mk
+:var j jj k
+
+if idum < 0 || iff == 0 # 初期化
+	iff=1
+	mj=abs(MSEED-abs idum) # 種idumと大きい数MSEEDを使ってma[55]を初期化
+	mj %= MBIG
+	ma 55=mj
+	mk=1
+	for j=1;j<=54;j++ # ここで表の残りを初期化
+		jj=(21*j) % 55 # ちょっぴりランダムな順序で
+		ma jj=mk       # でも数値自体は特にランダムではない
+		mk=mj-mk
+		if mk < MZ; mk += MBIG; endif
+		mj=ma jj
+	next
+	for k=1;k<=4;k++ # 発生源を「ウォームアップ」してランダム化する
+		for j=1;j<=55;j++
+			ma j -= ma(1+(j+30) % 55)
+			if ma j < MZ; ma j += MBIG; endif
+		next
+	next
+	inext=0 # 最初に生成する数の添字を準備
+	inextp=31 # 定数31は特別な意味を持つ
+	idum=1
+endif
+if [++]inext == 56; inext=1; endif # inextを増し、56になったら1に戻す
+if [++]inextp == 56; inextp=1; endif # 同様にinextpについて
+mj=ma inext-ma inextp # 減算法で新しい乱数を生成
+if mj < MZ; mj += MBIG; endif # 範囲に収まるようにする
+ma inext=mj # 格納する
+return mj*FAC # 導かれた一様乱数を出力

@@ -1,0 +1,72 @@
+#complexのテスト
+
+func approx
+	return (@1 ? (abs ((@1 - @0) / @1)) (abs @0)) < (DBL_EPSILON * 4.0)
+endfunc
+
+:ans FALSE
+:assert TRUE
+:gcomplex 16
+
+:var fc0 fc1 fc2
+
+# complexの性質のテスト
+fc1 = 1
+fc2 = (2 2)
+assert real fc0 == 0 && imag fc0 == 0
+assert real fc1 == 1 && imag fc1 == 0
+assert real fc2 == 2 && imag fc2 == 2
+fc0 += fc2; assert real fc0 ==   2 && imag fc0 == 2
+fc0 -= fc1; assert real fc0 ==   1 && imag fc0 == 2
+fc0 *= fc2; assert real fc0 == \-2 && imag fc0 == 6
+fc0 /= fc2; assert real fc0 ==   1 && imag fc0 == 2
+
+# 算術のテスト
+fc0 = (\-4 \-5)      ; assert real fc0 == \-4 && imag fc0 == \-5
+fc0 = 2 + fc2 + 3    ; assert real fc0 ==   7 && imag fc0 ==   2
+fc0 = 2 - fc2 - 3    ; assert real fc0 == \-3 && imag fc0 == \-2
+fc0 = 2 * fc2 * 3    ; assert real fc0 ==  12 && imag fc0 ==  12
+fc0 = 8 / fc2 / 2    ; assert real fc0 ==   1 && imag fc0 == \-1
+fc0 = [+]fc1 + [-]fc2; assert real fc0 == \-1 && imag fc0 == \-2
+assert fc2 == fc2 && fc1 == 1 && 1 == fc1
+assert fc1 != fc2 && fc1 != 0 && 3 != fc1
+
+# 数学関数のテスト
+:define e      2.7182818284590452353602875
+:define ln2    0.6931471805599453094172321
+:define piby4  0.7853981633974483096156608
+:define rthalf 0.7071067811865475244008444
+:define c1 (rthalf * (e + 1 / e) / 2)
+:define s1 (rthalf * (e - 1 / e) / 2)
+assert approx (abs (5 \-12)) 13
+assert arg fc1 == 0 && approx (arg fc2) piby4
+assert conjg fc2 == (2 \-2)
+fc0 = cos (piby4 \-1)
+assert approx (real fc0) c1 && approx (imag fc0) s1
+fc0 = cosh (\-1 piby4)
+assert approx (real fc0) c1 && approx (imag fc0) ([-]s1)
+fc0 = exp fc1
+assert approx (real fc0) e && imag fc0 == 0
+fc0 = exp (1 [-]piby4)
+assert approx (real fc0) (e * rthalf) && approx (imag fc0) ([-]e * rthalf)
+fc0 = log (1 \-1)
+assert approx (real fc0) (ln2 / 2) && approx (imag fc0) ([-]piby4)
+assert norm (3 \-4) == 25 && norm fc2 == 8
+fc0 = polar 1 [-]piby4
+assert approx (real fc0) rthalf && approx (imag fc0) ([-]rthalf)
+fc0 = pow fc2 fc2
+fc0 = pow fc2 5; assert real fc0 == \-128 && imag fc0 == \-128
+:println ["( ] (real fc0) [" ] (imag fc0) [" )]
+fc0 = pow fc2 2; assert real fc0 == 0 && imag fc0 == 8
+:println ["( ] (real fc0) [" ] (imag fc0) [" )]
+fc0 = pow 2 fc2
+fc0 = sin (piby4 \-1)
+assert approx (real fc0) c1 && approx (imag fc0) ([-]s1)
+fc0 = sinh (\-1 piby4)
+assert approx (real fc0) ([-]s1) && approx (imag fc0) c1
+fc0 = sqr (rthalf [-]rthalf)
+assert approx (real fc0) 0 && approx (imag fc0) \-1
+fc0 = sqrt (0 \-1)
+assert approx (real fc0) rthalf && approx (imag fc0) ([-]rthalf)
+
+:println ["SUCCESS testing complex]

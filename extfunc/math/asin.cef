@@ -1,0 +1,5 @@
+#!/usr/local/bin/clip
+#\!- <val>
+:ptype
+:rad 1
+!atan(@0/!sqrt(1-@0*@0))

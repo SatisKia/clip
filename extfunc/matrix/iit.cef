@@ -1,0 +1,268 @@
+#非対称行列の固有値計算：逆反復法
+#@n = !- @@a @m @@e @@v
+
+:label a0 @@0 # 行列A
+:label m @1 # 求める固有値の個数
+:param 2 TRUE
+for @i = 0; @i < row a0; @i++
+	@@2 @i = 0.0
+next
+:param 3 TRUE
+@@3 = @@Z
+
+if row a0 != col a0
+	return 0
+endif
+
+:include !pm
+:include !iit
+
+:var nn # 行列Aの次数
+nn = row a0
+if m > nn; m = nn; endif
+
+:label evr @@A # 固有値の実数部
+:label evi @@B # 固有値の虚数部
+:label vr  @@C # 固有ベクトルの実数部
+:label vi  @@D # 固有ベクトルの虚数部
+:label vtr @@E # tAの固有ベクトルの実数部
+:label vti @@F # tAの固有ベクトルの虚数部
+:array a1 # AのLU分解
+:array a2 # Aの2乗
+:array at # tAのLU分解
+:array index index1 indext
+
+:var l j k n ban ba2 kai kk kmax sw
+kmax = 100
+:var rmax rmin rrq ev apr d1 d2 r1 r2
+:var d r s t ss eps eps2
+eps = 0.001
+eps2 = 0.0001
+:var beta gamma beta9 gamma9 dai sho
+:var a11 a12 a21 a22 b1 b2 trace dmax
+:var sigma cr ci wa seki bunsi bunbo
+:array a b c
+:array x y z u v w
+:var goto
+n = nn
+s = 0.0
+for l = 0; l < n; [++]l
+	s += a0 l l
+next
+trace = s
+# AのLU分解
+a1 = a0
+ludec a1 index1 n
+# Aの2乗
+a2 = a0 * a0
+# tAのLU分解
+for l = 0; l < n; [++]l
+	for j = 0; j < n; [++]j
+		at l j = a0 j l
+	next
+next
+ludec at indext n
+# 固有値がm個得られるまで反復
+for ban = 0; ban < m; [++]ban
+	goto = FALSE
+	sw = 0
+	# 出発値交換の制御
+	for kai = 0; kai < 10; [++]kai
+		# 出発値を設定
+		inival x n
+		if (ban == n - 1) && (kai == 0)
+			s = trace
+			for l = 0; l <= n - 2; [++]l
+				s -= evr l
+			next
+			avec2 a0 s x n index
+		endif
+		# メイン・ループ
+		for k = 0; k < kmax; [++]k
+			# 方程式Ay＝xを解く
+			copyv x u n
+			filter u ban n
+			normal x n
+			for kk = 0; kk < 5; [++]kk
+				copyv u b n
+				solve a1 b x index1 n
+				ev = 1.0 / sp x u n
+				filter x ban n
+				normal x n
+				dmax = 0.0
+				for l = 0; l < n; [++]l
+					d = abs (u l - x l)
+					if d > dmax; dmax = d; endif
+				next
+				if dmax < 0.0001
+					vec1 a0 ev x n ban index
+					sw = 1
+					goto = TRUE
+					break
+				endif
+				copyv x u n
+			next
+			if goto
+				break
+			endif
+			# 方程式Ay＝xを解く
+			copyv x b n
+			solve a1 b y index1 n
+			# 方程式Az＝yを解く
+			copyv y b n
+			solve a1 b z index1 n
+			# 収束判定(1)
+			rati z y rmin rmax rrq n
+			d = rmax - rmin
+			r = abs rrq
+			if ((r > eps) && ((d / r) < 0.1)) || ((r <= eps) && (d < 0.1))
+				sw = 1
+				break
+			endif
+			# 収束判定(2)
+			lsf x y z beta gamma n
+			for l = 0; l < n; [++]l
+				w l = x l + beta * y l + gamma * z l
+			next
+			ss = sp w w n
+			d = sqrt (ss / n)
+			r = abs rrq
+			if ((r > eps) && ((d / r) < 0.01)) || ((r <= eps) && (d < 0.01))
+				sw = 2
+				break
+			endif
+		next
+		if sw >= 1; break; endif
+	next
+	if goto
+		continue
+	endif
+	if sw == 0
+		# 収束しないので計算打切り
+		break
+	endif
+	# 精度改良
+	ev = rrq
+	for k = 0; k < kmax; [++]k
+		goto = FALSE
+		switch sw
+		case 1
+			# 原点移動
+			sigma = ev
+			for l = 0; l < n; [++]l
+				for j = 0; j < n; [++]j
+					c l j = a0 l j
+				next
+				c l l -= sigma
+			next
+			ludec c index n
+			# 方程式Ay＝xを解く
+			copyv x u n
+			filter u ban n
+			normal u n
+			for kk = 0; kk < 5; [++]kk
+				copyv u b n
+				solve c b x index n
+				ev = sigma + 1.0 / sp x u n
+				filter x ban n
+				normal x n
+				dmax = 0.0
+				for l = 0; l < n; [++]l
+					d = abs (u l - x l)
+					if d > dmax; dmax = d; endif
+				next
+				if dmax < 0.0001
+					vec1 a0 ev x n ban index
+					sw = 1
+					goto = TRUE
+					break
+				endif
+				copyv x u n
+			next
+			breakswi
+		case 2
+			# ダブルシフト
+			wa = [-]beta
+			seki = gamma
+			for l = 0; l < n; [++]l
+				for j = 0; j < n; [++]j
+					c l j = a2 l j - wa * a0 l j
+				next
+				c l l += seki
+			next
+			ludec c index n
+			# 濃縮
+			for kk = 0; kk < 5; [++]kk
+				filter x ban n
+				normal x n
+				copyv x b n
+				solve c b x index n
+			next
+			breakswi
+		default
+			return 0
+		endswi
+		if goto
+			continue
+		endif
+		# フィルター
+		normal x n
+		filter x ban n
+		# 方程式Ay＝xを解く
+		normal x n
+		copyv x b n
+		solve a1 b y index1 n
+		# 方程式Az＝yを解く
+		copyv y b n
+		solve a1 b z index1 n
+		# 収束判定(1)
+		rati x y rmin rmax rrq n
+		ev = rrq
+		d1 = rmax - rmin
+		r1 = abs ev
+		if ((r1 > eps) && ((d1 / r1) < 0.001)) || ((r1 <= eps) && (d1 < 0.001))
+			vec1 a0 ev x n ban index
+			sw = 1
+			break
+		endif
+		# 収束判定(2)
+		lsf x y z beta gamma n
+		for l = 0; l < n; [++]l
+			w l = x l + beta * y l + gamma * x l
+		next
+		ss = sp w w n
+		d2 = sqrt (ss / n)
+		r2 = abs ev
+		if ((r2 > eps) && ((d2 / r2) < 0.001)) || ((r2 <= eps) && (d2 < 0.001))
+			vec2 a0 beta gamma x y z n ban index
+			sw = 2
+			break
+		endif
+		# スイッチ切り替え
+		if ((r1 > eps) && ((d1 / r1) < 0.01)) || ((r1 <= eps) && (d1 < 0.01))
+			sw = 1
+		endif
+		if ((r2 > eps) && ((d2 / r2) < 0.01)) || ((r2 <= eps) && (d2 < 0.01))
+			sw = 2
+		endif
+	next
+	if k >= kmax
+		# 収束しないので計算打切り
+		break
+	endif
+	if sw == 2
+		ban++
+	endif
+next
+
+:complex
+for l = 0; l < ban; [++]l
+	@@2 l = ((evr l) (evi l))
+next
+for l = 0; l < ban; [++]l
+	for j = 0; j < ban; [++]j
+		@@3 l j = ((vr l j) (vi l j))
+	next
+next
+
+return ban

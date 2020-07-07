@@ -1,0 +1,53 @@
+#同じ固有値を持つバランスのとれた行列
+#@@b = !- @@a
+:label a @@0
+
+:define RADIX 2.0 # 処理系の浮動小数点の基数
+
+if row a != col a
+	return a
+endif
+
+:var n
+n = row a
+
+:base 1
+:var last j k
+:var s r g f c sqrdx
+
+sqrdx=RADIX*RADIX
+last=0
+while last == 0
+	last=1
+	for k=1;k<=n;k++ # 列と行のノルムを求める
+		r=c=0.0
+		for j=1;j<=n;j++
+			if j != k
+				c += abs(a j k)
+				r += abs(a k j)
+			endif
+		next
+		if c && r # 両方とも0でないなら
+			g=r/RADIX
+			f=1.0
+			s=c+r
+			while c<g # 基数の整数乗で、行列をできるだけバランスする値を見つける
+				f *= RADIX
+				c *= sqrdx
+			endwhile
+			g=r*RADIX
+			while c>g
+				f /= RADIX
+				c /= sqrdx
+			endwhile
+			if (c+r)/f < 0.95*s
+				last=0
+				g=1.0/f
+				for j=1;j<=n;j++; a k j *= g; next # 相似変換をする
+				for j=1;j<=n;j++; a j k *= f; next
+			endif
+		endif
+	next
+endwhile
+
+return a

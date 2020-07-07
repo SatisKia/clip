@@ -1,0 +1,19 @@
+#\!- <iseed>
+:label iseed @0
+:param 0 TRUE
+
+# ランダムなビットを整数として返す。iseedの下位18ビットを使う。
+# iseedは次回の呼出しのために書き換える。
+
+:ulong
+
+:var newbit # XORで合成する新しいビット
+
+newbit = (iseed >> 17) & 1 # 右端から18番目のビットを取り出す
+newbit ^= (iseed >> 4) & 1 # 右端から5番目のビットとXORする
+newbit ^= (iseed >> 1) & 1 # 右端から2番目のビットとXORする
+newbit ^= (iseed & 1) # 右端のビットとXORする
+iseed=(iseed << 1) | newbit # 種を左シフトし、XORの結果を右端のビットに入れる
+:int
+@r=newbit
+return @r

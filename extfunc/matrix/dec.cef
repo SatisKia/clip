@@ -1,0 +1,53 @@
+#LU分解
+#@r = !- @@a @@l @@u
+:params a[] &l[] &u[]
+
+l = @@Z
+u = @@Z
+
+if row a != col a
+	return FALSE
+endif
+
+:var n
+n = row a
+:mat n n l
+:mat n n u
+
+:var m j k
+:var p s
+
+for m = 0; m < n; [++]m
+	l m 0 = a m 0
+	u m 0 = 0.0
+next
+p = a 0 0
+u 0 0 = 1.0
+for j = 1; j < n; [++]j
+	l 0 j = 0.0
+	u 0 j = a 0 j / p
+next
+for m = 1; m < n; [++]m
+	s = a m m
+	for k = 0; k < m; [++]k
+		s -= l m k * u k m
+	next
+	l m m = p = s
+	u m m = 1.0
+	for j = m + 1; j < n; [++]j
+		s = a j m
+		for k = 0; k < m; [++]k
+			s -= l j k * u k m
+		next
+		l j m = s
+		u j m = 0.0
+		s = a m j
+		for k = 0; k < m; [++]k
+			s -= l m k * u k j
+		next
+		u m j = s / p
+		l m j = 0.0
+	next
+next
+
+return TRUE

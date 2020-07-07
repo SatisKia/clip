@@ -1,0 +1,124 @@
+func _strcat &dst[] &len src[] width zero minus
+	:ans FALSE
+	@s = strlen src
+	if [!]minus && @s < width
+		for @i = 0; @i < width - @s; @i++
+			dst (len++) = zero ? '0 [' ]
+		next
+	endif
+	for @i = 0; @i < @s; @i++
+		dst (len++) = src @i
+	next
+	if minus && @s < width
+		for @i = 0; @i < width - @s; @i++
+			dst (len++) = [' ]
+		next
+	endif
+	dst len = 0
+endfunc
+
+@f = FALSE
+@l = 0
+str @l = 0
+@i = 0
+while format @i != 0
+	if format @i == '\%
+		if @f
+			str (@l++) = '\%
+			str  @l    = 0
+			@f = FALSE
+		else
+			@f = TRUE
+			@w = 0
+			if format (@i + 1) == '0
+				@z = TRUE
+				@m = FALSE
+				@i++
+			elif format (@i + 1) == '\-
+				@z = FALSE
+				@m = TRUE
+				@i++
+			else
+				@z = FALSE
+				@m = FALSE
+			endif
+			@d = FALSE
+			@p = 0
+		endif
+	elif @f
+		if format @i == '.
+			@d = TRUE
+		elif format @i >= '0 && format @i <= '9
+			if @d
+				@p = @p * 10 + (format @i - '0)
+			else
+				@w = @w * 10 + (format @i - '0)
+			endif
+		else
+			switch format @i
+			case 'c
+				str (@l++) = @:(index++)
+				str  @l    = 0
+				breakswi
+			case 'd
+			case 'i
+				:int
+				:sprint @@t @:(index++)
+				_strcat str @l @@t @w FALSE @m
+				breakswi
+			case 's
+				_strcat str @l @@:(index++) @w FALSE @m
+				breakswi
+			case 'o
+				:uint 8
+				:sprint @@t @:(index++)
+				:radix \10
+				_strcat str @l @@t @w @z @m
+				breakswi
+			case 'u
+				:uint
+				:sprint @@t @:(index++)
+				_strcat str @l @@t @w @z @m
+				breakswi
+			case 'x
+			case 'X
+				:uint 16
+				:sprint @@t @:(index++)
+				:radix \10
+				if format @i == 'x
+					strlwr @@t
+				endif
+				_strcat str @l @@t @w @z @m
+				breakswi
+			case 'e
+			case 'E
+				:efloat @p
+				:sprint @@t @:(index++)
+				if format @i == 'E
+					strupr @@t
+				endif
+				_strcat str @l @@t @w FALSE @m
+				breakswi
+			case 'f
+				:float @p
+				:sprint @@t @:(index++)
+				_strcat str @l @@t @w FALSE @m
+				breakswi
+			case 'g
+			case 'G
+				:gfloat @p
+				:sprint @@t @:(index++)
+				if format @i == 'G
+					strupr @@t
+				endif
+				_strcat str @l @@t @w FALSE @m
+				breakswi
+			endswi
+			@f = FALSE
+		endif
+	else
+		str (@l++) = format @i
+		str  @l    = 0
+	endif
+	@i++
+endwhile

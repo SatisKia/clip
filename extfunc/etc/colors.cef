@@ -1,0 +1,15 @@
+:ans 0
+:gworld 255 255
+:gupdate 0
+@C = 0
+@Y = 0
+for @y = 0; @y < 16; @y++
+	for @x = 0; @x < 16; @x++
+		:gfill (@x * 16) @Y 15 15 @C
+		!sprintf @@C ["%02X] @C
+		:gtext @@C (@x * 16 + 1) (@Y + 8) (255 - @C)
+		@C++
+	next
+	@Y += 16
+next
+:gupdate \-1

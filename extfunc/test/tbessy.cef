@@ -1,0 +1,20 @@
+:include !tplot
+
+:ans FALSE
+:gworld 256 256
+
+window 0 \-3.2 12 1.2 0.5 1
+:rectangular
+
+@y = 160
+if @0
+	plot ["!y 0 x] 1 160 @y
+	plot ["!y 1 x] 2 160 @y
+	plot ["!y 2 x] 3 160 @y
+	plot ["!y 3 x] 4 160 @y
+else
+	plot ["!bessy0 x]  1 160 @y
+	plot ["!bessy1 x]  2 160 @y
+	plot ["!bessy 2 x] 3 160 @y
+	plot ["!bessy 3 x] 4 160 @y
+endif

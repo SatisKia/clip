@@ -1,0 +1,53 @@
+#消去法によるHessenberg形への変換
+#@@b = !- @@a
+:label a @@0
+
+if row a != col a
+	return a
+endif
+
+:var n
+n = row a
+
+:base 1
+:var m j k
+:var y x
+
+for m=2;m<n;m++
+	x=0.0
+	k=m
+	for j=m;j<=n;j++ # ピボットを求める
+		if abs(a j(m-1)) > abs x
+			x=a j(m-1)
+			k=j
+		endif
+	next
+	if k != m # 行と列を交換
+		for j=m-1;j<=n;j++; y=a k j;a k j=a m j;a m j=y; next
+		for j=1;j<=n;j++; y=a j k;a j k=a j m;a j m=y; next
+	endif
+	if x # 消去を実行
+		for k=m+1;k<=n;k++
+			if (y=a k(m-1)) != 0.0
+				y /= x
+				a k(m-1)=y
+				for j=m;j<=n;j++
+					a k j -= y*a m j
+				next
+				for j=1;j<=n;j++
+					a j m += y*a j k
+				next
+			endif
+		next
+	endif
+next
+
+for k = 1; k <= n; k++
+	for j = 1; j <= n; j++
+		if k > j + 1
+			a k j = 0.0
+		endif
+	next
+next
+
+return a

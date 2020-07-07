@@ -1,0 +1,11 @@
+#ヘッセンベルグ型への変換
+#@@b = !- @@a
+
+if row @@0 != col @@0
+	return @@Z
+endif
+
+:include !matrix
+
+Hessenberg (row @@0) @@0
+return @@0

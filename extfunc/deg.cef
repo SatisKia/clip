@@ -1,0 +1,4 @@
+#!/usr/local/bin/clip
+#ラジアンを度に変換 convert radian to degree
+:float \16
+@0 * 180 / !pi

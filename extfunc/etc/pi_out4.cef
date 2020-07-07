@@ -1,0 +1,5 @@
+#\!- <prec>
+:ans FALSE
+:fract
+!fract2str (428224593349304 136308121570117) @@p @0
+:println @@p

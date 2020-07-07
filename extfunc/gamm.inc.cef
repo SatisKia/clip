@@ -1,0 +1,61 @@
+:define ITMAX 100
+:define EPS 3.0e-7
+
+# 不完全ガンマ関数P(a,x)を級数で求め、gamserに入れて戻る。
+# また、ln Γ(a)をglnに入れる。
+func gser &gamser a x &gln
+	:var n
+	:var sum del ap
+
+	gln=!gammln a
+	if x <= 0.0
+		if x < 0.0; return FALSE; endif
+		gamser=0.0
+		return TRUE
+	else
+		ap=a
+		del=sum=1.0/a
+		for n=1;n<=ITMAX;n++
+			[++]ap
+			del *= x/ap
+			sum += del
+			if abs del < abs sum*EPS
+				gamser=sum*exp([-]x+a*log x-gln)
+				return TRUE
+			endif
+		next
+		return FALSE
+	endif
+endfunc
+
+# 不完全ガンマ関数Q(a,x)を連分数で求め、gammcfに入れて戻る。
+# また、ln Γ(a)をglnに入れる。
+func gcf &gammcf a x &gln
+	:var n
+	:var gold g fac b1 # facは部分分子・分母の桁あふれを避けるための再規格化因子
+	gold=0.0;fac=1.0;b1=1.0
+	:var b0 anf ana an a1 a0
+	b0=0.0;a0=1.0
+
+	gln=!gammln a
+	a1=x # 連分数を計算
+	for n=1;n<=ITMAX;n++
+		an=n
+		ana=an-a
+		a0=(a1+a0*ana)*fac # 1ステップ分
+		b0=(b1+b0*ana)*fac
+		anf=an*fac
+		a1=x*a0+anf*a1 # 次のステップ
+		b1=x*b0+anf*b1
+		if a1 # 再規格化するか？
+			fac=1.0/a1 # する。そのためにfacをセット
+			g=b1*fac # 答えの新しい値
+			if abs((g-gold)/g) < EPS # 収束なら脱出
+				gammcf=exp([-]x+a*log x-gln)*g # 前に付くべき因子を掛ける
+				return TRUE
+			endif
+			gold=g # そうでないなら値を保存
+		endif
+	next
+	return FALSE
+endfunc

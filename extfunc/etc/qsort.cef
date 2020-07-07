@@ -1,0 +1,19 @@
+#!/usr/local/bin/clip
+#クイックソート quicksort
+#\!- <array> <first> <last>
+:params &a[] first last
+:ans 0
+
+if last - first < 1; return; endif
+
+@x = a ((first + last) / 2)
+@i = first; @j = last
+for;;
+	while a @i < @x;   @i++; endwhile
+	while @x   < a @j; @j--; endwhile
+	if @i >= @j; break; endif
+	@t = a @i; a @i = a @j; a @j = @t
+	@i++; @j--
+next
+if first  < @i - 1; !qsort a  first   (@i - 1); endif
+if @j + 1 < last;   !qsort a (@j + 1)  last;    endif

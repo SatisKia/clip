@@ -1,0 +1,4 @@
+#!/usr/local/bin/clip
+#円周率 pi
+:float \16
+4 * atan 1

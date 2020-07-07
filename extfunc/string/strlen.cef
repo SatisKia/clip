@@ -1,0 +1,6 @@
+#文字列の長さ
+#\!- <str>
+for @l = 0; ; @l++
+	if @@0 @l == 0; break; endif
+next
+return @l

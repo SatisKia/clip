@@ -1,0 +1,31 @@
+#!NAMESPACE mp
+#多倍長整数同士の大小比較
+#\!- <a> <b>
+#aがbよりも大きい場合は正の値、小さい場合は負の値、等しい場合はゼロの値
+:include !mp:mp
+
+:params a[] b[]
+
+mp_param a
+mp_param b
+
+$RETURN_A (a 0 < 0 && (b 0 >= 0)),\-1
+$RETURN_A (b 0 < 0 && (a 0 >= 0)),1
+$CND      @k,(a 0 < 0 && (b 0 < 0)),\-1,1
+
+:var la lb
+$SET la,mp_get_len a
+$SET lb,mp_get_len b
+
+:long
+
+$CND @i,(la > lb),la,lb
+if @i > 0
+	$LOOPSTART	# @i
+	$CND		@a,(@i <= la),a @i,0
+	$CND		@b,(@i <= lb),b @i,0
+	$RETURN_A	(@a != @b),(@a - @b * @k) # (@a - @b) * @k
+	$LOOPEND_D	@i,0
+endif
+
+return 0

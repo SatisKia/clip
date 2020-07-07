@@ -1,0 +1,49 @@
+#!NAMESPACE mp
+:include !mp:mp
+
+func mp_fround_get a[] n
+	$SET @l,mp_get_len a
+	:long
+	@n = 1 + n / MP_DIGIT
+	$RETURN_A (@n > @l),0
+	(a @n / pow 10 (n % MP_DIGIT)) % 10
+endfunc
+
+func mp_fround_set &a[] n val
+	:long
+	@n = 1 + n / MP_DIGIT
+	$SET		@a,a @n
+#	$SET_Z		@b
+	$SET		@k,1
+	$MOD		n,MP_DIGIT
+#	$SET_Z		@i
+	$LOOPSTART	# @i
+	if @i == n
+		@b += val * @k
+	elif @i > n
+		@b += (@a % 10) * @k
+	endif
+	$DIV		@a,10
+	$MUL		@k,10
+	$LOOPEND_I	@i,MP_DIGIT
+	$SET		a @n,@b
+endfunc
+
+func mp_fround_zero &a[] n
+	:arrayfill 0 a 1 (int (n / MP_DIGIT))
+endfunc
+
+func mp_fround_up &a[] n
+	$SET		@l,mp_get_len a
+	$LOOPSTART
+	$ADD_A		@a,mp_fround_get a n,1
+	mp_fround_set a n (@a % 10)
+	$BREAK		(@a < 10)
+	$INC		n
+	if (1 + int (n / MP_DIGIT)) > @l
+		$INC   @l
+		mp_set_len a (@l * (a 0 < 0 ? \-1 1))
+		$SET_Z a @l
+	endif
+	$LOOPCONT
+endfunc

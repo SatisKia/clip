@@ -1,0 +1,67 @@
+#!NAMESPACE ft
+#高速フーリエ変換
+#\!- <ret_array> <src_array> <num> <inv_flag>
+:params &ret[] f[] N inv
+:ans FALSE
+:complex
+
+# 因数分解
+@P = int sqrt N
+if @P > 1
+	$LOOPSTART	# @P
+	$BREAK		(N % @P == 0)
+	$LOOPEND_D	@P,1
+endif
+$DIV_A @Q,N,@P
+
+# 逆変換の場合
+if inv
+	# 複素共役を取る
+	$SUB_A		@t,N,1
+	$LOOPSTART	# @t
+	$CONJG		f @t,f @t
+	$LOOPENDE_D	@t,0
+endif
+
+# ステップ1
+$SUB_A		@p,@P,1
+$LOOPSTART	# @p
+$SUB_A		@r,@Q,1
+$LOOPSTART	# @r
+@t = \-6.28318530717958647692i * @r / @Q
+$SET_Z		@@F @r @p
+$SET_Z		@q
+$LOOPSTART	# @q
+@@F @r @p += f (@q * @P + @p) * exp (@t * @q)
+$LOOPEND_I	@q,@Q
+@@F @r @p *= exp (@t * @p / @P)
+$LOOPENDE_D	@r,0
+$LOOPENDE_D	@p,0
+
+# ステップ2
+if @P == 1
+	$SUB_A		@r,@Q,1
+	$LOOPSTART	# @r
+	$SET		ret @r,@@F @r 0
+	$LOOPENDE_D	@r,0
+else
+	$SUB_A		@r,@Q,1
+	$LOOPSTART	# @r
+	:arraycopy @@F @r 0 @@f 0 @P
+	!fft @@r @@f @P
+	$SUB_A		@s,@P,1
+	$LOOPSTART	# @s
+	$SET		ret (@s * @Q + @r),@@r @s
+	$LOOPENDE_D	@s,0
+	$LOOPENDE_D	@r,0
+endif
+
+# 逆変換の場合
+if inv
+	# 結果の複素共役を取り、Nで割る
+	$SUB_A		@x,N,1
+	$LOOPSTART	# @x
+	$CONJG		ret @x,ret @x
+	$DIV		ret @x,N
+	$LOOPENDE_D	@x,0
+endif

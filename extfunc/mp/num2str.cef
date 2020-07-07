@@ -1,0 +1,49 @@
+#!NAMESPACE mp
+#多倍長整数を文字列に変換する
+#\!- <s> <n>
+:include !mp:mp
+
+:params &s[] n[]
+:ans FALSE
+
+$LT_A @m,n 0,0
+
+$SET n 0,mp_get_len n
+if n 0 == 0
+	$SET   s 0,'0
+	$SET_Z s 1 # 文字列終端
+	return
+endif
+
+:long
+
+$SET   @s,\-1
+#SET_Z @n
+$SET   @i,n 0
+if @i > 0
+	$LOOPSTART	# @i
+	$SET		@x,n ([++]@n)
+	$SET_Z		@j
+	$LOOPSTART	# @j
+	s ([++]@s) = @x % 10 + '0
+	$DIV		@x,10
+	$LOOPEND_I	@j,MP_DIGIT
+	$LOOPEND_D	@i,0
+endif
+while s @s == '0
+	if [--]@s < 0
+		$SET_Z @s
+		break
+	endif
+endwhile
+if @m
+	$SET s ([++]@s),['-]
+endif
+$SET_Z s (@s + 1) # 文字列終端
+
+$SET_Z @t
+while @t < @s
+	$SET @x,s @t
+	$SET s (@t++),s @s
+	$SET s (@s--),@x
+endwhile

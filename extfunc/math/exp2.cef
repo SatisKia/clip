@@ -1,0 +1,11 @@
+#指数関数(連分数) exponential function
+#\!- <val>
+:float \16
+
+:define N 22
+
+@k=int(@0/!log 2+(@0>=0?0.5 \-0.5))
+@0-=@k*!log 2
+@X=@0*@0;@w=@X/N
+for @i=N-4;@i>=6;@i-=4;@w=@X/(@w+@i);next
+!ldexp((2+@w+@0)/(2+@w-@0))@k

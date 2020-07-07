@@ -1,0 +1,24 @@
+#!/usr/local/bin/clip
+#エジプトの分数 Egyptian fractions
+#\!- <num> <denom>
+:params m n
+:ans 0
+:int
+
+:var q
+
+if @! < 2
+	:scan ["分子? ] m
+	:scan ["分母? ] n
+endif
+if n == 0
+	:error "ゼロで除算しました
+	return
+endif
+:print m ["/] n [" = ]
+while n % m != 0
+	q = n / m + 1
+	:print ["1/] q [" + ]
+	m = m * q - n; n *= q
+endwhile
+:println ["1/] (n / m)

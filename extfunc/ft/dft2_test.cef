@@ -1,0 +1,40 @@
+:include !ft:test
+:include !tplot
+
+:ans FALSE
+
+@T = 2 * 3.14159265358979323846 / @0
+:array sr si tr ti
+for @i = 0; @i < @0; @i++
+	# f(t)=2*sin(4t)+3*cos(2t)
+	# tの範囲は0～2π
+	sr @i = 2 * sin (4 * (@T * @i)) + 3 * cos (2 * (@T * @i))
+	si @i = 0
+	tr @i = sr @i + (rand / RAND_MAX - 0.5) * 5.0
+	ti @i = 0
+next
+
+:array ur ui
+!ft:dft2 ur ui @0 tr ti @0
+@d = ft_cut ur @0 @1 @2; ft_cut ui @0 @1 @2
+
+:array vr vi
+!ft:idft2 vr vi @0 ur ui @0
+if @d; ft_double vr @0; ft_double vi @0; endif
+
+:gworld 256 256
+if [!]@3
+	# 縦軸-5～5、横軸0～2π
+	window 0 \-5 (@0 - 1) 5 (@0 / 8) 1
+	# 元データ
+	ft_draw tr @0 3
+	ft_draw sr @0 253
+	# IDFTデータ
+	ft_draw vr @0 252
+else
+	# 縦軸-175～175、横軸0～2π
+	window 0 \-175 (@0 - 1) 175 (@0 / 8) 25
+	# DFTデータ
+	ft_draw ur @0 252
+	ft_draw ui @0 253
+endif

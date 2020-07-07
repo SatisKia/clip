@@ -1,0 +1,16 @@
+#対数(連分数) logarithm
+#\!- <val>
+:define LOG2 0.693147180559945309417232121458
+:define SQRT2 1.41421356237309504880168872421
+:define N 9
+if @0 <= 0
+	:warn ["外部関数-の引数が0または負の値になりました]
+	return 0
+endif
+!frexp (@0 / SQRT2) @k
+@0 /= !ldexp 1 @k
+@0--; @s = 0
+for @i = N; @i >= 1; @i--
+	@s = @i * @0 / (2 + @i * @0 / (2 * @i + 1 + @s
+next
+return LOG2 * @k + @0 / (1 + @s)

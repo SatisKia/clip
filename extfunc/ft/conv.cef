@@ -1,0 +1,16 @@
+#!NAMESPACE ft
+#畳み込み
+#\!- <ret_array> <ret_num> <src1_array> <src1_num> <src2_array> <src2_num>
+:params &ret[] ret_num x[] x_num y[] y_num
+:ans FALSE
+:complex
+
+!dft @@x ret_num x x_num
+!dft @@y ret_num y y_num
+
+$SUB_A		@i,ret_num,1
+$LOOPSTART	# @i
+$MUL_A		@@z @i,@@x @i,@@y @i
+$LOOPENDE_D	@i,0
+
+!idft ret ret_num @@z ret_num

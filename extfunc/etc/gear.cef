@@ -1,0 +1,82 @@
+#!/usr/local/bin/clip
+#歯形の作図
+#\!- 1|2 [<ﾓｼﾞｭｰﾙ> <角> <数> <転位係数> <倍率>]
+:ans 0
+:params SE M AL Z X K
+
+:define BACKCOLOR 255
+:define FORECOLOR 0
+
+#
+# パラメータの入力
+#
+while SE!=1&&SE!=2
+	:scan ["部分(1)／全体(2)] SE
+endwhile
+if @!<=1
+	if SE==1
+		M=5; AL=20; Z=16; X=0.2; K=14
+	else
+		M=6; AL=20; Z=20; X=0; K=2.2
+	endif
+	:scan ["モジュール m=] M
+	:scan ["圧力角    α=] AL
+	:scan ["歯数       z=] Z
+	:scan ["転位係数   x=] X
+	:scan ["図示倍率   k=] K
+endif
+
+:var PI RD D R H HA P WY
+:var S T U X0 Y0
+:var TH I J N
+:array TX TY XX YY
+PI=3.141593
+RD=PI/180
+D=Z*M
+R=D/2
+H=2.25*M
+HA=1.25*M
+P=PI*M
+WY=R*K
+
+#
+# グラフィック画面の作成
+#
+:gworld 640 400
+:gfill 0 0 640 400 BACKCOLOR
+if SE==1
+	:window 1 (405-WY) 641.69 ([-]WY)
+else
+	:window 1 425 641.69 20
+endif
+
+#
+# 歯形の作図
+#
+if SE==1; S=900/Z; else; S=180; endif
+for TH=[-]S; TH<=S; TH++
+	T=int(TH/360*Z)
+	U=P/4-(M*tan(AL*RD))
+	X0=R*cos(TH*RD)*(tan(TH*RD)-(TH*RD))
+	Y0=[-]R*(cos(TH*RD)+((TH*RD)*sin(TH*RD))-1)
+
+	# ラックの切り込み状態線の座標計算
+	for I=T-1; I<=T+1; I++
+		TX(0)=P*I+U                    ; TY(0)=[-]M-(X*M)
+		TX(1)=TX(0)+H*tan(AL*RD)       ; TY(1)=  HA-(X*M)
+		TX(2)=TX(1)+P/2-2*HA*tan(AL*RD); TY(2)=  HA-(X*M)
+		TX(3)=TX(2)+H*tan(AL*RD)       ; TY(3)=[-]M-(X*M)
+		TX(4)=TX(0)+P                  ; TY(4)=[-]M-(X*M)
+
+		# 移動座標の計算
+		for N=0; N<=4; N++
+			XX(N)=(X0+TX(N)*cos(TH*RD)-TY(N)*sin(TH*RD))*K+322+U
+			YY(N)=(Y0+TX(N)*sin(TH*RD)+TY(N)*cos(TH*RD))*K+230-R*K
+		next
+
+		# 図を描く
+		for J=0; J<=3; J++
+			:wline (XX(J)) (YY(J)) (XX(J+1)) (YY(J+1)) FORECOLOR
+		next
+	next
+next

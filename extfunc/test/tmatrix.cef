@@ -1,0 +1,187 @@
+#行列のテスト
+
+:include !tmatrix
+
+:ans FALSE
+:assert TRUE
+
+# 算術のテスト
+
+@@A{{\-4   6 3}{0 1 2}}
+@@B{{  5 \-1 0}{3 1 0}}
+@@C{{  1   5 3}{3 2 2}}
+assert @@C == @@A + @@B
+
+@@A{{2.7 \-1.8}{0.9 3.6}}
+@@B{{5.4 \-3.6}{1.8 7.2}}
+@@C{{3   \-2  }{1   4  }}
+assert @@A + @@A == 2 * @@A
+assert @@A + @@A == @@B
+assert 2 * @@A == @@B
+assert approx ((10 / 9) * @@A) @@C
+
+@@A{{5 \-8 1}{4 0 0}}
+@@B{{5 4}{\-8 0}{1 0}}
+assert trans @@A == @@B
+
+@@A{{7 5 \-2}}
+@@B{{7}{5}{\-2}}
+assert trans @@A == @@B
+
+@@A{{2 3}{5 \-1}}
+@@R{{2 4}{4 \-1}}
+@@S{{0 \-1}{1 0}}
+assert ((@@A + trans @@A) / 2) == @@R
+assert ((@@A - trans @@A) / 2) == @@S
+
+@@A{{2 \-3}{0 4}}
+@@B{{\-5 2}{2 1}}
+@@C{{7 \-5}{\-2 3}}; assert @@A - @@B == @@C
+@@C{{\-7 5}{2 \-3}}; assert @@B - @@A == @@C
+@@C{{2 0}{\-3 4}};   assert trans @@A == @@C
+                     assert trans @@B == @@B
+                     assert trans (trans @@B) == @@B
+@@C{{4 \-3}{\-3 8}}; assert @@A + trans @@A == @@C
+@@C{{0 \-3}{3 0}};   assert @@A - trans @@A == @@C
+@@C{{\-3 2}{\-1 5}}; assert trans (@@A + @@B) == @@C
+                     assert trans @@A + trans @@B == @@C
+@@K{{1 3 5}{0 4 2}{0 0 6}}
+@@M{{2 0 0}{\-1 1 0}{4 \-3 0}}
+@@N{{6 7}{0 \-2}{3 8}}
+@@L{{18 0 9}{21 \-6 24}}
+                     assert trans (3 * @@N) == @@L
+                     assert 3 * trans @@N == @@L
+@@L{{\-1 3 5}{1 3 2}{\-4 3 6}}
+                     assert @@K - @@M == @@L
+                     assert @@M - @@K == [-]@@L
+@@L{{3 3 5}{\-1 5 2}{4 \-3 6}}
+                     assert @@K + @@M == @@L
+                     assert @@M + @@K == @@L
+
+@@A{{2   1}{ 3 4}}
+@@B{{1 \-2}{ 5 3}}
+@@C{{7 \-1}{23 6}}
+assert @@A * @@B == @@C
+
+@@A{{3 2 \-1}{0 4 6}}
+@@B{{1 0 2}{5 3 1}{6 4 2}}
+@@C{{7 2 6}{56 36 16}}
+assert @@A * @@B == @@C
+
+@@A{{3 4 2}{6 0 \-1}{\-5 \-2 1}}
+@@B{{1}{3}{2}}
+@@C{{19}{4}{\-9}}
+assert @@A * @@B == @@C
+
+@@A{{3 6 1}}
+@@B{{1}{2}{4}}
+@@C{{3 6 1}{6 12 2}{12 24 4}}
+assert 3 != @@A
+assert @@A != 3
+assert @@A * @@B == 19
+assert @@B * @@A == @@C
+
+@@A{{1 0}{0 0}}
+@@B{{0 1}{1 0}}
+@@C{{0 1}{0 0}}; assert @@A * @@B == @@C
+@@C{{0 0}{1 0}}; assert @@B * @@A == @@C
+
+@@A{{1 1}{2 2}}
+@@B{{\-1 1}{1 \-1}}
+@@C{{0 0}{0 0}}; assert @@A * @@B == @@C
+
+@@A{{4 6 \-1}{3 0 2}{1 \-2 5}}
+@@B{{2 4}{0 1}{\-1 2}}
+@@C{{3}{1}{2}}
+@@I{{1 0 0}{0 1 0}{0 0 1}}
+@@D{{33 26 3}{14 14 7}{3 \-4 20}};   assert @@A * @@A == @@D
+@@D{{4}{17}};                        assert trans @@B * @@C == @@D
+@@D{{4 17}};                         assert trans @@C * @@B == @@D
+@@D{{20 4 6}{4 1 2}{6 2 5}};         assert @@B * trans @@B == @@D
+@@D{{5 6}{6 21}};                    assert trans @@B * @@B == @@D
+@@D{{43 44 0}{23 12 13}{6 \-10 33}}; assert @@A * @@A + 3 * @@A - 2 * @@I == @@D
+@@D{{25 100}};                       assert trans @@C * @@A * @@B == @@D
+@@D{{25}{100}};                      assert trans (@@A * @@B) * @@C == @@D
+
+@@A{{2 \-1 0}{0 \-2 1}{1 0 1}}
+@@B{{\-2 1 \-1}{1 2 \-2}{2 \-1 \-4}}
+@@C{{\-5 0 0}{0 \-5 0}{0 0 \-5}}
+assert @@A * @@B == @@B * @@A
+assert @@A * @@B == @@C
+assert @@B * @@A == @@C
+
+# 逆行列のテスト
+
+@@A{{\-1 1 2}{3 \-1 1}{\-1 3 4}}
+@@B{{\-0.7 0.2 0.3}{\-1.3 \-0.2 0.7}{0.8 0.2 \-0.2}}
+@@I{{1 0 0}{0 1 0}{0 0 1}}
+assert approx (!inverse @@A) @@B
+assert approx (@@A * !inverse @@A) @@I
+assert approx (!inverse @@A * @@A) @@I
+
+@@A{{3 1}{2 4}}
+@@B{{4 \-1}{\-2 3}}
+assert approx (!inverse @@A) ((1 / 10) * @@B)
+
+@@A{{\-0.5 0 0}{0 4 0}{0 0 1}}
+@@B{{\-2 0 0}{0 0.25 0}{0 0 1}}
+assert approx (!inverse @@A) @@B
+
+@@A{{(1 / sqrt 2) (\-1 / sqrt 2)}{(  1 / sqrt 2) (1 / sqrt 2)}}
+@@B{{(1 / sqrt 2) (  1 / sqrt 2)}{(\-1 / sqrt 2) (1 / sqrt 2)}}
+assert approx (!inverse @@A) @@B
+
+@@A{{1.0 0 \-1.0}{\-0.2 0.4 0.6}{1.0 0 \-3.0}}
+@@B{{(3/2) 0 (\-1/2)}{0 (5/2) (1/2)}{(1/2) 0 (\-1/2)}}
+assert approx (!inverse @@A) @@B
+
+@@A{{2 0 \-1}{5 1 0}{0 1 3}}
+@@B{{3 \-1 1}{\-15 6 \-5}{5 \-2 2}}
+assert approx (!inverse @@A) @@B
+
+@@A{{6 4 3}{4 3 4}{3 2 2}}
+@@B{{\-2 \-2 7}{4 3 \-12}{\-1 0 2}}
+assert approx (!inverse @@A) @@B
+
+# 行列式のテスト
+
+@@A{{2 \-1 2}{1 10 \-3}{\-1   1   1}}; assert approx_d (!det @@A) 46
+@@A{{2 \-1 2}{5 10 \-3}{\-3   1   1}}; assert approx_d (!det @@A) 92
+@@A{{2   2 2}{1  5 \-3}{\-1 \-3   1}}; assert approx_d (!det @@A) 0
+@@A{{2 \-1 2}{1 10   5}{\-1   1 \-3}}; assert approx_d (!det @@A) \-46
+
+@@A{{1 3 0}{2 6 4}{\-1 0 2}}
+@@B{{2 6 4}{1 3 0}{\-1 0 2}}
+assert !det @@A == !det (trans @@A)
+assert approx_d (!det @@A) \-12
+assert approx_d (!det (trans @@A)) \-12
+assert !det @@B == [-]!det @@A
+assert approx_d (!det @@B) 12
+
+@@A{{4 6 1}{3 \-9 2}{\-1 12 5}}
+@@B{{4 2 1}{3 \-3 2}{\-1  4 5}}
+assert !det @@A == 3 * !det @@B
+
+@@A{{\-6 21 \-30}{1 \-3 5}{2 7 \-4}}
+@@B{{  1  0    5}{1 \-3 5}{2 7 \-4}}
+@@C{{  1  0    5}{0 \-3 0}{2 7 \-4}}
+assert !det @@A == !det @@B
+assert !det @@A == !det @@C
+assert !det @@B == !det @@C
+assert approx_d (!det @@A) 42
+assert approx_d (!det @@B) 42
+assert approx_d (!det @@C) 42
+
+@@A{{1 2}{4 3}};                assert approx_d (!det @@A) \-5
+@@A{{4 6 5}{0 1 \-7}{0 0 6}};   assert approx_d (!det @@A) 24
+@@A{{4 7 \-1}{3 2 2}{1 5 \-3}}; assert approx_d (!det @@A) 0
+
+@@A{{1 24 21 93}{2 \-37 \-1 194}{\-2 35 0 \-171}{\-3 177 63 234}}
+assert approx_d (!det @@A) \-468
+:prec 0
+:println (!det @@A)
+
+@@A{{1 2 \-1 2}{3 0 1 5}{1 \-2 0 3}{\-2 \-4 1 6}}
+assert approx_d (!det @@A) 90
+
+:println ["SUCCESS testing matrix]

@@ -1,0 +1,12 @@
+:include !tplot
+
+:ans FALSE
+:gworld 256 256
+
+window \-3.5 \-1.125 3.5 2.125 1 0.5
+:rectangular
+
+@y = 40
+plot ["!erf x]   1 10 @y
+plot ["!erfc x]  2 10 @y
+plot ["!erfcc x] 3 10 @y

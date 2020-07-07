@@ -1,0 +1,31 @@
+#任意の実数xおよびn≧2について、変形Bessel関数In(x)の値を返す
+#\!- <n> <x>
+:params n x
+
+:define ACC 40.0 # 精度を良くするにはACCを増す
+:define BIGNO 1.0e10
+:define BIGNI 1.0e-10
+
+:var j
+:var bi bim bip tox ans
+
+if x == 0.0
+	return 0.0
+else
+	tox=2.0/abs(x)
+	bip=ans=0.0
+	bi=1.0
+	for j=2*(n+int sqrt(ACC*n));j>0;j-- # 偶数のmから下向きの漸化式
+		bim=bip+j*tox*bi
+		bip=bi
+		bi=bim
+		if abs(bi) > BIGNO # 桁あふれを避けるため再規格化
+			ans *= BIGNI
+			bi *= BIGNI
+			bip *= BIGNI
+		endif
+		if j == n; ans=bip; endif
+	next
+	ans *= !bessi0(x)/bi # bessi0で規格化
+	return x < 0.0 && (n & 1) ? ([-]ans) ans
+endif

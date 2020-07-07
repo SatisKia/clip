@@ -1,0 +1,16 @@
+#!NAMESPACE mp
+#\!- <rop> [<op>]
+:include !mp:mp
+
+:params &rop[] op[]
+:ans FALSE
+
+if @! == 1 # パラメータが1つの場合
+	$ABS rop 0,rop 0
+	return
+endif
+
+mp_param op
+
+:arraycopy op 1 rop 1 (mp_get_len op)
+$ABS rop 0,op 0

@@ -1,0 +1,75 @@
+#!NAMESPACE image
+#スケーリング
+#\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
+
+func add
+	# ピクセル数を求める
+#	$SET_Z	@n
+	$SET	@i,1
+	if @i < @1
+		$LOOPSTART	# @i
+		$ADD		@n,@@0 @i
+		$LOOPEND	@i,@1,2
+	endif
+
+#	$SET_Z		@r
+#	$SET_Z		@g
+#	$SET_Z		@b
+	$SET_Z		@i
+	$LOOPSTART	# @i
+	$DIV_A		@k,@@0 (@i + 1),@n
+	$SET		@c,@@0 @i
+	$AND_A		@R,@c,\xFF0000
+	$SHIFTR		@R,16
+	$MUL		@R,@k
+	$ADD		@r,@R
+	$AND_A		@G,@c,\x00FF00
+	$SHIFTR		@G,8
+	$MUL		@G,@k
+	$ADD		@g,@G
+	$AND_A		@B,@c,\x0000FF
+	$MUL		@B,@k
+	$ADD		@b,@B
+	$LOOPEND	@i,@1,2
+	return (int @r << 16) + (int @g << 8) + int @b
+endfunc
+
+:ans FALSE
+:param 7 TRUE
+
+$SET		@W,(@3 - @1 + 1)
+$SET		@H,(@4 - @2 + 1)
+$SET		@w,@5
+$SET		@h,@6
+$CND		@M,(@W > @w),(@W / @w),((@W - 1) / (@w - 1))
+$CND		@N,(@H > @h),(@H / @h),((@H - 1) / (@h - 1))
+$CND		@m,(@M < 1.0),1.0,@M
+$CND		@n,(@N < 1.0),1.0,@N
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET_Z		@k
+$MODF		@P,(@M * @x + @1),@X
+$MODF		@Q,(@N * @y + @2),@Y
+$CEIL		@I,(@P + @m)	# X方向ピクセル数
+$CEIL		@J,(@Q + @n)	# Y方向ピクセル数
+$SUB_A		@q,1.0,@Q
+$SET_Z		@j
+$LOOPSTART	# @j:Y方向ループ
+$SUB_A		@p,1.0,@P
+$SET_Z		@i
+$LOOPSTART	# @i:X方向ループ
+$SET		@@c @k,@@0 (@Y + @j) (@X + @i)
+$INC		@k
+$CND		@r,(@p > 1.0),1.0,@p
+$CND		@s,(@q > 1.0),1.0,@q
+$MUL_A		@@c @k,@r,@s
+$INC		@k
+$SUB_A		@p,@m,@p	# 次のステップ
+$LOOPEND_I	@i,@I
+$SUB_A		@q,@n,@q	# 次のステップ
+$LOOPEND_I	@j,@J
+$SET		@@7 @y @x,add @@c @k
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

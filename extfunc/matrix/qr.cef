@@ -1,0 +1,60 @@
+#QR法（対称な3重対角行列の固有値計算）
+#@n = !- @@a @@e
+:params a[] &d[]
+
+for @i = 0; @i < row a; @i++
+	d @i = 0.0
+next
+
+if row a != col a
+	return 0
+endif
+
+:var n
+n = row a
+
+:var j k kmax m
+kmax = 32
+:array e p q c s
+:var di ei dip pi r lambda sint cost
+
+for j = 1; j < n; [++]j
+	d (j - 1) = a (j - 1) (j - 1)
+	e j = a (j - 1) j
+next
+d (n - 1) = a (n - 1) (n - 1)
+e n = 0.0
+
+lambda = 0.0
+
+for m = n; m >= 1; [--]m
+	for k = 1; k < kmax; [++]k
+		# 収束判定
+		if abs (e (m - 1)) < 0.0000001; break; endif
+		# QR分解
+		di = d 0 - lambda
+		ei = e 1
+		for j = 1; j < m; [++]j
+			r = sqrt (di * di + e j * e j)
+			c j = cost = di / r
+			s j = sint = e j / r
+			p j = r
+			dip = d j - lambda
+			q j =     cost  * ei + sint * dip
+			di  = ([-]sint) * ei + cost * dip
+			ei  =     cost  * e (j + 1)
+		next
+		p m = di
+		# 逆順乗算
+		pi = p 1
+		for j = 1; j < m; [++]j
+			e j = s j * p (j + 1)
+			d (j - 1) = c j * pi + s j * q j + lambda
+			pi = c j * p (j + 1)
+		next
+		d (m - 1) = pi + lambda
+		lambda = d (m - 1)
+	next
+next
+
+return n

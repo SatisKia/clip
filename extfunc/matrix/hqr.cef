@@ -1,0 +1,150 @@
+#上Hesenberg行列のすべての固有値を求める
+#@r = !- @@a @@e
+:params a[] &e[]
+
+for @i = 0; @i < row a; @i++
+	e @i = 0.0
+next
+
+if row a != col a
+	return FALSE
+endif
+
+func SIGN a b
+	return b >= 0.0 ? (abs a) ([-]abs a)
+endfunc
+
+:var n
+n = row a
+:array wr wi
+
+:base 1
+:var nn m l k j its ii mmin
+:var z y x w v u t s r q p anorm
+
+anorm=abs(a 1 1) # 行列のノルムの計算。これは単一の小さな下副対角要素を捜すために用いる
+for ii=2;ii<=n;ii++
+	for j=(ii-1);j<=n;j++
+		anorm += abs(a ii j)
+	next
+next
+nn=n
+t=0.0 # 例外的なシフトによってだけ変化する
+while nn >= 1 # 次の固有値を捜し始める
+	its=0
+	do
+		for l=nn;l>=2;l-- # 繰返しの開始：単一の小さな下副対角要素を捜す
+			s=abs(a(l-1)(l-1))+abs(a l l)
+			if s == 0.0; s=anorm; endif
+			if (abs(a l(l-1)) + s) == s; break; endif
+		next
+		x=a nn nn
+		if l == nn # 1個の根が求められた
+			wr nn=x+t
+			wi(nn--)=0.0
+		else
+			y=a(nn-1)(nn-1)
+			w=a nn(nn-1)*a(nn-1)nn
+			if l == (nn-1) # 2個の根が求められた
+				p=0.5*(y-x)
+				q=p*p+w
+				z=sqrt(abs q)
+				x += t
+				if q >= 0.0 # 実数根の対
+					z=p+SIGN z p
+					wr(nn-1)=wr nn=x+z
+					if z; wr nn=x-w/z; endif
+					wi(nn-1)=wi nn=0.0
+				else # 複素数根の対
+					wr(nn-1)=wr nn=x+p
+					wi(nn-1)= [-](wi nn=z)
+				endif
+				nn -= 2
+			else # 根が求められなかった。反復を続ける
+				if its == 30; return FALSE; endif
+				if its == 10 || its == 20 # 例外的なシフトを求める
+					t += x
+					for ii=1;ii<=nn;ii++; a ii ii -= x; next
+					s=abs(a nn(nn-1))+abs(a(nn-1)(nn-2))
+					y=x=0.75*s
+					w = \-0.4375*s*s
+				endif
+				[++]its
+				for m=(nn-2);m>=l;m-- # シフトを求め、隣り合う2個の小さな下副対角要素を捜す
+					z=a m m
+					r=x-z
+					s=y-z
+					p=(r*s-w)/a(m+1)m+a m(m+1)
+					q=a(m+1)(m+1)-z-r-s
+					r=a(m+2)(m+1)
+					s=abs p+abs q+abs r # オーバーフローまたはアンダーフローを避けるためにスケールする
+					p /= s
+					q /= s
+					r /= s
+					if m == l; break; endif
+					u=abs(a m(m-1))*(abs q+abs r)
+					v=abs p*(abs(a(m-1)(m-1))+abs z+abs(a(m+1)(m+1)))
+					if (u+v) == v; break; endif
+				next
+				for ii=m+2;ii<=nn;ii++
+					a ii(ii-2)=0.0
+					if ii != (m+2); a ii(ii-3)=0.0; endif
+				next
+				for k=m;k<=nn-1;k++ # 1行からnn行までおよびm列からnn列までの2重QRステップ
+					if k != m
+						p=a k(k-1) # Householderベクトルの組み立てを開始
+						q=a(k+1)(k-1)
+						r=0.0
+						if k != (nn-1); r=a(k+2)(k-1); endif
+						if (x=abs p+abs q+abs r) != 0.0
+							p /= x # オーバーフローまたはアンダーフローを避けるためにスケールする
+							q /= x
+							r /= x
+						endif
+					endif
+					if (s=SIGN(sqrt(p*p+q*q+r*r))p) != 0.0
+						if k == m
+							if l != m
+								a k(k-1) = [-]a k(k-1)
+							endif
+						else
+							a k(k-1) = [-]s*x
+						endif
+						p += s
+						x=p/s
+						y=q/s
+						z=r/s
+						q /= p
+						r /= p
+						for j=k;j<=nn;j++ # 行の修正
+							p=a k j+q*a(k+1)j
+							if k != (nn-1)
+								p += r*a(k+2)j
+								a(k+2)j -= p*z
+							endif
+							a(k+1)j -= p*y
+							a k j -= p*x
+						next
+						mmin = nn<k+3 ? nn (k+3) # 列の修正
+						for ii=l;ii<=mmin;ii++
+							p=x*a ii k+y*a ii(k+1)
+							if k != (nn-1)
+								p += z*a ii(k+2)
+								a ii(k+2) -= p*r
+							endif
+							a ii(k+1) -= p*q
+							a ii k -= p
+						next
+					endif
+				next
+			endif
+		endif
+	until l < nn-1
+endwhile
+
+:complex
+for @i = 1; @i <= n; @i++
+	e @i = ((wr @i) (wi @i))
+next
+
+return TRUE

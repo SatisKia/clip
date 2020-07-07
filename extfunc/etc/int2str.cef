@@ -1,0 +1,39 @@
+#整数の基数radixでの表記を文字列で得る
+#\!- <val> <radix> <str> [<keta>]
+:params val radix &str[] keta
+:int
+!strcpy @@a "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
+if radix < 2 || radix > (!strlen @@a)
+	return FALSE
+endif
+
+# 符号をチェックして、負の値の場合は正の値に変換する
+@m = (val < 0)
+if @m
+	val = [-]val
+endif
+
+# 基数の変換メイン
+for @i = 0; val > 0; @i++
+	@@t @i = @@a (val % radix)
+	val /= radix
+next
+if @! >= 4
+	for ; @i < keta; @i++
+		@@t @i = '0
+	next
+endif
+
+# 符号を元に戻す
+if @m
+	@@t @i = ['-]
+	@i++
+endif
+
+# 文字列の反転
+for @j = 0; @j < @i; @j++
+	str @j = @@t (@i - 1 - @j)
+next
+str @j = 0 # 文字列終端
+
+return TRUE

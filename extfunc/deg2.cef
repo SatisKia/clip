@@ -1,0 +1,9 @@
+#!/usr/local/bin/clip
+#ラジアンを度に変換します
+func todeg
+	:deg
+	:angle 0
+	return @0
+endfunc
+:rad
+todeg @0

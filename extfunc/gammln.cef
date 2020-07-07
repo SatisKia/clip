@@ -1,0 +1,24 @@
+#ln Γ(x)を返す（x＞0）
+#\!- <x>
+:label xx @0
+
+if xx<=0&&xx==int xx; :warn["ゼロで除算しました]; return INFINITY
+elif isinf xx; return INFINITY
+endif
+
+:var x y tmp ser
+:array cof
+cof 0=76.18009172947146
+cof 1=¥-86.50532032941677
+cof 2=24.01409824083091
+cof 3=¥-1.231739572450155
+cof 4=0.1208650973866179e-2
+cof 5=¥-0.5395239384953e-5
+:var j
+
+y=x=xx
+tmp=x+5.5
+tmp -= (x+0.5)*log tmp
+ser=1.000000000190015
+for j=0;j<=5;j++; ser += cof j/[++]y; next
+return [-]tmp+log(2.5066282746310005*ser/x)

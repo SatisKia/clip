@@ -1,0 +1,11 @@
+#文字列dstに文字列srcを追加する
+#\!- <dst> <src>
+:params &dst[] src[]
+:var dst_len src_len
+dst_len = !strlen dst
+src_len = !strlen src
+for @i = dst_len, @j = 0; @j < src_len; @i++, @j++
+	dst @i = src @j
+next
+dst @i = 0
+return @i

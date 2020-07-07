@@ -1,0 +1,17 @@
+#!NAMESPACE mp
+#\!- <rop> <op>
+:include !mp:mpf
+
+:params &rop[] op[]
+:ans FALSE
+
+mpf_param op
+
+$SET @p,mpf_get_prec op
+@n = int (@p / MP_DIGIT)
+if @n > 0
+	@p -= @n * MP_DIGIT
+	mpf_div op @n
+endif
+mpf_coef @@k @p
+!div rop op @@k

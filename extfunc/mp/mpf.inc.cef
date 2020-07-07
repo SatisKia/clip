@@ -1,0 +1,93 @@
+#!NAMESPACE mp
+:include !mp:define
+
+func mpf_param &a[]
+	:ans FALSE
+	if a 0 != 0 && abs a 0 < MP_LEN_COEF
+		!fstr2num a a
+	endif
+endfunc
+
+func mpf_get_prec a[]
+	abs a 0 & MP_PREC_MASK
+endfunc
+
+func mpf_set_prec &a[] prec
+	:ans FALSE
+	@l = int abs (a 0 / MP_LEN_COEF)
+	if @l == 0
+		# ゼロ値
+		$ADD_A a 0,MP_LEN_COEF,prec
+		$SET_Z a 1
+	else
+		a 0 = (@l * MP_LEN_COEF + prec) * (a 0 < 0 ? \-1 1)
+	endif
+endfunc
+
+#
+# 配列の要素の挿入だけで行える分の乗算を行う
+#
+func mpf_mul &a[] prec
+	@n = int (prec / MP_DIGIT)
+	if @n > 0
+		@l = int abs (a 0 / MP_LEN_COEF)
+		:arraycopy a 1 a (@n + 1) @l
+		:arrayfill 0 a 1 @n
+		@p = abs a 0 & MP_PREC_MASK
+		a 0 = ((@l + @n) * MP_LEN_COEF + @p) * (a 0 < 0 ? \-1 1)
+	endif
+	return prec - @n * MP_DIGIT
+endfunc
+
+#
+# 配列の要素の削除だけで行える分の除算を行う
+#
+func mpf_div &a[] len
+	:ans FALSE
+	@l = int abs (a 0 / MP_LEN_COEF)
+	:arraycopy a (len + 1) a 1 (@l - len)
+	$SUB @l,len
+	@p = abs a 0 & MP_PREC_MASK
+	if @l == 0
+		# ゼロ値
+		$ADD_A a 0,MP_LEN_COEF,@p
+		$SET_Z a 1
+	else
+		a 0 = (@l * MP_LEN_COEF + @p) * (a 0 < 0 ? \-1 1)
+	endif
+endfunc
+
+#
+# 10のprec乗の値の多倍長数データを生成する
+#
+func mpf_coef &k[] prec
+	:ans FALSE
+	:uint
+	@n = prec / MP_DIGIT + 1
+	k @n = pow 10 (prec % MP_DIGIT)
+	:arrayfill 0 k 1 (@n - 1)
+	:float
+	$MUL_A k 0,@n,MP_LEN_COEF
+endfunc
+
+#
+# 小数点以下の桁数を揃える
+#
+func mpf_match_prec &a[] &b[]
+	$SET @a,mpf_get_prec a
+	$SET @b,mpf_get_prec b
+	$SET @p,@a
+	if @a < @b
+		if (@t = mpf_mul a (@b - @a)) > 0
+			mpf_coef @@k @t; !mul a a @@k
+		endif
+		mpf_set_prec a @b
+		$SET @p,@b
+	elif @b < @a
+		if (@t = mpf_mul b (@a - @b)) > 0
+			mpf_coef @@k @t; !mul b b @@k
+		endif
+		mpf_set_prec b @a
+	endif
+	return @p
+endfunc

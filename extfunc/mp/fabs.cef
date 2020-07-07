@@ -1,0 +1,13 @@
+#!NAMESPACE mp
+#\!- <rop> [<op>]
+:include !mp:mpf
+
+:params &rop[] op[]
+:ans FALSE
+
+if @! == 1 # パラメータが1つの場合
+	!abs rop
+else
+	mpf_param op
+	!abs rop op
+endif

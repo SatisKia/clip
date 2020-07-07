@@ -1,0 +1,15 @@
+#文字列の比較
+#\!- <str1> <str2>
+:params str1[] str2[]
+@l = !strlen str1
+@r = @l - (!strlen str2)
+if @r != 0
+	return @r
+endif
+for @i = 0; @i < @l; @i++
+	@r = str1 @i - str2 @i
+	if @r != 0
+		break
+	endif
+next
+return @r

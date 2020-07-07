@@ -1,0 +1,34 @@
+#!/usr/local/bin/clip
+#第1種ベッセル関数 Bessel function
+#\!- <n> <x>
+:params n x
+
+n = int n									# nは整数
+
+:define EPS 1e\-10							# 許容相対誤差
+
+:define x_2 (x / 2)
+
+if x < 0
+	if n & 1; return [-]!j n [-]x
+	else;     return    !j n [-]x
+	endif
+endif
+if n < 0
+	if n & 1; return [-]!j [-]n x
+	else;     return    !j [-]n x
+	endif
+endif
+if x == 0; return n == 0; endif
+@a = @s = 0; @b = 1
+@k = int n; if @k < x; @k = int x; endif
+do; @k++; until (@b *= x_2 / @k) > EPS
+if @k & 1; @k++; endif						# 奇数なら偶数にする
+while @k > 0
+	@s += @b
+	@a = 2 * @k * @b / x - @a; @k--			# a=J(k)(x),kは奇数
+	if n == @k; @r = @a; endif
+	@b = 2 * @k * @a / x - @b; @k--			# b=J(k)(x),kは偶数
+	if n == @k; @r = @b; endif
+endwhile
+return @r / (2 * @s + @b)

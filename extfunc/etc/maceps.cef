@@ -1,0 +1,29 @@
+#!/usr/local/bin/clip
+#機械エプシロン machine epsilon
+:ans 0
+:efloat \16
+:param 0 1
+
+if @! == 0
+	:print ["e                     ]
+	:print "\t
+	:print ["1 + e                 ]
+	:print "\t
+	:print ["(1 + e) - 1           ]
+	:println
+	:print ["----------------------]
+	:print "\t
+	:print ["----------------------]
+	:print "\t
+	:print ["----------------------]
+	:println
+endif
+
+@e = 1; @w = 1 + @e
+while @w > 1
+	if @! == 0
+		:println @e "\t @w "\t (@w - 1)
+	endif
+	@0 = @e
+	@e /= 2; @w = 1 + @e
+endwhile

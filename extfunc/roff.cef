@@ -1,0 +1,10 @@
+#!/usr/local/bin/clip
+#四捨五入 rounding off
+#\!- <val> <prec>
+:complex
+@p = pow 10 @1
+@r = @p * real @0 + ((real @0 < 0) ? \-0.5 0.5)
+@i = @p * imag @0 + ((imag @0 < 0) ? \-0.5 0.5)
+@r = int (@r / @p) + int (@r % @p) / @p
+@i = int (@i / @p) + int (@i % @p) / @p
+@r @i

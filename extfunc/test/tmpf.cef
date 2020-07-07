@@ -1,0 +1,61 @@
+func print a[] b
+	:ans FALSE
+	:float 14
+	!mp:fnum2str @@s a; :println @@s
+	:println b
+endfunc
+
+:ans FALSE
+:float 14
+
+@a=@0; @b=@1
+:sprint @@0 @0; !mp:fstr2num @@a @@0
+:sprint @@1 @1; !mp:fstr2num @@b @@1
+
+:println @a [" + ] @b
+!mp:fadd @@c @@a @@b
+print @@c (@a+@b)
+
+:println @b [" + ] @a
+!mp:fadd @@d @@b @@a
+print @@d (@b+@a)
+
+:println @a [" - ] @b
+!mp:fsub @@e @@a @@b
+print @@e (@a-@b)
+
+:println @b [" - ] @a
+!mp:fsub @@f @@b @@a
+print @@f (@b-@a)
+
+:println @a [" * ] @b
+!mp:fmul @@g @@a @@b 14
+print @@g (@a*@b)
+
+:println @b [" * ] @a
+!mp:fmul @@h @@b @@a 14
+print @@h (@b*@a)
+
+:println @a [" / ] @b
+!mp:fdiv @@i @@a @@b 14
+print @@i (@a/@b)
+
+:println @b [" / ] @a
+!mp:fdiv @@j @@b @@a 14
+print @@j (@b/@a)
+
+:println ["|] @a ["|]
+!mp:fabs @@k @@a
+print @@k (abs @a)
+
+:println ["|] @b ["|]
+!mp:fabs @@l @@b
+print @@l (abs @b)
+
+:println ["-(] @a [")]
+!mp:fneg @@m @@a
+print @@m ([-]@a)
+
+:println ["-(] @b [")]
+!mp:fneg @@n @@b
+print @@n ([-]@b)

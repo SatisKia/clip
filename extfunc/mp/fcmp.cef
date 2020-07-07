@@ -1,0 +1,13 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数同士の大小比較
+#\!- <a> <b>
+#aがbよりも大きい場合は正の値、小さい場合は負の値、等しい場合はゼロの値
+:include !mp:mpf
+
+:params a[] b[]
+
+mpf_param a
+mpf_param b
+
+mpf_match_prec a b
+!cmp a b

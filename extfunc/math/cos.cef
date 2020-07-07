@@ -1,0 +1,5 @@
+#\!- <val>
+:ptype
+:rad
+:angle 0
+return !sin (!pi / 2 - !abs @0)

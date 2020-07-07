@@ -1,0 +1,47 @@
+#!NAMESPACE mp
+:include !mp:mp
+:include !mp:mpf
+
+:ans FALSE
+
+$SET @p,mpf_get_prec @@0
+if @1
+	$SET @l,mp_get_len @@0
+	:print ["len ] @l
+	if @p > 0
+		:print [", prec ] @p
+	endif
+	:print [", ]
+	if @@0 0 < 0; :print ["minus]
+	else;         :print ["plus]
+	endif
+	:println
+
+	:print ["data:]
+	:uint
+	$SET @i,1
+	if @i <= @l
+		$LOOPSTART # @i
+		if @i % 10 == 1
+			:println
+		else
+			:print [" ]
+		endif
+		$POW_A		@k,10,(MP_DIGIT - 1)
+		$SET_Z		@j
+		$LOOPSTART	# @j
+		:print ((@@0 @i / @k) % 10)
+		$DIV		@k,10
+		$LOOPEND_I	@j,MP_DIGIT
+		$LOOPENDE_I	@i,@l
+	endif
+	:println
+	:float
+
+	:println ["value:]
+endif
+
+if @p == 0; !num2str  @@s @@0
+else;       !fnum2str @@s @@0
+endif
+:println @@s

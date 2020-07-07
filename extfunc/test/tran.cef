@@ -1,0 +1,50 @@
+:ans 0
+
+:println ["ran0]
+@a=123 # 任意の整数値
+for @i=0;@i<10;@i++
+	:print [" ] (!ran0 @a
+next
+:println
+
+:println ["ran1]
+@a=\-123 # 負の値
+for @i=0;@i<10;@i++
+	:print [" ] (!ran1 @a @b @@a
+next
+:println
+
+:println ["ran2]
+@a=\-123 # 負の値
+for @i=0;@i<10;@i++
+	:print [" ] (!ran2 @a @b @c @@a
+next
+:println
+
+:println ["ran3]
+@a=\-123 # 負の値
+for @i=0;@i<10;@i++
+	:print [" ] (!ran3 @a @b @c @d @@a
+next
+:println
+
+:println ["ranqd]
+@a=123 # 任意の整数値
+for @i=0;@i<10;@i++
+	:print [" ] (!ranqd @a
+next
+:println
+
+:println ["irbit1]
+@a=12345
+for @i=0;@i<50;@i++
+	:print [" ] (!irbit1 @a
+next
+:println
+
+:println ["irbit2]
+@a=12345
+for @i=0;@i<50;@i++
+	:print [" ] (!irbit2 @a
+next
+:println

@@ -1,0 +1,7 @@
+#ln(n!)を返す logarithm of factorial function
+#\!- <n>
+:label n @0
+
+if n < 0; return ¥-1; endif
+if n <= 1; return 0.0; endif
+return !gammln(n+1.0)

@@ -1,0 +1,17 @@
+:include !tplot
+
+:ans FALSE
+:gworld 256 256
+
+window 0 \-0.1 15 1.1 1 0.1
+:rectangular
+
+plot ["!gammp 0.5 x] 1 160 @y
+plot ["!gammp 1 x]   2 160 @y
+plot ["!gammp 3 x]   3 160 @y
+plot ["!gammp 10 x]  4 160 @y
+
+plot ["!gammq 0.5 x] 254 160 @y
+plot ["!gammq 1 x]   253 160 @y
+plot ["!gammq 3 x]   252 160 @y
+plot ["!gammq 10 x]  251 160 @y

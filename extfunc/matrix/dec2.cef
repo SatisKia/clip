@@ -1,0 +1,25 @@
+#LU分解：ガウス法
+#@@b = !- @@a
+:label a @@0
+
+if row a != col a
+	:error "LU分解できません
+	return @@Z
+endif
+
+:var n
+n = row a
+:var l j k p q
+for k = 0; k < n - 1; [++]k
+	p = a k k
+	for j = k + 1; j < n; [++]j
+		a k j /= p
+	next
+	for l = k + 1; l < n; [++]l
+		q = a l k
+		for j = k + 1; j < n; [++]j
+			a l j -= q * a k j
+		next
+	next
+next
+return a

@@ -1,0 +1,25 @@
+#\!- <idum>
+:label idum @0
+:param 0 TRUE
+
+# Park and Millerの「最低基準」乱数生成法。0.0から1.0までの一様乱数を返す。
+# idumを任意の整数値（MASK以外）に設定・再設定すれば乱数列が初期化される。
+# 同じ系列の乱数を使っている間はidumを変えてはならない。
+
+:define IA 16807
+:define IM 2147483647
+:define AM (1.0/IM)
+:define IQ 127773 # IM/IA
+:define IR 2836 # IM%IA
+:define MASK 123459876
+
+:var k
+:var ans
+
+idum ^= MASK # idumが0などの単純なビットパターンでも困らないようにMASKと排他的論理和をとる
+k=int(idum/IQ
+idum=int(IA*(idum-k*IQ)-IR*k # idum=(IA*idum)%IMをSchrageの方法で桁あふれなく計算する
+if idum < 0; idum += IM; endif
+ans=AM*idum # idumを浮動小数点に変換
+idum ^= MASK # 戻る前にマスクを外す
+return ans

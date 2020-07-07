@@ -1,0 +1,72 @@
+#浮動小数点数を文字列に変換する
+#\!- <val> <str> <prec>
+:params val &str[] prec
+:ans FALSE
+:float
+!strcpy @@a "0123456789
+
+# 符号をチェックして、負の値の場合は正の値に変換する
+@i = 0
+if val < 0.0
+	str @i = ['-]
+	@i++
+	val = [-]val
+endif
+
+# 整数部の桁数分を引く
+@I = int val
+if @I == 0
+	prec--
+else
+	:int
+	for @j = 0; @I > 0; @j++
+		@I /= 10
+	next
+	:float
+	prec -= @j
+endif
+
+# 四捨五入
+if prec <= 0
+	val += 0.5
+else
+	@t = 5.0
+	for @j = 0; @j <= prec; @j++
+		@t /= 10.0
+	next
+	val += @t
+endif
+
+# 変換メイン
+@I = int val
+val -= @I
+if @I == 0
+	str @i = '0
+	@i++
+else
+	:int
+	for @j = 0; @I > 0; @j++
+		@@t @j = @@a (@I % 10)
+		@I /= 10
+	next
+	:float
+
+	# 文字列の反転
+	for @k = 0; @k < @j; @k++
+		str @i = @@t (@j - 1 - @k)
+		@i++
+	next
+endif
+if prec > 0
+	str @i = '.
+	@i++
+	do
+		val *= 10
+		@I = int val
+		val -= @I
+		str @i = @@a @I
+		@i++
+		prec--
+	until prec > 0
+endif
+str @i = 0 # 文字列終端

@@ -1,0 +1,13 @@
+#!/usr/local/bin/clip
+#経過時間を出力 elapsed time
+#\!- <start> <var_now>
+:ans 0
+:param 1 1
+:gfloat
+
+@1 = time
+@0 = @1 - @0
+@h = int (int @0 / (60 * 60)); @0 -= @h * 60 * 60
+@m = int (int @0 /  60      ); @0 -= @m * 60
+
+:println @h ["h ] @m ["m ] @0 ["s]

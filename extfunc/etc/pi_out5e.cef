@@ -1,0 +1,29 @@
+#Gauss\-Legendre(ガウス=ルジャンドル)のアルゴリズム
+#\!- <prec> <start> <count> [<print_flag>]
+#startの値は更新されるので、次回呼出しに渡せる。
+:params prec &start count print_flag
+:parent @@:0
+:parent @@a
+:parent @@b
+:parent @@t
+:parent @@p
+@N = int (log prec / log 2) # 繰り返し回数。log2(prec)程度の反復でよい。
+:global MP_PREC
+$SET MP_PREC,prec
+if start == 0
+	!mp ["a=1]
+	!mp ["b=1/sqrt(2)]
+	!mp ["t=1/4]
+	!mp ["p=1]
+endif
+$SET_Z		@i
+$LOOPSTART	# @i
+!mp ["n=(a+b)/2]
+!mp ["b=sqrt(a*b)]
+!mp ["t=t-p*sqr(a-n)]
+!mp ["p=2*p]
+!mp ["a=n]
+$INC		start
+$LOOPEND_I	@i,count
+!mp ["sqr(a+b)/(4*t)] prec print_flag
+return (start < @N)

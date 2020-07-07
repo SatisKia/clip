@@ -1,0 +1,39 @@
+#!NAMESPACE mp
+#文字列を多倍長整数に変換する
+#\!- <n> <s>
+:include !mp:mp
+
+:params &n[] s[]
+:ans FALSE
+
+:long
+
+$CND @m,(s 0 == ['-]),1,0
+$SET @s,@m
+while s @s >= '0 && s @s <= '9
+	$INC @s
+endwhile
+if @s == 0
+	$SET_Z n 0
+	return
+endif
+
+#SET_Z		@x
+$SET		@k,1
+#SET_Z		@n
+$DEC		@s
+$LOOPSTART	# @s
+@x += (s @s - '0) * @k
+$MUL @k,10
+if @k == MP_ELEMENT
+	$SET   n ([++]@n),@x
+	$SET_Z @x
+	$SET   @k,1
+endif
+$LOOPENDE_D @s,@m
+if @k > 1
+	$SET n ([++]@n),@x
+endif
+
+:float
+mp_set_len n ((@m == 1) ? ([-]@n) @n)

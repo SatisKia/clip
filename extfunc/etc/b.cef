@@ -1,0 +1,40 @@
+#!/usr/local/bin/clip
+#ベルヌーイ数 Bernoulli numbers
+#\!- <num> [<array>]
+:param 1 1
+
+:ans 0
+:gfloat \16
+
+@p = @! < 2 ? 1 0
+
+@q = 1
+@@t 1 = 1
+
+@f = 1
+@@1 0 = 1
+@@1 1 = \-1 / 2
+
+for @n = 2; @n <= @0; @n++
+	for @i = 1; @i < @n; @i++; @@t (@i - 1) = @i * @@t @i; next
+	@@t (@n - 1) = 0
+	for @i = @n; @i >= 2; @i--; @@t @i += @@t (@i - 2); next
+	if @n % 2 == 0
+		@q *= 4
+		@a = @n * @@t 0; @b = @q * (@q - 1)
+
+		if [++]@f % 2; @a = [-]@a; endif
+		@@1 @n = @a / @b
+
+		if @p
+			@d = !gcd @a @b
+			@a /= @d; @b /= @d
+			:print ["B(] @n [") = ]
+			if @b == 1
+				:println @a
+			else
+				:println @a [" / ] @b
+			endif
+		endif
+	endif
+next

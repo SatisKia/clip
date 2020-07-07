@@ -1,0 +1,41 @@
+#Gauss\-Legendre(ガウス=ルジャンドル)のアルゴリズム
+#\!- <prec> <start> <count> [<print_flag>]
+#startの値は更新されるので、次回呼出しに渡せる。
+:params prec &start count print_flag
+:parent @@:0
+:parent @@a a
+:parent @@b b
+:parent @@t t
+:parent @@p p
+@N = int (log prec / log 2) # 繰り返し回数。log2(prec)程度の反復でよい。
+:namespace mp
+if start == 0
+	!fset   a "1
+	!fsqrt2 @@T "2 prec 4
+	!fdiv   b "1 @@T prec
+	!fdiv   t "1 "4 prec
+	!fset   p "1
+endif
+$SET_Z		@i
+$LOOPSTART	# @i
+!fadd		@@T a b
+!fmul		@@n @@T "0.5 prec
+!fmul		@@T a b prec
+!fsqrt2		b @@T prec 4
+!fsub		@@T a @@n
+!fmul		@@T @@T @@T prec
+!fmul		@@T p @@T prec
+!fsub		t t @@T
+!fmul		p "2 p prec
+!fset		a @@n
+$INC		start
+$LOOPEND_I	@i,count
+!fadd		@@T a b
+!fmul		@@T @@T @@T prec
+!fmul		@@U "4 t prec
+!fdiv2		@@:0 @@T @@U prec
+if print_flag
+	!fnum2str @@S @@:0
+	:println @@S
+endif
+return (start < @N)

@@ -1,0 +1,16 @@
+#!NAMESPACE vector
+#\!- <a> [<row_flag>]
+if @1
+	# 行ベクトル
+	:mat 1 (@@0 0) @@m
+	for @i = 0; @i < @@0 0; @i++
+		@@m 0 @i = @@0 (1 + @i)
+	next
+else
+	# 列ベクトル
+	:mat (@@0 0) 1 @@m
+	for @i = 0; @i < @@0 0; @i++
+		@@m @i 0 = @@0 (1 + @i)
+	next
+endif
+return @@m

@@ -1,0 +1,49 @@
+#ハウスホルダー変換（実対称行列を3重対角行列に変換）
+#@@b = !- @@a
+:label a @@0
+
+if row a != col a
+	return @@Z
+endif
+
+:base 1
+:var n
+n = row a
+:var l j k
+:var alk alpha c s ss uu w
+:array p q u
+for k = 1; k <= n - 2; [++]k
+	ss = 0.0
+	for l = k + 1; l <= n; [++]l
+		u l = alk = a l k
+		ss += alk * alk
+	next
+	s = sqrt ss
+	if a (k + 1) k > 0.0; s = [-]s; endif
+	u k = 0.0
+	u (k + 1) -= s
+	uu = 2.0 * (ss + abs (a (k + 1) k * s))
+	c = 2.0 / uu
+	for l = k; l <= n; [++]l
+		w = 0.0
+		for j = k; j <= n; [++]j
+			w += a l j * u j
+		next
+		p l = c * w
+	next
+	w = 0.0
+	for l = k; l <= n; [++]l
+		w += u l * p l
+	next
+	alpha = w / uu
+	for l = k; l <= n; [++]l
+		q l = p l - alpha * u l
+	next
+	for l = k; l <= n; [++]l
+		for j = l; j <= n; [++]j
+			a l j -= u l * q j + q l * u j
+			a j l = a l j
+		next
+	next
+next
+return a

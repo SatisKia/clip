@@ -1,0 +1,10 @@
+#文字列str中の文字を小文字に変換する
+#\!- <str>
+:params &str[]
+:ans FALSE
+@l = !strlen str
+for @i = 0; @i < @l; @i++
+	if str @i >= 'A && str @i <= 'Z
+		str @i = 'a + (str @i - 'A)
+	endif
+next

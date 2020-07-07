@@ -1,0 +1,21 @@
+#!NAMESPACE mp
+#平方根 square root
+#\!- <ret> <val> <prec>
+#valが負の値の場合TRUEを返す。
+:param 0 TRUE
+!fset @@x @@1
+if !fcmp @@x "0 > 0
+	:global MP_PREC
+	$SET MP_PREC,@2
+	if !fcmp @@x "1 > 0; !:mp ["s=x]
+	else;                !:mp ["s=1]
+	endif
+	do
+		!:mp ["l=s]
+		!:mp ["s=(x/s+s)/2]
+	until !fcmp @@s @@l < 0
+	!fset @@0 @@l
+	return FALSE
+endif
+!fset @@0 "0
+return (!fcmp @@x "0 != 0)

@@ -1,0 +1,14 @@
+#\!- <val>
+:ptype
+:rad
+:angle 0
+
+:include !trig
+
+#
+# tan x
+#
+@t = ur_tan @0 @k
+if @k % 2 == 0; return @t; endif
+if @t != 0; return \-1 / @t; endif
+return HUGE_VAL

@@ -1,0 +1,8 @@
+#「拙速」法 quick and dirty
+#\!- <idum>
+:label idum @0
+:param 0 TRUE
+
+:ulong
+idum = 1664525*idum + 1013904223
+return idum

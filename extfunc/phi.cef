@@ -1,0 +1,26 @@
+#!/usr/local/bin/clip
+#オイラーの関数 Euler's (totient) function
+#\!- <val>
+
+if @0 < 1
+	:warn "外部関数\-の引数が0または負の値になりました
+	return
+endif
+
+:uint \10
+
+@t = @0
+if @0 % 2 == 0
+	@t /= 2
+	do; @0 /= 2; until @0 % 2 == 0
+endif
+@d = 3
+while @0 / @d >= @d
+	if @0 % @d == 0
+		@t = @t / @d * (@d - 1)
+		do; @0 /= @d; until @0 % @d == 0
+	endif
+	@d += 2
+endwhile
+if @0 > 1; @t = @t / @0 * (@0 - 1); endif
+@t

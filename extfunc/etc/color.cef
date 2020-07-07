@@ -1,0 +1,62 @@
+#色見本を表示 display color sample
+#\!- <rgb_val> [<rgb_val> ...]
+
+func hex
+	:param 1 TRUE
+	:int 16
+	if @0 < 10
+		:sprint @@1 ["0] @0
+	else
+		:sprint @@1 @0
+	endif
+endfunc
+
+:ans 0
+
+:gcolor 0 BG_COLOR
+:gcolor 1 \x0000FF
+for @i = 0; @i < @!; @i++
+	:gcolor (2 + @i) @:('0 + @i)
+next
+
+@x = @y = 0
+if @! <= 2
+	@w = @h = 230
+elif @! <= 5
+	@w = @h = int (460 / @!)
+else
+	@w = 76; @h = 92
+endif
+if @! < 5
+	:gworld 320 (@h * @!)
+	:gfill 0 0 320 (@h * @!) 0
+else
+	:gworld 320 (@h * 5)
+	:gfill 0 0 320 (@h * 5) 0
+endif
+for @i = 0; @i < @!; @i++
+	if @i == 5
+		@x = 160
+		@y = 0
+	endif
+
+	:gfill @x @y @w @h (2 + @i)
+
+	@R = (@:('0 + @i) & \xFF0000) >> 16
+	@G = (@:('0 + @i) & \x00FF00) >> 8
+	@B =  @:('0 + @i) & \x0000FF
+	hex @R @@R
+	hex @G @@G
+	hex @B @@B
+
+	:sprint @@C ["\#] @@R @@G @@B
+	:gtextl @@C (@x + @w + 4) (@y + 16) 1
+	:sprint @@C ["R:] @R
+	:gtextl @@C (@x + @w + 4) (@y + 32) 1
+	:sprint @@C ["G:] @G
+	:gtextl @@C (@x + @w + 4) (@y + 48) 1
+	:sprint @@C ["B:] @B
+	:gtextl @@C (@x + @w + 4) (@y + 64) 1
+
+	@y += @h
+next

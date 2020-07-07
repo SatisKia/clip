@@ -1,0 +1,16 @@
+#\!- <num>
+:ans FALSE
+func g q r t j n &k
+	:var u y
+	u=3*(3*j+1)*(3*j+2)
+	y=int((q*(27*j-12)+5*r)/(5*t))
+	if isinf y;return;endif
+	:print y
+	k++;if k>=n;return;endif
+	if k==1
+		:print [".]
+	endif
+	g(10*q*j*(2*j-1))(10*u*(q*(5*j-2)+r-y*t))(t*u)(j+1)n k
+endfunc
+g 1 180 60 2 @0
+:println

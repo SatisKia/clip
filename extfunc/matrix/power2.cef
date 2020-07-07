@@ -1,0 +1,61 @@
+#対称行列の固有値計算：累乗法
+#@n = !- @@a @m @@e @@v
+:params a[] m &lambda[] &x[]
+
+for @i = 0; @i < row a; @i++
+	lambda @i = 0.0
+next
+x = @@Z
+
+if row a != col a
+	return 0
+endif
+
+:define EPS 1e-6 # 許容誤差
+:define MAX_ITER 200 # 最大の繰返し数
+
+:var n
+n = row a
+if m > n; m = n; endif
+
+:var l j k kk iter
+:var s s1 t u d d1 e
+:array y
+
+kk = m # 実際に求められた固有値・固有ベクトルの個数
+for k = 0; k < m; k++ # k番目の固有値・固有ベクトルを求める
+	# 大きさ1の初期値ベクトル
+	t = 1 / sqrt n
+	for l = 0; l < n; l++
+		x k l = t
+	next
+	d = s = 0; iter = 0
+	do
+		d1 = d; s1 = s; s = e = 0
+		for l = 0; l < n; l++
+			t = 0
+			for j = 0; j < n; j++
+				t += a l j * x k j
+			next
+			y l = t; s += t * t # y＝Ax
+		next
+		s = sqrt s; if s1 < 0; s = [-]s; endif # s＝±|y|
+		for l = 0; l < n; l++
+			t = y l / s; u = x k l - t
+			e += u * u
+			x k l = t # 固有ベクトル
+		next
+		if e > 2; s = [-]s; endif # ベクトルが反転したなら固有値は負
+		d = sqrt e; d1 -= d
+	until [++]iter < MAX_ITER && e > EPS * d1
+	if iter >= MAX_ITER && kk == m; kk = k; endif
+	lambda k = s # 固有値
+	if k < m - 1
+		for l = 0; l < n; l++
+			for j = 0; j < n; j++
+				a l j -= s * x k l * x k j
+			next
+		next
+	endif
+next
+return kk # 収束した固有ベクトルの数

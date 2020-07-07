@@ -1,0 +1,69 @@
+#!/usr/local/bin/clip
+#自己平方フラクタル
+#\!-
+
+:ans 0
+:gcomplex
+
+:label KS @0	# 複素平面の縦横の分割数
+:label CS @1	# カラーの始点
+:label CE @2	# カラーの終点
+:label KL @3	# 最大繰り返し回数
+:label RS @4	# 複素平面の実部の始点
+:label RE @5	# 複素平面の実部の終点
+:label IS @6	# 複素平面の虚部の始点
+:label IE @7	# 複素平面の虚部の終点
+:label A  @8	# 複素定数
+
+if @! < 9
+	KS = 100
+	CS = 1
+	CE = 255
+	KL = 30
+	RS = \-1.5
+	RE = 1.5
+	IS = \-1.5
+	IE = 1.5
+	A  = (1.0 0.0)
+
+	:scan ["複素平面の縦横の分割数? ] KS
+	:scan ["カラーの始点? ]           CS
+	:scan ["カラーの終点? ]           CE
+	:scan ["最大繰り返し回数? ]       KL
+	:scan ["実部の始点? ]             RS
+	:scan ["実部の終点? ]             RE
+	:scan ["虚部の始点? ]             IS
+	:scan ["虚部の終点? ]             IE
+	:scan ["複素定数? ]               A
+endif
+
+@r = (RE - RS) / KS		# 実部の増分
+@i = (IE - IS) / KS		# 虚部の増分
+
+@c = CE - CS + 1		# 使用する色数
+
+:clear
+:println ["最大繰り返し回数: ] KL
+:println ["実部: ] RS ["～] RE
+:println ["虚部: ] IS ["～] IE
+:println ["複素定数: ] A
+@t = time
+
+:gworld KS KS
+:gclear 0
+
+for @x = 0; @x < KS; @x++			# 実軸方向ループ
+	for @y = 0; @y < KS; @y++		# 虚軸方向ループ
+		@z = ((@x * @r + RS) (@y * @i + IS))
+		for @k = 0; @k <= KL; @k++	# 収束計算のループ
+			@Z = @z * @z + A
+			if norm @Z > 4.0
+				:gput @x (KS - 1 - @y) (@k % @c + CS)
+				break
+			endif
+			@z = @Z		# 初期値をリセット
+		next
+	next
+next
+
+!time @t

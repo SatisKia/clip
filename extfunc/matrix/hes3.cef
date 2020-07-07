@@ -1,0 +1,53 @@
+#ヘッセンベルグ行列への変換
+#@@b = !- @@a
+:label a @@0
+
+if row a != col a
+	return @@Z
+endif
+
+:var n
+n = row a
+:var l j k
+:var alk alpha s ss uu
+:array u v w vv ww
+for k = 0; k <= n - 3; [++]k
+	ss = 0.0
+	for l = k + 1; l < n; [++]l
+		u l = alk = a l k
+		ss += alk * alk
+	next
+	s = sqrt ss
+	if u (k + 1) > 0.0; s = [-]s; endif
+	u k = 0.0
+	u (k + 1) -= s
+	uu = sqrt (2.0 * (ss - a (k + 1) k * s))
+	for l = k; l < n; [++]l
+		u l /= uu
+	next
+	for l = k; l < n; [++]l
+		s  = 0.0
+		ss = 0.0
+		for j = k; j < n; [++]j
+			s  += a l j * u j
+			ss += a j l * u j
+		next
+		v  l = s
+		vv l = ss
+	next
+	s = 0.0
+	for l = k; l < n; [++]l
+		s += u l * v l
+	next
+	alpha = s
+	for l = k; l < n; [++]l
+		w  l = (v  l - alpha * u l) * 2.0
+		ww l = (vv l - alpha * u l) * 2.0
+	next
+	for l = k; l < n; [++]l
+		for j = k; j < n; [++]j
+			a l j -= u l * ww j + w l * u j
+		next
+	next
+next
+return a

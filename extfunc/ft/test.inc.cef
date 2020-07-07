@@ -1,0 +1,54 @@
+#!NAMESPACE ft
+
+func ft_cut &data[] n h v
+	:complex
+	if h > int (n / 2); h = int (n / 2); endif
+	if h == 0
+		for @i = 0; @i < n; @i++
+			@R = real data @i
+			@I = imag data @i
+			if abs @R <= v; @R = 0; endif
+			if abs @I <= v; @I = 0; endif
+			data @i = (@R @I)
+		next
+	else
+		for @i = h; @i < n; @i++
+			data @i = 0
+		next
+		return TRUE
+	endif
+	return FALSE
+endfunc
+
+func ft_double &data[] n
+	:ans FALSE
+	:complex
+	for @i = 0; @i < n; @i++
+		data @i *= 2
+	next
+endfunc
+
+func ft_draw data[] n color
+	:ans FALSE
+	:complex
+	:wmove 0 (data 0)
+	for @i = 1; @i < n; @i++
+		:wline @i (data @i) color
+	next
+endfunc
+func ft_draw_real data[] n color
+	:ans FALSE
+	:complex
+	:wmove 0 (real data 0)
+	for @i = 1; @i < n; @i++
+		:wline @i (real data @i) color
+	next
+endfunc
+func ft_draw_imag data[] n color
+	:ans FALSE
+	:complex
+	:wmove 0 (imag data 0)
+	for @i = 1; @i < n; @i++
+		:wline @i (imag data @i) color
+	next
+endfunc

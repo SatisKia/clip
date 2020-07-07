@@ -1,0 +1,21 @@
+#!/usr/local/bin/clip
+#素数 primes
+#\!- <max> [<array>]
+:param 1 1
+:ans 0
+:int
+
+if @0 < 2; return; endif
+@p = @! < 2 ? 1 0
+
+@@1 0 = 2; if @p; :print ["2 ]; endif
+@x = 1; @k = 1
+while 1
+	@x += 2; @j = 0
+	while @j < @k && @x % @@1 @j != 0; @j++; endwhile
+	if @j == @k
+		if @x > @0; break; endif
+		@@1 (@k++) = @x; if @p; :print @x [" ]; endif
+	endif
+endwhile
+if @p; :println; endif

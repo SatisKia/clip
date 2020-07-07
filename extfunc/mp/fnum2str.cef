@@ -1,0 +1,54 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数を文字列に変換する
+#\!- <s> <n>
+:include !mp:mpf
+
+:params &s[] n[]
+:ans FALSE
+
+$SET    @p,mpf_get_prec n
+!num2str @@s n
+$STRLEN @l,@@s
+
+$SUB_A @i,@l,1
+if @i > 0
+	$LOOPSTART	# @i
+	$BREAK		(@@s @i != '0)
+	$LOOPEND_D	@i,0
+endif
+@p -= @l - (@i + 1)
+if @p < 0
+	$SUB   @i,@p
+	$SET_Z @p
+endif
+$ADD_A @l,@i,1
+
+#SET_Z @j
+#SET_Z @k
+if @@s 0 == ['-]
+	$SET s (@j++),@@s (@k++)
+	$DEC @l
+endif
+if @l <= @p
+	$SET s (@j++),'0
+endif
+if @l < @p
+	$SET   s (@j++),'.
+	$SUB_A @n,@p,@l
+	$SET_Z @i
+	if @i < @n
+		$LOOPSTART	# @i
+		$SET		s (@j++),'0
+		$LOOPEND_I	@i,@n
+	endif
+endif
+$SET_Z @i
+if @i < @l
+	$LOOPSTART	# @i
+	if @i == @l - @p
+		$SET s (@j++),'.
+	endif
+	$SET		s (@j++),@@s (@k++)
+	$LOOPEND_I	@i,@l
+endif
+$SET_Z s @j

@@ -1,0 +1,16 @@
+#正のxおよびn≧2について、変形Bessel関数Kn(x)の値を返す
+#\!- <n> <x>
+:params n x
+
+:var j
+:var bk bkm bkp tox
+
+tox=2.0/x
+bkm=!bessk0(x) # どんなxについても…
+bk=!bessk1(x)
+for j=1;j<n;j++ # …上向きの漸化式を使う
+	bkp=bkm+j*tox*bk
+	bkm=bk
+	bk=bkp
+next
+return bk

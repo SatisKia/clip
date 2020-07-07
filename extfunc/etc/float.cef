@@ -1,0 +1,24 @@
+#!/usr/local/bin/clip
+#浮動小数点型の基数、精度、機械エプシロン
+#\!- <var_base> <var_prec> <var_eps>
+:params 1 1 1
+:ans 0
+:gfloat \16
+
+@x = @y = 2
+while (@x + 1) - @x == 1; @x *= 2; endwhile
+while (@x + @y) == @x; @y *= 2; endwhile
+@0 = int ((@x + @y) - @x)
+
+@1 = 1; @x = @0
+while (@x + 1) - @x == 1; @1++; @x *= @0; endwhile
+
+@2 = 1
+while (1 + @2 / 2) > 1; @2 /= 2; endwhile
+@2 = (1 + @2) - 1
+
+if @! < 3
+	:println ["基数          : ] @0
+	:println ["精度          : ] @1
+	:println ["機械エプシロン: ] @2
+endif

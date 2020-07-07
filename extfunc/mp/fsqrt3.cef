@@ -1,0 +1,96 @@
+#!NAMESPACE mp
+#\!- <ret> <val> <prec>
+#valが負の値の場合TRUEを返す。
+:include !mp:mp
+:include !mp:mpf
+
+func mp_sqrt &x[] a[]
+	mp_set_len x 0
+	$RETURN_A (a 0 < 0),TRUE
+	$RETURN_A (mp_get_len a == 0),FALSE
+	if mp_get_len a == 1
+		mp_set_len x 1
+		x 1 = int sqrt (a 1)
+		return FALSE
+	endif
+	if mp_get_len a == 2
+		mp_set_len x 1
+		x 1 = int sqrt (a 2 * MP_ELEMENT + a 1)
+		return FALSE
+	endif
+
+	$INT   @l,(mp_get_len a + 1 / 2) # (mp_get_len a + 1) / 2
+	$SET_Z @@b (@l + 1) # 配列の確保
+	:arrayfill 0 x 1 @l
+	:arrayfill 0 @@b 1 @l
+	mp_set_len x @l
+	mp_set_len @@b @l
+
+	# 最上位桁の平方数を求める
+	@i = (@l - 1) * 2 + 1
+	$SET @a,a @i
+	if mp_get_len a % 2 == 0
+		@a += a (@i + 1) * MP_ELEMENT
+	endif
+	x @l = int sqrt @a
+
+	# 初回のaとbが求まる
+	$ADD_A @@b @l,x @l,x @l
+	if @@b @l >= MP_ELEMENT
+		$SUB @@b @l,MP_ELEMENT
+		$SET @@b (@l + 1),1
+		mp_set_len @@b (@l + 1)
+	endif
+	!mul @@w x x
+	!sub a a @@w
+	$DEC @l
+
+	$LOOPSTART
+
+	!div @@q a @@b @@r # 仮値Q
+	if @l > 1
+		:arrayfill 0 @@q 1 (@l - 1)
+	endif
+	if mp_get_len @@q > @l
+		$SUB_A @@q @l,MP_ELEMENT,1
+		mp_set_len @@q @l
+	endif
+	$LOOPSTART
+	!add		@@r @@b @@q
+	!mul		@@w @@r @@q
+	$BREAK		(!cmp @@w a <= 0)
+	$DEC		@@q @l # 仮値Qを下げる
+	$LOOPCONT
+	$SET		x @l,@@q @l
+	$BREAK		(@l == 1)
+
+	# 次のaとbが求まる
+	!add @@b @@r @@q
+	!sub a a @@w
+	$DEC @l
+
+	$LOOPCONT
+
+	return FALSE
+endfunc
+
+:params &ret[] a[] prec
+
+mpf_param a
+
+@t = prec * 2 - mpf_get_prec a
+if @t > 0
+	if (@u = mpf_mul a @t) > 0
+		mpf_coef @@k @u; !mul a a @@k
+	endif
+elif @t < 0
+	$ABS @u,@t
+	if (@n = int (@u / MP_DIGIT)) > 0
+		@u -= @n * MP_DIGIT
+		mpf_div a @n
+	endif
+	mpf_coef @@k @u; !div a a @@k
+endif
+$SET @r,mp_sqrt ret a
+mpf_set_prec ret prec
+return @r

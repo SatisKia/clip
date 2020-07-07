@@ -1,0 +1,32 @@
+#分数の浮動小数点表記を文字列で得る
+#\!- <val> <str> <prec>
+:params val &str[] prec
+:ans FALSE
+
+:fract
+@u = num val
+@d = denom val
+:float
+
+:define MAX_SAFE_INTEGER (pow 2 53 - 1)
+:define MAX_SAFE_INTEGER_10 (int (MAX_SAFE_INTEGER / 10))
+
+str 0 = 0
+for @i = 0; @i <= prec; @i++
+	@n = int (@u / @d)
+	:sprint @@t @n
+	!strcat str @@t
+	@u -= @d * @n
+	if @u <= MAX_SAFE_INTEGER_10
+		@u *= 10
+	else
+		@d = int (@d * (MAX_SAFE_INTEGER / @u) / 10)
+		@u = MAX_SAFE_INTEGER
+	endif
+	if @u == 0
+		break
+	endif
+	if @i == 0 && @i < prec
+		!strcat str [".]
+	endif
+next

@@ -1,0 +1,12 @@
+#!NAMESPACE mp
+#\!- <rop> <op>
+:include !mp:define
+
+:params &rop[] op[]
+:ans FALSE
+
+if op 0 != 0 && abs op 0 < MP_LEN_COEF
+	!fstr2num rop op
+else
+	!set rop op
+endif

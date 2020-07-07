@@ -1,0 +1,31 @@
+#!NAMESPACE image
+#グレースケール
+#\!- <array>
+:ans FALSE
+:gclear (gcolor \xFFFFFF)
+
+# グレースケールのパレットを構築する
+$SET_Z		@i
+$LOOPSTART	# @i
+:gcolor @i ((@i << 16) + (@i << 8) + @i)
+$LOOPEND_I	@i,256
+
+:ulong
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@C,@@0 @y @x
+$AND_A		@r,@C,\xFF0000
+$SHIFTR_A	@Y,@r,16
+$AND_A		@g,@C,\x00FF00
+$SHIFTR		@g,8
+$ADD		@Y,@g
+$AND_A		@b,@C,\x0000FF
+$ADD		@Y,@b
+$DIV		@Y,3
+:gput @x @y (gcolor ((@Y << 16) + (@Y << 8) + @Y))
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

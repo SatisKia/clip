@@ -1,0 +1,45 @@
+func text
+	:ans FALSE
+	:sprint @@s @0
+	:gtext @@s (gx @1 + 2) (gy @2 - 1) @3
+endfunc
+func window l b r t x y
+	:ans FALSE
+	:window l b r t
+	:gclear \xFF
+	for @i = [-]y, @j = 1; @i >= b; @i -= y, @j++
+		:wline l @i r @i \x08
+		if (@j % 2) == 0
+			text @i l @i \xF7
+		endif
+	next
+	for @i = y, @j = 1; @i <= t; @i += y, @j++
+		:wline l @i r @i \x08
+		if (@j % 2) == 0
+			text @i l @i \xF7
+		endif
+	next
+	for @i = [-]x, @j = 1; @i >= l; @i -= x, @j++
+		:wline @i b @i t \x08
+		if (@j % 2) == 0
+			text @i @i b \xF7
+		endif
+	next
+	for @i = x, @j = 1; @i <= r; @i += x, @j++
+		:wline @i b @i t \x08
+		if (@j % 2) == 0
+			text @i @i b \xF7
+		endif
+	next
+	:wline l 0 r 0 \xF7
+	:wline 0 b 0 t \xF7
+	:gtext ["0] (gx 0 + 2) (gy 0 - 1) \xF7
+endfunc
+
+func plot expr[] color x &y
+	:ans FALSE
+	:plot expr color
+	if y == 0; y = 10; endif
+	:gtext expr x y
+	y += 10
+endfunc

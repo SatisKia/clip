@@ -1,0 +1,9 @@
+#!/usr/local/bin/clip
+#円周率(相加相乗平均) pi
+:float \16
+@a = 1; @b = 1 / sqrt 2.0; @s = 1; @t = 4
+for @i = 0; @i < 3; @i++
+	@l = @a; @a = (@a + @b) / 2; @b = sqrt (@l * @b)
+	@s -= @t * (@a - @l) * (@a - @l); @t *= 2
+next
+(@a + @b) * (@a + @b) / @s

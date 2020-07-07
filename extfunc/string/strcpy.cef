@@ -1,0 +1,9 @@
+#文字列dstに文字列srcをコピーする
+#\!- <dst> <src>
+:params &dst[] src[]
+@l = !strlen src
+for @i = 0; @i < @l; @i++
+	dst @i = src @i
+next
+dst @i = 0
+return @i

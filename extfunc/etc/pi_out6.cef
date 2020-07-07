@@ -1,0 +1,29 @@
+#円周率(Machin の公式) pi
+#\!- <prec>
+:ans FALSE
+:namespace mp
+!fset		@@p "0
+$SET		@k,1
+!fdiv		@@t "16.0 "5.0 @0
+!fdiv		@@v "1 ["-25.0] @0
+$LOOPSTART
+:sprint @@k @k
+!fdiv2		@@u @@t @@k @0
+$BREAK		(!fcmp @@u "0 == 0)
+!fadd		@@p @@p @@u
+!fmul		@@t @@t @@v @0
+$ADD		@k,2
+$LOOPCONT
+$SET		@k,1
+!fdiv		@@t "4.0 "239.0 @0
+!fdiv		@@v "1 ["-57121.0] @0
+$LOOPSTART
+:sprint @@k @k
+!fdiv2		@@u @@t @@k @0
+$BREAK		(!fcmp @@u "0 == 0)
+!fsub		@@p @@p @@u
+!fmul		@@t @@t @@v @0
+$ADD		@k,2
+$LOOPCONT
+!fnum2str @@s @@p
+:println @@s

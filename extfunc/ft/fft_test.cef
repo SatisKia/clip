@@ -1,0 +1,36 @@
+:include !ft:test
+:include !tplot
+
+:ans FALSE
+:complex
+
+@T = 2 * 3.14159265358979323846 / @0
+for @i = 0; @i < @0; @i++
+	# f(t)=2*sin(4t)+3*cos(2t)
+	# tの範囲は0～2π
+	@@s @i = 2 * sin (4 * (@T * @i)) + 3 * cos (2 * (@T * @i))
+	@@t @i = @@s @i + (rand / RAND_MAX - 0.5) * 5.0
+next
+
+!ft:fft @@u @@t @0 FALSE
+@d = ft_cut @@u @0 @1 @2
+
+!ft:fft @@v @@u @0 TRUE
+if @d; ft_double @@v @0; endif
+
+:gworld 256 256
+if [!]@3
+	# 縦軸-5～5、横軸0～2π
+	window 0 \-5 (@0 - 1) 5 (@0 / 8) 1
+	# 元データ
+	ft_draw @@t @0 3
+	ft_draw @@s @0 253
+	# IFFTデータ
+	ft_draw @@v @0 252
+else
+	# 縦軸-175～175、横軸0～2π
+	window 0 \-175 (@0 - 1) 175 (@0 / 8) 25
+	# FFTデータ
+	ft_draw_real @@u @0 252
+	ft_draw_imag @@u @0 253
+endif

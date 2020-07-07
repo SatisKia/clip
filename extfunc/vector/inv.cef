@@ -1,0 +1,15 @@
+#!NAMESPACE vector
+#逆ベクトル
+#\!- <ret> [<a>]
+:params &ret[] a[]
+:ans FALSE
+if @! == 1 # パラメータが1つの場合
+	for @i = 1; @i <= ret 0; @i++
+		ret @i = [-]ret @i
+	next
+else
+	ret 0 = a 0
+	for @i = 1; @i <= ret 0; @i++
+		ret @i = [-]a @i
+	next
+endif

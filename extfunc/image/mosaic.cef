@@ -1,0 +1,56 @@
+#!NAMESPACE image
+#モザイク処理
+#\!- <array> <left> <top> <right> <bottom> <width> <height>
+
+func add
+	:ulong
+#	$SET_Z		@r
+#	$SET_Z		@g
+#	$SET_Z		@b
+#	$SET_Z		@i
+	$LOOPSTART	# @i
+	$AND_A		@R,@@0 @i,\xFF0000
+	$SHIFTR		@R,16
+	$ADD		@r,@R
+	$AND_A		@G,@@0 @i,\x00FF00
+	$SHIFTR		@G,8
+	$ADD		@g,@G
+	$AND_A		@B,@@0 @i,\x0000FF
+	$ADD		@b,@B
+	$LOOPEND_I	@i,@1
+	return ((@r / @1) << 16) + ((@g / @1) << 8) + (@b / @1)
+endfunc
+
+:ans FALSE
+:param 0 TRUE
+
+$SET		@W,(@3 - @1 + 1)
+$SET		@H,(@4 - @2 + 1)
+#SET_Z		@y
+$LOOPSTART	# @y
+$CND		@h,(@y + @6 > @H),(@H - @y),@6
+$SET_Z		@x
+$LOOPSTART	# @x
+$CND		@w,(@x + @5 > @W),(@W - @x),@5
+
+# 平均値を算出
+$SET_Z		@k
+$SET_Z		@j
+$LOOPSTART	# @j
+$SET_Z		@i
+$LOOPSTART	# @i
+$SET		@@c (@k++),@@0 (@2 + @y + @j) (@1 + @x + @i)
+$LOOPEND_I	@i,@w
+$LOOPEND_I	@j,@h
+$SET		@c,add @@c @k
+
+$SET_Z		@j
+$LOOPSTART	# @j
+$SET_Z		@i
+$LOOPSTART	# @i
+$SET		@@0 (@2 + @y + @j) (@1 + @x + @i),@c
+$LOOPEND_I	@i,@w
+$LOOPEND_I	@j,@h
+
+$LOOPEND	@x,@W,@5
+$LOOPEND	@y,@H,@6

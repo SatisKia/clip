@@ -1,0 +1,11 @@
+#!NAMESPACE vector
+#ベクトルのスカラー倍
+#\!- <ret> <a> <b>
+#aはベクトル・データ
+#bはスカラー
+:params &ret[] a[] b
+:ans FALSE
+ret 0 = a 0
+for @i = 1; @i <= ret 0; @i++
+	ret @i = a @i * b
+next

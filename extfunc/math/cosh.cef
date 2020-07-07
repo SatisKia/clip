@@ -1,0 +1,7 @@
+#!/usr/local/bin/clip
+#\!- <val>
+:ptype
+:rad
+:angle 0
+@t=!exp @0
+(@t+1/@t)/2

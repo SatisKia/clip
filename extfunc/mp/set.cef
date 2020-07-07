@@ -1,0 +1,13 @@
+#!NAMESPACE mp
+#\!- <rop> <op>
+:include !mp:mp
+
+:params &rop[] op[]
+:ans FALSE
+
+if op 0 != 0 && abs op 0 < MP_LEN_COEF
+	!str2num rop op
+	return
+endif
+
+:arraycopy op 0 rop 0 (mp_get_len op + 1)

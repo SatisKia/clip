@@ -1,0 +1,26 @@
+#!NAMESPACE mp
+#平方根 square root
+#\!- <ret> <val> <prec>
+#valが負の値の場合TRUEを返す。
+:include !mp:mpf
+
+:param 0 TRUE
+
+mpf_param @@1
+
+if !fcmp @@1 "0 > 0
+	if !fcmp @@1 "1 > 0; !fset @@s @@1
+	else;                !fset @@s "1
+	endif
+	do
+		!fset @@l @@s
+		!fdiv2 @@t @@1 @@s @2
+		!fadd @@t @@t @@s
+		!fmul @@t @@t "0.5 @2
+		!fset @@s @@t
+	until !fcmp @@s @@l < 0
+	!fset @@0 @@l
+	return FALSE
+endif
+!fset @@0 "0
+return (!fcmp @@1 "0 != 0)

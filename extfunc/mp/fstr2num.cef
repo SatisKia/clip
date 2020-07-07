@@ -1,0 +1,62 @@
+#!NAMESPACE mp
+#文字列を多倍長浮動小数点数に変換する
+#\!- <n> <s>
+:include !mp:mpf
+
+:params &n[] s[]
+:ans FALSE
+
+$STRLEN @l,s
+#SET_Z  @j
+#SET_Z  @p
+#SET_Z  @i
+if @i < @l
+	$LOOPSTART # @i
+	if (s @i == 'e) || (s @i == 'E)
+		if @p != 0
+			@p -= @l - @i
+		endif
+		$INC @i
+		if s @i == '\-
+			$SET_T @m
+			$INC   @i
+		else
+			$SET_F @m
+			if s @i == '\+
+				$INC @i
+			endif
+		endif
+		break
+	elif s @i == '.
+		@p = @l - (@i + 1)
+	else
+		$SET @@s (@j++),s @i
+	endif
+	$LOOPEND_I @i,@l
+endif
+$SET_Z @@s @j # 文字列終端を書き込む
+!str2num n @@s
+
+#SET_Z @e
+if @i < @l
+	$LOOPSTART # @i
+	@e = @e * 10 + (s @i - '0)
+	$LOOPEND_I @i,@l
+endif
+if @m
+	$ADD   @p,@e
+	$SET_Z @e
+elif @p >= @e
+	$SUB   @p,@e
+	$SET_Z @e
+else
+	$SUB   @e,@p
+	$SET_Z @p
+endif
+
+mpf_set_prec n @p
+
+if @e > 0
+	mpf_coef @@k @e
+	!fmul n n @@k @p
+endif

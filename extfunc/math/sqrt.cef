@@ -1,0 +1,13 @@
+#!/usr/local/bin/clip
+#平方根 square root
+#\!- <val>
+:ptype
+if @0>0
+	if @0>1;@s=@0;else;@s=1;endif
+	do
+		@l=@s;@s=(@0/@s+@s)/2
+	until @s<@l
+	return @l
+endif
+if @0!=0;:warn ["外部関数-の引数が負の値になりました];endif
+return 0

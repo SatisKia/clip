@@ -1,0 +1,19 @@
+func print a[]
+	:ans FALSE
+	!mp:fnum2str @@s a
+	:println @@s
+endfunc
+
+:ans FALSE
+
+:println ["pi_out5]
+@s=time
+@a=0; while !pi_out5 100 @a 1 FALSE; endwhile
+!time @s
+print @@:0
+
+:println ["pi_out5e]
+@s=time
+@a=0; while !pi_out5e 100 @a 1 FALSE; endwhile
+!time @s
+print @@:0

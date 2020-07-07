@@ -1,0 +1,10 @@
+#!/usr/local/bin/clip
+#ガンマ関数 gamma function
+#\!- <val>
+if @0 == 0; :warn ["ゼロで除算しました]; return INFINITY
+elif isinf @0; return @0 == [-]INFINITY ? NAN INFINITY
+elif @0 < 0
+	if @0 == int @0; return NAN; endif
+	return !pi / (sin (!pi * @0) * exp (!loggamma (1 - @0)))
+endif
+exp (!loggamma @0)

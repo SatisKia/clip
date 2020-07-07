@@ -1,0 +1,39 @@
+func print a[]
+	:ans FALSE
+	!mp:fnum2str @@s a
+	:println @@s
+endfunc
+
+:ans FALSE
+:float 14
+
+:sprint @@0 @0
+!mp:fstr2num @@a @@0
+
+:println ["fsqrt]
+@s=time
+!mp:fsqrt @@b @@a 100
+!time @s
+print @@b
+
+:println ["fsqrte]
+@s=time
+!mp:fsqrte @@b @@a 100
+!time @s
+print @@b
+
+for @i=2;@i<=6;@i++
+	:println ["fsqrt2 order:] @i
+	@s=time
+	!mp:fsqrt2 @@b @@a 100 @i
+	!time @s
+	print @@b
+next
+
+for @i=2;@i<=6;@i++
+	:println ["fsqrt2e order:] @i
+	@s=time
+	!mp:fsqrt2e @@b @@a 100 @i
+	!time @s
+	print @@b
+next

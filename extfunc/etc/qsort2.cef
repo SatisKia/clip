@@ -1,0 +1,48 @@
+#!/usr/local/bin/clip
+#クイックソート(非再帰版) quicksort
+#\!- <num> <array>
+:param 1 1
+:ans 0
+if @0 < 2; return; endif
+
+:define THRESHOLD 10
+
+:var left right
+:array leftstack rightstack
+
+left = 0; right = @0 - 1; @p = 0
+for;;
+	if right - left <= THRESHOLD
+		if @p == 0; break; endif
+		@p--
+		left  = leftstack  @p
+		right = rightstack @p
+	endif
+	@x = @@1 ((left + right) / 2)
+	@i = left; @j = right
+	for;;
+		while @@1 @i < @x;     @i++; endwhile
+		while @x     < @@1 @j; @j--; endwhile
+		if @i >= @j; break; endif
+		@t = @@1 @i; @@1 @i = @@1 @j; @@1 @j = @t
+		@i++; @j--
+	next
+	if @i - left > right - @j
+		if @i - left > THRESHOLD
+			leftstack  @p = left
+			rightstack @p = @i - 1
+			@p++
+		endif
+		left = @j + 1
+	else
+		if right - @j > THRESHOLD
+			leftstack  @p = @j + 1
+			rightstack @p = right
+			@p++
+		endif
+		right = @i - 1
+	endif
+next
+
+# 適当なところまでクイックソートし、あとは挿入ソートに切り替える
+!inssort @0 @@1

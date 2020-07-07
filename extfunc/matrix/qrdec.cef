@@ -1,0 +1,46 @@
+#QR分解（グラム・シュミットの直交化法）
+#@r = !- @@a @@q @@r
+:params a[] &q[] &r[]
+
+q = @@Z
+r = @@Z
+
+if row a != col a
+	return FALSE
+endif
+
+:var n
+n = row a
+:mat n n q
+:mat n n r
+
+:var l j k
+:array b
+:var s
+
+for k = 0; k < n; [++]k
+	for l = 0; l < n; [++]l
+		b l = a l k
+	next
+	for j = 0; j < k; [++]j
+		s = 0.0
+		for l = 0; l < n; [++]l
+			s += q l j * b l
+		next
+		for l = 0; l < n; [++]l
+			b l -= s * q l j
+		next
+		r j k = s
+	next
+	s = 0.0
+	for l = 0; l < n; [++]l
+		s += b l * b l
+	next
+	s = sqrt s
+	for l = 0; l < n; [++]l
+		q l k = b l / s
+	next
+	r k k = s
+next
+
+return TRUE

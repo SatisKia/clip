@@ -1,0 +1,12 @@
+:include !tplot
+
+:ans FALSE
+:gworld 256 256
+
+window 0 0 4 6 1 1
+:rectangular
+
+plot ["!bessi0 x]  1 10 @y
+plot ["!bessi1 x]  2 10 @y
+plot ["!bessi 2 x] 3 10 @y
+plot ["!bessi 3 x] 4 10 @y

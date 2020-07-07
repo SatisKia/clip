@@ -1,0 +1,19 @@
+#n!の値を返す factorial function
+#\!- <n> <array>
+:params n &a[]
+
+:var ntop
+a 0=1.0
+for ntop=0;;ntop++
+	if a ntop==0.0; break; endif
+next
+ntop--
+:var j
+
+if n < 0; return ¥-1; endif
+if n > 32; return exp !gammln(n+1.0); endif
+while ntop<n
+	j=ntop++
+	a ntop=a j*ntop
+endwhile
+return a n

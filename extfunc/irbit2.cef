@@ -1,0 +1,22 @@
+#\!- <iseed>
+:label iseed @0
+:param 0 TRUE
+
+:define IB1 1 # 2の累乗
+:define IB2 2
+:define IB5 16
+:define IB18 131072
+:define MASK (IB1+IB2+IB5)
+
+# ランダムなビットを整数として返す。iseedの下位18ビットを使う。
+# iseedは次回の呼出しのために書き換える。
+
+:ulong \2
+
+if iseed & IB18 # マスクしたビットをすべて書き換え、シフトし、右端ビットに1を入れる
+	iseed=((iseed ^ MASK) << 1) | IB1
+	return 1
+else # シフトし、右端ビットに0を入れる
+	iseed <<= 1
+	return 0
+endif

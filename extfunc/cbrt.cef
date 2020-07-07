@@ -1,0 +1,5 @@
+#!/usr/local/bin/clip
+#立方根 cube root
+#\!- <val>
+:ptype
+exp (1 / 3 * log @0)

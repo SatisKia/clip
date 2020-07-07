@@ -1,0 +1,90 @@
+func approx_d
+	return (@1 ? (abs ((@1 - @0) / @1)) (abs @0)) < (DBL_EPSILON * 4.0)
+endfunc
+func approx
+	if (@r = row @@0) != row @@1; return FALSE; endif
+	if (@c = col @@0) != col @@1; return FALSE; endif
+	for @i = 0; @i < @r; @i++
+		for @j = 0; @j < @c; @j++
+			if [!]approx_d (@@0 @i @j) (@@1 @i @j); return FALSE; endif
+		next
+	next
+	return TRUE
+endfunc
+
+func print_b
+	:ans FALSE
+	if @0 == TRUE
+		:println ["TRUE]
+	else
+		:println ["FALSE]
+	endif
+endfunc
+func print_m
+	:ans FALSE
+	:ptype
+	:prec 16
+	for @i = 0; @i < row @@0; @i++
+		if @i == 0
+			:print ["{ {]
+		else
+			:print ["  {]
+		endif
+		for @j = 0; @j < col @@0; @j++
+			:print [" ] (@@0 @i @j)
+		next
+		if @i == (row @@0) - 1
+			:println [" } }]
+		else
+			:println [" }]
+		endif
+	next
+endfunc
+func print_a
+	:ans FALSE
+	:ptype
+	:prec 16
+	:print ["{]
+	for @i = 0; @i < @1; @i++
+		:print [" ] (@@0 @i)
+	next
+	:println [" }]
+endfunc
+
+# 指定行を抜き出した行行列を得る
+func row_m
+	for @i = 0; @i < row @@0; @i++
+		@@m 0 @i = @@0 @1 @i
+	next
+	return @@m
+endfunc
+
+# 指定列を抜き出した列行列を得る
+func col_m
+	for @i = 0; @i < col @@0; @i++
+		@@m @i 0 = @@0 @i @1
+	next
+	return @@m
+endfunc
+
+# A・x＝λx（x：固有ベクトル、λ：固有値）を評価する
+func product a[] n e[] v[]
+	:ans FALSE
+	for @i = 0; @i < n; @i++
+		@@a = a    * col_m v @i
+		@@b = e @i * col_m v @i
+		print_m @@a
+		print_m @@b
+		assert approx @@a @@b
+	next
+endfunc
+func product_t a[] n e[] v[]
+	:ans FALSE
+	for @i = 0; @i < n; @i++
+		@@a = a    * trans (row_m v @i)
+		@@b = e @i * trans (row_m v @i)
+		print_m @@a
+		print_m @@b
+		assert approx @@a @@b
+	next
+endfunc

@@ -1,0 +1,154 @@
+#ヤコビ法
+#@r = !- @@a @@e @@v
+:params A[] &lambda[] &V[]
+
+for @i = 0; @i < row A; @i++
+	lambda @i = 0.0
+next
+V = @@Z
+
+if row A != col A
+	return 0
+endif
+
+:include !matrix
+
+:define MAXITR 200 # 繰返し回数の上限
+
+# Aの更新
+func update_A n &A[]
+	:parent @A J_p
+	:parent @B J_q
+	:parent @C J_c
+	:parent @D J_s
+	:parent @E J_t
+	:parent @F J_t2
+	:var l
+	:var alp alq
+	for l = 0; l < n; l++
+		alp = A l J_p
+		alq = A l J_q
+		if l != J_p && l != J_q
+			A l J_p = alp - J_s * (J_t2 * alp + alq)
+			A l J_q = alq + J_s * (alp - J_t2 * alq)
+			A J_p l = A l J_p
+			A J_q l = A l J_q
+		elif l == J_p
+			A l l = alp - J_t * alq
+			A l J_q = 0.0
+		else
+			A l l = alq + J_t * alp
+			A l J_p = 0.0
+		endif
+	next
+endfunc
+
+# Vの更新
+func update_V n &V[]
+	:parent @A J_p
+	:parent @B J_q
+	:parent @C J_c
+	:parent @D J_s
+	:parent @E J_t
+	:parent @F J_t2
+	:var l
+	:var vlp vlq
+	for l = 0; l < n; l++
+		vlp = V l J_p
+		vlq = V l J_q
+		V l J_p = vlp - J_s * (J_t2 * vlp + vlq)
+		V l J_q = vlq + J_s * (vlp - J_t2 * vlq)
+	next
+endfunc
+
+# 次にゼロにする非対角要素の選択（古典的ヤコビ法）
+func select_nondiag n
+	:parent @A J_p
+	:parent @B J_q
+	:parent @C J_c
+	:parent @D J_s
+	:parent @E J_t
+	:parent @F J_t2
+	if J_p == n - 2 # 最終行
+		J_p = 0
+		J_q = 1
+	elif J_q == n - 1 # 最終列
+		J_p++
+		J_q = J_p + 1
+	else
+		J_q++
+	endif
+endfunc
+
+# 回転行列を求める
+func calc_Jmat A[]
+	:parent @A J_p
+	:parent @B J_q
+	:parent @C J_c
+	:parent @D J_s
+	:parent @E J_t
+	:parent @F J_t2
+	if abs A J_p J_q < NEARLY_ZERO
+		J_c = 1.0
+		J_s = 0.0
+		J_t2 = 0.0
+	else
+		:var phi
+		phi = 0.5 * (A J_q J_q - A J_p J_p) / A J_p J_q
+		if abs phi < 1.0e10
+			J_t = 1.0 / (abs phi + sqrt (phi * phi + 1.0))
+		else
+			J_t = 0.5 / abs phi
+		endif
+		J_t = phi < 0.0 ? ([-]J_t) J_t
+		J_c = 1.0 / sqrt (1.0 + J_t * J_t)
+		J_s = J_t * J_c
+		J_t2 = J_s / (1.0 + J_c)
+	endif
+endfunc
+
+# 非対角要素の2乗和
+func nondiag_norm n A[]
+	:var l j
+	:var _norm
+	_norm = 0.0
+	for l = 0; l < n; l++
+		for j = 0; j < n; j++
+			if j == l
+				continue
+			endif
+			_norm += A l j * A l j
+		next
+	next
+	return sqrt _norm
+endfunc
+
+:var n
+n = row A
+
+:var l j iteration ret_code
+iteration = 0
+:var p q
+for l = 0; l < n; l++
+	for j = 0; j < n; j++
+		V l j = 0.0
+	next
+	V l l = 1.0
+next
+while TRUE
+	if nondiag_norm n A < ZERO_TOLERANCE
+		ret_code = 1; break # 正常終了
+	endif
+	if iteration++ >= MAXITR
+		ret_code = 2; break # 繰返し回数の上限
+	endif
+	select_nondiag n
+	calc_Jmat A
+	update_A n A
+	update_V n V
+	cleanup n A; cleanup n V
+endwhile
+for l = 0; l < n; l++
+	lambda l = A l l
+next
+return ret_code

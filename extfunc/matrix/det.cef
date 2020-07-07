@@ -1,0 +1,40 @@
+#行列式
+#@d = !- @@a
+:label ma @@0
+
+if row ma != col ma
+	:error "行列式は定義されません
+	return 0.0
+endif
+
+:base 1
+:complex
+:var nrow
+nrow = row ma
+:var det c d
+:array b
+:var m j k h h1
+k = 2; det = 1.0
+for h = 1; h <= nrow; h++
+	if ma h h == 0.0
+		h1 = h
+		while (ma h1 h == 0.0) && ([++]h1 <= nrow); endwhile
+		if h1 > nrow
+			return 0.0
+		endif
+		for j = 1; j <= nrow; j++
+			b j     = ma h1 j
+			ma h1 j = ma h  j
+			ma h  j = [-](b j)
+		next
+	endif
+	c = ma h h
+	for j = 1; j <= nrow; j++; ma h j /= c; next
+	for m = k; m <= nrow; m++
+		d = ma m h
+		for j = k; j <= nrow; j++; ma m j -= ma h j * d; next
+	next
+	det *= c
+	[++]k
+next
+return (det * ma nrow nrow)

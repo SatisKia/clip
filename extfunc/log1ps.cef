@@ -1,0 +1,7 @@
+#引数に1を加えた値の対数
+#\!- <x>
+:label x @0
+if x <= \-1.0 || abs x > 1e-4
+	return log (1.0 + x)
+endif
+return (\-0.5 * x + 1.0) * x

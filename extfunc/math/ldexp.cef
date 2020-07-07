@@ -1,0 +1,11 @@
+#!/usr/local/bin/clip
+#\!- <x> <exp>
+:float \16
+if @1>=0;@w=2
+else;@w=0.5;@1=[-]@1
+endif
+while @1
+	if @1&1;@0*=@w;endif
+	@w*=@w;@1>>=1
+endwhile
+@0

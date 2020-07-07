@@ -1,0 +1,66 @@
+#さまざまなπ/4の倍数に対するすべての三角関数のテスト
+
+func approx
+	return (@1 ? (abs ((@1 - @0) / @1)) (abs @0)) < (DBL_EPSILON * 4.0)
+endfunc
+
+:ans FALSE
+:assert TRUE
+:gfloat 16
+
+:define piby4   0.78539816339744830962
+:define rthalf  0.70710678118654752440
+:define DBL_MAX 1.7976931348623158e+308
+
+assert approx (acos \-1.0) (4.0 * piby4)
+assert approx (acos [-]rthalf) (3.0 * piby4)
+assert approx (acos 0.0) (2.0 * piby4)
+assert approx (acos rthalf) piby4
+assert approx (acos 1.0) 0.0
+
+assert approx (asin \-1.0) (\-2.0 * piby4)
+assert approx (asin [-]rthalf) ([-]piby4)
+assert approx (asin 0.0) 0.0
+assert approx (asin rthalf) piby4
+assert approx (asin 1.0) (2.0 * piby4)
+
+assert approx (atan [-]DBL_MAX) (\-2.0 * piby4)
+assert approx (atan \-1.0) ([-]piby4)
+assert approx (atan 0.0) 0.0
+assert approx (atan 1.0) piby4
+assert approx (atan DBL_MAX) (2.0 * piby4)
+
+assert approx (atan2 \-1.0 \-1.0) (\-3.0 * piby4)
+assert approx (atan2 \-1.0 0.0) (\-2.0 * piby4)
+assert approx (atan2 \-1.0 1.0) ([-]piby4)
+assert approx (atan2 0.0 1.0) 0.0
+assert approx (atan2 1.0 1.0) piby4
+assert approx (atan2 1.0 0.0) (2.0 * piby4)
+assert approx (atan2 1.0 \-1.0) (3.0 * piby4)
+assert approx (atan2 0.0 \-1.0) (4.0 * piby4) || approx (atan2 0.0 \-1.0) (\-4.0 * piby4)
+
+assert approx (cos (\-3.0 * piby4)) ([-]rthalf)
+assert approx (cos (\-2.0 * piby4)) 0.0
+assert approx (cos [-]piby4) rthalf
+assert approx (cos 0.0) 1.0
+assert approx (cos piby4) rthalf
+assert approx (cos (2.0 * piby4)) 0.0
+assert approx (cos (3.0 * piby4)) ([-]rthalf)
+assert approx (cos (4.0 * piby4)) \-1.0
+
+assert approx (sin (\-3.0 * piby4)) ([-]rthalf)
+assert approx (sin (\-2.0 * piby4)) \-1.0
+assert approx (sin [-]piby4) ([-]rthalf)
+assert approx (sin 0.0) 0.0
+assert approx (sin piby4) rthalf
+assert approx (sin (2.0 * piby4)) 1.0
+assert approx (sin (3.0 * piby4)) rthalf
+assert approx (sin (4.0 * piby4)) 0.0
+
+assert approx (tan (\-3.0 * piby4)) 1.0
+assert approx (tan [-]piby4) \-1.0
+assert approx (tan 0.0) 0.0
+assert approx (tan piby4) 1.0
+assert approx (tan (3.0 * piby4)) \-1.0
+
+:println ["SUCCESS testing function, part 2]

@@ -1,0 +1,49 @@
+#!NAMESPACE image
+#誤差を右と下に拡散させる描画
+#\!- <array>
+
+func add
+	:int
+	$AND_A	@r,@0,\xFF0000
+	$SHIFTR	@r,16
+	$AND_A	@g,@0,\x00FF00
+	$SHIFTR	@g,8
+	$AND_A	@b,@0,\x0000FF
+	$ADDS	@r,@1,0,255
+	$ADDS	@g,@2,0,255
+	$ADDS	@b,@3,0,255
+	return (@r << 16) + (@g << 8) + @b
+endfunc
+
+:ans FALSE
+:gclear (gcolor \xFFFFFF)
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@C,@@0 @y @x	# 元画像のRGB値
+$GCOLOR24	@c,@C			# 描画するRGB値
+:gput @x @y
+$AND_A		@r,@C,\xFF0000
+$SHIFTR		@r,16
+$AND_A		@g,@C,\x00FF00
+$SHIFTR		@g,8
+$AND_A		@b,@C,\x0000FF
+$AND_A		@t,@c,\xFF0000
+$SHIFTR		@t,16
+$SUB		@r,@t
+$AND_A		@t,@c,\x00FF00
+$SHIFTR		@t,8
+$SUB		@g,@t
+$AND_A		@t,@c,\x0000FF
+$SUB		@b,@t
+$DIV		@r,2
+$DIV		@g,2
+$DIV		@b,2
+$SET		@@0 @y (@x + 1),add (@@0 @y (@x + 1)) (@r + 0.5) (@g + 0.5) (@b + 0.5)
+$SET		@@0 (@y + 1) @x,add (@@0 (@y + 1) @x) @r @g @b
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

@@ -1,0 +1,46 @@
+#!NAMESPACE image
+#近い色に合わせ込む描画
+#\!- <array>
+:ans FALSE
+:gclear (gcolor \xFFFFFF)
+
+# パレットの色を取得する
+$SET_Z		@i
+$LOOPSTART	# @i
+:gcolor @i
+$GCOLOR24	@c
+$AND_A		@@R @i,@c,\xFF0000
+$SHIFTR		@@R @i,16
+$AND_A		@@G @i,@c,\x00FF00
+$SHIFTR		@@G @i,8
+$AND_A		@@B @i,@c,\x0000FF
+$LOOPEND_I	@i,256
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@C,@@0 @y @x
+$AND_A		@r,@C,\xFF0000
+$SHIFTR		@r,16
+$AND_A		@g,@C,\x00FF00
+$SHIFTR		@g,8
+$AND_A		@b,@C,\x0000FF
+$SET		@d,766 # 255*3+1
+$SET_Z		@i
+$SET_Z		@j
+$LOOPSTART	# @i
+$SUB_A		@R,@@R @i,@r
+$SUB_A		@G,@@G @i,@g
+$SUB_A		@B,@@B @i,@b
+$SET		@c,(abs @R + abs @G + abs @B)
+if @c < @d
+	$SET @j,@i
+	$SET @d,@c
+endif
+$LOOPEND_I	@i,256
+:gput @x @y @j
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

@@ -1,0 +1,81 @@
+#complexのテスト
+
+func equal
+	:gcomplex 16
+	@r = (@0 == @1)
+	if [!]@r
+		:println @0 [" ] @1
+	endif
+	return @r
+endfunc
+func trunc
+	:gcomplex 16
+	if @2
+		:print @0 [" ] @1
+	endif
+	@r = (int (real @0 * 10000 + ((real @0 < 0) ? \-0.5 0.5))) / 10000
+	@i = (int (imag @0 * 10000 + ((imag @0 < 0) ? \-0.5 0.5))) / 10000
+	@0 = (@r @i)
+	@r = (int (real @1 * 10000 + ((real @1 < 0) ? \-0.5 0.5))) / 10000
+	@i = (int (imag @1 * 10000 + ((imag @1 < 0) ? \-0.5 0.5))) / 10000
+	@1 = (@r @i)
+	if @2
+		:println [" -> ] @0 [" ] @1
+	endif
+	return (@0 == @1)
+endfunc
+func approx
+	:gcomplex 16
+	@r = (real @1 ? (abs ((real @1 - real @0) / real @1)) (abs real @0)) < (DBL_EPSILON * 4.0)
+	@i = (imag @1 ? (abs ((imag @1 - imag @0) / imag @1)) (abs imag @0)) < (DBL_EPSILON * 4.0)
+	if @r && @i
+		:println @0 [" ] @1
+	else
+		return trunc @0 @1 TRUE
+	endif
+	return @r && @i
+endfunc
+
+:ans FALSE
+:assert TRUE
+:gcomplex 16
+
+:deg
+@@z{90\+i 15\+2i 10\+3i}
+@@y{1.0002\+0.0000i 0.2590\+0.0337i 0.1739\+0.0516i}
+for @i = 0; @i < 3; @i++
+	@@x @i = sin  @@z @i; assert approx (@@x @i) (@@y @i)
+	@@w @i = asin @@x @i; assert approx (@@w @i) (@@z @i)
+next
+@@z{180\+i 45\+2i 10\+3i}
+@@y{\-1.0002\+0.0000i 0.7075\-0.0247i 0.9862\-0.0091i}
+for @i = 0; @i < 3; @i++
+	@@x @i = cos  @@z @i; assert approx (@@x @i) (@@y @i)
+	@@w @i = acos @@x @i; assert approx (@@w @i) (@@z @i)
+next
+@@z{180\+i 15\+2i 10\+3i}
+@@y{0.0000\+0.0175i 0.2676\+0.0374i 0.1758\+0.0539i}
+for @i = 0; @i < 3; @i++
+	@@x @i = tan  @@z @i; assert approx (@@x @i) (@@y @i)
+	@@w @i = atan @@x @i; assert approx (@@w @i) (@@z @i)
+next
+
+:rad
+@@x{0.5i 1\+3i \-2.2\+i}
+@@y{0.0000\+0.4812i 0.3076\+1.8642i \-1.1091\+1.5480i}
+for @i = 0; @i < 3; @i++
+	@@z @i = asin @@x @i; assert approx (@@z @i) (@@y @i)
+	@@w @i = sin  @@z @i; assert approx (@@w @i) (@@x @i)
+next
+@@y{1.5708\-0.4812i 1.2632\-1.8642i 2.6799\-1.5480i}
+for @i = 0; @i < 3; @i++
+	@@z @i = acos @@x @i; assert approx (@@z @i) (@@y @i)
+	@@w @i = cos  @@z @i; assert approx (@@w @i) (@@x @i)
+next
+@@y{0.0000\+0.5493i 1.4615\+0.3059i \-1.2019\+0.1506i}
+for @i = 0; @i < 3; @i++
+	@@z @i = atan @@x @i; assert approx (@@z @i) (@@y @i)
+	@@w @i = tan  @@z @i; assert approx (@@w @i) (@@x @i)
+next
+
+:println ["SUCCESS testing complex, part 2]

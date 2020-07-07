@@ -1,0 +1,9 @@
+#!NAMESPACE vector
+#ベクトルの和
+#\!- <ret> <a> <b>
+:params &ret[] a[] b[]
+:ans FALSE
+ret 0 = a 0
+for @i = 1; @i <= ret 0; @i++
+	ret @i = a @i + b @i
+next

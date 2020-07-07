@@ -1,0 +1,12 @@
+#!/usr/local/bin/clip
+#円周率(Machin の公式) pi
+:float \16
+@p = 0; @k = 1; @t = 16.0 / 5.0
+do
+	@l = @p; @p += @t / @k; @t /= \-5.0 * 5.0; @k += 2
+until @p != @l
+@k = 1; @t = 4.0 / 239.0
+do
+	@l = @p; @p -= @t / @k; @t /= \-239.0 * 239.0; @k += 2
+until @p != @l
+@p

@@ -1,0 +1,27 @@
+:ans FALSE
+:complex
+:array x1 x2 x3
+@N = 64
+@T = 2 * 3.14159265358979323846 / @N
+for @i = 0; @i < @N; @i++
+	# f(t)=6*cos(3t)+4*sin(9t)
+	# tの範囲は0～2π
+	x1 @i = x2 @i = 6 * cos (3 * (@T * @i)) + 4 * sin (9 * (@T * @i))
+next
+!ft:fft2 x2 @N FALSE
+for @i = 0; @i < @N; @i++
+	x3 @i = x2 @i
+next
+!ft:fft2 x3 @N TRUE
+:println ["     | 元のデータ    | フーリエ変換  | 逆変換       ]
+:println ["-----+---------------+---------------+--------------]
+for @i = 0; @i < @N; @i++
+	!printf ["%4d] @i
+	:print [" | ]
+	!printf ["%6.3f %6.3f] (real x1 @i) (imag x1 @i)
+	:print [" | ]
+	!printf ["%6.3f %6.3f] (real x2 @i) (imag x2 @i)
+	:print [" | ]
+	!printf ["%6.3f %6.3f] (real x3 @i) (imag x3 @i)
+	:println
+next

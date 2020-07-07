@@ -1,0 +1,57 @@
+#!/usr/local/bin/clip
+#ドラゴンカーブ dragon curve
+#\!- <width> <height> <backcolor> <order>
+
+func draw_rel dx dy backcolor
+	:ans 0
+
+	# 現在色を更新する
+	@C = gcolor + 1
+	if @C == backcolor; @C++; endif
+	if @C > 255
+		@C = (backcolor == 0) ? 1 0
+	endif
+
+	# 角を落として描画する
+	if dx == 0
+		if gget (gcx-1) gcy == backcolor
+			:wline (wcx-(abs dy)/4) (wcy+dy/4) @C
+		else
+			:wline (wcx+(abs dy)/4) (wcy+dy/4) @C
+		endif
+		:wline wcx (wcy+dy/2) @C
+	else
+		if gget gcx (gcy-1) == backcolor
+			:wline (wcx+dx/4) (wcy+(abs dx)/4) @C
+		else
+			:wline (wcx+dx/4) (wcy-(abs dx)/4) @C
+		endif
+		:wline (wcx+dx/2) wcy @C
+	endif
+endfunc
+
+func dragon ii dx dy sign backcolor
+	:ans 0
+	if ii == 0; draw_rel dx dy backcolor
+	else
+		dragon (ii-1) ((dx-sign*dy)/2) ((dy+sign*dx)/2)   1 backcolor
+		dragon (ii-1) ((dx+sign*dy)/2) ((dy-sign*dx)/2) \-1 backcolor
+	endif
+endfunc
+
+:ans 0
+
+if @! < 4
+	@0 = 640; :scan ["スクリーンの幅? ]   @0
+	@1 = 400; :scan ["スクリーンの高さ? ] @1
+	@2 =   0; :scan ["背景色? ]           @2
+	@3 =  10; :scan ["位数? ]             @3
+endif
+
+:gworld @0 @1
+:gclear @2
+:window 0 0 4 3
+
+:wmove 1 1
+:gcolor 0
+dragon @3 2 0 1 @2

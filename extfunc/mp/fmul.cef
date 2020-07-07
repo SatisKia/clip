@@ -1,0 +1,19 @@
+#!NAMESPACE mp
+#多倍長浮動小数点数同士の乗算
+#\!- <ret> <a> <b> <prec>
+:include !mp:mpf
+
+:params &ret[] a[] b[] prec
+:ans FALSE
+
+mpf_param a
+mpf_param b
+
+!mul ret a b
+$ADD_A @p,mpf_get_prec a,mpf_get_prec b
+@n = int ((@p - (prec + MP_DIGIT)) / MP_DIGIT)
+if @n > 0
+	@p -= @n * MP_DIGIT
+	mpf_div ret @n
+endif
+mpf_set_prec ret @p

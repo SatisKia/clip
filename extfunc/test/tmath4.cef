@@ -1,0 +1,161 @@
+#C99規格で追加された関数のテスト
+
+func equal
+	:gfloat 16
+	@r = (@0 == @1)
+	if [!]@r
+		:println @0 [" ] @1
+	endif
+	return @r
+endfunc
+func trunc
+	:gfloat 16
+	if @2
+		:print @0 [" ] @1
+	endif
+	@0 = (int (@0 * 1000000 + ((@0 < 0) ? \-0.5 0.5))) / 1000000
+	@1 = (int (@1 * 1000000 + ((@1 < 0) ? \-0.5 0.5))) / 1000000
+	if @2
+		:println [" -> ] @0 [" ] @1
+	endif
+	return (@0 == @1)
+endfunc
+func approx
+	@r = (@1 ? (abs ((@1 - @0) / @1)) (abs @0)) < (DBL_EPSILON * 4.0)
+	if [!]@r
+		return trunc @0 @1 TRUE
+	endif
+	return @r
+endfunc
+
+:ans FALSE
+:assert TRUE
+:gfloat 16
+
+:define e     2.71828182845904523536
+:define n_inf ([-]INFINITY)
+:define p_inf INFINITY
+
+assert approx (!erf n_inf) \-1.000000
+assert approx (!erf \-7.0) \-1.0000000000000000
+assert approx (!erf \-6.0) \-1.0000000000000000
+assert approx (!erf \-5.0) \-0.9999999999984626
+assert approx (!erf \-4.0) \-0.9999999845827421
+assert approx (!erf \-3.0) \-0.9999779095030014
+assert approx (!erf \-2.0) \-0.9953222650189527
+assert approx (!erf \-1.0) \-0.8427007929497149
+assert approx (!erf 0.0  ) 0.0000000000000000
+assert approx (!erf 1.0  ) 0.8427007929497149
+assert approx (!erf 2.0  ) 0.9953222650189527
+assert approx (!erf 3.0  ) 0.9999779095030014
+assert approx (!erf 4.0  ) 0.9999999845827421
+assert approx (!erf 5.0  ) 0.9999999999984626
+assert approx (!erf 6.0  ) 1.0000000000000000
+assert approx (!erf 7.0  ) 1.0000000000000000
+assert approx (!erf p_inf) 1.000000
+
+assert approx (!erfc n_inf) 2.000000
+assert approx (!erfc \-7.0) 2.0000000000000000
+assert approx (!erfc \-6.0) 2.0000000000000000
+assert approx (!erfc \-5.0) 1.9999999999984626
+assert approx (!erfc \-4.0) 1.9999999845827421
+assert approx (!erfc \-3.0) 1.9999779095030015
+assert approx (!erfc \-2.0) 1.9953222650189528
+assert approx (!erfc \-1.0) 1.8427007929497148
+assert approx (!erfc 0.0  ) 1.0000000000000000
+assert approx (!erfc 1.0  ) 0.1572992070502851
+assert approx (!erfc 2.0  ) 0.0046777349810473
+assert approx (!erfc 3.0  ) 0.0000220904969986
+assert approx (!erfc 4.0  ) 0.0000000154172579
+assert approx (!erfc 5.0  ) 0.0000000000015375
+assert approx (!erfc 6.0  ) 0.0000000000000000
+assert approx (!erfc 7.0  ) 0.0000000000000000
+assert approx (!erfc p_inf) 0.000000
+
+assert approx (!expm1 n_inf) \-1
+assert approx (!expm1 \-1  ) \-0.6321205588285577
+assert approx (!expm1 0    ) 0
+assert trunc  (!expm1 0.01 ) 0.010050
+assert approx (!expm1 1    ) 1.718281828459045
+assert equal  (!expm1 p_inf) p_inf
+
+assert isnan  (!log1p \-2    )
+assert equal  (!log1p \-1    ) n_inf
+assert approx (!log1p 0      ) 0
+assert trunc  (!log1p 0.01   ) 0.009950
+assert approx (!log1p 1      ) 0.6931471805599453
+assert approx (!log1p (e - 1)) 1
+assert equal  (!log1p p_inf  ) p_inf
+
+assert isnan  (!gamma n_inf)
+assert isnan  (!gamma \-1  )
+assert equal  (!gamma 0    ) p_inf
+assert trunc  (!gamma 0.5  ) 1.772454
+assert approx (!gamma 2.0  ) 1.0
+assert approx (!gamma 3.0  ) 2.0
+assert approx (!gamma 4.0  ) 6.0
+assert approx (!gamma 5.0  ) 24.0
+assert approx (!gamma 6.0  ) 120.0
+assert approx (!gamma 7.0  ) 720.0
+assert approx (!gamma 8.0  ) 5040.0
+assert approx (!gamma 9.0  ) 40320.0
+assert equal  (!gamma p_inf) p_inf
+
+assert isnan  (!gamma2 n_inf)
+assert isnan  (!gamma2 \-1  )
+assert equal  (!gamma2 0    ) p_inf
+assert trunc  (!gamma2 0.5  ) 1.772454
+assert approx (!gamma2 2.0  ) 1.0
+assert approx (!gamma2 3.0  ) 2.0
+assert approx (!gamma2 4.0  ) 6.0
+assert approx (!gamma2 5.0  ) 24.0
+assert approx (!gamma2 6.0  ) 120.0
+assert approx (!gamma2 7.0  ) 720.0
+assert approx (!gamma2 8.0  ) 5040.0
+assert approx (!gamma2 9.0  ) 40320.0
+assert equal  (!gamma2 p_inf) p_inf
+
+assert equal  (!loggamma n_inf) p_inf
+assert equal  (!loggamma \-1  ) p_inf
+assert equal  (!loggamma 0    ) p_inf
+assert trunc  (!loggamma 0.5  ) 0.572365
+assert approx (!loggamma 1    ) 0.000000
+assert approx (!loggamma 2.0  ) 0.0000000000000000
+assert approx (!loggamma 3.0  ) 0.6931471805599453
+assert approx (!loggamma 4.0  ) 1.7917594692280550
+assert approx (!loggamma 5.0  ) 3.1780538303479458
+assert approx (!loggamma 6.0  ) 4.7874917427820458
+assert approx (!loggamma 7.0  ) 6.5792512120101012
+assert approx (!loggamma 8.0  ) 8.5251613610654147
+assert approx (!loggamma 9.0  ) 10.6046029027452510
+assert equal  (!loggamma p_inf) p_inf
+
+assert equal  (!gammln n_inf) p_inf
+assert equal  (!gammln \-1  ) p_inf
+assert equal  (!gammln 0    ) p_inf
+assert trunc  (!gammln 0.5  ) 0.572365
+assert approx (!gammln 1    ) 0.000000
+assert approx (!gammln 2.0  ) 0.0000000000000000
+assert approx (!gammln 3.0  ) 0.6931471805599453
+assert approx (!gammln 4.0  ) 1.7917594692280550
+assert approx (!gammln 5.0  ) 3.1780538303479458
+assert approx (!gammln 6.0  ) 4.7874917427820458
+assert approx (!gammln 7.0  ) 6.5792512120101012
+assert approx (!gammln 8.0  ) 8.5251613610654147
+assert approx (!gammln 9.0  ) 10.6046029027452510
+assert equal  (!gammln p_inf) p_inf
+
+assert !trunc 2 == 2
+assert !trunc 2.1 == 2
+assert !trunc 2.5 == 2
+assert !trunc 2.9 == 2
+assert !trunc 0.123 == 0
+assert !trunc \-0.123 == \-0
+assert !trunc \-1.123 == \-1
+assert !trunc \-2 == \-2
+assert !trunc \-2.1 == \-2
+assert !trunc \-2.5 == \-2
+assert !trunc \-2.9 == \-2
+assert isnan  (!trunc NAN)
+
+:println ["SUCCESS testing function, part 4]
