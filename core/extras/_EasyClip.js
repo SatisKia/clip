@@ -105,6 +105,9 @@ _EasyClip.prototype = {
 		this._param._array.setMatrix( _CHAR( chr ), arrayToMatrix( array ), false );
 	},
 	setArrayValue : function( chr, subIndex/*Array*/, value ){
+		for( var i = 0; i < subIndex.length; i++ ){
+			subIndex[i] -= this._param.base();
+		}
 		subIndex[subIndex.length] = -1;
 		this._param._array.set( _CHAR( chr ), subIndex, subIndex.length - 1, value, false );
 	},
