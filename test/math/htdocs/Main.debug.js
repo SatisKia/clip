@@ -2595,32 +2595,15 @@ _Value.prototype = {
   return this._t.toFloat();
  },
  ass : function( r ){
-  this._type = _value_type;
   if( r instanceof _Value ){
-   switch( r._type ){
-   case 0:
-    switch( this._type ){
-    case 0: this._c.ass( r._c ); break;
-    case 1 : this._f.ass( r._c.toFloat() ); break;
-    case 2 : this._t.ass( r._c.toFloat() ); break;
-    }
-    break;
-   case 1:
-    switch( this._type ){
-    case 0: this._c.ass( r._f.toFloat() ); break;
-    case 1 : this._f.ass( r._f ); break;
-    case 2 : this._t.ass( r._f.toFloat() ); break;
-    }
-    break;
-   case 2:
-    switch( this._type ){
-    case 0: this._c.ass( r._t.toFloat() ); break;
-    case 1 : this._f.ass( r._t.toFloat() ); break;
-    case 2 : this._t.ass( r._t ); break;
-    }
-    break;
+   this._type = r._type;
+   switch( this._type ){
+   case 0: this._c.ass( r._c ); break;
+   case 1 : this._f.ass( r._f ); break;
+   case 2 : this._t.ass( r._t ); break;
    }
   } else {
+   this._type = _value_type;
    switch( this._type ){
    case 0: this._c.ass( r ); break;
    case 1 : this._f.ass( r ); break;

@@ -42,6 +42,11 @@ window._TOKEN_FUNC = _TOKEN_FUNC;
 window._TOKEN_STAT = _TOKEN_STAT;
 window._TOKEN_COMMAND = _TOKEN_COMMAND;
 window._TOKEN_SE = _TOKEN_SE;
+window._TOKEN_DEFINE = _TOKEN_DEFINE;
+window._VALUE_DEFINE = _VALUE_DEFINE;
+window.indexOf = indexOf;
+window.getCode = getCode;
+window.getToken = getToken;
 window.regCustomCommand = regCustomCommand;
 window._Token = _Token;
 window._Variable = _Variable;
@@ -2508,25 +2513,6 @@ function _Loop(){
 	this._getFlag = false;
 	this._breakFlag = false;
 	this._contFlag = false;
-	this._loopSub = [
-		this._loopStart,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopCont,
-		this._loopDo,
-		this._loopUntil,
-		this._loopWhile,
-		this._loopEndWhile,
-		this._loopFor,
-		this._loopFor,
-		this._loopNext,
-		this._loopFunc,
-		this._loopEndFunc
-	];
 }
 _Loop.prototype = {
 	_newLine : function(){
@@ -2689,15 +2675,17 @@ _Loop.prototype = {
 		return 0x00;
 	},
 	regLine : function( line ){
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var ret;
 		var tmp = new _Void( this._curLoop._newLine() );
 		var beforeFlag = new _Boolean( false );
 		line._line.beginGetToken();
-		if( line._line.getToken( code, token ) ){
-			if( (code.val() == 10) && (token.obj() < 17) ){
-				if( (ret = this._loopSub[token.obj()]( this, tmp, beforeFlag )) != 0x00 ){
+		if( line._line.getToken() ){
+			code = _get_code;
+			token = _get_token;
+			if( (code == 10) && (token < 17) ){
+				if( (ret = _Loop._loopSub[token]( this, tmp, beforeFlag )) != 0x00 ){
 					return ret;
 				}
 			}
@@ -2797,6 +2785,25 @@ _Loop.prototype = {
 		return this._curLoop._contFlag;
 	}
 };
+_Loop._loopSub = [
+	_Loop.prototype._loopStart,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopCont,
+	_Loop.prototype._loopDo,
+	_Loop.prototype._loopUntil,
+	_Loop.prototype._loopWhile,
+	_Loop.prototype._loopEndWhile,
+	_Loop.prototype._loopFor,
+	_Loop.prototype._loopFor,
+	_Loop.prototype._loopNext,
+	_Loop.prototype._loopFunc,
+	_Loop.prototype._loopEndFunc
+];
 function _Param( num, parentParam, inherit ){
 	var i;
 	this._parentNum = (parentParam == undefined) ? 0 : (
@@ -2963,6 +2970,14 @@ _Param.prototype = {
 			return this._var.setImag( index, value, moveFlag );
 		}
 	},
+	fractSetMinus : function( index, isMinus, moveFlag ){
+		if( index == 0 ){
+			this._array._mat[index]._mat[0].fractSetMinus( isMinus );
+			return true;
+		} else {
+			return this._var.fractSetMinus( index, isMinus, moveFlag );
+		}
+	},
 	setNum : function( index, value, moveFlag ){
 		if( index == 0 ){
 			this._array._mat[index]._mat[0].setNum( value );
@@ -2977,6 +2992,14 @@ _Param.prototype = {
 			return true;
 		} else {
 			return this._var.setDenom( index, value, moveFlag );
+		}
+	},
+	fractReduce : function( index, moveFlag ){
+		if( index == 0 ){
+			this._array._mat[index]._mat[0].fractReduce();
+			return true;
+		} else {
+			return this._var.fractReduce( index, moveFlag );
 		}
 	},
 	val : function( index ){
@@ -3008,26 +3031,32 @@ _Param.prototype = {
 	},
 	setLabel : function( label ){
 		var i;
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var strLabel = new String();
 		var lock;
 		i = 0;
 		label.beginGetToken();
-		while( label.getToken( code, token ) ){
-			if( (code.val() == 20) || ((code.val() == 11) && (token.obj() >= 21)) ){
-				if( !(label.getToken( code, token )) ){
+		while( label.getToken() ){
+			code = _get_code;
+			token = _get_token;
+			if( (code == 20) || ((code == 11) && (token >= 21)) ){
+				if( !(label.getToken()) ){
 					break;
 				}
+				code = _get_code;
+				token = _get_token;
 				this._updateParam[i] = true;
 			} else {
 				this._updateParam[i] = false;
 			}
-			if( code.val() == 8 ){
-				strLabel = token.obj();
+			if( code == 8 ){
+				strLabel = token;
 				lock = label.lock();
-				if( label.getToken( code, token ) ){
-					if( code.val() == 21 ){
+				if( label.getToken() ){
+					code = _get_code;
+					token = _get_token;
+					if( code == 21 ){
 						this._array._label.setLabel( _CHAR_CODE_0 + i, strLabel, true );
 					} else {
 						label.unlock( lock );
@@ -3113,9 +3142,7 @@ __ProcScan.prototype = {
 			param = _global_param;
 		case 0x44:
 		case 0x45:
-			var string = new _String();
-			proc.strGet( param._array, proc.arrayIndexDirect( param, this._code, this._token ), string );
-			defString = string.str();
+			defString = proc.strGet( param._array, proc.arrayIndexDirect( param, this._code, this._token ) );
 			break;
 		case 0x23:
 			param = _global_param;
@@ -3275,399 +3302,6 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
 	this._endInc = null;
 	this._topUsage = null;
 	this._curUsage = null;
-	this._procSubFunc = [
-		this._funcDefined,
-		this._funcIndexOf,
-		this._funcIsInf,
-		this._funcIsNaN,
-		this._funcRand,
-		this._funcTime,
-		this._funcMkTime,
-		this._funcTmSec,
-		this._funcTmMin,
-		this._funcTmHour,
-		this._funcTmMDay,
-		this._funcTmMon,
-		this._funcTmYear,
-		this._funcTmWDay,
-		this._funcTmYDay,
-		this._funcTmXMon,
-		this._funcTmXYear,
-		this._funcA2D,
-		this._funcA2G,
-		this._funcA2R,
-		this._funcD2A,
-		this._funcD2G,
-		this._funcD2R,
-		this._funcG2A,
-		this._funcG2D,
-		this._funcG2R,
-		this._funcR2A,
-		this._funcR2D,
-		this._funcR2G,
-		this._funcSin,
-		this._funcCos,
-		this._funcTan,
-		this._funcASin,
-		this._funcACos,
-		this._funcATan,
-		this._funcATan2,
-		this._funcSinH,
-		this._funcCosH,
-		this._funcTanH,
-		this._funcASinH,
-		this._funcACosH,
-		this._funcATanH,
-		this._funcExp,
-		this._funcExp10,
-		this._funcLn,
-		this._funcLog,
-		this._funcLog10,
-		this._funcPow,
-		this._funcSqr,
-		this._funcSqrt,
-		this._funcCeil,
-		this._funcFloor,
-		this._funcAbs,
-		this._funcLdexp,
-		this._funcFrexp,
-		this._funcModf,
-		this._funcInt,
-		this._funcReal,
-		this._funcImag,
-		this._funcArg,
-		this._funcNorm,
-		this._funcConjg,
-		this._funcPolar,
-		this._funcNum,
-		this._funcDenom,
-		this._funcRow,
-		this._funcCol,
-		this._funcTrans,
-		this._funcStrCmp,
-		this._funcStrCmp,
-		this._funcStrLen,
-		this._funcGWidth,
-		this._funcGHeight,
-		this._funcGColor,
-		this._funcGColor,
-		this._funcGCX,
-		this._funcGCY,
-		this._funcWCX,
-		this._funcWCY,
-		this._funcGGet,
-		this._funcWGet,
-		this._funcGX,
-		this._funcGY,
-		this._funcWX,
-		this._funcWY,
-		this._funcCall,
-		this._funcEval
-	];
-	this._procSubOp = [
-		this._unaryIncrement,
-		this._unaryDecrement,
-		this._unaryComplement,
-		this._unaryNot,
-		this._unaryMinus,
-		this._unaryPlus,
-		this._opPostfixInc,
-		this._opPostfixDec,
-		this._opMul,
-		this._opDiv,
-		this._opMod,
-		this._opAdd,
-		this._opSub,
-		this._opShiftL,
-		this._opShiftR,
-		this._opLess,
-		this._opLessOrEq,
-		this._opGreat,
-		this._opGreatOrEq,
-		this._opEqual,
-		this._opNotEqual,
-		this._opAND,
-		this._opXOR,
-		this._opOR,
-		this._opLogAND,
-		this._opLogOR,
-		this._opConditional,
-		this._opAss,
-		this._opMulAndAss,
-		this._opDivAndAss,
-		this._opModAndAss,
-		this._opAddAndAss,
-		this._opSubAndAss,
-		this._opShiftLAndAss,
-		this._opShiftRAndAss,
-		this._opANDAndAss,
-		this._opORAndAss,
-		this._opXORAndAss,
-		this._opComma,
-		this._opPow,
-		this._opPowAndAss
-	];
-	this._procSubLoop = [
-		this._loopBegin,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopCont,
-		this._loopBegin,
-		this._loopUntil,
-		this._loopBegin,
-		this._loopEndWhile,
-		this._loopBegin,
-		this._loopBegin,
-		this._loopNext,
-		this._loopBegin,
-		this._loopEndFunc,
-		this._loopIf,
-		this._loopElIf,
-		this._loopElse,
-		this._loopEndIf,
-		this._loopSwitch,
-		this._loopCase,
-		this._loopDefault,
-		this._loopEndSwi,
-		this._loopBreakSwi,
-		this._loopContinue,
-		this._loopBreak,
-		this._loopContinue,
-		this._loopBreak,
-		this._loopAssert,
-		this._loopReturn,
-		this._loopReturn,
-		this._loopReturn
-	];
-	this._procSubStat = [
-		this._statStart,
-		this._statEnd,
-		this._statEndInc,
-		this._statEndDec,
-		this._statEndEq,
-		this._statEndEqInc,
-		this._statEndEqDec,
-		this._statCont,
-		this._statDo,
-		this._statUntil,
-		this._statWhile,
-		this._statEndWhile,
-		this._statFor,
-		this._statFor2,
-		this._statNext,
-		this._statFunc,
-		this._statEndFunc,
-		this._statIf,
-		this._statElIf,
-		this._statElse,
-		this._statEndIf,
-		this._statSwitch,
-		this._statCase,
-		this._statDefault,
-		this._statEndSwi,
-		this._statBreakSwi,
-		this._statContinue,
-		this._statBreak,
-		this._statContinue2,
-		this._statBreak2,
-		this._statAssert,
-		this._statReturn,
-		this._statReturn2,
-		this._statReturn3
-	];
-	this._procSubCommand = [
-		this._commandNull,
-		this._commandEFloat,
-		this._commandFFloat,
-		this._commandGFloat,
-		this._commandEComplex,
-		this._commandFComplex,
-		this._commandGComplex,
-		this._commandPrec,
-		this._commandIFract,
-		this._commandMFract,
-		this._commandHTime,
-		this._commandMTime,
-		this._commandSTime,
-		this._commandFTime,
-		this._commandFps,
-		this._commandSChar,
-		this._commandUChar,
-		this._commandSShort,
-		this._commandUShort,
-		this._commandSLong,
-		this._commandULong,
-		this._commandSInt,
-		this._commandUInt,
-		this._commandRadix,
-		this._commandPType,
-		this._commandRad,
-		this._commandDeg,
-		this._commandGrad,
-		this._commandAngle,
-		this._commandAns,
-		this._commandAssert,
-		this._commandWarn,
-		this._commandParam,
-		this._commandParams,
-		this._commandDefine,
-		this._commandEnum,
-		this._commandUnDef,
-		this._commandVar,
-		this._commandArray,
-		this._commandLocal,
-		this._commandGlobal,
-		this._commandLabel,
-		this._commandParent,
-		this._commandReal,
-		this._commandImag,
-		this._commandNum,
-		this._commandDenom,
-		this._commandMat,
-		this._commandTrans,
-		this._commandSRand,
-		this._commandLocalTime,
-		this._commandArrayCopy,
-		this._commandArrayFill,
-		this._commandStrCpy,
-		this._commandStrCpy,
-		this._commandStrLwr,
-		this._commandStrUpr,
-		this._commandClear,
-		this._commandError,
-		this._commandPrint,
-		this._commandPrint,
-		this._commandPrint,
-		this._commandScan,
-		this._commandGWorld,
-		this._commandGClear,
-		this._commandGColor,
-		this._commandGFill,
-		this._commandGMove,
-		this._commandGText,
-		this._commandGTextL,
-		this._commandGLine,
-		this._commandGPut,
-		this._commandGPut24,
-		this._commandGGet,
-		this._commandGGet24,
-		this._commandGUpdate,
-		this._commandWindow,
-		this._commandWFill,
-		this._commandWMove,
-		this._commandWText,
-		this._commandWTextL,
-		this._commandWLine,
-		this._commandWPut,
-		this._commandWGet,
-		this._commandRectangular,
-		this._commandParametric,
-		this._commandPolar,
-		this._commandLogScale,
-		this._commandNoLogScale,
-		this._commandPlot,
-		this._commandRePlot,
-		this._commandCalculator,
-		this._commandInclude,
-		this._commandBase,
-		this._commandNameSpace,
-		this._commandDump,
-		this._commandPrint
-	];
-	this._procSubSe = [
-		this._seNull,
-		this._seIncrement,
-		this._seDecrement,
-		this._seNegative,
-		this._seComplement,
-		this._seNot,
-		this._seMinus,
-		this._seSet,
-		this._seSetC,
-		this._seSetF,
-		this._seSetM,
-		this._seMul,
-		this._seDiv,
-		this._seMod,
-		this._seAdd,
-		this._seAddS,
-		this._seSub,
-		this._seSubS,
-		this._sePow,
-		this._seShiftL,
-		this._seShiftR,
-		this._seAND,
-		this._seOR,
-		this._seXOR,
-		this._seLess,
-		this._seLessOrEq,
-		this._seGreat,
-		this._seGreatOrEq,
-		this._seEqual,
-		this._seNotEqual,
-		this._seLogAND,
-		this._seLogOR,
-		this._seMulAndAss,
-		this._seDivAndAss,
-		this._seModAndAss,
-		this._seAddAndAss,
-		this._seAddSAndAss,
-		this._seSubAndAss,
-		this._seSubSAndAss,
-		this._sePowAndAss,
-		this._seShiftLAndAss,
-		this._seShiftRAndAss,
-		this._seANDAndAss,
-		this._seORAndAss,
-		this._seXORAndAss,
-		this._seLessAndAss,
-		this._seLessOrEqAndAss,
-		this._seGreatAndAss,
-		this._seGreatOrEqAndAss,
-		this._seEqualAndAss,
-		this._seNotEqualAndAss,
-		this._seLogANDAndAss,
-		this._seLogORAndAss,
-		this._seConditional,
-		this._seSetFALSE,
-		this._seSetTRUE,
-		this._seSetZero
-	];
-	this._procSub = [
-		this._procTop,
-		this._procVariable,
-		this._procAutoVar,
-		this._procGlobalVar,
-		this._procArray,
-		this._procAutoArray,
-		this._procAutoArray,
-		this._procConst,
-		this._procLabel,
-		this._procCommand,
-		this._procStat,
-		this._procUnary,
-		this._procFunc,
-		this._procExtFunc
-	];
-	this._procMain = [
-		this._procMain1,
-		this._procMain2,
-		this._procMain3
-	];
-	this._procMainCache = [
-		this._procMain1Cache,
-		this._procMain2Cache,
-		this._procMain3Cache
-	];
-	this._procTest = [
-		this._procTest1,
-		this._procTest2,
-		this._procTest3
-	];
 	if( _proc_graph == null ){
 		_proc_graph = new _Graph();
 		_proc_gworld = _proc_graph.gWorld();
@@ -3841,13 +3475,13 @@ _Proc.prototype = {
 	strCat : function( array, index, str ){
 		this._strSet( array, index, this.strLen( array, index ), str );
 	},
-	strGet : function( array, index, str ){
-		var tmp = new String();
+	strGet : function( array, index ){
+		var str = new String();
 		var len = this.strLen( array, index );
 		for( var i = 0; i < len; i++ ){
-			tmp += String.fromCharCode( _INT( array.val( index, i ).toFloat() ) );
+			str += String.fromCharCode( _INT( array.val( index, i ).toFloat() ) );
 		}
-		str.set( tmp );
+		return str;
 	},
 	strLen : function( array, index ){
 		var len;
@@ -4047,8 +3681,8 @@ _Proc.prototype = {
 	_procInitArray : function( param ){
 		var i;
 		var flag;
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var ret = 0x00;
 		var arrayList;
 		var resizeList;
@@ -4056,16 +3690,18 @@ _Proc.prototype = {
 		var lock;
 		var value = new _Matrix();
 		flag = false;
-		while( this.curLine().getToken( code, token ) ){
-			this._initArray.addCode( code.val(), token.obj() );
-			if( code.val() == 16 ){
+		while( this.curLine().getToken() ){
+			code = _get_code;
+			token = _get_token;
+			this._initArray.addCode( code, token );
+			if( code == 16 ){
 				this._initArrayCnt++;
 				if( this._initArrayCnt > this._initArrayMax ){
 					this._initArrayMax = this._initArrayCnt;
 				}
-			} else if( code.val() == 17 ){
+			} else if( code == 17 ){
 				if( this._initArrayCnt <= 0 ){
-					ret = this._retError( 0x2102, code.val(), token.obj() );
+					ret = this._retError( 0x2102, code, token );
 					flag = true;
 					break;
 				}
@@ -4082,14 +3718,16 @@ _Proc.prototype = {
 					this._initArray.beginGetToken();
 					while( true ){
 						lock = this._initArray.lock();
-						if( !(this._initArray.getToken( code, token )) ){
+						if( !(this._initArray.getToken()) ){
 							break;
 						}
-						if( code.val() == 16 ){
+						code = _get_code;
+						token = _get_token;
+						if( code == 16 ){
 							this._initArrayCnt++;
 							arrayList[this._initArrayCnt - 1] = 0;
 							arrayList[this._initArrayCnt ] = -1;
-						} else if( code.val() == 17 ){
+						} else if( code == 17 ){
 							this._initArrayCnt--;
 							if( this._initArrayCnt > 0 ){
 								arrayList[this._initArrayCnt - 1]++;
@@ -4097,7 +3735,7 @@ _Proc.prototype = {
 							}
 						} else {
 							this._initArray.unlock( lock );
-							if( this._const( param, code.val(), token.obj(), value ) == 0x00 ){
+							if( this._const( param, code, token, value ) == 0x00 ){
 								if( this._initArrayCnt == 2 ){
 									if( resizeList[0] < arrayList[0] ){
 										resizeList[0] = arrayList[0];
@@ -4114,7 +3752,7 @@ _Proc.prototype = {
 									);
 								arrayList[this._initArrayCnt - 1]++;
 							} else {
-								ret = this._retError( 0x2102, code.val(), token.obj() );
+								ret = this._retError( 0x2102, code, token );
 								flag = true;
 								break;
 							}
@@ -4158,20 +3796,22 @@ _Proc.prototype = {
 	},
 	_getParams : function( parentParam, code, token, funcParam ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var tmpValue = new _Matrix();
 		while( true ){
 			lock = this.curLine().lock();
-			if( !(this.curLine().getTokenParam( parentParam, newCode, newToken )) ){
+			if( !(this.curLine().getTokenParam( parentParam )) ){
 				break;
 			}
+			newCode = _get_code;
+			newToken = _get_token;
 			if(
-				((newCode.val() & (0x20 | 0x40)) != 0) ||
-				(newCode.val() == 7) ||
-				(newCode.val() == 19)
+				((newCode & (0x20 | 0x40)) != 0) ||
+				(newCode == 7) ||
+				(newCode == 19)
 			){
-				funcParam.addCode( newCode.val(), newToken.obj() );
+				funcParam.addCode( newCode, newToken );
 			} else {
 				this.curLine().unlock( lock );
 				if( this._const( parentParam, code, token, tmpValue ) == 0x00 ){
@@ -4210,19 +3850,21 @@ _Proc.prototype = {
 			) ? true : this._checkSkipLoop();
 	},
 	_processLoop : function( param ){
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		this.curLine().beginGetToken();
-		if( !(this.curLine().getTokenLock( code, token )) ){
+		if( !(this.curLine().getTokenLock()) ){
 			return 0x03;
 		}
-		switch( code.val() ){
+		code = _get_code;
+		token = _get_token;
+		switch( code ){
 		case 10:
 			if( !(param._enableStat) ){
 				return 0x102;
 			}
-			this._setError( code.val(), token.obj() );
-			return this._procSubLoop[token.obj()]( this );
+			this._setError( code, token );
+			return _Proc._procSubLoop[token]( this );
 		case 9:
 			if( !(param._enableCommand) ){
 				return 0x101;
@@ -4230,52 +3872,54 @@ _Proc.prototype = {
 			break;
 		case 22:
 			param._seFlag = true;
-			param._seToken = token.obj();
+			param._seToken = token;
 			break;
 		}
 		return this._checkSkip() ? 0x03 : 0x00;
 	},
 	_constFirst : function( param, code, token, value ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( !(this.curLine().getTokenParam( param, newCode, newToken )) ){
+		var newCode;
+		var newToken;
+		if( !(this.curLine().getTokenParam( param )) ){
 			return this._retError( 0x2106, code, token );
 		}
+		newCode = _get_code;
+		newToken = _get_token;
 		this._token.delToken( this._curInfo._assCode, this._curInfo._assToken );
-		this._curInfo._assCode = newCode.val();
-		this._curInfo._assToken = this._token.newToken( newCode.val(), newToken.obj() );
-		if( newCode.val() == 0x21 ){
-			return this._procVariableFirst( param, newToken.obj(), value );
-		} else if( newCode.val() == 0x44 ){
-			return this._procArrayFirst( param, newToken.obj(), value );
-		} else if( (newCode.val() & 0x1F) < 14 ){
-			return this._procSub[newCode.val() & 0x1F]( this, param, newCode.val(), newToken.obj(), value );
+		this._curInfo._assCode = newCode;
+		this._curInfo._assToken = this._token.newToken( newCode, newToken );
+		if( newCode == 0x21 ){
+			return this._procVariableFirst( param, newToken, value );
+		} else if( newCode == 0x44 ){
+			return this._procArrayFirst( param, newToken, value );
+		} else if( (newCode & 0x1F) < 14 ){
+			return _Proc._procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
 		} else {
-			return this._retError( 0x210A, newCode.val(), newToken.obj() );
+			return this._retError( 0x210A, newCode, newToken );
 		}
 	},
 	_const : function( param, code, token, value ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( !(this.curLine().getTokenParam( param, newCode, newToken )) ){
+		var newCode;
+		var newToken;
+		if( !(this.curLine().getTokenParam( param )) ){
 			return this._retError( 0x2106, code, token );
 		}
-		if( (newCode.val() & 0x1F) < 14 ){
-			return this._procSub[newCode.val() & 0x1F]( this, param, newCode.val(), newToken.obj(), value );
+		newCode = _get_code;
+		newToken = _get_token;
+		if( (newCode & 0x1F) < 14 ){
+			return _Proc._procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
 		} else {
-			return this._retError( 0x210A, newCode.val(), newToken.obj() );
+			return this._retError( 0x210A, newCode, newToken );
 		}
 	},
 	_constSkip : function( code, token ){
 		var subStep;
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		subStep = 0;
 		while( true ){
 			lock = this.curLine().lock();
-			if( this.curLine().getToken( newCode, newToken ) ){
-				switch( newCode.val() ){
+			if( this.curLine().getToken() ){
+				switch( _get_code ){
 				case 0:
 					subStep++;
 					break;
@@ -4301,12 +3945,10 @@ _Proc.prototype = {
 	},
 	_constSkipConditional : function( code, token ){
 		var subStep;
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		subStep = 0;
 		while( true ){
-			if( this.curLine().getToken( newCode, newToken ) ){
-				switch( newCode.val() ){
+			if( this.curLine().getToken() ){
+				switch( _get_code ){
 				case 0:
 					subStep++;
 					break;
@@ -4326,16 +3968,20 @@ _Proc.prototype = {
 		}
 		return 0x00;
 	},
-	_getString : function( param, code , token , string ){
-		if( this.curLine().getTokenParam( param, code, token ) ){
-			if( code.val() == 19 ){
-				string.set( token.obj() );
-			} else if( (code.val() & 0x40) != 0 ){
-				if( code.val() == 0x46 ){
+	_getString : function( param, string ){
+		var code;
+		var token;
+		if( this.curLine().getTokenParam( param ) ){
+			code = _get_code;
+			token = _get_token;
+			if( code == 19 ){
+				string.set( token );
+			} else if( (code & 0x40) != 0 ){
+				if( code == 0x46 ){
 					param = _global_param;
 				}
-				var arrayIndex = this.arrayIndexIndirect( param, code.val(), token.obj() );
-				this.strGet( param._array, arrayIndex, string );
+				var arrayIndex = this.arrayIndexIndirect( param, code, token );
+				string.set( this.strGet( param._array, arrayIndex ) );
 			} else {
 				string.set( null );
 			}
@@ -4346,15 +3992,17 @@ _Proc.prototype = {
 		return true;
 	},
 	_processOp : function( param, value ){
-		var code = new _Integer();
-		var token = new _Void();
-		if( !(this.curLine().getToken( code, token )) ){
+		var code;
+		var token;
+		if( !(this.curLine().getToken()) ){
 			return this._retError( 0x2101, 14, null );
 		}
-		if( (code.val() == 11) && (token.obj() >= 6) ){
-			return this._procSubOp[token.obj()]( this, param, code.val(), token.obj(), value );
+		code = _get_code;
+		token = _get_token;
+		if( (code == 11) && (token >= 6) ){
+			return _Proc._procSubOp[token]( this, param, code, token, value );
 		} else {
-			return this._retError( 0x2101, code.val(), token.obj() );
+			return this._retError( 0x2101, code, token );
 		}
 	},
 	_regInc : function( flag, param, code, token ){
@@ -4508,8 +4156,8 @@ _Proc.prototype = {
 	_processSub : function( param, value ){
 		var ret = 0x00;
 		var lock;
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var savInfo;
 		var subInfo = new __ProcInfo();
 		savInfo = this._curInfo;
@@ -4529,14 +4177,16 @@ _Proc.prototype = {
 				this.curLine().unlock( lock );
 			} else if( (param.mode() & 0x0020) != 0 ){
 				if( this.curLine().checkToken( 15 ) ){
-					this.curLine().getToken( code, token );
+					this.curLine().getToken();
+					code = _get_code;
+					token = _get_token;
 					this._curInfo = savInfo;
 					this._token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo.curArray = null;
-					return this._retError( 0x210C, code.val(), token.obj() );
+					return this._retError( 0x210C, code, token );
 				} else {
 					value._mat[0].setImag( tmpValue1._mat[0].real() );
-					this.curLine().getToken( code, token );
+					this.curLine().getToken();
 					this._curInfo = savInfo;
 					this._token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
@@ -4549,15 +4199,17 @@ _Proc.prototype = {
 					value.divAndAss( tmpValue1._mat[0].toFloat() );
 					this.curLine().unlock( lock );
 				} else if( this.curLine().checkToken( 15 ) ){
-					this.curLine().getToken( code, token );
+					this.curLine().getToken();
+					code = _get_code;
+					token = _get_token;
 					this._curInfo = savInfo;
 					this._token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
-					return this._retError( 0x210D, code.val(), token.obj() );
+					return this._retError( 0x210D, code, token );
 				} else {
 					tmpValue1.divAndAss( tmpValue2._mat[0].toFloat() );
 					value.addAndAss( tmpValue1 );
-					this.curLine().getToken( code, token );
+					this.curLine().getToken();
 					this._curInfo = savInfo;
 					this._token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
@@ -4573,7 +4225,7 @@ _Proc.prototype = {
 				return ret;
 			}
 		}
-		this.curLine().getToken( code, token );
+		this.curLine().getToken();
 		this._curInfo = savInfo;
 		this._token.delToken( subInfo._assCode, subInfo._assToken );
 		subInfo._curArray = null;
@@ -4587,7 +4239,7 @@ _Proc.prototype = {
 		var saveArray = this._curInfo._curArray;
 		var saveArraySize = this._curInfo._curArraySize;
 		if( param._seToken < 69 ){
-			ret = this._procSubSe[param._seToken]( this, param, 22, param._seToken, value );
+			ret = _Proc._procSubSe[param._seToken]( this, param, 22, param._seToken, value );
 		} else {
 			ret = this._procFuncSe( this, param, 12, param._seToken - 69, value );
 		}
@@ -4808,75 +4460,77 @@ _Proc.prototype = {
 		return err.val();
 	},
 	getParam : function( funcParam, parentParam, childParam ){
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var index;
 		var saveLine = this.curLine();
 		this.setCurLine( funcParam );
 		var i = _CHAR_CODE_0;
 		var j = 0;
 		funcParam.beginGetToken();
-		while( funcParam.getTokenParam( parentParam, code, token ) ){
+		while( funcParam.getTokenParam( parentParam ) ){
+			code = _get_code;
+			token = _get_token;
 			if( j > 9 ){
 				this.setCurLine( saveLine );
-				return this._retError( 0x2161, code.val(), token.obj() );
+				return this._retError( 0x2161, code, token );
 			}
-			childParam._updateParamCode[j] = code.val();
-			switch( code.val() ){
+			childParam._updateParamCode[j] = code;
+			switch( code ){
 			case 0x21:
-				index = this.varIndexParam( parentParam, token.obj() );
+				index = this.varIndexParam( parentParam, token );
 				childParam._updateParamIndex[j] = index;
 				childParam._var.set( i, parentParam.val( index ), true );
 				this._updateValue( parentParam, childParam._var.val( i ) );
 				break;
 			case 0x22:
-				index = this.autoVarIndex( parentParam, token.obj() );
+				index = this.autoVarIndex( parentParam, token );
 				childParam._updateParamIndex[j] = index;
 				childParam._var.set( i, parentParam.val( index ), true );
 				this._updateValue( parentParam, childParam._var.val( i ) );
 				break;
 			case 0x23:
-				index = this.autoVarIndex( _global_param, token.obj() );
+				index = this.autoVarIndex( _global_param, token );
 				childParam._updateParamIndex[j] = index;
 				childParam._var.set( i, _global_param.val( index ), true );
 				this._updateValue( _global_param, childParam._var.val( i ) );
 				break;
 			case 0x44:
-				index = this.arrayIndexParam( parentParam, token.obj() );
+				index = this.arrayIndexParam( parentParam, token );
 				childParam._updateParamIndex[j] = index;
 				parentParam._array.dup( childParam._array, index, i, true );
 				this._updateArray( parentParam, childParam._array, i );
-				if( token.obj() == 0 ){
+				if( token == 0 ){
 					childParam._var.set( i, parentParam.val( 0 ), true );
 					this._updateValue( parentParam, childParam._var.val( i ) );
 				}
 				break;
 			case 0x45:
-				index = this.autoArrayIndex( parentParam, token.obj() );
+				index = this.autoArrayIndex( parentParam, token );
 				childParam._updateParamIndex[j] = index;
 				parentParam._array.dup( childParam._array, index, i, true );
 				this._updateArray( parentParam, childParam._array, i );
 				break;
 			case 0x46:
-				index = this.autoArrayIndex( _global_param, token.obj() );
+				index = this.autoArrayIndex( _global_param, token );
 				childParam._updateParamIndex[j] = index;
 				_global_param._array.dup( childParam._array, index, i, true );
 				this._updateArray( _global_param, childParam._array, i );
 				break;
 			case 19:
-				this.strSet( childParam._array, i, token.obj() );
+				this.strSet( childParam._array, i, token );
 				break;
 			case 7:
-				childParam._var.set( i, token.obj(), true );
+				childParam._var.set( i, token, true );
 				this._updateValue( parentParam, childParam._var.val( i ) );
 				break;
 			case 18:
-				childParam._array.setMatrix( i, token.obj(), true );
+				childParam._array.setMatrix( i, token, true );
 				this._updateMatrix( parentParam, childParam._array._mat[i] );
 				break;
 			default:
 				this.setCurLine( saveLine );
-				return this._retError( 0x2162, code.val(), token.obj() );
+				return this._retError( 0x2162, code, token );
 			}
 			i++;
 			j++;
@@ -5082,9 +4736,9 @@ _Proc.prototype = {
 	},
 	main : function( func, childParam, step , err , ret ){
 		if( func instanceof __Func ){
-			return this._procMainCache[step.val()]( this, func, childParam, step, err, ret );
+			return _Proc._procMainCache[step.val()]( this, func, childParam, step, err, ret );
 		}
-		return this._procMain[step.val()]( this, func, childParam, step, err, ret );
+		return _Proc._procMain[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termMain : function( func, childParam, parentParam ){
 		if( func instanceof __Func ){
@@ -5132,7 +4786,7 @@ _Proc.prototype = {
 		return this._beginMain( func, childParam, step, err, ret, null, null );
 	},
 	test : function( func, childParam, step , err , ret ){
-		return this._procTest[step.val()]( this, func, childParam, step, err, ret );
+		return _Proc._procTest[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termTest : function( func, childParam ){
 		this._termMain( func, childParam, null );
@@ -6008,25 +5662,25 @@ _Proc.prototype = {
 		return ret;
 	},
 	_getFuncParamIndex : function( param, code, token, index , moveFlag , seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newToken;
 		if( seFlag ){
 			if( !(this.curLine().skipComma()) ){
 				return this._retError( 0x2181, code, token );
 			}
 		}
-		if( !(this.curLine().getTokenParam( param, newCode, newToken )) ){
+		if( !(this.curLine().getTokenParam( param )) ){
 			return this._retError( 0x2103, code, token );
 		}
-		switch( newCode.val() ){
+		newToken = _get_token;
+		switch( _get_code ){
 		case 0x21:
-			index.set( param, this.varIndexParam( param, newToken.obj() ) );
+			index.set( param, this.varIndexParam( param, newToken ) );
 			moveFlag.set( true );
 			break;
 		case 0x23:
 			param = _global_param;
 		case 0x22:
-			index.set( param, this.autoVarIndex( param, newToken.obj() ) );
+			index.set( param, this.autoVarIndex( param, newToken ) );
 			moveFlag.set( false );
 			break;
 		default:
@@ -6036,8 +5690,8 @@ _Proc.prototype = {
 	},
 	_getFuncParamMatrix : function( param, code, token, moveFlag , seFlag ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var index;
 		lock = this.curLine().lock();
 		if( seFlag ){
@@ -6046,17 +5700,19 @@ _Proc.prototype = {
 				return null;
 			}
 		}
-		if( this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		if( this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x46:
 				param = _global_param;
 			case 0x44:
 			case 0x45:
-				index = this.arrayIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+				index = this.arrayIndexIndirectMove( param, newCode, newToken, moveFlag );
 				break;
 			case 8:
 			case 0x23:
-				index = param._array._label.checkLabel( newToken.obj() );
+				index = param._array._label.checkLabel( newToken );
 				moveFlag.set( false );
 				break;
 			default:
@@ -6073,34 +5729,34 @@ _Proc.prototype = {
 		return param._array._mat[index];
 	},
 	_funcDefined : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
 				return _this._retError( 0x2181, code, token );
 			}
 		}
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			value.ass( ((newCode.val() == 8) || (newCode.val() == 0x23) || (newCode.val() == 0x46)) ? 0.0 : 1.0 );
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			value.ass( ((newCode == 8) || (newCode == 0x23) || (newCode == 0x46)) ? 0.0 : 1.0 );
 			return 0x00;
 		}
 		return _this._retError( 0x2103, code, token );
 	},
 	_funcIndexOf : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newToken;
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
 				return _this._retError( 0x2181, code, token );
 			}
 		}
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newToken = _get_token;
+			switch( _get_code ){
 			case 0x22:
-				value.ass( _this.autoVarIndex( param, newToken.obj() ) );
+				value.ass( _this.autoVarIndex( param, newToken ) );
 				return 0x00;
 			case 0x45:
-				value.ass( _this.autoArrayIndex( param, newToken.obj() ) );
+				value.ass( _this.autoArrayIndex( param, newToken ) );
 				return 0x00;
 			case 0x23:
 			case 0x46:
@@ -6137,8 +5793,6 @@ _Proc.prototype = {
 	},
 	_funcMkTime : function( _this, param, code, token, value, seFlag ){
 		var i;
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var format = new _String();
 		var errFlag;
 		var tmpValue = new _Matrix();
@@ -6147,7 +5801,7 @@ _Proc.prototype = {
 				return _this._retError( 0x2181, code, token );
 			}
 		}
-		_this._getString( param, newCode, newToken, format );
+		_this._getString( param, format );
 		if( format.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -6777,22 +6431,20 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_funcStrCmp : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
 				return _this._retError( 0x2181, code, token );
 			}
 		}
 		var string1 = new _String();
-		if( _this._getString( param, newCode, newToken, string1 ) ){
+		if( _this._getString( param, string1 ) ){
 			if( seFlag ){
 				if( !(_this.curLine().skipComma()) ){
 					return _this._retError( 0x2181, code, token );
 				}
 			}
 			var string2 = new _String();
-			if( _this._getString( param, newCode, newToken, string2 ) ){
+			if( _this._getString( param, string2 ) ){
 				var str1 = string1.str();
 				var str2 = string2.str();
 				var val = str1.length - str2.length;
@@ -6833,15 +6485,13 @@ _Proc.prototype = {
 		return _this._retError( 0x2103, code, token );
 	},
 	_funcStrLen : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
 				return _this._retError( 0x2181, code, token );
 			}
 		}
 		var string = new _String();
-		if( _this._getString( param, newCode, newToken, string ) ){
+		if( _this._getString( param, string ) ){
 			value.ass( string.str().length );
 			return 0x00;
 		}
@@ -6944,8 +6594,6 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_funcCall : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var ret;
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
@@ -6953,7 +6601,7 @@ _Proc.prototype = {
 			}
 		}
 		var func = new _String();
-		_this._getString( param, newCode, newToken, func );
+		_this._getString( param, func );
 		if( func.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -6970,8 +6618,6 @@ _Proc.prototype = {
 		return ret;
 	},
 	_funcEval : function( _this, param, code, token, value, seFlag ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var ret;
 		if( seFlag ){
 			if( !(_this.curLine().skipComma()) ){
@@ -6979,7 +6625,7 @@ _Proc.prototype = {
 			}
 		}
 		var string = new _String();
-		_this._getString( param, newCode, newToken, string );
+		_this._getString( param, string );
 		if( string.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -8141,41 +7787,47 @@ _Proc.prototype = {
 	_statFunc : function( _this, param, code, token ){
 		var i;
 		if( _this._statMode == 2 ){
-			var newCode = new _Integer();
-			var newToken = new _Void();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( newCode.val() == 0 ){
-					if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
-						return _this._retError( 0x212E, newCode.val(), newToken.obj() );
+			var newCode;
+			var newToken;
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( newCode == 0 ){
+					if( !(_this.curLine().getTokenParam( param )) ){
+						return _this._retError( 0x212E, newCode, newToken );
 					}
+					newCode = _get_code;
+					newToken = _get_token;
 				}
-				if( (newCode.val() == 8) || (newCode.val() == 0x23) || (newCode.val() == 0x46) ){
+				if( (newCode == 8) || (newCode == 0x23) || (newCode == 0x46) ){
 					_this._stat.doBreak();
-					if( param._func.search( newToken.obj(), false, null ) != null ){
-						return _this._retError( 0x212E, newCode.val(), newToken.obj() );
+					if( param._func.search( newToken, false, null ) != null ){
+						return _this._retError( 0x212E, newCode, newToken );
 					}
 					var func;
-					if( (func = param._func.create( newToken.obj(), _this.curNum() + 1 )) != null ){
+					if( (func = param._func.create( newToken, _this.curNum() + 1 )) != null ){
 						i = 0;
-						while( _this.curLine().getToken( newCode, newToken ) ){
-							switch( newCode.val() ){
+						while( _this.curLine().getToken() ){
+							newCode = _get_code;
+							newToken = _get_token;
+							switch( newCode ){
 							case 0:
 							case 15:
 								break;
 							case 20:
 							case 21:
 							case 11:
-								func._label.addCode( newCode.val(), newToken.obj() );
+								func._label.addCode( newCode, newToken );
 								break;
 							case 8:
 								if( i <= 9 ){
-									func._label.addCode( newCode.val(), newToken.obj() );
+									func._label.addCode( newCode, newToken );
 									i++;
 									break;
 								}
 							default:
 								param._func.del( func );
-								return _this._retError( 0x212F, newCode.val(), newToken.obj() );
+								return _this._retError( 0x212F, newCode, newToken );
 							}
 						}
 						var line;
@@ -8189,7 +7841,7 @@ _Proc.prototype = {
 					return 0x03;
 				}
 			}
-			return _this._retError( 0x212E, newCode.val(), newToken.obj() );
+			return _this._retError( 0x212E, newCode, newToken );
 		}
 		return 0x03;
 	},
@@ -8355,9 +8007,7 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_statReturn : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenLock( newCode, newToken ) ){
+		if( _this.curLine().getTokenLock() ){
 			var ret;
 			var tmpValue = new _Matrix();
 			if( (ret = _this._const( param, code, token, tmpValue )) == 0x00 ){
@@ -8737,34 +8387,33 @@ _Proc.prototype = {
 	},
 	_commandWarn : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var error = new _String();
 		lock = _this.curLine().lock();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( newCode.val() == 19 ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( newCode == 19 ){
 				if( _this.warnFlag() ){
 					_this._formatError(
-						newToken.obj(),
+						newToken,
 						param._fileFlag ? param._funcName : null,
 						error
 						);
 					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return 0x03;
-			} else if( (newCode.val() & 0x40) != 0 ){
+			} else if( (newCode & 0x40) != 0 ){
 				if( _this.warnFlag() ){
-					if( newCode.val() == 0x46 ){
+					if( newCode == 0x46 ){
 						param = _global_param;
 					}
-					var string = new _String();
-					_this.strGet( param._array, _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() ), string );
 					_this._formatError(
-						string.str(),
+						_this.strGet( param._array, _this.arrayIndexIndirect( param, newCode, newToken ) ),
 						param._fileFlag ? param._funcName : null,
 						error
 						);
-					string = null;
 					printWarn( error.str(), param._parentNum, param._parentFunc );
 				}
 				return 0x03;
@@ -8795,24 +8444,30 @@ _Proc.prototype = {
 	_commandParams : function( _this, param, code, token ){
 		var i;
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var label;
 		lock = _this.curLine().lock();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() == 20) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
-				if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode == 20) || ((newCode == 11) && (newToken >= 21)) ){
+				if( !(_this.curLine().getTokenParam( param )) ){
 					return _this._retError( 0x2141, code, token );
 				}
+				newCode = _get_code;
+				newToken = _get_token;
 				param._updateParam[0] = true;
 			} else {
 				param._updateParam[0] = false;
 			}
-			if( (newCode.val() == 8) || (newCode.val() == 0x23) || (newCode.val() == 0x46) ){
-				label = newToken.obj();
+			if( (newCode == 8) || (newCode == 0x23) || (newCode == 0x46) ){
+				label = newToken;
 				lock = _this.curLine().lock();
-				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 21 ){
+				if( _this.curLine().getToken() ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( newCode == 21 ){
 						param._array._label.setLabel( _CHAR_CODE_0, label, true );
 					} else {
 						_this.curLine().unlock( lock );
@@ -8823,29 +8478,35 @@ _Proc.prototype = {
 					param._var._label.setLabel( _CHAR_CODE_0, label, true );
 				}
 				i = 1;
-				while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+				while( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
 					if( i > 9 ){
 						return _this._retError( 0x2144, code, token );
 					}
-					if( (newCode.val() == 20) || ((newCode.val() == 11) && (newToken.obj() >= 21)) ){
-						if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
+					if( (newCode == 20) || ((newCode == 11) && (newToken >= 21)) ){
+						if( !(_this.curLine().getTokenParam( param )) ){
 							return _this._retError( 0x2141, code, token );
 						}
+						newCode = _get_code;
+						newToken = _get_token;
 						param._updateParam[i] = true;
 					} else {
 						param._updateParam[i] = false;
 					}
-					switch( newCode.val() ){
+					switch( newCode ){
 					case 0x22:
 					case 0x45:
-						return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+						return _this._retError( 0x2142, newCode, newToken );
 					case 8:
 					case 0x23:
 					case 0x46:
-						label = newToken.obj();
+						label = newToken;
 						lock = _this.curLine().lock();
-						if( _this.curLine().getToken( newCode, newToken ) ){
-							if( newCode.val() == 21 ){
+						if( _this.curLine().getToken() ){
+							newCode = _get_code;
+							newToken = _get_token;
+							if( newCode == 21 ){
 								param._array._label.setLabel( _CHAR_CODE_0 + i, label, true );
 							} else {
 								_this.curLine().unlock( lock );
@@ -8877,21 +8538,23 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandDefine : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
 				var value = new _Matrix();
 				if( _this._const( param, code, token, value ) == 0x00 ){
-					param._var.define( newToken.obj(), value._mat[0], true );
+					param._var.define( newToken, value._mat[0], true );
 				} else {
-					param._var.define( newToken.obj(), 1.0, true );
+					param._var.define( newToken, 1.0, true );
 				}
 				return 0x03;
 			}
@@ -8900,34 +8563,38 @@ _Proc.prototype = {
 	},
 	_commandEnum : function( _this, param, code, token ){
 		var value = new _Matrix();
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var lock;
-		var tmpCode = new _Integer();
-		var tmpToken = new _Void();
+		var tmpCode;
+		var tmpToken;
 		value.ass( 0.0 );
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
 				lock = _this.curLine().lock();
-				if( _this.curLine().getTokenParam( param, tmpCode, tmpToken ) ){
-					if( (tmpCode.val() == 8) || (tmpCode.val() == 0x23) || (tmpCode.val() == 0x46) ){
+				if( _this.curLine().getTokenParam( param ) ){
+					tmpCode = _get_code;
+					tmpToken = _get_token;
+					if( (tmpCode == 8) || (tmpCode == 0x23) || (tmpCode == 0x46) ){
 						_this.curLine().unlock( lock );
 					} else {
 						_this.curLine().unlock( lock );
-						if( _this._const( param, tmpCode.val(), tmpToken.obj(), value ) != 0x00 ){
+						if( _this._const( param, tmpCode, tmpToken, value ) != 0x00 ){
 							return _this._retError( 0x2141, code, token );
 						}
 					}
 				} else {
 					_this.curLine().unlock( lock );
 				}
-				param._var.define( newToken.obj(), _INT( value._mat[0].toFloat() ), true );
+				param._var.define( newToken, _INT( value._mat[0].toFloat() ), true );
 				value.addAndAss( 1.0 );
 				break;
 			default:
@@ -8937,30 +8604,34 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandUnDef : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() == 8) || (newCode.val() == 0x23) || (newCode.val() == 0x46) ){
-				return _this._retError( 0x2143, newCode.val(), newToken.obj() );
-			} else if( (newCode.val() & 0x20) != 0 ){
-				param._var.undef( param._var._label._label[_this.varIndexIndirect( param, newCode.val(), newToken.obj() )] );
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode == 8) || (newCode == 0x23) || (newCode == 0x46) ){
+				return _this._retError( 0x2143, newCode, newToken );
+			} else if( (newCode & 0x20) != 0 ){
+				param._var.undef( param._var._label._label[_this.varIndexIndirect( param, newCode, newToken )] );
 				return 0x03;
 			}
 		}
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandVar : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		var newCode;
+		var newToken;
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
-				param._var.define( newToken.obj(), 0.0, false );
+				param._var.define( newToken, 0.0, false );
 				break;
 			default:
 				return _this._retError( 0x2141, code, token );
@@ -8969,17 +8640,19 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandArray : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		var newCode;
+		var newToken;
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
-				param._array.define( newToken.obj() );
+				param._array.define( newToken );
 				break;
 			default:
 				return _this._retError( 0x2141, code, token );
@@ -8989,21 +8662,25 @@ _Proc.prototype = {
 	},
 	_commandLocal : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var label;
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
-				label = newToken.obj();
+				label = newToken;
 				lock = _this.curLine().lock();
-				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 21 ){
+				if( _this.curLine().getToken() ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( newCode == 21 ){
 						param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
@@ -9022,17 +8699,19 @@ _Proc.prototype = {
 	},
 	_commandGlobal : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var label;
-		var tmpCode = new _Integer();
-		var tmpToken = new _Void();
-		while( _this.curLine().getTokenParam( _global_param, newCode, newToken ) ){
-			if( newCode.val() == 8 ){
-				label = newToken.obj();
+		while( _this.curLine().getTokenParam( _global_param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( newCode == 8 ){
+				label = newToken;
 				lock = _this.curLine().lock();
-				if( _this.curLine().getToken( newCode, newToken ) ){
-					if( newCode.val() == 21 ){
+				if( _this.curLine().getToken() ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( newCode == 21 ){
 						_global_param._array.define( label );
 					} else {
 						_this.curLine().unlock( lock );
@@ -9044,18 +8723,18 @@ _Proc.prototype = {
 				}
 			} else {
 				lock = _this.curLine().lock();
-				if( _this.curLine().getToken( tmpCode, tmpToken ) ){
-					if( tmpCode.val() == 21 ){
-						if( (newCode.val() & 0x40) == 0 ){
-							return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				if( _this.curLine().getToken() ){
+					if( _get_code == 21 ){
+						if( (newCode & 0x40) == 0 ){
+							return _this._retError( 0x2142, newCode, newToken );
 						}
 					} else {
 						_this.curLine().unlock( lock );
 					}
 				} else {
 					_this.curLine().unlock( lock );
-					if( (newCode.val() & 0x20) == 0 ){
-						return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+					if( (newCode & 0x20) == 0 ){
+						return _this._retError( 0x2142, newCode, newToken );
 					}
 				}
 			}
@@ -9063,24 +8742,28 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandLabel : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var label;
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			switch( newCode.val() ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			switch( newCode ){
 			case 0x22:
 			case 0x45:
-				return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+				return _this._retError( 0x2142, newCode, newToken );
 			case 8:
 			case 0x23:
 			case 0x46:
-				label = newToken.obj();
-				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					if( newCode.val() == 0x21 ){
-						param._var._label.setLabel( _this.varIndexParam( param, newToken.obj() ), label, true );
+				label = newToken;
+				if( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( newCode == 0x21 ){
+						param._var._label.setLabel( _this.varIndexParam( param, newToken ), label, true );
 						return 0x03;
-					} else if( newCode.val() == 0x44 ){
-						param._array._label.setLabel( _this.arrayIndexParam( param, newToken.obj() ), label, true );
+					} else if( newCode == 0x44 ){
+						param._array._label.setLabel( _this.arrayIndexParam( param, newToken ), label, true );
 						return 0x03;
 					}
 				}
@@ -9090,12 +8773,14 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandParent : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var index;
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( newCode.val() == 0x21 ){
-				index = _this.varIndexParam( param, newToken.obj() );
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( newCode == 0x21 ){
+				index = _this.varIndexParam( param, newToken );
 				if( param._parent != null ){
 					param.setVal( index, param._parent._var.val( index ), true );
 					if( index == 0 ){
@@ -9105,36 +8790,40 @@ _Proc.prototype = {
 					}
 					param._updateParentVar[param._updateParentVar.length] = index;
 				}
-				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					switch( newCode.val() ){
+				if( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
+					switch( newCode ){
 					case 0x22:
 					case 0x45:
-						return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+						return _this._retError( 0x2142, newCode, newToken );
 					case 8:
 					case 0x23:
 					case 0x46:
-						param._var._label.setLabel( index, newToken.obj(), true );
+						param._var._label.setLabel( index, newToken, true );
 						break;
 					default:
 						return _this._retError( 0x2141, code, token );
 					}
 				}
 				return 0x03;
-			} else if( newCode.val() == 0x44 ){
-				index = _this.arrayIndexParam( param, newToken.obj() );
+			} else if( newCode == 0x44 ){
+				index = _this.arrayIndexParam( param, newToken );
 				if( param._parent != null ){
 					param._parent._array.dup( param._array, index, index, true );
 					param._updateParentArray[param._updateParentArray.length] = index;
 				}
-				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					switch( newCode.val() ){
+				if( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
+					switch( newCode ){
 					case 0x22:
 					case 0x45:
-						return _this._retError( 0x2142, newCode.val(), newToken.obj() );
+						return _this._retError( 0x2142, newCode, newToken );
 					case 8:
 					case 0x23:
 					case 0x46:
-						param._array._label.setLabel( index, newToken.obj(), true );
+						param._array._label.setLabel( index, newToken, true );
 						break;
 					default:
 						return _this._retError( 0x2141, code, token );
@@ -9146,19 +8835,21 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandReal : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
 			var value = new _Matrix();
 			if( _this._const( param, code, token, value ) == 0x00 ){
-				if( (newCode.val() & 0x20) != 0 ){
-					if( newCode.val() == 0x23 ){
+				if( (newCode & 0x20) != 0 ){
+					if( newCode == 0x23 ){
 						param = _global_param;
 					}
 					var moveFlag = new _Boolean();
-					var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+					var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 					if( !(param.setReal( index, value._mat[0].toFloat(), moveFlag.val() )) ){
-						return _this._retError( 0x210E, newCode.val(), newToken.obj() );
+						return _this._retError( 0x210E, newCode, newToken );
 					}
 					return 0x03;
 				}
@@ -9167,19 +8858,21 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandImag : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
 			var value = new _Matrix();
 			if( _this._const( param, code, token, value ) == 0x00 ){
-				if( (newCode.val() & 0x20) != 0 ){
-					if( newCode.val() == 0x23 ){
+				if( (newCode & 0x20) != 0 ){
+					if( newCode == 0x23 ){
 						param = _global_param;
 					}
 					var moveFlag = new _Boolean();
-					var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+					var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 					if( !(param.setImag( index, value._mat[0].toFloat(), moveFlag.val() )) ){
-						return _this._retError( 0x210E, newCode.val(), newToken.obj() );
+						return _this._retError( 0x210E, newCode, newToken );
 					}
 					return 0x03;
 				}
@@ -9188,19 +8881,21 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandNum : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
 			var value = new _Matrix();
 			if( _this._const( param, code, token, value ) == 0x00 ){
-				if( (newCode.val() & 0x20) != 0 ){
-					if( newCode.val() == 0x23 ){
+				if( (newCode & 0x20) != 0 ){
+					if( newCode == 0x23 ){
 						param = _global_param;
 					}
 					var moveFlag = new _Boolean();
-					var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+					var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 					if( !(param.setNum( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag.val() )) ){
-						return _this._retError( 0x210E, newCode.val(), newToken.obj() );
+						return _this._retError( 0x210E, newCode, newToken );
 					}
 					return 0x03;
 				}
@@ -9209,19 +8904,21 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandDenom : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
 			var value = new _Matrix();
 			if( _this._const( param, code, token, value ) == 0x00 ){
-				if( (newCode.val() & 0x20) != 0 ){
-					if( newCode.val() == 0x23 ){
+				if( (newCode & 0x20) != 0 ){
+					if( newCode == 0x23 ){
 						param = _global_param;
 					}
 					var moveFlag = new _Boolean();
-					var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+					var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 					if( !(param.setDenom( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag.val() )) ){
-						return _this._retError( 0x210E, newCode.val(), newToken.obj() );
+						return _this._retError( 0x210E, newCode, newToken );
 					}
 					return 0x03;
 				}
@@ -9231,20 +8928,22 @@ _Proc.prototype = {
 	},
 	_commandMat : function( _this, param, code, token ){
 		var value = newMatrixArray( 2 );
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		if( _this._const( param, code, token, value[0] ) == 0x00 ){
 			if( _this._const( param, code, token, value[1] ) == 0x00 ){
-				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					if( (newCode.val() & 0x40) != 0 ){
-						if( newCode.val() == 0x46 ){
+				if( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( (newCode & 0x40) != 0 ){
+						if( newCode == 0x46 ){
 							param = _global_param;
 						}
-						var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+						var index = _this.arrayIndexIndirect( param, newCode, newToken );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return 0x03;
-					} else if( (newCode.val() == 8) || (newCode.val() == 0x23) ){
-						var index = param._array.define( newToken.obj() );
+					} else if( (newCode == 8) || (newCode == 0x23) ){
+						var index = param._array.define( newToken );
 						param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
 						return 0x03;
 					}
@@ -9254,14 +8953,16 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandTrans : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
-				var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var index = _this.arrayIndexIndirect( param, newCode, newToken );
 				param._array.setMatrix( index, param._array._mat[index].trans(), false );
 				return 0x03;
 			}
@@ -9279,8 +8980,8 @@ _Proc.prototype = {
 	_commandLocalTime : function( _this, param, code, token ){
 		var i;
 		var value = new _Matrix();
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var format = new _String();
 		var errFlag;
 		var curIndex;
@@ -9288,7 +8989,7 @@ _Proc.prototype = {
 		if( _this._const( param, code, token, value ) != 0x00 ){
 			return _this._retError( 0x2141, code, token );
 		}
-		_this._getString( param, newCode, newToken, format );
+		_this._getString( param, format );
 		if( format.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -9302,12 +9003,14 @@ _Proc.prototype = {
 					errFlag = true;
 					break;
 				}
-				if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-					if( (newCode.val() & 0x20) != 0 ){
-						if( newCode.val() == 0x23 ){
-							curIndex = _this.varIndexIndirectMove( _global_param, newCode.val(), newToken.obj(), moveFlag );
+				if( _this.curLine().getTokenParam( param ) ){
+					newCode = _get_code;
+					newToken = _get_token;
+					if( (newCode & 0x20) != 0 ){
+						if( newCode == 0x23 ){
+							curIndex = _this.varIndexIndirectMove( _global_param, newCode, newToken, moveFlag );
 						} else {
-							curIndex = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+							curIndex = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 						}
 					} else {
 						errFlag = true;
@@ -9341,8 +9044,8 @@ _Proc.prototype = {
 	_commandArrayCopy : function( _this, param, code, token ){
 		var i;
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var value = new _Matrix();
 		var srcCode;
 		var srcToken;
@@ -9350,9 +9053,15 @@ _Proc.prototype = {
 		var dstCode;
 		var dstToken;
 		var dstIndex = new Array();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
-			srcCode = newCode.val();
-			srcToken = newToken.obj();
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				srcCode = newCode;
+				srcToken = newToken;
+			} else {
+				return _this._retError( 0x2141, code, token );
+			}
 		} else {
 			return _this._retError( 0x2141, code, token );
 		}
@@ -9365,18 +9074,21 @@ _Proc.prototype = {
 		}
 		while( true ){
 			lock = _this.curLine().lock();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
-				dstCode = newCode.val();
-				dstToken = newToken.obj();
-				break;
-			} else {
-				_this.curLine().unlock( lock );
-				if( _this._const( param, code, token, value ) == 0x00 ){
-					srcIndex[i] = _INT( value._mat[0].toFloat() );
-					i++;
-				} else {
-					return _this._retError( 0x2141, code, token );
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( (newCode & 0x40) != 0 ){
+					dstCode = newCode;
+					dstToken = newToken;
+					break;
 				}
+			}
+			_this.curLine().unlock( lock );
+			if( _this._const( param, code, token, value ) == 0x00 ){
+				srcIndex[i] = _INT( value._mat[0].toFloat() );
+				i++;
+			} else {
+				return _this._retError( 0x2141, code, token );
 			}
 		}
 		i = 0;
@@ -9437,8 +9149,8 @@ _Proc.prototype = {
 	},
 	_commandArrayFill : function( _this, param, code, token ){
 		var i;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var srcValue = new _Matrix();
 		var tmpValue = new _Matrix();
 		var dstCode;
@@ -9447,9 +9159,15 @@ _Proc.prototype = {
 		if( _this._const( param, code, token, srcValue ) != 0x00 ){
 			return _this._retError( 0x2141, code, token );
 		}
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) && ((newCode.val() & 0x40) != 0) ){
-			dstCode = newCode.val();
-			dstToken = newToken.obj();
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				dstCode = newCode;
+				dstToken = newToken;
+			} else {
+				return _this._retError( 0x2141, code, token );
+			}
 		} else {
 			return _this._retError( 0x2141, code, token );
 		}
@@ -9494,14 +9212,16 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandStrCpy : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				var tmpParam = (newCode == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
 				var string = new _String();
-				_this._getString( param, newCode, newToken, string );
+				_this._getString( param, string );
 				switch( token ){
 				case 53:
 					_this.strSet( tmpParam._array, _arrayIndex, string.str() );
@@ -9516,12 +9236,14 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandStrLwr : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				var tmpParam = (newCode == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
 				_this.strLwr( tmpParam._array, _arrayIndex );
 				return 0x03;
 			}
@@ -9529,12 +9251,14 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandStrUpr : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				var tmpParam = (newCode == 0x46) ? _global_param : param;
+				var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
 				_this.strUpr( tmpParam._array, _arrayIndex );
 				return 0x03;
 			}
@@ -9542,8 +9266,8 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandPrint : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var _arrayIndex = new Array( 2 );
 		var topPrint;
 		var curPrint;
@@ -9555,12 +9279,14 @@ _Proc.prototype = {
 		var imag = new _String();
 		switch( token ){
 		case 61:
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( (newCode.val() & 0x40) != 0 ){
-					if( newCode.val() == 0x46 ){
-						_arrayIndex[0] = _this.arrayIndexIndirect( _global_param, newCode.val(), newToken.obj() );
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( (newCode & 0x40) != 0 ){
+					if( newCode == 0x46 ){
+						_arrayIndex[0] = _this.arrayIndexIndirect( _global_param, newCode, newToken );
 					} else {
-						_arrayIndex[0] = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+						_arrayIndex[0] = _this.arrayIndexIndirect( param, newCode, newToken );
 					}
 				} else {
 					return _this._retError( 0x2141, code, token );
@@ -9575,7 +9301,7 @@ _Proc.prototype = {
 		case 96:
 			if( skipCommandLog() ){
 				while( true ){
-					if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
+					if( !(_this.curLine().getTokenParam( param )) ){
 						break;
 					}
 				}
@@ -9587,9 +9313,11 @@ _Proc.prototype = {
 		errFlag = false;
 		while( true ){
 			lock = _this.curLine().lock();
-			if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
+			if( !(_this.curLine().getTokenParam( param )) ){
 				break;
 			}
+			newCode = _get_code;
+			newToken = _get_token;
 			if( topPrint == null ){
 				topPrint = new __ProcPrint();
 				curPrint = topPrint;
@@ -9599,16 +9327,14 @@ _Proc.prototype = {
 				curPrint = tmpPrint;
 			}
 			curPrint._string = null;
-			if( newCode.val() == 19 ){
+			if( newCode == 19 ){
 				curPrint._string = new String();
-				curPrint._string = newToken.obj();
-			} else if( (newCode.val() & 0x40) != 0 ){
-				var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-				_arrayIndex[1] = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
+				curPrint._string = newToken;
+			} else if( (newCode & 0x40) != 0 ){
+				var tmpParam = (newCode == 0x46) ? _global_param : param;
+				_arrayIndex[1] = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
 				curPrint._string = new String();
-				var tmp = new _String();
-				_this.strGet( tmpParam._array, _arrayIndex[1], tmp );
-				curPrint._string = tmp.str();
+				curPrint._string = _this.strGet( tmpParam._array, _arrayIndex[1] );
 			} else {
 				_this.curLine().unlock( lock );
 				if( _this._const( param, code, token, value ) == 0x00 ){
@@ -9659,47 +9385,49 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandScan : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var ret = 0x00;
 		var topScan;
 		var curScan;
 		var tmpScan;
 		topScan = new __ProcScan();
 		curScan = topScan;
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( newCode.val() == 19 ){
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( newCode == 19 ){
 				curScan._title = new String();
-				curScan._title = newToken.obj();
-			} else if( ((newCode.val() & 0x20) != 0) || ((newCode.val() & 0x40) != 0) ){
-				switch( newCode.val() ){
+				curScan._title = newToken;
+			} else if( ((newCode & 0x20) != 0) || ((newCode & 0x40) != 0) ){
+				switch( newCode ){
 				case 0x21:
-					if( param._var.isLocked( _this.varIndexParam( param, newToken.obj() ) ) ){
+					if( param._var.isLocked( _this.varIndexParam( param, newToken ) ) ){
 						ret = _this._retError( 0x210E, code, token );
 					}
 					break;
 				case 0x22:
-					if( param._var.isLocked( _this.autoVarIndex( param, newToken.obj() ) ) ){
+					if( param._var.isLocked( _this.autoVarIndex( param, newToken ) ) ){
 						ret = _this._retError( 0x210E, code, token );
 					}
 					break;
 				case 0x23:
-					if( _global_param._var.isLocked( _this.autoVarIndex( _global_param, newToken.obj() ) ) ){
+					if( _global_param._var.isLocked( _this.autoVarIndex( _global_param, newToken ) ) ){
 						ret = _this._retError( 0x210E, code, token );
 					}
 					break;
 				}
 				_this._token.delToken( curScan._code, curScan._token );
-				curScan._code = newCode.val();
-				switch( newCode.val() ){
+				curScan._code = newCode;
+				switch( newCode ){
 				case 0x21:
-					curScan._token = _this.varIndexParam( param, newToken.obj() );
+					curScan._token = _this.varIndexParam( param, newToken );
 					break;
 				case 0x44:
-					curScan._token = _this.arrayIndexParam( param, newToken.obj() );
+					curScan._token = _this.arrayIndexParam( param, newToken );
 					break;
 				default:
-					curScan._token = _this._token.newToken( newCode.val(), newToken.obj() );
+					curScan._token = _this._token.newToken( newCode, newToken );
 					break;
 				}
 				tmpScan = new __ProcScan();
@@ -9714,7 +9442,7 @@ _Proc.prototype = {
 		if( curScan._before != null ){
 			curScan._before._next = null;
 			if( ret == 0x00 ){
-				doCommandScan( _this, topScan, param );
+				doCommandScan( topScan, _this, param );
 			}
 			curScan = topScan;
 			while( curScan != null ){
@@ -9736,30 +9464,29 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandError : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var error = new _String();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( newCode.val() == 19 ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( newCode == 19 ){
 				_this._formatError(
-					newToken.obj(),
+					newToken,
 					param._fileFlag ? param._funcName : null,
 					error
 					);
 				printError( error.str(), param._parentNum, param._parentFunc );
 				return 0x03;
-			} else if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+			} else if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
-				var string = new _String();
-				_this.strGet( param._array, _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() ), string );
 				_this._formatError(
-					string.str(),
+					_this.strGet( param._array, _this.arrayIndexIndirect( param, newCode, newToken ) ),
 					param._fileFlag ? param._funcName : null,
 					error
 					);
-				string = null;
 				printError( error.str(), param._parentNum, param._parentFunc );
 				return 0x03;
 			}
@@ -9872,12 +9599,10 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandGText : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var text = new _String();
 		var ret = 0x00;
 		var value = newMatrixArray( 3 );
-		_this._getString( param, newCode, newToken, text );
+		_this._getString( param, text );
 		if( text.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -9896,12 +9621,10 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandWText : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var text = new _String();
 		var ret = 0x00;
 		var value = newMatrixArray( 3 );
-		_this._getString( param, newCode, newToken, text );
+		_this._getString( param, text );
 		if( text.isNull() ){
 			return _this._retError( 0x210B, code, token );
 		}
@@ -9991,17 +9714,19 @@ _Proc.prototype = {
 	},
 	_commandGPut : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		lock = _this.curLine().lock();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
 				var width = _proc_gworld.width ();
 				var height = _proc_gworld.height();
-				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
 				var arrayList = new Array( 3 );
 				arrayList[2] = -1;
 				var x, y;
@@ -10035,16 +9760,18 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandGPut24 : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
 				var width = _proc_gworld.width ();
 				var height = _proc_gworld.height();
-				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
 				var arrayList = new Array( 3 );
 				arrayList[2] = -1;
 				var x, y;
@@ -10082,17 +9809,19 @@ _Proc.prototype = {
 	},
 	_commandGGet : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		lock = _this.curLine().lock();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
 				var width = _proc_gworld.width ();
 				var height = _proc_gworld.height();
-				var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
 				var arrayList = new Array( 3 );
 				var resizeList = new Array( 3 );
 				resizeList[0] = height - 1;
@@ -10120,13 +9849,15 @@ _Proc.prototype = {
 					ret = _this._const( param, code, token, value[i] );
 				}
 				if( ret == 0x00 ){
-					if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-						if( (newCode.val() & 0x20) != 0 ){
-							if( newCode.val() == 0x23 ){
+					if( _this.curLine().getTokenParam( param ) ){
+						newCode = _get_code;
+						newToken = _get_token;
+						if( (newCode & 0x20) != 0 ){
+							if( newCode == 0x23 ){
 								param = _global_param;
 							}
 							var moveFlag = new _Boolean();
-							var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+							var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 							if( !(param.setVal(
 								index,
 								_proc_gworld.get( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) ),
@@ -10143,11 +9874,13 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandGGet24 : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
 					param = _global_param;
 				}
 				var w = new _Integer();
@@ -10156,7 +9889,7 @@ _Proc.prototype = {
 				if( data != null ){
 					var width = w.val();
 					var height = h.val();
-					var _arrayIndex = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+					var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
 					var arrayList = new Array( 3 );
 					var resizeList = new Array( 3 );
 					resizeList[0] = height - 1;
@@ -10195,15 +9928,17 @@ _Proc.prototype = {
 			ret = _this._const( param, code, token, value[i] );
 		}
 		if( ret == 0x00 ){
-			var newCode = new _Integer();
-			var newToken = new _Void();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( (newCode.val() & 0x20) != 0 ){
-					if( newCode.val() == 0x23 ){
+			var newCode;
+			var newToken;
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( (newCode & 0x20) != 0 ){
+					if( newCode == 0x23 ){
 						param = _global_param;
 					}
 					var moveFlag = new _Boolean();
-					var index = _this.varIndexIndirectMove( param, newCode.val(), newToken.obj(), moveFlag );
+					var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
 					if( !(param.setVal(
 						index,
 						_proc_gworld.wndGet( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() ),
@@ -10242,10 +9977,10 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandLogScale : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getToken( newCode, newToken ) ){
-			if( newCode.val() == 8 ){
+		var newToken;
+		if( _this.curLine().getToken() ){
+			newToken = _get_token;
+			if( _get_code == 8 ){
 				var value = new _Matrix();
 				if( _this._const( param, code, token, value ) == 0x00 ){
 					if( value._mat[0].toFloat() <= 1.0 ){
@@ -10254,11 +9989,11 @@ _Proc.prototype = {
 				} else {
 					value.ass( 10.0 );
 				}
-				if( newToken.obj() == "x" ){
+				if( newToken == "x" ){
 					_proc_graph.setLogScaleX( value._mat[0].toFloat() );
-				} else if( newToken.obj() == "y" ){
+				} else if( newToken == "y" ){
 					_proc_graph.setLogScaleY( value._mat[0].toFloat() );
-				} else if( newToken.obj() == "xy" ){
+				} else if( newToken == "xy" ){
 					_proc_graph.setLogScaleX( value._mat[0].toFloat() );
 					_proc_graph.setLogScaleY( value._mat[0].toFloat() );
 				} else {
@@ -10270,15 +10005,15 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandNoLogScale : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getToken( newCode, newToken ) ){
-			if( newCode.val() == 8 ){
-				if( newToken.obj() == "x" ){
+		var newToken;
+		if( _this.curLine().getToken() ){
+			newToken = _get_token;
+			if( _get_code == 8 ){
+				if( newToken == "x" ){
 					_proc_graph.setLogScaleX( 0.0 );
-				} else if( newToken.obj() == "y" ){
+				} else if( newToken == "y" ){
 					_proc_graph.setLogScaleY( 0.0 );
-				} else if( newToken.obj() == "xy" ){
+				} else if( newToken == "xy" ){
 					_proc_graph.setLogScaleX( 0.0 );
 					_proc_graph.setLogScaleY( 0.0 );
 				} else {
@@ -10291,22 +10026,22 @@ _Proc.prototype = {
 	},
 	_commandPlot : function( _this, param, code, token ){
 		var lock;
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		var value = newMatrixArray( 4 );
 		switch( _proc_graph.mode() ){
 		case 0:
 		case 2:
 			lock = _this.curLine().lock();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( newCode.val() == 19 ){
-					_proc_graph.setExpr( newToken.obj() );
-				} else if( (newCode.val() & 0x40) != 0 ){
-					var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
-					var string = new _String();
-					_this.strGet( tmpParam._array, _arrayIndex, string );
-					_proc_graph.setExpr( string.str() );
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( newCode == 19 ){
+					_proc_graph.setExpr( newToken );
+				} else if( (newCode & 0x40) != 0 ){
+					var tmpParam = (newCode == 0x46) ? _global_param : param;
+					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
+					_proc_graph.setExpr( _this.strGet( tmpParam._array, _arrayIndex ) );
 				} else {
 					_this.curLine().unlock( lock );
 					break;
@@ -10315,30 +10050,30 @@ _Proc.prototype = {
 			break;
 		case 1:
 			lock = _this.curLine().lock();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( newCode.val() == 19 ){
-					_proc_graph.setExpr1( newToken.obj() );
-				} else if( (newCode.val() & 0x40) != 0 ){
-					var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
-					var string = new _String();
-					_this.strGet( tmpParam._array, _arrayIndex, string );
-					_proc_graph.setExpr1( string.str() );
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( newCode == 19 ){
+					_proc_graph.setExpr1( newToken );
+				} else if( (newCode & 0x40) != 0 ){
+					var tmpParam = (newCode == 0x46) ? _global_param : param;
+					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
+					_proc_graph.setExpr1( _this.strGet( tmpParam._array, _arrayIndex ) );
 				} else {
 					_this.curLine().unlock( lock );
 					break;
 				}
 			}
 			lock = _this.curLine().lock();
-			if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-				if( newCode.val() == 19 ){
-					_proc_graph.setExpr2( newToken.obj() );
-				} else if( (newCode.val() & 0x40) != 0 ){
-					var tmpParam = (newCode.val() == 0x46) ? _global_param : param;
-					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode.val(), newToken.obj() );
-					var string = new _String();
-					_this.strGet( tmpParam._array, _arrayIndex, string );
-					_proc_graph.setExpr2( string.str() );
+			if( _this.curLine().getTokenParam( param ) ){
+				newCode = _get_code;
+				newToken = _get_token;
+				if( newCode == 19 ){
+					_proc_graph.setExpr2( newToken );
+				} else if( (newCode & 0x40) != 0 ){
+					var tmpParam = (newCode == 0x46) ? _global_param : param;
+					var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
+					_proc_graph.setExpr2( _this.strGet( tmpParam._array, _arrayIndex ) );
 				} else {
 					return _this._retError( 0x2141, code, token );
 				}
@@ -10470,11 +10205,11 @@ _Proc.prototype = {
 		var saveCurLine = _this._curLine;
 		var saveProcLine = _this._procLine;
 		var saveFuncName = param._funcName;
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getToken( newCode, newToken ) ){
-			if( newCode.val() == 13 ){
-				var name = newToken.obj() + ".inc";
+		var newToken;
+		if( _this.curLine().getToken() ){
+			newToken = _get_token;
+			if( _get_code == 13 ){
+				var name = newToken + ".inc";
 				var func;
 				if( (func = _proc_func.search( name, true, null )) != null ){
 					if( _this.mainLoop( func, param, null, null ) == 0x04 ){
@@ -10513,11 +10248,11 @@ _Proc.prototype = {
 		return _this._retError( 0x2141, code, token );
 	},
 	_commandNameSpace : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getToken( newCode, newToken ) ){
-			if( newCode.val() == 8 ){
-				param.setNameSpace( newToken.obj() );
+		var newToken;
+		if( _this.curLine().getToken() ){
+			newToken = _get_token;
+			if( _get_code == 8 ){
+				param.setNameSpace( newToken );
 				return 0x03;
 			}
 			return _this._retError( 0x2141, code, token );
@@ -10526,28 +10261,30 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_commandDump : function( _this, param, code, token ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
+		var newCode;
+		var newToken;
 		if( skipCommandLog() ){
 			while( true ){
-				if( !(_this.curLine().getTokenParam( param, newCode, newToken )) ){
+				if( !(_this.curLine().getTokenParam( param )) ){
 					break;
 				}
 			}
 			return 0x03;
 		}
-		while( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & 0x20) != 0 ){
-				if( newCode.val() == 0x23 ){
-					doCommandDumpVar( _global_param, _this.varIndexIndirect( _global_param, newCode.val(), newToken.obj() ) );
+		while( _this.curLine().getTokenParam( param ) ){
+			newCode = _get_code;
+			newToken = _get_token;
+			if( (newCode & 0x20) != 0 ){
+				if( newCode == 0x23 ){
+					doCommandDumpVar( _global_param, _this.varIndexIndirect( _global_param, newCode, newToken ) );
 				} else {
-					doCommandDumpVar( param, _this.varIndexIndirect( param, newCode.val(), newToken.obj() ) );
+					doCommandDumpVar( param, _this.varIndexIndirect( param, newCode, newToken ) );
 				}
-			} else if( (newCode.val() & 0x40) != 0 ){
-				if( newCode.val() == 0x46 ){
-					doCommandDumpArray( _global_param, _this.arrayIndexIndirect( _global_param, newCode.val(), newToken.obj() ) );
+			} else if( (newCode & 0x40) != 0 ){
+				if( newCode == 0x46 ){
+					doCommandDumpArray( _global_param, _this.arrayIndexIndirect( _global_param, newCode, newToken ) );
 				} else {
-					doCommandDumpArray( param, _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() ) );
+					doCommandDumpArray( param, _this.arrayIndexIndirect( param, newCode, newToken ) );
 				}
 			} else {
 				return _this._retError( 0x2141, code, token );
@@ -10587,11 +10324,9 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_procArrayFirst : function( param, token, value ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		this._curInfo._assToken = this.arrayIndexParam( param, token );
-		if( this.curLine().getTokenLock( newCode, newToken ) ){
-			if( newCode.val() == 16 ){
+		if( this.curLine().getTokenLock() ){
+			if( _get_code == 16 ){
 				this._initArrayFlag = true;
 				this._initArrayCnt = 0;
 				this._initArrayMax = 0;
@@ -10610,11 +10345,9 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_procArray : function( _this, param, code, token, value ){
-		var newCode = new _Integer();
-		var newToken = new _Void();
 		var index = _this.arrayIndexParam( param, token );
-		if( _this.curLine().getTokenLock( newCode, newToken ) ){
-			if( newCode.val() == 16 ){
+		if( _this.curLine().getTokenLock() ){
+			if( _get_code == 16 ){
 				_this._initArrayFlag = true;
 				_this._initArrayCnt = 0;
 				_this._initArrayMax = 0;
@@ -10637,10 +10370,8 @@ _Proc.prototype = {
 		if( code == 0x46 ){
 			param = _global_param;
 		}
-		var newCode = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenLock( newCode, newToken ) ){
-			if( newCode.val() == 16 ){
+		if( _this.curLine().getTokenLock() ){
+			if( _get_code == 16 ){
 				_this._initArrayFlag = true;
 				_this._initArrayCnt = 0;
 				_this._initArrayMax = 0;
@@ -10689,7 +10420,7 @@ _Proc.prototype = {
 	_procCommand : function( _this, param, code, token, value ){
 		var ret;
 		if( token < 97 ){
-			if( (ret = _this._procSubCommand[token]( _this, param, code, token )) != 0x03 ){
+			if( (ret = _Proc._procSubCommand[token]( _this, param, code, token )) != 0x03 ){
 				return ret;
 			}
 		} else {
@@ -10705,11 +10436,11 @@ _Proc.prototype = {
 		}
 	},
 	_procStat : function( _this, param, code, token, value ){
-		return _this._procSubStat[token]( _this, param, code, token );
+		return _Proc._procSubStat[token]( _this, param, code, token );
 	},
 	_procUnary : function( _this, param, code, token, value ){
 		if( token < 6 ){
-			return _this._procSubOp[token]( _this, param, code, token, value );
+			return _Proc._procSubOp[token]( _this, param, code, token, value );
 		} else {
 			return _this._retError( 0x2100, code, token );
 		}
@@ -10718,7 +10449,7 @@ _Proc.prototype = {
 		var ret;
 		clearValueError();
 		clearMatrixError();
-		if( (ret = _this._procSubFunc[token]( _this, param, code, token, value, false )) != 0x00 ){
+		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, false )) != 0x00 ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -10732,7 +10463,7 @@ _Proc.prototype = {
 		var ret;
 		clearValueError();
 		clearMatrixError();
-		if( (ret = _this._procSubFunc[token]( _this, param, code, token, value, true )) != 0x00 ){
+		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, true )) != 0x00 ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -10843,6 +10574,399 @@ _Proc.prototype = {
 		return true;
 	}
 };
+_Proc._procSubFunc = [
+	_Proc.prototype._funcDefined,
+	_Proc.prototype._funcIndexOf,
+	_Proc.prototype._funcIsInf,
+	_Proc.prototype._funcIsNaN,
+	_Proc.prototype._funcRand,
+	_Proc.prototype._funcTime,
+	_Proc.prototype._funcMkTime,
+	_Proc.prototype._funcTmSec,
+	_Proc.prototype._funcTmMin,
+	_Proc.prototype._funcTmHour,
+	_Proc.prototype._funcTmMDay,
+	_Proc.prototype._funcTmMon,
+	_Proc.prototype._funcTmYear,
+	_Proc.prototype._funcTmWDay,
+	_Proc.prototype._funcTmYDay,
+	_Proc.prototype._funcTmXMon,
+	_Proc.prototype._funcTmXYear,
+	_Proc.prototype._funcA2D,
+	_Proc.prototype._funcA2G,
+	_Proc.prototype._funcA2R,
+	_Proc.prototype._funcD2A,
+	_Proc.prototype._funcD2G,
+	_Proc.prototype._funcD2R,
+	_Proc.prototype._funcG2A,
+	_Proc.prototype._funcG2D,
+	_Proc.prototype._funcG2R,
+	_Proc.prototype._funcR2A,
+	_Proc.prototype._funcR2D,
+	_Proc.prototype._funcR2G,
+	_Proc.prototype._funcSin,
+	_Proc.prototype._funcCos,
+	_Proc.prototype._funcTan,
+	_Proc.prototype._funcASin,
+	_Proc.prototype._funcACos,
+	_Proc.prototype._funcATan,
+	_Proc.prototype._funcATan2,
+	_Proc.prototype._funcSinH,
+	_Proc.prototype._funcCosH,
+	_Proc.prototype._funcTanH,
+	_Proc.prototype._funcASinH,
+	_Proc.prototype._funcACosH,
+	_Proc.prototype._funcATanH,
+	_Proc.prototype._funcExp,
+	_Proc.prototype._funcExp10,
+	_Proc.prototype._funcLn,
+	_Proc.prototype._funcLog,
+	_Proc.prototype._funcLog10,
+	_Proc.prototype._funcPow,
+	_Proc.prototype._funcSqr,
+	_Proc.prototype._funcSqrt,
+	_Proc.prototype._funcCeil,
+	_Proc.prototype._funcFloor,
+	_Proc.prototype._funcAbs,
+	_Proc.prototype._funcLdexp,
+	_Proc.prototype._funcFrexp,
+	_Proc.prototype._funcModf,
+	_Proc.prototype._funcInt,
+	_Proc.prototype._funcReal,
+	_Proc.prototype._funcImag,
+	_Proc.prototype._funcArg,
+	_Proc.prototype._funcNorm,
+	_Proc.prototype._funcConjg,
+	_Proc.prototype._funcPolar,
+	_Proc.prototype._funcNum,
+	_Proc.prototype._funcDenom,
+	_Proc.prototype._funcRow,
+	_Proc.prototype._funcCol,
+	_Proc.prototype._funcTrans,
+	_Proc.prototype._funcStrCmp,
+	_Proc.prototype._funcStrCmp,
+	_Proc.prototype._funcStrLen,
+	_Proc.prototype._funcGWidth,
+	_Proc.prototype._funcGHeight,
+	_Proc.prototype._funcGColor,
+	_Proc.prototype._funcGColor,
+	_Proc.prototype._funcGCX,
+	_Proc.prototype._funcGCY,
+	_Proc.prototype._funcWCX,
+	_Proc.prototype._funcWCY,
+	_Proc.prototype._funcGGet,
+	_Proc.prototype._funcWGet,
+	_Proc.prototype._funcGX,
+	_Proc.prototype._funcGY,
+	_Proc.prototype._funcWX,
+	_Proc.prototype._funcWY,
+	_Proc.prototype._funcCall,
+	_Proc.prototype._funcEval
+];
+_Proc._procSubOp = [
+	_Proc.prototype._unaryIncrement,
+	_Proc.prototype._unaryDecrement,
+	_Proc.prototype._unaryComplement,
+	_Proc.prototype._unaryNot,
+	_Proc.prototype._unaryMinus,
+	_Proc.prototype._unaryPlus,
+	_Proc.prototype._opPostfixInc,
+	_Proc.prototype._opPostfixDec,
+	_Proc.prototype._opMul,
+	_Proc.prototype._opDiv,
+	_Proc.prototype._opMod,
+	_Proc.prototype._opAdd,
+	_Proc.prototype._opSub,
+	_Proc.prototype._opShiftL,
+	_Proc.prototype._opShiftR,
+	_Proc.prototype._opLess,
+	_Proc.prototype._opLessOrEq,
+	_Proc.prototype._opGreat,
+	_Proc.prototype._opGreatOrEq,
+	_Proc.prototype._opEqual,
+	_Proc.prototype._opNotEqual,
+	_Proc.prototype._opAND,
+	_Proc.prototype._opXOR,
+	_Proc.prototype._opOR,
+	_Proc.prototype._opLogAND,
+	_Proc.prototype._opLogOR,
+	_Proc.prototype._opConditional,
+	_Proc.prototype._opAss,
+	_Proc.prototype._opMulAndAss,
+	_Proc.prototype._opDivAndAss,
+	_Proc.prototype._opModAndAss,
+	_Proc.prototype._opAddAndAss,
+	_Proc.prototype._opSubAndAss,
+	_Proc.prototype._opShiftLAndAss,
+	_Proc.prototype._opShiftRAndAss,
+	_Proc.prototype._opANDAndAss,
+	_Proc.prototype._opORAndAss,
+	_Proc.prototype._opXORAndAss,
+	_Proc.prototype._opComma,
+	_Proc.prototype._opPow,
+	_Proc.prototype._opPowAndAss
+];
+_Proc._procSubLoop = [
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopEnd,
+	_Proc.prototype._loopCont,
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopUntil,
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopEndWhile,
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopNext,
+	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopEndFunc,
+	_Proc.prototype._loopIf,
+	_Proc.prototype._loopElIf,
+	_Proc.prototype._loopElse,
+	_Proc.prototype._loopEndIf,
+	_Proc.prototype._loopSwitch,
+	_Proc.prototype._loopCase,
+	_Proc.prototype._loopDefault,
+	_Proc.prototype._loopEndSwi,
+	_Proc.prototype._loopBreakSwi,
+	_Proc.prototype._loopContinue,
+	_Proc.prototype._loopBreak,
+	_Proc.prototype._loopContinue,
+	_Proc.prototype._loopBreak,
+	_Proc.prototype._loopAssert,
+	_Proc.prototype._loopReturn,
+	_Proc.prototype._loopReturn,
+	_Proc.prototype._loopReturn
+];
+_Proc._procSubStat = [
+	_Proc.prototype._statStart,
+	_Proc.prototype._statEnd,
+	_Proc.prototype._statEndInc,
+	_Proc.prototype._statEndDec,
+	_Proc.prototype._statEndEq,
+	_Proc.prototype._statEndEqInc,
+	_Proc.prototype._statEndEqDec,
+	_Proc.prototype._statCont,
+	_Proc.prototype._statDo,
+	_Proc.prototype._statUntil,
+	_Proc.prototype._statWhile,
+	_Proc.prototype._statEndWhile,
+	_Proc.prototype._statFor,
+	_Proc.prototype._statFor2,
+	_Proc.prototype._statNext,
+	_Proc.prototype._statFunc,
+	_Proc.prototype._statEndFunc,
+	_Proc.prototype._statIf,
+	_Proc.prototype._statElIf,
+	_Proc.prototype._statElse,
+	_Proc.prototype._statEndIf,
+	_Proc.prototype._statSwitch,
+	_Proc.prototype._statCase,
+	_Proc.prototype._statDefault,
+	_Proc.prototype._statEndSwi,
+	_Proc.prototype._statBreakSwi,
+	_Proc.prototype._statContinue,
+	_Proc.prototype._statBreak,
+	_Proc.prototype._statContinue2,
+	_Proc.prototype._statBreak2,
+	_Proc.prototype._statAssert,
+	_Proc.prototype._statReturn,
+	_Proc.prototype._statReturn2,
+	_Proc.prototype._statReturn3
+];
+_Proc._procSubCommand = [
+	_Proc.prototype._commandNull,
+	_Proc.prototype._commandEFloat,
+	_Proc.prototype._commandFFloat,
+	_Proc.prototype._commandGFloat,
+	_Proc.prototype._commandEComplex,
+	_Proc.prototype._commandFComplex,
+	_Proc.prototype._commandGComplex,
+	_Proc.prototype._commandPrec,
+	_Proc.prototype._commandIFract,
+	_Proc.prototype._commandMFract,
+	_Proc.prototype._commandHTime,
+	_Proc.prototype._commandMTime,
+	_Proc.prototype._commandSTime,
+	_Proc.prototype._commandFTime,
+	_Proc.prototype._commandFps,
+	_Proc.prototype._commandSChar,
+	_Proc.prototype._commandUChar,
+	_Proc.prototype._commandSShort,
+	_Proc.prototype._commandUShort,
+	_Proc.prototype._commandSLong,
+	_Proc.prototype._commandULong,
+	_Proc.prototype._commandSInt,
+	_Proc.prototype._commandUInt,
+	_Proc.prototype._commandRadix,
+	_Proc.prototype._commandPType,
+	_Proc.prototype._commandRad,
+	_Proc.prototype._commandDeg,
+	_Proc.prototype._commandGrad,
+	_Proc.prototype._commandAngle,
+	_Proc.prototype._commandAns,
+	_Proc.prototype._commandAssert,
+	_Proc.prototype._commandWarn,
+	_Proc.prototype._commandParam,
+	_Proc.prototype._commandParams,
+	_Proc.prototype._commandDefine,
+	_Proc.prototype._commandEnum,
+	_Proc.prototype._commandUnDef,
+	_Proc.prototype._commandVar,
+	_Proc.prototype._commandArray,
+	_Proc.prototype._commandLocal,
+	_Proc.prototype._commandGlobal,
+	_Proc.prototype._commandLabel,
+	_Proc.prototype._commandParent,
+	_Proc.prototype._commandReal,
+	_Proc.prototype._commandImag,
+	_Proc.prototype._commandNum,
+	_Proc.prototype._commandDenom,
+	_Proc.prototype._commandMat,
+	_Proc.prototype._commandTrans,
+	_Proc.prototype._commandSRand,
+	_Proc.prototype._commandLocalTime,
+	_Proc.prototype._commandArrayCopy,
+	_Proc.prototype._commandArrayFill,
+	_Proc.prototype._commandStrCpy,
+	_Proc.prototype._commandStrCpy,
+	_Proc.prototype._commandStrLwr,
+	_Proc.prototype._commandStrUpr,
+	_Proc.prototype._commandClear,
+	_Proc.prototype._commandError,
+	_Proc.prototype._commandPrint,
+	_Proc.prototype._commandPrint,
+	_Proc.prototype._commandPrint,
+	_Proc.prototype._commandScan,
+	_Proc.prototype._commandGWorld,
+	_Proc.prototype._commandGClear,
+	_Proc.prototype._commandGColor,
+	_Proc.prototype._commandGFill,
+	_Proc.prototype._commandGMove,
+	_Proc.prototype._commandGText,
+	_Proc.prototype._commandGTextL,
+	_Proc.prototype._commandGLine,
+	_Proc.prototype._commandGPut,
+	_Proc.prototype._commandGPut24,
+	_Proc.prototype._commandGGet,
+	_Proc.prototype._commandGGet24,
+	_Proc.prototype._commandGUpdate,
+	_Proc.prototype._commandWindow,
+	_Proc.prototype._commandWFill,
+	_Proc.prototype._commandWMove,
+	_Proc.prototype._commandWText,
+	_Proc.prototype._commandWTextL,
+	_Proc.prototype._commandWLine,
+	_Proc.prototype._commandWPut,
+	_Proc.prototype._commandWGet,
+	_Proc.prototype._commandRectangular,
+	_Proc.prototype._commandParametric,
+	_Proc.prototype._commandPolar,
+	_Proc.prototype._commandLogScale,
+	_Proc.prototype._commandNoLogScale,
+	_Proc.prototype._commandPlot,
+	_Proc.prototype._commandRePlot,
+	_Proc.prototype._commandCalculator,
+	_Proc.prototype._commandInclude,
+	_Proc.prototype._commandBase,
+	_Proc.prototype._commandNameSpace,
+	_Proc.prototype._commandDump,
+	_Proc.prototype._commandPrint
+];
+_Proc._procSubSe = [
+	_Proc.prototype._seNull,
+	_Proc.prototype._seIncrement,
+	_Proc.prototype._seDecrement,
+	_Proc.prototype._seNegative,
+	_Proc.prototype._seComplement,
+	_Proc.prototype._seNot,
+	_Proc.prototype._seMinus,
+	_Proc.prototype._seSet,
+	_Proc.prototype._seSetC,
+	_Proc.prototype._seSetF,
+	_Proc.prototype._seSetM,
+	_Proc.prototype._seMul,
+	_Proc.prototype._seDiv,
+	_Proc.prototype._seMod,
+	_Proc.prototype._seAdd,
+	_Proc.prototype._seAddS,
+	_Proc.prototype._seSub,
+	_Proc.prototype._seSubS,
+	_Proc.prototype._sePow,
+	_Proc.prototype._seShiftL,
+	_Proc.prototype._seShiftR,
+	_Proc.prototype._seAND,
+	_Proc.prototype._seOR,
+	_Proc.prototype._seXOR,
+	_Proc.prototype._seLess,
+	_Proc.prototype._seLessOrEq,
+	_Proc.prototype._seGreat,
+	_Proc.prototype._seGreatOrEq,
+	_Proc.prototype._seEqual,
+	_Proc.prototype._seNotEqual,
+	_Proc.prototype._seLogAND,
+	_Proc.prototype._seLogOR,
+	_Proc.prototype._seMulAndAss,
+	_Proc.prototype._seDivAndAss,
+	_Proc.prototype._seModAndAss,
+	_Proc.prototype._seAddAndAss,
+	_Proc.prototype._seAddSAndAss,
+	_Proc.prototype._seSubAndAss,
+	_Proc.prototype._seSubSAndAss,
+	_Proc.prototype._sePowAndAss,
+	_Proc.prototype._seShiftLAndAss,
+	_Proc.prototype._seShiftRAndAss,
+	_Proc.prototype._seANDAndAss,
+	_Proc.prototype._seORAndAss,
+	_Proc.prototype._seXORAndAss,
+	_Proc.prototype._seLessAndAss,
+	_Proc.prototype._seLessOrEqAndAss,
+	_Proc.prototype._seGreatAndAss,
+	_Proc.prototype._seGreatOrEqAndAss,
+	_Proc.prototype._seEqualAndAss,
+	_Proc.prototype._seNotEqualAndAss,
+	_Proc.prototype._seLogANDAndAss,
+	_Proc.prototype._seLogORAndAss,
+	_Proc.prototype._seConditional,
+	_Proc.prototype._seSetFALSE,
+	_Proc.prototype._seSetTRUE,
+	_Proc.prototype._seSetZero
+];
+_Proc._procSub = [
+	_Proc.prototype._procTop,
+	_Proc.prototype._procVariable,
+	_Proc.prototype._procAutoVar,
+	_Proc.prototype._procGlobalVar,
+	_Proc.prototype._procArray,
+	_Proc.prototype._procAutoArray,
+	_Proc.prototype._procAutoArray,
+	_Proc.prototype._procConst,
+	_Proc.prototype._procLabel,
+	_Proc.prototype._procCommand,
+	_Proc.prototype._procStat,
+	_Proc.prototype._procUnary,
+	_Proc.prototype._procFunc,
+	_Proc.prototype._procExtFunc
+];
+_Proc._procMain = [
+	_Proc.prototype._procMain1,
+	_Proc.prototype._procMain2,
+	_Proc.prototype._procMain3
+];
+_Proc._procMainCache = [
+	_Proc.prototype._procMain1Cache,
+	_Proc.prototype._procMain2Cache,
+	_Proc.prototype._procMain3Cache
+];
+_Proc._procTest = [
+	_Proc.prototype._procTest1,
+	_Proc.prototype._procTest2,
+	_Proc.prototype._procTest3
+];
 function defProcFunction(){
 	if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
 	if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
@@ -10857,13 +10981,13 @@ function defProcFunction(){
 	if( window.printError == undefined ) window.printError = function( error, num, func ){};
 	if( window.doFuncGColor == undefined ) window.doFuncGColor = function( rgb ){ return 0; };
 	if( window.doFuncGColor24 == undefined ) window.doFuncGColor24 = function( index ){ return 0x000000; };
-if( window.doFuncEval == undefined ) window.doFuncEval = function( parentProc, childProc, childParam, string, value ){ return 0x00; };
+	if( window.doFuncEval == undefined ) window.doFuncEval = function( parentProc, childProc, childParam, string, value ){ return 0x00; };
 	if( window.doCommandClear == undefined ) window.doCommandClear = function(){};
 	if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
-	if( window.doCommandScan == undefined ) window.doCommandScan = function( _this, topScan, param ){};
+	if( window.doCommandScan == undefined ) window.doCommandScan = function( topScan, proc, param ){};
 	if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( gWorld, width, height ){};
 	if( window.doCommandWindow == undefined ) window.doCommandWindow = function( gWorld, left, bottom, right, top ){};
-	if( window.doCommandGColor == undefined ) window.doCommandGColor = function( color, rgb ){};
+	if( window.doCommandGColor == undefined ) window.doCommandGColor = function( index, rgb ){};
 	if( window.doCommandGPut24 == undefined ) window.doCommandGPut24 = function( x, y, rgb ){};
 	if( window.doCommandGPut24End == undefined ) window.doCommandGPut24End = function(){};
 	if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width , height ){ return null; };
@@ -11218,6 +11342,45 @@ var _TOKEN_SE = [
 	"return",
 	"return_a"
 ];
+var _TOKEN_DEFINE = [
+	"DBL_EPSILON",
+	"HUGE_VAL",
+	"RAND_MAX",
+	"FALSE",
+	"TRUE",
+	"BG_COLOR",
+	"TIME_ZONE",
+	"INFINITY",
+	"NAN"
+];
+var _VALUE_DEFINE = [
+	_DBL_EPSILON,
+	Number.MAX_VALUE,
+	_RAND_MAX,
+	0,
+	1,
+	gWorldBgColor(),
+	(new Date()).getTimezoneOffset() * -60,
+	Number.POSITIVE_INFINITY,
+	Number.NaN
+];
+function indexOf( stringArray, string ){
+	var len = stringArray.length;
+	for( var i = 0; i < len; i++ ){
+		if( stringArray[i] == string ){
+			return i;
+		}
+	}
+	return -1;
+}
+var _get_code;
+var _get_token;
+function getCode(){
+	return _get_code;
+}
+function getToken(){
+	return _get_token;
+}
 function __Token(){
 	this._code = 0;
 	this._token = null;
@@ -11322,15 +11485,15 @@ _Token.prototype = {
 		return false;
 	},
 	checkFunc : function( string, func ){
-		func.set( _TOKEN_FUNC.indexOf( string ) );
+		func.set( indexOf( _TOKEN_FUNC, string ) );
 		return (func.val() >= 0);
 	},
 	checkStat : function( string, stat ){
-		stat.set( _TOKEN_STAT.indexOf( string ) );
+		stat.set( indexOf( _TOKEN_STAT, string ) );
 		return (stat.val() >= 0);
 	},
 	checkCommand : function( string, command ){
-		command.set( _TOKEN_COMMAND.indexOf( string ) + 1 );
+		command.set( indexOf( _TOKEN_COMMAND, string ) + 1 );
 		if( command.val() >= 1 ){
 				return true;
 		}
@@ -11343,7 +11506,7 @@ _Token.prototype = {
 		return false;
 	},
 	checkSe : function( string, se ){
-		se.set( _TOKEN_SE.indexOf( string ) + 1 );
+		se.set( indexOf( _TOKEN_SE, string ) + 1 );
 		if( se.val() >= 1 ){
 				return true;
 		}
@@ -11354,15 +11517,11 @@ _Token.prototype = {
 		return false;
 	},
 	checkDefine : function( string, value ){
-		if( string == "DBL_EPSILON" ){ value.ass( _DBL_EPSILON ); return true; }
-		if( string == "HUGE_VAL" ){ value.ass( Number.MAX_VALUE ); return true; }
-		if( string == "RAND_MAX" ){ value.ass( _RAND_MAX ); return true; }
-		if( string == "FALSE" ){ value.ass( 0 ); return true; }
-		if( string == "TRUE" ){ value.ass( 1 ); return true; }
-		if( string == "BG_COLOR" ){ value.ass( gWorldBgColor() ); return true; }
-		if( string == "TIME_ZONE" ){ value.ass( (new Date()).getTimezoneOffset() * -60 ); return true; }
-		if( string == "INFINITY" ){ value.ass( Number.POSITIVE_INFINITY ); return true; }
-		if( string == "NAN" ){ value.ass( Number.NaN ); return true; }
+		var define = indexOf( _TOKEN_DEFINE, string );
+		if( define >= 0 ){
+			value.ass( _VALUE_DEFINE[define] );
+			return true;
+		}
 		return false;
 	},
 	stringToValue : function( param, string, value ){
@@ -12924,51 +13083,51 @@ _Token.prototype = {
 	beginGetToken : function( num ){
 		this._get = (num == undefined) ? this._top : this._searchList( num );
 	},
-	getToken : function( code , token ){
+	getToken : function(){
 		if( this._get == null ){
 			return false;
 		}
-		code .set( this._get._code );
-		token.set( this._get._token );
+		_get_code = this._get._code;
+		_get_token = this._get._token;
 		this._get = this._get._next;
 		return true;
 	},
-	getTokenParam : function( param, code , token ){
+	getTokenParam : function( param ){
 		if( this._get == null ){
 			return false;
 		}
 		if( this._get._code == 8 ){
 			if( param._func.search( this._get._token, false, null ) != null ){
-				code.set( this._get._code );
+				_get_code = this._get._code;
 			} else if( param._var._label.checkLabel( this._get._token ) >= 0 ){
-				code.set( 0x22 );
+				_get_code = 0x22;
 			} else if( param._array._label.checkLabel( this._get._token ) >= 0 ){
-				code.set( 0x45 );
+				_get_code = 0x45;
 			} else if( globalParam()._var._label.checkLabel( this._get._token ) >= 0 ){
-				code.set( 0x23 );
+				_get_code = 0x23;
 			} else if( globalParam()._array._label.checkLabel( this._get._token ) >= 0 ){
-				code.set( 0x46 );
+				_get_code = 0x46;
 			} else {
 				var value = new _Value();
 				if( this.stringToValue( param, this._get._token, value ) ){
 					this._get._code = 7;
 					this._get._token = dupValue( value );
 				}
-				code.set( this._get._code );
+				_get_code = this._get._code;
 			}
 		} else {
-			code.set( this._get._code );
+			_get_code = this._get._code;
 		}
-		token.set( this._get._token );
+		_get_token = this._get._token;
 		this._get = this._get._next;
 		return true;
 	},
-	getTokenLock : function( code , token ){
+	getTokenLock : function(){
 		if( this._get == null ){
 			return false;
 		}
-		code .set( this._get._code );
-		token.set( this._get._token );
+		_get_code = this._get._code;
+		_get_token = this._get._token;
 		return true;
 	},
 	checkToken : function( code ){
@@ -13182,6 +13341,17 @@ assert( index != 0 );
 		this._var[index].setImag( value );
 		return true;
 	},
+	fractSetMinus : function( index, isMinus, moveFlag ){
+assert( index != 0 );
+		if( this.isLocked( index ) ){
+			return false;
+		}
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._var[index].fractSetMinus( isMinus );
+		return true;
+	},
 	setNum : function( index, value, moveFlag ){
 assert( index != 0 );
 		if( this.isLocked( index ) ){
@@ -13202,6 +13372,17 @@ assert( index != 0 );
 			this.move( index );
 		}
 		this._var[index].setDenom( value );
+		return true;
+	},
+	fractReduce : function( index, moveFlag ){
+assert( index != 0 );
+		if( this.isLocked( index ) ){
+			return false;
+		}
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._var[index].fractReduce();
 		return true;
 	},
 	val : function( index ){
@@ -15687,32 +15868,15 @@ _Value.prototype = {
 		return this._t.toFloat();
 	},
 	ass : function( r ){
-		this._type = _value_type;
 		if( r instanceof _Value ){
-			switch( r._type ){
-			case 0:
-				switch( this._type ){
-				case 0: this._c.ass( r._c ); break;
-				case 1 : this._f.ass( r._c.toFloat() ); break;
-				case 2 : this._t.ass( r._c.toFloat() ); break;
-				}
-				break;
-			case 1:
-				switch( this._type ){
-				case 0: this._c.ass( r._f.toFloat() ); break;
-				case 1 : this._f.ass( r._f ); break;
-				case 2 : this._t.ass( r._f.toFloat() ); break;
-				}
-				break;
-			case 2:
-				switch( this._type ){
-				case 0: this._c.ass( r._t.toFloat() ); break;
-				case 1 : this._f.ass( r._t.toFloat() ); break;
-				case 2 : this._t.ass( r._t ); break;
-				}
-				break;
+			this._type = r._type;
+			switch( this._type ){
+			case 0: this._c.ass( r._c ); break;
+			case 1 : this._f.ass( r._f ); break;
+			case 2 : this._t.ass( r._t ); break;
 			}
 		} else {
+			this._type = _value_type;
 			switch( this._type ){
 			case 0: this._c.ass( r ); break;
 			case 1 : this._f.ass( r ); break;
@@ -16811,6 +16975,15 @@ window._CLIP_SE_BREAK = 66;
 window._CLIP_SE_RETURN = 67;
 window._CLIP_SE_RETURN_ANS = 68;
 window._CLIP_SE_FUNC = 69;
+window._CLIP_DEFINE_DBL_EPSILON = 0;
+window._CLIP_DEFINE_HUGE_VAL = 1;
+window._CLIP_DEFINE_RAND_MAX = 2;
+window._CLIP_DEFINE_FALSE = 3;
+window._CLIP_DEFINE_TRUE = 4;
+window._CLIP_DEFINE_BG_COLOR = 5;
+window._CLIP_DEFINE_TIME_ZONE = 6;
+window._CLIP_DEFINE_INFINITY = 7;
+window._CLIP_DEFINE_NAN = 8;
 window._CLIP_NO_ERR = 0x00;
 window._CLIP_LOOP_STOP = 0x01;
 window._CLIP_LOOP_CONT = 0x02;

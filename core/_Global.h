@@ -517,6 +517,20 @@
 #define _CLIP_SE_FUNC			69
 
 /*
+ * 定義定数の種類
+ */
+
+#define _CLIP_DEFINE_DBL_EPSILON	0
+#define _CLIP_DEFINE_HUGE_VAL		1
+#define _CLIP_DEFINE_RAND_MAX		2
+#define _CLIP_DEFINE_FALSE			3
+#define _CLIP_DEFINE_TRUE			4
+#define _CLIP_DEFINE_BG_COLOR		5
+#define _CLIP_DEFINE_TIME_ZONE		6
+#define _CLIP_DEFINE_INFINITY		7
+#define _CLIP_DEFINE_NAN			8
+
+/*
  * エラー・コード
  */
 

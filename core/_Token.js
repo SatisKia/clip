@@ -346,6 +346,50 @@ var _TOKEN_SE = [
 	"return_a"
 ];
 
+var _TOKEN_DEFINE = [
+	"DBL_EPSILON",
+	"HUGE_VAL",
+	"RAND_MAX",
+	"FALSE",
+	"TRUE",
+	"BG_COLOR",
+	"TIME_ZONE",
+	"INFINITY",
+	"NAN"
+];
+var _VALUE_DEFINE = [
+	_DBL_EPSILON,
+	Number.MAX_VALUE,
+	_RAND_MAX,
+	0,
+	1,
+	gWorldBgColor(),
+	(new Date()).getTimezoneOffset() * -60,
+	Number.POSITIVE_INFINITY,
+	Number.NaN
+];
+
+function indexOf( stringArray, string ){
+//	return stringArray.indexOf( string );
+	var len = stringArray.length;
+	for( var i = 0; i < len; i++ ){
+		if( stringArray[i] == string ){
+			return i;
+		}
+	}
+	return -1;
+}
+
+// getToken用
+var _get_code;
+var _get_token;
+function getCode(){
+	return _get_code;
+}
+function getToken(){
+	return _get_token;
+}
+
 // トークン・データ
 function __Token(){
 	this._code   = 0;		// 識別コード
@@ -461,19 +505,19 @@ _Token.prototype = {
 
 	// 文字列が関数名かどうかチェックする
 	checkFunc : function( string, func/*_Integer*/ ){
-		func.set( _TOKEN_FUNC.indexOf( string ) );
+		func.set( indexOf( _TOKEN_FUNC, string ) );
 		return (func.val() >= 0);
 	},
 
 	// 文字列が文かどうかチェックする
 	checkStat : function( string, stat/*_Integer*/ ){
-		stat.set( _TOKEN_STAT.indexOf( string ) );
+		stat.set( indexOf( _TOKEN_STAT, string ) );
 		return (stat.val() >= 0);
 	},
 
 	// 文字列がコマンドかどうかチェックする
 	checkCommand : function( string, command/*_Integer*/ ){
-		command.set( _TOKEN_COMMAND.indexOf( string ) + 1 );
+		command.set( indexOf( _TOKEN_COMMAND, string ) + 1 );
 		if( command.val() >= 1 ){
 				return true;
 		}
@@ -490,7 +534,7 @@ _Token.prototype = {
 
 	// 文字列が単一式かどうかチェックする
 	checkSe : function( string, se/*_Integer*/ ){
-		se.set( _TOKEN_SE.indexOf( string ) + 1 );
+		se.set( indexOf( _TOKEN_SE, string ) + 1 );
 		if( se.val() >= 1 ){
 				return true;
 		}
@@ -505,15 +549,11 @@ _Token.prototype = {
 
 	// 文字列が定義定数かどうかチェックする
 	checkDefine : function( string, value/*_Value*/ ){
-		if( string == "DBL_EPSILON" ){ value.ass( _DBL_EPSILON ); return true; }
-		if( string == "HUGE_VAL"    ){ value.ass( Number.MAX_VALUE ); return true; }
-		if( string == "RAND_MAX"    ){ value.ass( _RAND_MAX ); return true; }
-		if( string == "FALSE"       ){ value.ass( 0 ); return true; }
-		if( string == "TRUE"        ){ value.ass( 1 ); return true; }
-		if( string == "BG_COLOR"    ){ value.ass( gWorldBgColor() ); return true; }
-		if( string == "TIME_ZONE"   ){ value.ass( (new Date()).getTimezoneOffset() * -60 ); return true; }
-		if( string == "INFINITY"    ){ value.ass( Number.POSITIVE_INFINITY ); return true; }
-		if( string == "NAN"         ){ value.ass( Number.NaN ); return true; }
+		var define = indexOf( _TOKEN_DEFINE, string );
+		if( define >= 0 ){
+			value.ass( _VALUE_DEFINE[define] );
+			return true;
+		}
 		return false;
 	},
 
@@ -2193,18 +2233,18 @@ _Token.prototype = {
 	beginGetToken : function( num ){
 		this._get = (num == undefined) ? this._top : this._searchList( num );
 	},
-	getToken : function( code/*_Integer*/, token/*_Void*/ ){
+	getToken : function(){
 		if( this._get == null ){
 			return false;
 		}
 
-		code .set( this._get._code  );
-		token.set( this._get._token );
+		_get_code  = this._get._code;
+		_get_token = this._get._token;
 
 		this._get = this._get._next;
 		return true;
 	},
-	getTokenParam : function( param, code/*_Integer*/, token/*_Void*/ ){
+	getTokenParam : function( param ){
 		if( this._get == null ){
 			return false;
 		}
@@ -2213,42 +2253,42 @@ _Token.prototype = {
 			// 重要：関数、ローカル、グローバルの順にチェックすること！
 			if( param._func.search( this._get._token, false, null ) != null ){
 				// 関数
-				code.set( this._get._code );
+				_get_code = this._get._code;
 			} else if( param._var._label.checkLabel( this._get._token ) >= 0 ){
 				// ローカル変数
-				code.set( _CLIP_CODE_AUTO_VAR );
+				_get_code = _CLIP_CODE_AUTO_VAR;
 			} else if( param._array._label.checkLabel( this._get._token ) >= 0 ){
 				// ローカル配列
-				code.set( _CLIP_CODE_AUTO_ARRAY );
+				_get_code = _CLIP_CODE_AUTO_ARRAY;
 			} else if( globalParam()._var._label.checkLabel( this._get._token ) >= 0 ){
 				// グローバル変数
-				code.set( _CLIP_CODE_GLOBAL_VAR );
+				_get_code = _CLIP_CODE_GLOBAL_VAR;
 			} else if( globalParam()._array._label.checkLabel( this._get._token ) >= 0 ){
 				// グローバル配列
-				code.set( _CLIP_CODE_GLOBAL_ARRAY );
+				_get_code = _CLIP_CODE_GLOBAL_ARRAY;
 			} else {
 				var value = new _Value();
 				if( this.stringToValue( param, this._get._token, value ) ){
 					this._get._code  = _CLIP_CODE_CONSTANT;
 					this._get._token = dupValue( value );
 				}
-				code.set( this._get._code );
+				_get_code = this._get._code;
 			}
 		} else {
-			code.set( this._get._code );
+			_get_code = this._get._code;
 		}
-		token.set( this._get._token );
+		_get_token = this._get._token;
 
 		this._get = this._get._next;
 		return true;
 	},
-	getTokenLock : function( code/*_Integer*/, token/*_Void*/ ){
+	getTokenLock : function(){
 		if( this._get == null ){
 			return false;
 		}
 
-		code .set( this._get._code  );
-		token.set( this._get._token );
+		_get_code  = this._get._code;
+		_get_token = this._get._token;
 
 		return true;
 	},

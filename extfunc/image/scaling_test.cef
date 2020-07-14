@@ -1,0 +1,19 @@
+:ans FALSE
+#変換元
+@W = @0
+@H = @1
+#変換先
+@w = @2
+@h = @3
+:println ["[] @W ["x] @H [" -> ] @w ["x] @h ["\]]
+@M = @W > @w ? ((@W - 1) / (@w - 1)) (@W / @w)
+@N = @H > @h ? ((@H - 1) / (@h - 1)) (@H / @h)
+:println ["ステップごとにずれる幅: ] @M [" ] @N
+for @y = 0; @y < @h; @y++
+	for @x = 0; @x < @w; @x++
+		@X = @M * @x
+		@Y = @N * @y
+		:println @x [" ] @y [" : ] @X [" ] @Y
+		@@7 @y @x = @@0 (int @Y) (int @X)
+	next
+next

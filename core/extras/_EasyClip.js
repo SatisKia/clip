@@ -98,8 +98,17 @@ _EasyClip.prototype = {
 		this._param.setVal( _CHAR( chr ), value, false );
 	},
 	setComplex : function( chr, real, imag ){
-		this._param.setReal( _CHAR( chr ), real, false );
-		this._param.setImag( _CHAR( chr ), imag, false );
+		var index = _CHAR( chr );
+		this._param.setReal( index, real, false );
+		this._param.setImag( index, imag, false );
+	},
+	setFract : function( chr, num, denom ){
+		var index = _CHAR( chr );
+		var isMinus = ((num < 0) && (denom >= 0)) || ((num >= 0) && (denom < 0));
+		this._param.fractSetMinus( index, isMinus          , false );
+		this._param.setNum       ( index, Math.abs( num   ), false );
+		this._param.setDenom     ( index, Math.abs( denom ), false );
+		this._param.fractReduce  ( index, false );
 	},
 	setMatrix : function( chr, array/*Array*/ ){
 		this._param._array.setMatrix( _CHAR( chr ), arrayToMatrix( array ), false );
@@ -110,6 +119,22 @@ _EasyClip.prototype = {
 		}
 		subIndex[subIndex.length] = -1;
 		this._param._array.set( _CHAR( chr ), subIndex, subIndex.length - 1, value, false );
+	},
+	setArrayComplex : function( chr, subIndex/*Array*/, real, imag ){
+		var value = new _Value();
+		value.setReal( real );
+		value.setImag( imag );
+		this.setArrayValue( chr, subIndex, value );
+	},
+	setArrayFract : function( chr, subIndex/*Array*/, num, denom ){
+		var value = new _Value();
+		var isMinus = ((num < 0) && (denom >= 0)) || ((num >= 0) && (denom < 0));
+		value.fractSetMinus( isMinus           );
+		value.setNum       ( Math.abs( num   ) );
+		value.setDenom     ( Math.abs( denom ) );
+		value.fractReduce  ();
+		this._param.fractReduce  ( _CHAR( chr ), false );
+		this.setArrayValue( chr, subIndex, value );
 	},
 	setString : function( chr, string ){
 		this._proc.strSet( this._param._array, _CHAR( chr ), string );
@@ -147,17 +172,19 @@ _EasyClip.prototype = {
 		var _dim   = -1;
 		var _index = new Array();
 
-		var code  = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 
 		var array = this._param._array.makeToken( new _Token(), _CHAR( chr ) );
 		array.beginGetToken();
-		while( array.getToken( code, token ) ){
-			if( code.val() == _CLIP_CODE_ARRAY_TOP ){
+		while( array.getToken() ){
+			code  = getCode();
+			token = getToken();
+			if( code == _CLIP_CODE_ARRAY_TOP ){
 				_index[++_dim] = 0;
-			} else if( code.val() == _CLIP_CODE_ARRAY_END ){
+			} else if( code == _CLIP_CODE_ARRAY_END ){
 				_index[--_dim]++;
-			} else if( code.val() == _CLIP_CODE_CONSTANT ){
+			} else if( code == _CLIP_CODE_CONSTANT ){
 				if( (dim == undefined) || (dim == _dim + 1) ){
 					if( _dim > 0 ){
 						if( !(_array[_index[0]] instanceof Array) ){
@@ -177,22 +204,22 @@ _EasyClip.prototype = {
 					switch( _dim ){
 					case 0:
 						if( !(_array[_index[0]] instanceof Array) ){
-							_array[_index[0]] = token.obj().toFloat();
+							_array[_index[0]] = token.toFloat();
 						}
 						break;
 					case 1:
 						if( !(_array[_index[0]][_index[1]] instanceof Array) ){
-							_array[_index[0]][_index[1]] = token.obj().toFloat();
+							_array[_index[0]][_index[1]] = token.toFloat();
 						}
 						break;
 					case 2:
 						if( !(_array[_index[0]][_index[1]][_index[2]] instanceof Array) ){
-							_array[_index[0]][_index[1]][_index[2]] = token.obj().toFloat();
+							_array[_index[0]][_index[1]][_index[2]] = token.toFloat();
 						}
 						break;
 					case 3:
 						if( !(_array[_index[0]][_index[1]][_index[2]][_index[3]] instanceof Array) ){
-							_array[_index[0]][_index[1]][_index[2]][_index[3]] = token.obj().toFloat();
+							_array[_index[0]][_index[1]][_index[2]][_index[3]] = token.toFloat();
 						}
 						break;
 					}
@@ -207,15 +234,17 @@ _EasyClip.prototype = {
 		var _token = new _Token();
 
 		var i;
-		var code   = new _Integer();
-		var token  = new _Void();
+		var code;
+		var token;
 		var string = new String();
 		var enter  = false;
 
 		array.beginGetToken();
-		while( array.getToken( code, token ) ){
+		while( array.getToken() ){
+			code  = getCode();
+			token = getToken();
 			if( enter ){
-				if( code.val() == _CLIP_CODE_ARRAY_TOP ){
+				if( code == _CLIP_CODE_ARRAY_TOP ){
 					string += "<br>";
 					for( i = 0; i < indent; i++ ){
 						string += "&nbsp;";
@@ -223,12 +252,12 @@ _EasyClip.prototype = {
 				}
 				enter = false;
 			}
-			string += _token.tokenString( param, code.val(), token.obj() );
+			string += _token.tokenString( param, code, token );
 			string += "&nbsp;";
-			if( code.val() == _CLIP_CODE_ARRAY_TOP ){
+			if( code == _CLIP_CODE_ARRAY_TOP ){
 				indent += 2;
 			}
-			if( code.val() == _CLIP_CODE_ARRAY_END ){
+			if( code == _CLIP_CODE_ARRAY_END ){
 				indent -= 2;
 				enter = true;
 			}
@@ -240,9 +269,7 @@ _EasyClip.prototype = {
 		return this.getArrayTokenString( this._param, this._param._array.makeToken( new _Token(), _CHAR( chr ) ), indent );
 	},
 	getString : function( chr ){
-		var string = new _String();
-		this._proc.strGet( this._param._array, _CHAR( chr ), string );
-		return string.str();
+		return this._proc.strGet( this._param._array, _CHAR( chr ) );
 	},
 
 	// 各種設定
@@ -266,6 +293,9 @@ _EasyClip.prototype = {
 	},
 	setBase : function( base ){
 		this._param.setBase( (base != 0) ? 1 : 0 );
+	},
+	setAnsFlag : function( flag ){
+		this._proc.setAnsFlag( flag );
 	},
 	setAssertFlag : function( flag ){
 		this._proc.setAssertFlag( flag );

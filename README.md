@@ -32,6 +32,76 @@ CLIPエンジンをJavaScriptから簡単に実行する機能を提供するオ
 
 _EasyClipオブジェクトの使用サンプルとして、core/extras/test.htmlを置いています。
 
+### 変数・関数の上書き
+
+```javascript
+/*
+ * _EasyClip用
+ */
+
+window.loopMax = 65536; // ループ回数上限
+
+window.canvasPut = function( x, y, index ){
+    // キャンバスの指定座標にインデックスのRGBカラーを描画する処理を記述する
+};
+
+/*
+ * _Proc用
+ */
+
+window.assertProc = function( num, func ){
+    // アサートに失敗した時に処理を停止する場合trueを返す
+    return false;
+};
+window.errorProc = function( err, num, func, token ){
+    // 以下は文字列を生成する例
+    var str = (((err & _CLIP_PROC_WARN) != 0) ? "warning:" : "error:") + intToString( err, 16, 4 ) + " line:" + num;
+};
+
+window.printAnsMatrix = function( param, array/*_Token*/ ){
+    // 以下は文字列を生成する例
+    var str = _clip.getArrayTokenString( param, array, 0 );
+};
+window.printAnsComplex = function( real, imag ){
+    // 以下は文字列を生成する例
+    var str = real + imag;
+};
+window.printWarn = function( warn, num, func ){
+};
+window.printError = function( error, num, func ){
+};
+
+window.doFuncGColor = function( rgb ){
+    // RGBカラーからインデックスを求めて返す
+    return 0;
+};
+window.doFuncGColor24 = function( index ){
+    // インデックスのRGBカラー値を返す
+    return 0x000000;
+};
+
+window.doCommandClear = function(){
+};
+window.doCommandPrint = function( topPrint, flag ){
+    // コマンド:print、:println実行時に呼ばれる関数
+    // コマンド:print時はflagにfalseが、コマンド:println時はflagにtrueが渡される
+};
+window.doCommandScan = function( topScan, proc, param ){
+    // コマンド:scan実行時に呼ばれる関数
+};
+window.doCommandGWorld = function( gWorld, width, height ){
+    // コマンド:gworld実行時に呼ばれる関数
+    // 独自処理に加え、以下も実行する必要がある
+    gWorld.create( width, height, true );
+};
+window.doCommandGColor = function( index, rgb ){
+    // インデックスにおけるRGBカラー値を設定する処理を記述する
+};
+window.doCommandGPut24End = function(){
+    // コマンド:gput24実行の後に呼ばれる関数
+};
+```
+
 ### オブジェクトの構築
 
 ```javascript
@@ -43,6 +113,7 @@ var clip = new _EasyClip();
 ```javascript
 clip.setValue( 'a', 12.345 ); // CLIPでの@a
 clip.setComplex( 'b', 12.3, 4.5 ); // CLIPでの@b
+clip.setFract( 'c', 1, 3 ); // CLIPでの@c
 ```
 
 ### 配列に値を設定する
@@ -53,6 +124,8 @@ clip.setArrayValue( 'b', [0, 0], 12 ); // CLIPでの@@b 0 0
 clip.setArrayValue( 'b', [0, 1], 34 ); // CLIPでの@@b 0 1
 clip.setArrayValue( 'b', [1, 0], 56 ); // CLIPでの@@b 1 0
 clip.setArrayValue( 'b', [1, 1], 78 ); // CLIPでの@@b 1 1
+clip.setArrayComplex( 'c', [0], 12.3, 4.5 ); // CLIPでの@@c 0
+clip.setArrayFract( 'd', [2], 3, 7 ); // CLIPでの@@d 2
 clip.setString( 's', "Hello World!!" ); // CLIPでの@@s
 ```
 
@@ -165,6 +238,10 @@ clip.setBase( base );
 | --- | --- |
 | 0 | 0オリジン |
 | 1 | 1オリジン |
+
+```javascript
+clip.setAnsFlag( flag );
+```
 
 ```javascript
 clip.setAssertFlag( flag );

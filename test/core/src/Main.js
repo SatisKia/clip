@@ -703,28 +703,31 @@ function printTrace( param, line, num, comment, skipFlag ){
 	if( skipFlag ){
 		string += "SKIP ";
 	}
-	var code  = new _Integer();
-	var token = new _Void();
+	var code;
+	var token;
 	line.beginGetToken();
 	var i = 0;
-	while( line.getTokenParam( param, code, token ) ){
+	while( line.getTokenParam( param ) ){
+		code  = getCode();
+		token = getToken();
+
 		if( i == 0 ){
 			traceString += string;
 		} else {
 			traceString += " ";
 		}
 
-		traceString += (new _Token()).tokenString( param, code.val(), token.obj() );
+		traceString += (new _Token()).tokenString( param, code, token );
 
 		if( traceLevel >= 2 ){
 			if( traceLevel == 3 ){
-				if( code.val() == _CLIP_CODE_LABEL ){
-					for( var j = 0; j < token.obj().length; j++ ){
-						traceString += "," + token.obj().charCodeAt( j );
+				if( code == _CLIP_CODE_LABEL ){
+					for( var j = 0; j < token.length; j++ ){
+						traceString += "," + token.charCodeAt( j );
 					}
 				}
 			}
-			traceString += "(" + codeString( code.val() ) + ")";
+			traceString += "(" + codeString( code ) + ")";
 		}
 
 		i++;
@@ -750,29 +753,32 @@ function printTest( param, line, num, comment ){
 	if( param._fileFlag ){
 		string += "" + num + ": ";
 	}
-	var code  = new _Integer();
-	var token = new _Void();
+	var code;
+	var token;
 	line.beginGetToken();
 	var i = 0;
-	while( line.getTokenParam( param, code, token ) ){
+	while( line.getTokenParam( param ) ){
+		code  = getCode();
+		token = getToken();
+
 		if( i == 0 ){
 			con.print( string );
 		} else {
 			con.print( " " );
 		}
 
-		con.print( (new _Token()).tokenString( param, code.val(), token.obj() ) );
+		con.print( (new _Token()).tokenString( param, code, token ) );
 
 		if( traceLevel >= 2 ){
 			con.setColor( "0000ff" );
 			if( traceLevel == 3 ){
-				if( code.val() == _CLIP_CODE_LABEL ){
-					for( var j = 0; j < token.obj().length; j++ ){
-						con.print( "," + token.obj().charCodeAt( j ) );
+				if( code == _CLIP_CODE_LABEL ){
+					for( var j = 0; j < token.length; j++ ){
+						con.print( "," + token.charCodeAt( j ) );
 					}
 				}
 			}
-			con.print( "(" + codeString( code.val() ) + ")" );
+			con.print( "(" + codeString( code ) + ")" );
 			con.setColor();
 		}
 
@@ -795,15 +801,17 @@ function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
 	var _token = new _Token();
 
 	var i;
-	var code   = new _Integer();
-	var token  = new _Void();
+	var code;
+	var token;
 	var string = new String();
 	var enter  = false;
 
 	array.beginGetToken();
-	while( array.getToken( code, token ) ){
+	while( array.getToken() ){
+		code  = getCode();
+		token = getToken();
 		if( enter ){
-			if( code.val() == _CLIP_CODE_ARRAY_TOP ){
+			if( code == _CLIP_CODE_ARRAY_TOP ){
 				string += br;
 				for( i = 0; i < indent; i++ ){
 					string += sp;
@@ -811,12 +819,12 @@ function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
 			}
 			enter = false;
 		}
-		string += _token.tokenString( param, code.val(), token.obj() );
+		string += _token.tokenString( param, code, token );
 		string += sp;
-		if( code.val() == _CLIP_CODE_ARRAY_TOP ){
+		if( code == _CLIP_CODE_ARRAY_TOP ){
 			indent += 2;
 		}
-		if( code.val() == _CLIP_CODE_ARRAY_END ){
+		if( code == _CLIP_CODE_ARRAY_END ){
 			indent -= 2;
 			enter = true;
 		}
@@ -926,20 +934,20 @@ function doCommandLog( topPrint ){
 	}
 	traceString += "\n";
 }
-function doCommandScan( _this, topScan, param ){
+function doCommandScan( topScan, proc, param ){
 	var defString = new String();
 	var newString = new String();
 
 	var cur = topScan;
 	while( cur != null ){
-		defString = cur.getDefString( _this, param );
+		defString = cur.getDefString( proc, param );
 
 		newString = prompt( cur.title(), defString );
 		if( (newString == null) || (newString.length == 0) ){
 			newString = defString;
 		}
 
-		cur.setNewValue( newString, _this, param );
+		cur.setNewValue( newString, proc, param );
 
 		cur = cur.next();
 	}
@@ -1034,8 +1042,8 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
 		canvasLine( x1, y1, x2, y2 );
 	}
 }
-function doCommandGColor( color, rgb ){
-	COLOR_WIN[color] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
+function doCommandGColor( index, rgb ){
+	COLOR_WIN[index] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
 	needGUpdate = true;
 }
 function doCommandGPut24( x, y, rgb ){
@@ -1249,15 +1257,17 @@ function doCustomCommand( _this, param, code, token ){
 		break;
 	case _CLIP_COMMAND_CUSTOM_LIST:
 	case _CLIP_COMMAND_CUSTOM_LISTD:
-		var newCode  = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getTokenParam( param, newCode, newToken ) ){
-			if( (newCode.val() & _CLIP_CODE_ARRAY_MASK) != 0 ){
-				if( newCode.val() == _CLIP_CODE_GLOBAL_ARRAY ){
+		var newCode;
+		var newToken;
+		if( _this.curLine().getTokenParam( param ) ){
+			newCode  = getCode();
+			newToken = getToken();
+			if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				if( newCode == _CLIP_CODE_GLOBAL_ARRAY ){
 					param = globalParam();
 				}
 
-				var index = _this.arrayIndexIndirect( param, newCode.val(), newToken.obj() );
+				var index = _this.arrayIndexIndirect( param, newCode, newToken );
 				var array = new _Token();
 				var label;
 				var string = "";
@@ -1282,8 +1292,8 @@ function doCustomCommand( _this, param, code, token ){
 				con.setColor();
 
 				break;
-			} else if( newCode.val() == _CLIP_CODE_EXTFUNC ){
-				var func = new _String( newToken.obj() );
+			} else if( newCode == _CLIP_CODE_EXTFUNC ){
+				var func = new _String( newToken );
 				var data = _this.getExtFuncData( func, null );
 				if( data != null ){
 					con.setColor( "0000ff" );
@@ -1424,11 +1434,11 @@ function doCustomCommand( _this, param, code, token ){
 
 		break;
 	case _CLIP_COMMAND_CUSTOM_USAGE:
-		var newCode  = new _Integer();
-		var newToken = new _Void();
-		if( _this.curLine().getToken( newCode, newToken ) ){
-			if( newCode.val() == _CLIP_CODE_EXTFUNC ){
-				_this.usage( newToken.obj(), param, true/*キャッシュON*/ );
+		var newToken;
+		if( _this.curLine().getToken() ){
+			newToken = getToken();
+			if( getCode() == _CLIP_CODE_EXTFUNC ){
+				_this.usage( newToken, param, true/*キャッシュON*/ );
 				break;
 			}
 		}

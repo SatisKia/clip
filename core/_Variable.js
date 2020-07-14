@@ -94,6 +94,19 @@ assert( index != 0 );
 		this._var[index].setImag( value );
 		return true;
 	},
+	fractSetMinus : function( index, isMinus, moveFlag ){
+#ifdef DEBUG
+assert( index != 0 );
+#endif // DEBUG
+		if( this.isLocked( index ) ){
+			return false;
+		}
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._var[index].fractSetMinus( isMinus );
+		return true;
+	},
 	setNum : function( index, value, moveFlag ){
 #ifdef DEBUG
 assert( index != 0 );
@@ -118,6 +131,19 @@ assert( index != 0 );
 			this.move( index );
 		}
 		this._var[index].setDenom( value );
+		return true;
+	},
+	fractReduce : function( index, moveFlag ){
+#ifdef DEBUG
+assert( index != 0 );
+#endif // DEBUG
+		if( this.isLocked( index ) ){
+			return false;
+		}
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._var[index].fractReduce();
 		return true;
 	},
 

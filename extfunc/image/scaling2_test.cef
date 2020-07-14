@@ -1,0 +1,39 @@
+:ans FALSE
+#変換元
+@W = @0
+@H = @1
+#変換先
+@w = @2
+@h = @3
+:println ["[] @W ["x] @H [" -> ] @w ["x] @h ["\]]
+@M = @W > @w ? (@W / @w) ((@W - 1) / (@w - 1))
+@N = @H > @h ? (@H / @h) ((@H - 1) / (@h - 1))
+:println ["ステップごとにずれる幅: ] @M [" ] @N
+@m = @M < 1.0 ? 1.0 @M
+@n = @N < 1.0 ? 1.0 @N
+:println ["変換元を参照する領域: ] @m [" ] @n
+for @y = 0; @y < @h; @y++
+	for @x = 0; @x < @w; @x++
+		@X = @M * @x
+		@Y = @N * @y
+		:println ["[] @x [" ] @y [" : ] @X [" ] @Y ["\]]
+		@k = 0
+		@P = modf @X @X
+		@Q = modf @Y @Y
+		@I = ceil (@P + @m)	# X方向ピクセル数
+		@J = ceil (@Q + @n)	# Y方向ピクセル数
+		@q = 1.0 - @Q
+		for @j = 0; @j < @J; @j++	# Y方向ループ
+			@p = 1.0 - @P
+			for @i = 0; @i < @I; @i++	# X方向ループ
+				@r = @p > 1.0 ? 1.0 @p
+				@s = @q > 1.0 ? 1.0 @q
+				:println (@X + @i) [" ] (@Y + @j) [" : ] @r [" * ] @s
+				@k += @r * @s
+				@p = @m - @p	# 次のステップ
+			next
+			@q = @n - @q	# 次のステップ
+		next
+		:println @k
+	next
+next

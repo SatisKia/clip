@@ -35,30 +35,6 @@ function _Loop(){
 
 	this._breakFlag = false;
 	this._contFlag = false;
-
-	this._loopSub = [
-		this._loopStart,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopEnd,
-		this._loopCont,
-
-		this._loopDo,
-		this._loopUntil,
-
-		this._loopWhile,
-		this._loopEndWhile,
-
-		this._loopFor,
-		this._loopFor,
-		this._loopNext,
-
-		this._loopFunc,
-		this._loopEndFunc
-	];
 }
 
 _Loop.prototype = {
@@ -250,17 +226,19 @@ _Loop.prototype = {
 	},
 
 	regLine : function( line ){
-		var code  = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var ret;
 
 		var tmp = new _Void( this._curLoop._newLine() );
 		var beforeFlag = new _Boolean( false );
 
 		line._line.beginGetToken();
-		if( line._line.getToken( code, token ) ){
-			if( (code.val() == _CLIP_CODE_STATEMENT) && (token.obj() < _CLIP_STAT_LOOP_END) ){
-				if( (ret = this._loopSub[token.obj()]( this, tmp, beforeFlag )) != _CLIP_NO_ERR ){
+		if( line._line.getToken() ){
+			code  = _get_code;
+			token = _get_token;
+			if( (code == _CLIP_CODE_STATEMENT) && (token < _CLIP_STAT_LOOP_END) ){
+				if( (ret = _Loop._loopSub[token]( this, tmp, beforeFlag )) != _CLIP_NO_ERR ){
 					return ret;
 				}
 			}
@@ -370,3 +348,27 @@ _Loop.prototype = {
 	}
 
 };
+
+_Loop._loopSub = [
+	_Loop.prototype._loopStart,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopEnd,
+	_Loop.prototype._loopCont,
+
+	_Loop.prototype._loopDo,
+	_Loop.prototype._loopUntil,
+
+	_Loop.prototype._loopWhile,
+	_Loop.prototype._loopEndWhile,
+
+	_Loop.prototype._loopFor,
+	_Loop.prototype._loopFor,
+	_Loop.prototype._loopNext,
+
+	_Loop.prototype._loopFunc,
+	_Loop.prototype._loopEndFunc
+];

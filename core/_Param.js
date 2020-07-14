@@ -204,6 +204,14 @@ _Param.prototype = {
 			return this._var.setImag( index, value, moveFlag );
 		}
 	},
+	fractSetMinus : function( index, isMinus, moveFlag ){
+		if( index == 0 ){
+			this._array._mat[index]._mat[0].fractSetMinus( isMinus );
+			return true;
+		} else {
+			return this._var.fractSetMinus( index, isMinus, moveFlag );
+		}
+	},
 	setNum : function( index, value, moveFlag ){
 		if( index == 0 ){
 			this._array._mat[index]._mat[0].setNum( value );
@@ -218,6 +226,14 @@ _Param.prototype = {
 			return true;
 		} else {
 			return this._var.setDenom( index, value, moveFlag );
+		}
+	},
+	fractReduce : function( index, moveFlag ){
+		if( index == 0 ){
+			this._array._mat[index]._mat[0].fractReduce();
+			return true;
+		} else {
+			return this._var.fractReduce( index, moveFlag );
 		}
 	},
 
@@ -262,31 +278,37 @@ _Param.prototype = {
 	// 関数の引数用変数にラベルを設定する
 	setLabel : function( label ){
 		var i;
-		var code = new _Integer();
-		var token = new _Void();
+		var code;
+		var token;
 		var strLabel = new String();
 		var lock;
 
 		i = 0;
 		label.beginGetToken();
-		while( label.getToken( code, token ) ){
+		while( label.getToken() ){
+			code  = _get_code;
+			token = _get_token;
 			// &かどうかをチェックする
-			if( (code.val() == _CLIP_CODE_PARAM_ANS) || ((code.val() == _CLIP_CODE_OPERATOR) && (token.obj() >= _CLIP_OP_AND)) ){
-				if( !(label.getToken( code, token )) ){
+			if( (code == _CLIP_CODE_PARAM_ANS) || ((code == _CLIP_CODE_OPERATOR) && (token >= _CLIP_OP_AND)) ){
+				if( !(label.getToken()) ){
 					break;
 				}
+				code  = _get_code;
+				token = _get_token;
 				this._updateParam[i] = true;
 			} else {
 				this._updateParam[i] = false;
 			}
 
-			if( code.val() == _CLIP_CODE_LABEL ){
-				strLabel = token.obj();
+			if( code == _CLIP_CODE_LABEL ){
+				strLabel = token;
 
 				// ラベルを設定する
 				lock = label.lock();
-				if( label.getToken( code, token ) ){
-					if( code.val() == _CLIP_CODE_PARAM_ARRAY ){
+				if( label.getToken() ){
+					code  = _get_code;
+					token = _get_token;
+					if( code == _CLIP_CODE_PARAM_ARRAY ){
 						this._array._label.setLabel( _CHAR_CODE_0 + i, strLabel, true );
 					} else {
 						label.unlock( lock );

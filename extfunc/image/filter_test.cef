@@ -1,0 +1,43 @@
+:ans FALSE
+switch @1
+#シャープ化
+case 0; @@m{{0 \-1 0}{\-1 5 \-1}{0 \-1 0}}; breakswi
+#ぼかし
+case 1; @@m{{0.08 0.12 0.08}{0.12 0.20 0.12}{0.08 0.12 0.08}}; breakswi
+#ぼかしその2
+case 2; @@m{{(1/9) (1/9) (1/9)}{(1/9) (1/9) (1/9)}{(1/9) (1/9) (1/9)}}; breakswi
+#輪郭（エッジ）抽出
+case 3; @@m{{1 1 1}{1 \-8 1}{1 1 1}}; breakswi
+#輪郭抽出その2
+case 4; @@m{{0 1 0}{1 \-4 1}{0 1 0}}; breakswi
+#エンボス
+case 5; @@m{{\-1 0 0}{0 0 0}{0 0 1}}; breakswi
+#エンボスその2
+case 6; @@m{{\-2 \-1 0}{\-1 1 1}{0 1 2}}; breakswi
+#輪郭強調
+case 7; @@m{{0 0 0}{\-1 1 0}{0 0 0}}; breakswi
+endswi
+
+@t=time
+!image:filter @@0 @@m @@o
+:println (time-@t)
+
+# エンボスの場合、さらに計算値に128を加える
+if @1 == 5
+	@w = col @@o
+	@h = row @@o
+	for @y = 0; @y < @h; @y++
+		for @x = 0; @x < @w; @x++
+			@c = @@o @y @x
+			@r = ((@c & \xFF0000) >> 16) + 128
+			@g = ((@c & \x00FF00) >> 8 ) + 128
+			@b =  (@c & \x0000FF)        + 128
+			if @r > 255; @r = 255; endif
+			if @g > 255; @g = 255; endif
+			if @b > 255; @b = 255; endif
+			@@o @y @x = (@r << 16) + (@g << 8) + @b
+		next
+	next
+endif
+
+:gput24 @@o

@@ -216,32 +216,15 @@ _Value.prototype = {
 
 	// 代入
 	ass : function( r ){
-		this._type = _value_type;	// 代入の場合は左辺値の変換は不要なのでtype関数は使わない
 		if( r instanceof _Value ){
-			switch( r._type ){
-			case _VALUE_TYPE_COMPLEX:
-				switch( this._type ){
-				case _VALUE_TYPE_COMPLEX: this._c.ass( r._c           ); break;
-				case _VALUE_TYPE_FRACT  : this._f.ass( r._c.toFloat() ); break;
-				case _VALUE_TYPE_TIME   : this._t.ass( r._c.toFloat() ); break;
-				}
-				break;
-			case _VALUE_TYPE_FRACT:
-				switch( this._type ){
-				case _VALUE_TYPE_COMPLEX: this._c.ass( r._f.toFloat() ); break;
-				case _VALUE_TYPE_FRACT  : this._f.ass( r._f           ); break;
-				case _VALUE_TYPE_TIME   : this._t.ass( r._f.toFloat() ); break;
-				}
-				break;
-			case _VALUE_TYPE_TIME:
-				switch( this._type ){
-				case _VALUE_TYPE_COMPLEX: this._c.ass( r._t.toFloat() ); break;
-				case _VALUE_TYPE_FRACT  : this._f.ass( r._t.toFloat() ); break;
-				case _VALUE_TYPE_TIME   : this._t.ass( r._t           ); break;
-				}
-				break;
+			this._type = r._type;	// 代入の場合は左辺値の変換は不要なのでtype関数は使わない
+			switch( this._type ){
+			case _VALUE_TYPE_COMPLEX: this._c.ass( r._c ); break;
+			case _VALUE_TYPE_FRACT  : this._f.ass( r._f ); break;
+			case _VALUE_TYPE_TIME   : this._t.ass( r._t ); break;
 			}
 		} else {
+			this._type = _value_type;	// 代入の場合は左辺値の変換は不要なのでtype関数は使わない
 			switch( this._type ){
 			case _VALUE_TYPE_COMPLEX: this._c.ass( r ); break;
 			case _VALUE_TYPE_FRACT  : this._f.ass( r ); break;
