@@ -17,7 +17,7 @@ function cssGetPropertyValue( selector, property ){
 			rule = rules[j];
 			if( rule.selectorText == selector ){
 				value = rule.style.getPropertyValue( property );
-				// 最後まで検索して新しい設定を有効にするため、break しない
+				// 最後まで検索して新しい設定を有効にするため、breakしない
 			}
 		}
 	}
@@ -37,7 +37,7 @@ function cssSetPropertyValue( selector, property, value ){
 			rule = rules[j];
 			if( rule.selectorText == selector ){
 				rule.style.setProperty( property, value );
-				// 最後まで検索して全て更新するため、break しない
+				// 最後まで検索して全て更新するため、breakしない
 			}
 		}
 	}

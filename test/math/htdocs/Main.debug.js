@@ -186,8 +186,8 @@ _Complex.prototype = {
  },
  polar : function( rho, theta ){
   theta = _angToRad( theta );
-  this._re = rho * Math.cos( theta );
-  this._im = rho * Math.sin( theta );
+  this._re = rho * _COS( theta );
+  this._im = rho * _SIN( theta );
  },
  real : function(){
   return this._re;
@@ -271,7 +271,7 @@ _Complex.prototype = {
    if( r._im == 0.0 ){
     return new _Complex( this._re / r._re, this._im / r._re );
    }
-   if( Math.abs( r._re ) < Math.abs( r._im ) ){
+   if( _ABS( r._re ) < _ABS( r._im ) ){
     var w = r._re / r._im;
     var d = r._re * w + r._im;
     return new _Complex( (this._re * w + this._im) / d, (this._im * w - this._re) / d );
@@ -287,7 +287,7 @@ _Complex.prototype = {
    if( r._im == 0.0 ){
     this._re /= r._re;
     this._im /= r._re;
-   } else if( Math.abs( r._re ) < Math.abs( r._im ) ){
+   } else if( _ABS( r._re ) < _ABS( r._im ) ){
     var w = r._re / r._im;
     var d = r._re * w + r._im;
     var t = (this._re * w + this._im) / d;
@@ -353,17 +353,17 @@ _Complex.prototype = {
  },
  fabs : function(){
   if( this._re == 0.0 ){
-   return Math.abs( this._im );
+   return _ABS( this._im );
   }
   if( this._im == 0.0 ){
-   return Math.abs( this._re );
+   return _ABS( this._re );
   }
-  if( Math.abs( this._re ) < Math.abs( this._im ) ){
+  if( _ABS( this._re ) < _ABS( this._im ) ){
    var t = this._re / this._im;
-   return Math.abs( this._im ) * Math.sqrt( 1.0 + t * t );
+   return _ABS( this._im ) * _SQRT( 1.0 + t * t );
   }
   var t = this._im / this._re;
-  return Math.abs( this._re ) * Math.sqrt( 1.0 + t * t );
+  return _ABS( this._re ) * _SQRT( 1.0 + t * t );
  },
  farg : function(){
   return fatan2( this._im, this._re );
@@ -381,8 +381,8 @@ _Complex.prototype = {
   var re = _angToRad( this._re );
   var im = _angToRad( this._im );
   return new _Complex(
-   Math.sin( re ) * fcosh( im ),
-   Math.cos( re ) * fsinh( im )
+   _SIN( re ) * fcosh( im ),
+   _COS( re ) * fsinh( im )
    );
  },
  cos : function(){
@@ -392,8 +392,8 @@ _Complex.prototype = {
   var re = _angToRad( this._re );
   var im = _angToRad( this._im );
   return new _Complex(
-    Math.cos( re ) * fcosh( im ),
-   -Math.sin( re ) * fsinh( im )
+    _COS( re ) * fcosh( im ),
+   -_SIN( re ) * fsinh( im )
    );
  },
  tan : function(){
@@ -402,12 +402,12 @@ _Complex.prototype = {
   }
   var re2 = _angToRad( this._re ) * 2.0;
   var im2 = _angToRad( this._im ) * 2.0;
-  var d = Math.cos( re2 ) + fcosh( im2 );
+  var d = _COS( re2 ) + fcosh( im2 );
   if( d == 0.0 ){
    _complex_err = true;
   }
   return new _Complex(
-   Math.sin( re2 ) / d,
+   _SIN( re2 ) / d,
    fsinh( im2 ) / d
    );
  },
@@ -464,8 +464,8 @@ _Complex.prototype = {
    return floatToComplex( fsinh( this._re ) );
   }
   return new _Complex(
-   fsinh( this._re ) * Math.cos( this._im ),
-   fcosh( this._re ) * Math.sin( this._im )
+   fsinh( this._re ) * _COS( this._im ),
+   fcosh( this._re ) * _SIN( this._im )
    );
  },
  cosh : function(){
@@ -473,8 +473,8 @@ _Complex.prototype = {
    return floatToComplex( fcosh( this._re ) );
   }
   return new _Complex(
-   fcosh( this._re ) * Math.cos( this._im ),
-   fsinh( this._re ) * Math.sin( this._im )
+   fcosh( this._re ) * _COS( this._im ),
+   fsinh( this._re ) * _SIN( this._im )
    );
  },
  tanh : function(){
@@ -483,13 +483,13 @@ _Complex.prototype = {
   }
   var re2 = this._re * 2.0;
   var im2 = this._im * 2.0;
-  var d = fcosh( re2 ) + Math.cos( im2 );
+  var d = fcosh( re2 ) + _COS( im2 );
   if( d == 0.0 ){
    _complex_err = true;
   }
   return new _Complex(
    fsinh( re2 ) / d,
-   Math.sin( im2 ) / d
+   _SIN( im2 ) / d
    );
  },
  asinh : function(){
@@ -530,35 +530,35 @@ _Complex.prototype = {
  },
  ceil : function(){
   return new _Complex(
-   Math.ceil( this._re ),
-   Math.ceil( this._im )
+   _CEIL( this._re ),
+   _CEIL( this._im )
    );
  },
  floor : function(){
   return new _Complex(
-   Math.floor( this._re ),
-   Math.floor( this._im )
+   _FLOOR( this._re ),
+   _FLOOR( this._im )
    );
  },
  exp : function(){
   if( this._im == 0.0 ){
-   return floatToComplex( Math.exp( this._re ) );
+   return floatToComplex( _EXP( this._re ) );
   }
-  var e = Math.exp( this._re );
+  var e = _EXP( this._re );
   return new _Complex(
-   e * Math.cos( this._im ),
-   e * Math.sin( this._im )
+   e * _COS( this._im ),
+   e * _SIN( this._im )
    );
  },
  exp10 : function(){
   if( this._im == 0.0 ){
-   return floatToComplex( Math.exp( this._re / _NORMALIZE ) );
+   return floatToComplex( _EXP( this._re / _NORMALIZE ) );
   }
   var im = this._im / _NORMALIZE;
-  var e = Math.exp( this._re / _NORMALIZE );
+  var e = _EXP( this._re / _NORMALIZE );
   return new _Complex(
-   e * Math.cos( im ),
-   e * Math.sin( im )
+   e * _COS( im ),
+   e * _SIN( im )
    );
  },
  log : function(){
@@ -566,15 +566,15 @@ _Complex.prototype = {
    if( this._re <= 0.0 ){
     if( _complex_isreal ){
      _complex_err = true;
-     return floatToComplex( Math.log( this._re ) );
+     return floatToComplex( _LOG( this._re ) );
     }
    } else {
-    return floatToComplex( Math.log( this._re ) );
+    return floatToComplex( _LOG( this._re ) );
    }
   }
   return new _Complex(
-   Math.log( this.fabs() ),
-   Math.atan2( this._im, this._re )
+   _LOG( this.fabs() ),
+   _ATAN2( this._im, this._re )
    );
  },
  log10 : function(){
@@ -582,35 +582,35 @@ _Complex.prototype = {
    if( this._re <= 0.0 ){
     if( _complex_isreal ){
      _complex_err = true;
-     return floatToComplex( Math.log( this._re ) * _NORMALIZE );
+     return floatToComplex( _LOG( this._re ) * _NORMALIZE );
     }
    } else {
-    return floatToComplex( Math.log( this._re ) * _NORMALIZE );
+    return floatToComplex( _LOG( this._re ) * _NORMALIZE );
    }
   }
   return new _Complex(
-   Math.log( this.fabs() ) * _NORMALIZE,
-   Math.atan2( this._im, this._re ) * _NORMALIZE
+   _LOG( this.fabs() ) * _NORMALIZE,
+   _ATAN2( this._im, this._re ) * _NORMALIZE
    );
  },
  pow : function( y ){
   if( y instanceof _Complex ){
    if( y._im == 0.0 ){
     if( this._im == 0.0 ){
-     return floatToComplex( Math.pow( this._re, y._re ) );
+     return floatToComplex( _POW( this._re, y._re ) );
     }
 
     return this.log().mul( y._re ).exp();
    }
    if( this._im == 0.0 ){
 
-    return y.mul( Math.log( this._re ) ).exp();
+    return y.mul( _LOG( this._re ) ).exp();
    }
 
    return this.log().mul( y ).exp();
   }
   if( this._im == 0.0 ){
-   return floatToComplex( Math.pow( this._re, y ) );
+   return floatToComplex( _POW( this._re, y ) );
   }
 
   return this.log().mul( y ).exp();
@@ -630,27 +630,27 @@ _Complex.prototype = {
    if( this._re < 0.0 ){
     if( _complex_isreal ){
      _complex_err = true;
-     return floatToComplex( Math.sqrt( this._re ) );
+     return floatToComplex( _SQRT( this._re ) );
     }
    } else {
-    return floatToComplex( Math.sqrt( this._re ) );
+    return floatToComplex( _SQRT( this._re ) );
    }
   }
   if( this._re >= 0.0 ){
-   var r = Math.sqrt( this.fabs() + this._re );
+   var r = _SQRT( this.fabs() + this._re );
    return new _Complex(
     _SQRT05 * r,
     _SQRT05 * this._im / r
     );
   }
   if( this._im >= 0.0 ){
-   var r = Math.sqrt( this.fabs() - this._re );
+   var r = _SQRT( this.fabs() - this._re );
    return new _Complex(
     _SQRT05 * this._im / r,
     _SQRT05 * r
     );
   }
-  var r = Math.sqrt( this.fabs() - this._re );
+  var r = _SQRT( this.fabs() - this._re );
   return new _Complex(
    -_SQRT05 * this._im / r,
    -_SQRT05 * r
@@ -689,61 +689,61 @@ function _angToRad( ang ){
 
 
 function fsin( x ){
- return Math.sin( _angToRad( x ) );
+ return _SIN( _angToRad( x ) );
 }
 function fcos( x ){
- return Math.cos( _angToRad( x ) );
+ return _COS( _angToRad( x ) );
 }
 function ftan( x ){
- return Math.tan( _angToRad( x ) );
+ return _TAN( _angToRad( x ) );
 }
 function fasin( x ){
- return _radToAng( Math.asin( x ) );
+ return _radToAng( _ASIN( x ) );
 }
 function facos( x ){
- return _radToAng( Math.acos( x ) );
+ return _radToAng( _ACOS( x ) );
 }
 function fatan( x ){
- return _radToAng( Math.atan( x ) );
+ return _radToAng( _ATAN( x ) );
 }
 function fatan2( y, x ){
- return _radToAng( Math.atan2( y, x ) );
+ return _radToAng( _ATAN2( y, x ) );
 }
 function fsinh( x ){
- if( Math.abs( x ) > _EPS5 ){
-  var t = Math.exp( x );
+ if( _ABS( x ) > _EPS5 ){
+  var t = _EXP( x );
   return (t - 1.0 / t) / 2.0;
  }
  return x * (1.0 + x * x / 6.0);
 }
 function fcosh( x ){
- var t = Math.exp( x );
+ var t = _EXP( x );
  return (t + 1.0 / t) / 2.0;
 }
 function ftanh( x ){
  if( x > _EPS5 ){
-  return 2.0 / (1.0 + Math.exp( -2.0 * x )) - 1.0;
+  return 2.0 / (1.0 + _EXP( -2.0 * x )) - 1.0;
  }
  if( x < -_EPS5 ){
-  return 1.0 - 2.0 / (Math.exp( 2.0 * x ) + 1.0);
+  return 1.0 - 2.0 / (_EXP( 2.0 * x ) + 1.0);
  }
  return x * (1.0 - x * x / 3.0);
 }
 function fasinh( x ){
  if( x > _EPS5 ){
-  return Math.log( Math.sqrt( x * x + 1.0 ) + x );
+  return _LOG( _SQRT( x * x + 1.0 ) + x );
  }
  if( x < -_EPS5 ){
-  return -Math.log( Math.sqrt( x * x + 1.0 ) - x );
+  return -_LOG( _SQRT( x * x + 1.0 ) - x );
  }
  return x * (1.0 - x * x / 6.0);
 }
 function facosh( x ){
- return Math.log( x + Math.sqrt( x * x - 1.0 ) );
+ return _LOG( x + _SQRT( x * x - 1.0 ) );
 }
 function fatanh( x ){
- if( Math.abs( x ) > _EPS5 ){
-  return Math.log( (1.0 + x) / (1.0 - x) ) * 0.5;
+ if( _ABS( x ) > _EPS5 ){
+  return _LOG( (1.0 + x) / (1.0 - x) ) * 0.5;
  }
  return x * (1.0 + x * x / 3.0);
 }
@@ -815,7 +815,7 @@ _Fract.prototype = {
    for( i = 0; i < p; i++ ){
     this._nu = this._nu * 10 + array_y[i];
    }
-   this._de = (Math.pow( 10.0, p ) - 1) * Math.pow( 10.0, k );
+   this._de = (_POW( 10.0, p ) - 1) * _POW( 10.0, k );
    return 1;
   }
   return 0;
@@ -825,8 +825,8 @@ _Fract.prototype = {
   var k = 1;
   var i;
   for( i = 0; ; i++ ){
-   if( xx / Math.pow( 10.0, i ) < 10 ){
-    k = Math.pow( 10.0, i );
+   if( xx / _POW( 10.0, i ) < 10 ){
+    k = _POW( 10.0, i );
     xx /= k;
     break;
    }
@@ -839,7 +839,7 @@ _Fract.prototype = {
    }
    if( ret > 0 ){
     this._nu = (ii * this._de + this._nu) * k;
-    this._de *= Math.pow( 10.0, i );
+    this._de *= _POW( 10.0, i );
     if( !_APPROX( x, this._nu / this._de ) ){
      return false;
     }
@@ -872,7 +872,7 @@ _Fract.prototype = {
  },
  _setFloat : function( x ){
   if( !this._recurring( x ) ){
-   var de = Math.pow( 10.0, _FPREC( x ) );
+   var de = _POW( 10.0, _FPREC( x ) );
    this._set( x * de, de );
   }
  },
@@ -1196,8 +1196,8 @@ _Fract.prototype = {
   return new _Fract( false, this._nu, this._de );
  },
  _powInt : function( y ){
-  var nu = Math.pow( this._nu, y );
-  var de = Math.pow( this._de, y );
+  var nu = _POW( this._nu, y );
+  var de = _POW( this._de, y );
   return new _Fract(
    ((nu < 0.0) != (de < 0.0)),
    (nu < 0.0) ? -nu : nu,
@@ -1209,12 +1209,12 @@ _Fract.prototype = {
    if( y.toFloat() == _INT( y.toFloat() ) ){
     return this._powInt( y.toFloat() );
    }
-   return floatToFract( Math.pow( this.toFloat(), y.toFloat() ) );
+   return floatToFract( _POW( this.toFloat(), y.toFloat() ) );
   }
   if( y == _INT( y ) ){
    return this._powInt( y );
   }
-  return floatToFract( Math.pow( this.toFloat(), y ) );
+  return floatToFract( _POW( this.toFloat(), y ) );
  },
  sqr : function(){
   return new _Fract(
@@ -1244,6 +1244,20 @@ function floatToFract( x ){
 var _DBL_EPSILON = 2.2204460492503131e-016;
 var _NORMALIZE = 0.434294481903251816668;
 var _RAND_MAX = 32767;
+var _ABS = Math.abs;
+var _ACOS = Math.acos;
+var _ASIN = Math.asin;
+var _ATAN = Math.atan;
+var _ATAN2 = Math.atan2;
+var _CEIL = Math.ceil;
+var _COS = Math.cos;
+var _EXP = Math.exp;
+var _FLOOR = Math.floor;
+var _LOG = Math.log;
+var _POW = Math.pow;
+var _SIN = Math.sin;
+var _SQRT = Math.sqrt;
+var _TAN = Math.tan;
 var _rand_next = 1;
 function srand( seed ){
  _rand_next = seed;
@@ -1254,29 +1268,29 @@ function rand(){
 }
 function _INT( x ){
  if( x < 0.0 ){
-  return Math.ceil( x );
+  return _CEIL( x );
  }
- return Math.floor( x );
+ return _FLOOR( x );
 }
 function _DIV( a, b ){
  if( a < 0 ){
-  return Math.ceil( a / b );
+  return _CEIL( a / b );
  }
- return Math.floor( a / b );
+ return _FLOOR( a / b );
 }
 function _MOD( a, b ){
  if( a < 0 ){
   a = -_INT( a );
-  return -(a - Math.floor( a / b ) * b);
+  return -(a - _FLOOR( a / b ) * b);
  }
  a = _INT( a );
- return a - Math.floor( a / b ) * b;
+ return a - _FLOOR( a / b ) * b;
 }
 function _SHIFTL( a, b ){
- return a * Math.pow( 2, b );
+ return a * _POW( 2, b );
 }
 function _SHIFTR( a, b ){
- return _DIV( a, Math.pow( 2, b ) );
+ return _DIV( a, _POW( 2, b ) );
 }
 function _AND( a, b ){
  return (_DIV( a, 0x10000 ) & _DIV( b, 0x10000 )) * 0x10000 + ((a & 0xFFFF) & (b & 0xFFFF));
@@ -1326,9 +1340,9 @@ function _ISZERO( x ){
 }
 function _APPROX( x, y ){
  if( y == 0 ){
-  return Math.abs( x ) < (_DBL_EPSILON * 4.0);
+  return _ABS( x ) < (_DBL_EPSILON * 4.0);
  }
- return Math.abs( (y - x) / y ) < (_DBL_EPSILON * 4.0);
+ return _ABS( (y - x) / y ) < (_DBL_EPSILON * 4.0);
 }
 function _APPROX_M( x, y ){
  if( x._row != y._row ) return false;
@@ -1347,7 +1361,7 @@ function _EPREC( x ){
  }
  q = 0;
  for( p = 0; ; p++ ){
-  t = x * Math.pow( 10.0, p );
+  t = x * _POW( 10.0, p );
   i = _INT( t );
   if( (t - i) == 0.0 ){
    break;
@@ -1357,7 +1371,7 @@ function _EPREC( x ){
   }
  }
  if( q == 0 ){
-  return p + _INT( Math.log( Math.abs( x ) ) * _NORMALIZE ) ;
+  return p + _INT( _LOG( _ABS( x ) ) * _NORMALIZE ) ;
  }
  return p - q;
 }
@@ -1368,7 +1382,7 @@ function _FPREC( x ){
   return 0;
  }
  for( p = 0; ; p++ ){
-  t = x * Math.pow( 10.0, p );
+  t = x * _POW( 10.0, p );
   i = _INT( t );
   if( (t - i) == 0.0 ){
    break;

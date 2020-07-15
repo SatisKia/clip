@@ -67,8 +67,26 @@ window.printAnsComplex = function( real, imag ){
     var str = real + imag;
 };
 window.printWarn = function( warn, num, func ){
+    // 以下は文字列を生成する例
+    var str = "warning: ";
+    if( (func != null) && (func.length > 0) ){
+        str += func + ": ";
+    }
+    if( num > 0 ){
+        str += "line:" + num + " ";
+    }
+    str += warn;
 };
 window.printError = function( error, num, func ){
+    // 以下は文字列を生成する例
+    var str = "error: ";
+    if( (func != null) && (func.length > 0) ){
+        str += func + ": ";
+    }
+    if( num > 0 ){
+        str += "line:" + num + " ";
+    }
+    str += error;
 };
 
 window.doFuncGColor = function( rgb ){
@@ -81,6 +99,7 @@ window.doFuncGColor24 = function( index ){
 };
 
 window.doCommandClear = function(){
+    // コマンド:clear実行時に呼ばれる関数
 };
 window.doCommandPrint = function( topPrint, flag ){
     // コマンド:print、:println実行時に呼ばれる関数
@@ -95,6 +114,7 @@ window.doCommandGWorld = function( gWorld, width, height ){
     gWorld.create( width, height, true );
 };
 window.doCommandGColor = function( index, rgb ){
+    // コマンド:gcolorでRGBカラーが指定された時に呼ばれる関数
     // インデックスにおけるRGBカラー値を設定する処理を記述する
 };
 window.doCommandGPut24End = function(){
@@ -138,11 +158,11 @@ var imag = clip.getAnsValue().imag();
 var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
 ```
 
+getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
+
 ```javascript
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
 ```
-
-getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
 
 ### 変数の値を確認する
 
@@ -152,11 +172,11 @@ var real = clip.getValue( 'b' ).real();
 var imag = clip.getValue( 'b' ).imag();
 ```
 
+getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
+
 ```javascript
 var string = clip.getComplexString( 'b' );
 ```
-
-getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
 
 ### 配列の値を確認する
 
@@ -170,6 +190,8 @@ var array4 = clip.getArray( 'a', n ); // n次元要素のみを取り出す
 ```javascript
 var string = "@@b = " + clip.getArrayString( 'b', 6 );
 ```
+
+getArray関数で取得したArrayオブジェクトをJSON.stringifyに渡すことでも文字列に変換できます。
 
 ```javascript
 var string = clip.getString( 's' );
@@ -204,17 +226,25 @@ clip.setMode( mode );
 | _CLIP_MODE_S_LONG | 符号付き32ビット整数型 |
 | _CLIP_MODE_U_LONG | 符号なし32ビット整数型 |
 
+_EasyClipオブジェクト構築直後 _CLIP_MODE_G_FLOAT
+
 ```javascript
 clip.setPrec( prec );
 ```
+
+_EasyClipオブジェクト構築直後 6
 
 ```javascript
 clip.setFps( fps );
 ```
 
+_EasyClipオブジェクト構築直後 30.0
+
 ```javascript
 clip.setRadix( radix );
 ```
+
+_EasyClipオブジェクト構築直後 10
 
 ```javascript
 clip.setAngType( type );
@@ -226,9 +256,13 @@ clip.setAngType( type );
 | _ANG_TYPE_DEG | 度 |
 | _ANG_TYPE_GRAD | グラジアン |
 
+_EasyClipオブジェクト構築直後 _ANG_TYPE_RAD
+
 ```javascript
 clip.setCalculator( flag );
 ```
+
+_EasyClipオブジェクト構築直後 false
 
 ```javascript
 clip.setBase( base );
@@ -239,17 +273,25 @@ clip.setBase( base );
 | 0 | 0オリジン |
 | 1 | 1オリジン |
 
+_EasyClipオブジェクト構築直後 0
+
 ```javascript
 clip.setAnsFlag( flag );
 ```
+
+_EasyClipオブジェクト構築直後 false
 
 ```javascript
 clip.setAssertFlag( flag );
 ```
 
+_EasyClipオブジェクト構築直後 false
+
 ```javascript
 clip.setWarnFlag( flag );
 ```
+
+_EasyClipオブジェクト構築直後 true
 
 ### コマンド
 
@@ -264,11 +306,11 @@ clip.commandWindow( left, bottom, right, top );
 ```
 
 ```javascript
-clip.commandGClear( color );
+clip.commandGClear( index );
 ```
 
 ```javascript
-clip.commandGColor( color );
+clip.commandGColor( index );
 ```
 
 ```javascript
@@ -280,25 +322,21 @@ clip.commandGPut24( array/*Array*/ );
 ```
 
 ```javascript
-var tmp = new _Void();
-clip.commandGGet( tmp/*_Void*/ );
-var array = tmp.obj();
+var array = clip.commandGGet(); // 取得できなかった場合null
 ```
 
 ```javascript
-var tmp = new _Void();
-clip.commandGGet24( tmp/*_Void*/ );
-var array = tmp.obj();
+var array = clip.commandGGet24(); // 取得できなかった場合null
 ```
 
 ### 計算
 
 ```javascript
-var ret = clip.procLine( line/*String*/ );
+var ret = clip.procLine( line/*String*/ ); // 正常終了時、_CLIP_PROC_ENDが返ってくる
 ```
 
 ```javascript
-var ret = clip.procScript( script/*Array*/ );
+var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_ENDが返ってくる
 ```
 
 ### キャンバス

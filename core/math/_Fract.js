@@ -83,7 +83,7 @@ _Fract.prototype = {
 			for( i = 0; i < p; i++ ){
 				this._nu = this._nu * 10 + array_y[i];
 			}
-			this._de = (Math.pow( 10.0, p ) - 1) * Math.pow( 10.0, k );
+			this._de = (_POW( 10.0, p ) - 1) * _POW( 10.0, k );
 			return 1;
 		}
 		return 0;
@@ -94,8 +94,8 @@ _Fract.prototype = {
 		var k = 1;
 		var i;
 		for( i = 0; ; i++ ){
-			if( xx / Math.pow( 10.0, i ) < 10 ){
-				k = Math.pow( 10.0, i );
+			if( xx / _POW( 10.0, i ) < 10 ){
+				k = _POW( 10.0, i );
 				xx /= k;
 				break;
 			}
@@ -109,7 +109,7 @@ _Fract.prototype = {
 			}
 			if( ret > 0 ){
 				this._nu = (ii * this._de + this._nu) * k;
-				this._de *= Math.pow( 10.0, i );
+				this._de *= _POW( 10.0, i );
 				if( !_APPROX( x, this._nu / this._de ) ){
 					return false;
 				}
@@ -143,7 +143,7 @@ _Fract.prototype = {
 	},
 	_setFloat : function( x ){
 		if( !this._recurring( x ) ){
-			var de = Math.pow( 10.0, _FPREC( x ) );
+			var de = _POW( 10.0, _FPREC( x ) );
 			this._set( x * de, de );
 		}
 	},
@@ -501,8 +501,8 @@ _Fract.prototype = {
 
 	// べき乗
 	_powInt : function( y ){
-		var nu = Math.pow( this._nu, y );
-		var de = Math.pow( this._de, y );
+		var nu = _POW( this._nu, y );
+		var de = _POW( this._de, y );
 		return new _Fract(
 			((nu < 0.0) != (de < 0.0)),
 			(nu < 0.0) ? -nu : nu,
@@ -514,12 +514,12 @@ _Fract.prototype = {
 			if( y.toFloat() == _INT( y.toFloat() ) ){
 				return this._powInt( y.toFloat() );
 			}
-			return floatToFract( Math.pow( this.toFloat(), y.toFloat() ) );
+			return floatToFract( _POW( this.toFloat(), y.toFloat() ) );
 		}
 		if( y == _INT( y ) ){
 			return this._powInt( y );
 		}
-		return floatToFract( Math.pow( this.toFloat(), y ) );
+		return floatToFract( _POW( this.toFloat(), y ) );
 	},
 
 	// 自乗

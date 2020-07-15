@@ -595,7 +595,7 @@ _Value.prototype = {
 		if( this._type == _VALUE_TYPE_FRACT   ) return fractToValue  ( this._f.sqr() );
 		return fractToValue( this._tmpFract().sqr() );
 	},
-	ldexp : function( exp ){ // load exponent
+	ldexp : function( exp ){	// load exponent
 		var x = this.toFloat();
 		var w = (exp >= 0) ? 2.0 : 0.5;
 		if( exp < 0 ) exp = -exp;
@@ -606,7 +606,7 @@ _Value.prototype = {
 		}
 		return floatToValue( x );
 	},
-	frexp : function( exp/*_Integer*/ ){ // fraction and exponent
+	frexp : function( exp/*_Integer*/ ){	// fraction and exponent
 		var x = this.toFloat();
 		var m = (x < 0.0) ? true : false;
 		if( m ) x = -x;

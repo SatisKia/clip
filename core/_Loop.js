@@ -238,7 +238,7 @@ _Loop.prototype = {
 			code  = _get_code;
 			token = _get_token;
 			if( (code == _CLIP_CODE_STATEMENT) && (token < _CLIP_STAT_LOOP_END) ){
-				if( (ret = _Loop._loopSub[token]( this, tmp, beforeFlag )) != _CLIP_NO_ERR ){
+				if( (ret = _loopSub[token]( this, tmp, beforeFlag )) != _CLIP_NO_ERR ){
 					return ret;
 				}
 			}
@@ -349,7 +349,7 @@ _Loop.prototype = {
 
 };
 
-_Loop._loopSub = [
+_loopSub = [
 	_Loop.prototype._loopStart,
 	_Loop.prototype._loopEnd,
 	_Loop.prototype._loopEnd,

@@ -197,14 +197,14 @@ function procLoopTotal(){
 	return _proc_loop_total;
 }
 
-#define _STAT_IFMODE_DISABLE	0	// 無効(スキップ中)
-#define _STAT_IFMODE_ENABLE		1	// 有効(開始前または実行中)
-#define _STAT_IFMODE_PROCESSED	2	// 実行済み(スキップ中)
+#define _STAT_IFMODE_DISABLE	0	// 無効（スキップ中）
+#define _STAT_IFMODE_ENABLE		1	// 有効（開始前または実行中）
+#define _STAT_IFMODE_PROCESSED	2	// 実行済み（スキップ中）
 //#define _STAT_IFMODE_STARTED	3	// 開始した
 
-#define _STAT_SWIMODE_DISABLE	0	// 無効(スキップ中)
-#define _STAT_SWIMODE_ENABLE	1	// 有効(開始前または実行中)
-#define _STAT_SWIMODE_PROCESSED	2	// 実行済み(スキップ中)
+#define _STAT_SWIMODE_DISABLE	0	// 無効（スキップ中）
+#define _STAT_SWIMODE_ENABLE	1	// 有効（開始前または実行中）
+#define _STAT_SWIMODE_PROCESSED	2	// 実行済み（スキップ中）
 //#define _STAT_SWIMODE_STARTED	3	// 開始した
 
 #define _STAT_MODE_NOT_START	0	// 開始前
@@ -889,7 +889,7 @@ _Proc.prototype = {
 
 			this._setError( code, token );
 
-			return _Proc._procSubLoop[token]( this );
+			return _procSubLoop[token]( this );
 		case _CLIP_CODE_COMMAND:
 			if( !(param._enableCommand) ){
 				return _CLIP_LOOP_ERR_COMMAND;
@@ -922,7 +922,7 @@ _Proc.prototype = {
 		} else if( newCode == _CLIP_CODE_ARRAY ){
 			return this._procArrayFirst( param, newToken, value );
 		} else if( (newCode & _CLIP_CODE_MASK) < _CLIP_CODE_PROC_END ){
-			return _Proc._procSub[newCode & _CLIP_CODE_MASK]( this, param, newCode, newToken, value );
+			return _procSub[newCode & _CLIP_CODE_MASK]( this, param, newCode, newToken, value );
 		} else {
 			return this._retError( _CLIP_PROC_ERR_CONSTANT, newCode, newToken );
 		}
@@ -938,7 +938,7 @@ _Proc.prototype = {
 		newToken = _get_token;
 
 		if( (newCode & _CLIP_CODE_MASK) < _CLIP_CODE_PROC_END ){
-			return _Proc._procSub[newCode & _CLIP_CODE_MASK]( this, param, newCode, newToken, value );
+			return _procSub[newCode & _CLIP_CODE_MASK]( this, param, newCode, newToken, value );
 		} else {
 			return this._retError( _CLIP_PROC_ERR_CONSTANT, newCode, newToken );
 		}
@@ -1037,7 +1037,7 @@ _Proc.prototype = {
 		token = _get_token;
 
 		if( (code == _CLIP_CODE_OPERATOR) && (token >= _CLIP_OP_UNARY_END) ){
-			return _Proc._procSubOp[token]( this, param, code, token, value );
+			return _procSubOp[token]( this, param, code, token, value );
 		} else {
 			return this._retError( _CLIP_PROC_ERR_OPERATOR, code, token );
 		}
@@ -1316,7 +1316,7 @@ _Proc.prototype = {
 		var saveArraySize = this._curInfo._curArraySize;
 
 		if( param._seToken < _CLIP_SE_FUNC ){
-			ret = _Proc._procSubSe[param._seToken]( this, param, _CLIP_CODE_SE, param._seToken, value );
+			ret = _procSubSe[param._seToken]( this, param, _CLIP_CODE_SE, param._seToken, value );
 		} else {
 			ret = this._procFuncSe( this, param, _CLIP_CODE_FUNCTION, param._seToken - _CLIP_SE_FUNC, value );
 		}
@@ -1913,9 +1913,9 @@ _Proc.prototype = {
 	},
 	main : function( func, childParam, step/*_Integer*/, err/*_Integer*/, ret/*_Integer*/ ){
 		if( func instanceof __Func ){
-			return _Proc._procMainCache[step.val()]( this, func, childParam, step, err, ret );
+			return _procMainCache[step.val()]( this, func, childParam, step, err, ret );
 		}
-		return _Proc._procMain[step.val()]( this, func, childParam, step, err, ret );
+		return _procMain[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termMain : function( func, childParam, parentParam ){
 		if( func instanceof __Func ){
@@ -1972,7 +1972,7 @@ _Proc.prototype = {
 		return this._beginMain( func, childParam, step, err, ret, null, null );
 	},
 	test : function( func, childParam, step/*_Integer*/, err/*_Integer*/, ret/*_Integer*/ ){
-		return _Proc._procTest[step.val()]( this, func, childParam, step, err, ret );
+		return _procTest[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termTest : function( func, childParam ){
 		this._termMain( func, childParam, null );
@@ -8452,7 +8452,7 @@ _Proc.prototype = {
 		var ret;
 
 		if( token < _CLIP_COMMAND_CUSTOM ){
-			if( (ret = _Proc._procSubCommand[token]( _this, param, code, token )) != _CLIP_PROC_SUB_END ){
+			if( (ret = _procSubCommand[token]( _this, param, code, token )) != _CLIP_PROC_SUB_END ){
 				return ret;
 			}
 		} else {
@@ -8470,11 +8470,11 @@ _Proc.prototype = {
 		}
 	},
 	_procStat : function( _this, param, code, token, value ){
-		return _Proc._procSubStat[token]( _this, param, code, token );
+		return _procSubStat[token]( _this, param, code, token );
 	},
 	_procUnary : function( _this, param, code, token, value ){
 		if( token < _CLIP_OP_UNARY_END ){
-			return _Proc._procSubOp[token]( _this, param, code, token, value );
+			return _procSubOp[token]( _this, param, code, token, value );
 		} else {
 			return _this._retError( _CLIP_PROC_ERR_UNARY, code, token );
 		}
@@ -8485,7 +8485,7 @@ _Proc.prototype = {
 		clearValueError();
 		clearMatrixError();
 
-		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, false )) != _CLIP_NO_ERR ){
+		if( (ret = _procSubFunc[token]( _this, param, code, token, value, false )) != _CLIP_NO_ERR ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -8503,7 +8503,7 @@ _Proc.prototype = {
 		clearValueError();
 		clearMatrixError();
 
-		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, true )) != _CLIP_NO_ERR ){
+		if( (ret = _procSubFunc[token]( _this, param, code, token, value, true )) != _CLIP_NO_ERR ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -8632,7 +8632,7 @@ _Proc.prototype = {
 
 };
 
-_Proc._procSubFunc = [
+_procSubFunc = [
 	_Proc.prototype._funcDefined,
 	_Proc.prototype._funcIndexOf,
 
@@ -8732,7 +8732,7 @@ _Proc._procSubFunc = [
 	_Proc.prototype._funcEval
 ];
 
-_Proc._procSubOp = [
+_procSubOp = [
 	_Proc.prototype._unaryIncrement,
 	_Proc.prototype._unaryDecrement,
 	_Proc.prototype._unaryComplement,
@@ -8791,7 +8791,7 @@ _Proc._procSubOp = [
 	_Proc.prototype._opPowAndAss
 ];
 
-_Proc._procSubLoop = [
+_procSubLoop = [
 	_Proc.prototype._loopBegin,
 	_Proc.prototype._loopEnd,
 	_Proc.prototype._loopEnd,
@@ -8836,7 +8836,7 @@ _Proc._procSubLoop = [
 	_Proc.prototype._loopReturn
 ];
 
-_Proc._procSubStat = [
+_procSubStat = [
 	_Proc.prototype._statStart,
 	_Proc.prototype._statEnd,
 	_Proc.prototype._statEndInc,
@@ -8881,7 +8881,7 @@ _Proc._procSubStat = [
 	_Proc.prototype._statReturn3
 ];
 
-_Proc._procSubCommand = [
+_procSubCommand = [
 	_Proc.prototype._commandNull,
 
 	_Proc.prototype._commandEFloat,
@@ -9005,7 +9005,7 @@ _Proc._procSubCommand = [
 	_Proc.prototype._commandPrint
 ];
 
-_Proc._procSubSe = [
+_procSubSe = [
 	_Proc.prototype._seNull,
 
 	_Proc.prototype._seIncrement,
@@ -9074,7 +9074,7 @@ _Proc._procSubSe = [
 	_Proc.prototype._seSetZero
 ];
 
-_Proc._procSub = [
+_procSub = [
 	_Proc.prototype._procTop,
 
 	_Proc.prototype._procVariable,
@@ -9094,19 +9094,19 @@ _Proc._procSub = [
 	_Proc.prototype._procExtFunc
 ];
 
-_Proc._procMain = [
+_procMain = [
 	_Proc.prototype._procMain1,
 	_Proc.prototype._procMain2,
 	_Proc.prototype._procMain3
 ];
 
-_Proc._procMainCache = [
+_procMainCache = [
 	_Proc.prototype._procMain1Cache,
 	_Proc.prototype._procMain2Cache,
 	_Proc.prototype._procMain3Cache
 ];
 
-_Proc._procTest = [
+_procTest = [
 	_Proc.prototype._procTest1,
 	_Proc.prototype._procTest2,
 	_Proc.prototype._procTest3

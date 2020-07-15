@@ -94,10 +94,10 @@ function _GWorld(){
 	this._scrollOffY  = 0.0;
 
 	// 現在点
-	this._imgMoveX = 0;		// 現在のＸ座標(イメージ用)
-	this._imgMoveY = 0;		// 現在のＹ座標(イメージ用)
-	this._wndMoveX = 0.0;	// 現在のＸ座標(ウィンドウ用)
-	this._wndMoveY = 0.0;	// 現在のＹ座標(ウィンドウ用)
+	this._imgMoveX = 0;		// 現在のＸ座標（イメージ用）
+	this._imgMoveY = 0;		// 現在のＹ座標（イメージ用）
+	this._wndMoveX = 0.0;	// 現在のＸ座標（ウィンドウ用）
+	this._wndMoveY = 0.0;	// 現在のＹ座標（ウィンドウ用）
 
 	// カレントカラー
 	this._color = 0;
@@ -491,8 +491,8 @@ _GWorld.prototype = {
 		var temp;
 		var s;
 
-		dx = Math.abs( x2 - x1 );
-		dy = Math.abs( y2 - y1 );
+		dx = _ABS( x2 - x1 );
+		dy = _ABS( y2 - y1 );
 		if( dx > dy ){
 			if( x1 > x2 ){
 				step = (y1 > y2) ? 1 : -1;
@@ -537,8 +537,8 @@ _GWorld.prototype = {
 		var temp;
 		var s;
 
-		dx = Math.abs( x2 - x1 );
-		dy = Math.abs( y2 - y1 );
+		dx = _ABS( x2 - x1 );
+		dy = _ABS( y2 - y1 );
 		if( dx > dy ){
 			if( x1 > x2 ){
 				step = (y1 > y2) ? 1 : -1;

@@ -233,7 +233,7 @@ _Graph.prototype = {
 		} else {
 			this._info[this._curIndex]._isLogScaleX = true;
 			this._info[this._curIndex]._baseX       = base;
-			this._info[this._curIndex]._logBaseX    = 1.0 / Math.log( base );
+			this._info[this._curIndex]._logBaseX    = 1.0 / _LOG( base );
 		}
 	},
 	setLogScaleY : function( base ){
@@ -242,7 +242,7 @@ _Graph.prototype = {
 		} else {
 			this._info[this._curIndex]._isLogScaleY = true;
 			this._info[this._curIndex]._baseY       = base;
-			this._info[this._curIndex]._logBaseY    = 1.0 / Math.log( base );
+			this._info[this._curIndex]._logBaseY    = 1.0 / _LOG( base );
 		}
 	},
 
@@ -263,16 +263,16 @@ _Graph.prototype = {
 	},
 
 	logX : function( x ){
-		return this._info[this._curIndex]._isLogScaleX ? Math.log( x ) * this._info[this._curIndex]._logBaseX : x;
+		return this._info[this._curIndex]._isLogScaleX ? _LOG( x ) * this._info[this._curIndex]._logBaseX : x;
 	},
 	logY : function( y ){
-		return this._info[this._curIndex]._isLogScaleY ? Math.log( y ) * this._info[this._curIndex]._logBaseY : y;
+		return this._info[this._curIndex]._isLogScaleY ? _LOG( y ) * this._info[this._curIndex]._logBaseY : y;
 	},
 	expX : function( x ){
-		return this._info[this._curIndex]._isLogScaleX ? Math.exp( x / this._info[this._curIndex]._logBaseX ) : x;
+		return this._info[this._curIndex]._isLogScaleX ? _EXP( x / this._info[this._curIndex]._logBaseX ) : x;
 	},
 	expY : function( y ){
-		return this._info[this._curIndex]._isLogScaleY ? Math.exp( y / this._info[this._curIndex]._logBaseY ) : y;
+		return this._info[this._curIndex]._isLogScaleY ? _EXP( y / this._info[this._curIndex]._logBaseY ) : y;
 	},
 
 	// 計算結果を消去する
@@ -1113,7 +1113,7 @@ _Graph.prototype = {
 //			var t1 = fatan2( y, x );
 //				:
 
-//			ratio.set( Math.abs( (t1 - t2) / (t3 - t2) ) );
+//			ratio.set( _ABS( (t1 - t2) / (t3 - t2) ) );
 			ratio.set( 0.0 );
 			return num;
 		}

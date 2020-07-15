@@ -69,7 +69,7 @@ _Time.prototype = {
 		this._sec   += _s;
 		this._frame -= _s * this._fps;
 
-		// 秒を 60 未満の値にする
+		// 秒を60未満の値にする
 		_m = _INT( this._sec / 60.0 );
 		if( (this._sec < 0.0) && ((this._sec % 60.0) != 0.0) ){
 			_m -= 1.0;
@@ -77,7 +77,7 @@ _Time.prototype = {
 		this._min += _m;
 		this._sec -= _m * 60.0;
 
-		// 分を 60 未満の値にする
+		// 分を60未満の値にする
 		_h = _INT( this._min / 60.0 );
 		if( (this._min < 0.0) && ((this._min % 60.0) != 0.0) ){
 			_h -= 1.0;

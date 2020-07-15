@@ -3088,7 +3088,7 @@ function doFuncGColor( rgb ){
   rr = COLOR_WIN[i] & 0x0000FF;
   gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
   bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
-  tmp = Math.abs( rr - r ) + Math.abs( gg - g ) + Math.abs( bb - b );
+  tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
   if( tmp < d ){
    j = i;
    d = tmp;

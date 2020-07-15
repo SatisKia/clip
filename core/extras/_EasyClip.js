@@ -105,9 +105,9 @@ _EasyClip.prototype = {
 	setFract : function( chr, num, denom ){
 		var index = _CHAR( chr );
 		var isMinus = ((num < 0) && (denom >= 0)) || ((num >= 0) && (denom < 0));
-		this._param.fractSetMinus( index, isMinus          , false );
-		this._param.setNum       ( index, Math.abs( num   ), false );
-		this._param.setDenom     ( index, Math.abs( denom ), false );
+		this._param.fractSetMinus( index, isMinus      , false );
+		this._param.setNum       ( index, _ABS( num   ), false );
+		this._param.setDenom     ( index, _ABS( denom ), false );
 		this._param.fractReduce  ( index, false );
 	},
 	setMatrix : function( chr, array/*Array*/ ){
@@ -129,9 +129,9 @@ _EasyClip.prototype = {
 	setArrayFract : function( chr, subIndex/*Array*/, num, denom ){
 		var value = new _Value();
 		var isMinus = ((num < 0) && (denom >= 0)) || ((num >= 0) && (denom < 0));
-		value.fractSetMinus( isMinus           );
-		value.setNum       ( Math.abs( num   ) );
-		value.setDenom     ( Math.abs( denom ) );
+		value.fractSetMinus( isMinus       );
+		value.setNum       ( _ABS( num   ) );
+		value.setDenom     ( _ABS( denom ) );
 		value.fractReduce  ();
 		this._param.fractReduce  ( _CHAR( chr ), false );
 		this.setArrayValue( chr, subIndex, value );
@@ -311,11 +311,11 @@ _EasyClip.prototype = {
 	commandWindow : function( left, bottom, right, top ){
 		doCommandWindow( this._proc.gWorld(), left, bottom, right, top );
 	},
-	commandGClear : function( color ){
-		this._proc.gWorld().clear( color );
+	commandGClear : function( index ){
+		this._proc.gWorld().clear( index );
 	},
-	commandGColor : function( color ){
-		this._proc.gWorld().setColor( color );
+	commandGColor : function( index ){
+		this._proc.gWorld().setColor( index );
 	},
 	commandGPut : function( array/*Array*/ ){
 		var gWorld = this._proc.gWorld();
@@ -342,46 +342,49 @@ _EasyClip.prototype = {
 		}
 		doCommandGPut24End();
 	},
-	commandGGet : function( array/*_Void*/ ){
+	commandGGet : function(){
 		var gWorld = this._proc.gWorld();
 		var width  = gWorld.width ();
 		var height = gWorld.height();
-
-		var x, y;
-		var _array = new Array( height );
-		for( y = 0; y < height; y++ ){
-			_array[y] = new Array( width );
-			for( x = 0; x < width; x++ ){
-				_array[y][x] = gWorld.get( x, y );
+		if( (width > 0) && (height > 0) ){
+			var x, y;
+			var array = new Array( height );
+			for( y = 0; y < height; y++ ){
+				array[y] = new Array( width );
+				for( x = 0; x < width; x++ ){
+					array[y][x] = gWorld.get( x, y );
+				}
 			}
+			return array;
 		}
-		array.set( _array );
+		return null;
 	},
-	commandGGet24 : function( array/*_Void*/ ){
+	commandGGet24 : function(){
 		var w = new _Integer();
 		var h = new _Integer();
 		var data = doCommandGGet24Begin( w, h );
 		if( data != null ){
 			var width  = w.val();
 			var height = h.val();
-
-			var x, y, r, g, b;
-			var i = 0;
-			var _array = new Array( height );
-			for( y = 0; y < height; y++ ){
-				_array[y] = new Array( width );
-				for( x = 0; x < width; x++ ){
-					r = data[i++];
-					g = data[i++];
-					b = data[i++];
-					i++;
-					_array[y][x] = (r << 16) + (g << 8) + b;
+			if( (width > 0) && (height > 0) ){
+				var x, y, r, g, b;
+				var i = 0;
+				var array = new Array( height );
+				for( y = 0; y < height; y++ ){
+					array[y] = new Array( width );
+					for( x = 0; x < width; x++ ){
+						r = data[i++];
+						g = data[i++];
+						b = data[i++];
+						i++;
+						array[y][x] = (r << 16) + (g << 8) + b;
+					}
 				}
+				doCommandGGet24End();
+				return array;
 			}
-			array.set( _array );
-
-			doCommandGGet24End();
 		}
+		return null;
 	},
 
 	// 計算

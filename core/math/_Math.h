@@ -16,13 +16,13 @@
 #define _VALUE_TYPE_FRACT	1	// 分数型
 #define _VALUE_TYPE_TIME	2	// 時間型
 
-// _SIGNED、_UNSIGNED 用
+// _SIGNED、_UNSIGNED用
 #define _UMAX_8		256
 #define _UMAX_16	65536
 #define _UMAX_24	16777216
 #define _UMAX_32	4294967296
 
-// _SIGNED 用
+// _SIGNED用
 #define _SMIN_8		-128
 #define _SMAX_8		 127
 #define _SMIN_16	-32768

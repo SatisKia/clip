@@ -422,7 +422,7 @@ function _Token(){
 
 _Token.prototype = {
 
-	// 文字列が角括弧(Square Bracket)付き演算子かどうかチェックする
+	// 文字列が角括弧（Square Bracket）付き演算子かどうかチェックする
 	checkSqOp : function( string, op/*_Integer*/ ){
 		switch( string.charAt( 0 ) ){
 		case '+':

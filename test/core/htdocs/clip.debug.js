@@ -4,175 +4,6 @@
  */
 (function( window, undefined ){
 var document = window.document;
-window._Array = _Array;
-window._FuncInfo = _FuncInfo;
-window._Func = _Func;
-window.isCharSpace = isCharSpace;
-window.isCharEnter = isCharEnter;
-window.isCharEscape = isCharEscape;
-window._GraphAns = _GraphAns;
-window.newGraphAnsArray = newGraphAnsArray;
-window._Graph = _Graph;
-window.newGWorldCharInfo = newGWorldCharInfo;
-window.regGWorldCharInfo = regGWorldCharInfo;
-window.regGWorldBgColor = regGWorldBgColor;
-window.gWorldBgColor = gWorldBgColor;
-window._GWorld = _GWorld;
-window.defGWorldFunction = defGWorldFunction;
-window._Label = _Label;
-window._Line = _Line;
-window._Loop = _Loop;
-window._Param = _Param;
-window._MIN_VALUE = _MIN_VALUE;
-window._MAX_VALUE = _MAX_VALUE;
-window.setGlobalParam = setGlobalParam;
-window.globalParam = globalParam;
-window.setProcWarnFlowFlag = setProcWarnFlowFlag;
-window.setProcTraceFlag = setProcTraceFlag;
-window.setProcLoopMax = setProcLoopMax;
-window.initProcLoopCount = initProcLoopCount;
-window.resetProcLoopCount = resetProcLoopCount;
-window.procLoopCount = procLoopCount;
-window.procLoopCountMax = procLoopCountMax;
-window.procLoopTotal = procLoopTotal;
-window._Proc = _Proc;
-window.defProcFunction = defProcFunction;
-window._TOKEN_OP = _TOKEN_OP;
-window._TOKEN_FUNC = _TOKEN_FUNC;
-window._TOKEN_STAT = _TOKEN_STAT;
-window._TOKEN_COMMAND = _TOKEN_COMMAND;
-window._TOKEN_SE = _TOKEN_SE;
-window._TOKEN_DEFINE = _TOKEN_DEFINE;
-window._VALUE_DEFINE = _VALUE_DEFINE;
-window.indexOf = indexOf;
-window.getCode = getCode;
-window.getToken = getToken;
-window.regCustomCommand = regCustomCommand;
-window._Token = _Token;
-window._Variable = _Variable;
-window._EPS5 = _EPS5;
-window._PI = _PI;
-window._SQRT05 = _SQRT05;
-window.setComplexAngType = setComplexAngType;
-window.complexAngType = complexAngType;
-window.setComplexIsReal = setComplexIsReal;
-window.complexIsReal = complexIsReal;
-window.clearComplexError = clearComplexError;
-window.complexError = complexError;
-window._Complex = _Complex;
-window.getComplex = getComplex;
-window.setComplex = setComplex;
-window.dupComplex = dupComplex;
-window.floatToComplex = floatToComplex;
-window.fsin = fsin;
-window.fcos = fcos;
-window.ftan = ftan;
-window.fasin = fasin;
-window.facos = facos;
-window.fatan = fatan;
-window.fatan2 = fatan2;
-window.fsinh = fsinh;
-window.fcosh = fcosh;
-window.ftanh = ftanh;
-window.fasinh = fasinh;
-window.facosh = facosh;
-window.fatanh = fatanh;
-window._FRACT_MAX = _FRACT_MAX;
-window.clearFractError = clearFractError;
-window.fractError = fractError;
-window._Fract = _Fract;
-window.getFract = getFract;
-window.setFract = setFract;
-window.dupFract = dupFract;
-window.floatToFract = floatToFract;
-window._DBL_EPSILON = _DBL_EPSILON;
-window._NORMALIZE = _NORMALIZE;
-window._RAND_MAX = _RAND_MAX;
-window.srand = srand;
-window.rand = rand;
-window.assert = assert;
-window._INT = _INT;
-window._DIV = _DIV;
-window._MOD = _MOD;
-window._SHIFTL = _SHIFTL;
-window._SHIFTR = _SHIFTR;
-window._AND = _AND;
-window._OR = _OR;
-window._XOR = _XOR;
-window._SIGNED = _SIGNED;
-window._UNSIGNED = _UNSIGNED;
-window._CHAR = _CHAR;
-window._CHAR_CODE_0 = _CHAR_CODE_0;
-window._CHAR_CODE_9 = _CHAR_CODE_9;
-window._CHAR_CODE_LA = _CHAR_CODE_LA;
-window._CHAR_CODE_LZ = _CHAR_CODE_LZ;
-window._CHAR_CODE_UA = _CHAR_CODE_UA;
-window._CHAR_CODE_UZ = _CHAR_CODE_UZ;
-window._CHAR_CODE_EX = _CHAR_CODE_EX;
-window._CHAR_CODE_COLON = _CHAR_CODE_COLON;
-window._ISINF = _ISINF;
-window._ISNAN = _ISNAN;
-window._ISZERO = _ISZERO;
-window._APPROX = _APPROX;
-window._APPROX_M = _APPROX_M;
-window._EPREC = _EPREC;
-window._FPREC = _FPREC;
-window._GCD = _GCD;
-window._LCM = _LCM;
-window.stringToFloat = stringToFloat;
-window.stringToInt = stringToInt;
-window.floatToExponential = floatToExponential;
-window.floatToFixed = floatToFixed;
-window.floatToString = floatToString;
-window.floatToStringPoint = floatToStringPoint;
-window.intToString = intToString;
-window.clearMatrixError = clearMatrixError;
-window.matrixError = matrixError;
-window._Matrix = _Matrix;
-window.deleteMatrix = deleteMatrix;
-window.dupMatrix = dupMatrix;
-window.arrayToMatrix = arrayToMatrix;
-window.valueToMatrix = valueToMatrix;
-window.floatToMatrix = floatToMatrix;
-window.newMatrixArray = newMatrixArray;
-window.setTimeFps = setTimeFps;
-window.timeFps = timeFps;
-window.clearTimeError = clearTimeError;
-window.timeError = timeError;
-window._Time = _Time;
-window.getTime = getTime;
-window.setTime = setTime;
-window.dupTime = dupTime;
-window.floatToTime = floatToTime;
-window.setValueType = setValueType;
-window.valueType = valueType;
-window.clearValueError = clearValueError;
-window.valueError = valueError;
-window._Value = _Value;
-window.deleteValue = deleteValue;
-window.getValue = getValue;
-window.setValue = setValue;
-window.copyValue = copyValue;
-window.dupValue = dupValue;
-window.floatToValue = floatToValue;
-window.complexToValue = complexToValue;
-window.fractToValue = fractToValue;
-window.timeToValue = timeToValue;
-window.newValueArray = newValueArray;
-window._Boolean = _Boolean;
-window.newBooleanArray = newBooleanArray;
-window._Float = _Float;
-window.newFloatArray = newFloatArray;
-window._Integer = _Integer;
-window.newIntegerArray = newIntegerArray;
-window._String = _String;
-window.newStringArray = newStringArray;
-window._Void = _Void;
-window.newVoidArray = newVoidArray;
-window._Tm = _Tm;
-window.time = time;
-window.mktime = mktime;
-window.localtime = localtime;
 function __ArrayNode(){
 	this._node = null;
 	this._nodeNum = 0;
@@ -820,7 +651,7 @@ _Graph.prototype = {
 		} else {
 			this._info[this._curIndex]._isLogScaleX = true;
 			this._info[this._curIndex]._baseX = base;
-			this._info[this._curIndex]._logBaseX = 1.0 / Math.log( base );
+			this._info[this._curIndex]._logBaseX = 1.0 / _LOG( base );
 		}
 	},
 	setLogScaleY : function( base ){
@@ -829,7 +660,7 @@ _Graph.prototype = {
 		} else {
 			this._info[this._curIndex]._isLogScaleY = true;
 			this._info[this._curIndex]._baseY = base;
-			this._info[this._curIndex]._logBaseY = 1.0 / Math.log( base );
+			this._info[this._curIndex]._logBaseY = 1.0 / _LOG( base );
 		}
 	},
 	isLogScaleX : function(){
@@ -845,16 +676,16 @@ _Graph.prototype = {
 		return this._info[this._curIndex]._baseY;
 	},
 	logX : function( x ){
-		return this._info[this._curIndex]._isLogScaleX ? Math.log( x ) * this._info[this._curIndex]._logBaseX : x;
+		return this._info[this._curIndex]._isLogScaleX ? _LOG( x ) * this._info[this._curIndex]._logBaseX : x;
 	},
 	logY : function( y ){
-		return this._info[this._curIndex]._isLogScaleY ? Math.log( y ) * this._info[this._curIndex]._logBaseY : y;
+		return this._info[this._curIndex]._isLogScaleY ? _LOG( y ) * this._info[this._curIndex]._logBaseY : y;
 	},
 	expX : function( x ){
-		return this._info[this._curIndex]._isLogScaleX ? Math.exp( x / this._info[this._curIndex]._logBaseX ) : x;
+		return this._info[this._curIndex]._isLogScaleX ? _EXP( x / this._info[this._curIndex]._logBaseX ) : x;
 	},
 	expY : function( y ){
-		return this._info[this._curIndex]._isLogScaleY ? Math.exp( y / this._info[this._curIndex]._logBaseY ) : y;
+		return this._info[this._curIndex]._isLogScaleY ? _EXP( y / this._info[this._curIndex]._logBaseY ) : y;
 	},
 	delAns : function(){
 		this._info[this._curIndex]._ans = new Array();
@@ -2076,8 +1907,8 @@ _GWorld.prototype = {
 		var step;
 		var temp;
 		var s;
-		dx = Math.abs( x2 - x1 );
-		dy = Math.abs( y2 - y1 );
+		dx = _ABS( x2 - x1 );
+		dy = _ABS( y2 - y1 );
 		if( dx > dy ){
 			if( x1 > x2 ){
 				step = (y1 > y2) ? 1 : -1;
@@ -2120,8 +1951,8 @@ _GWorld.prototype = {
 		var step;
 		var temp;
 		var s;
-		dx = Math.abs( x2 - x1 );
-		dy = Math.abs( y2 - y1 );
+		dx = _ABS( x2 - x1 );
+		dy = _ABS( y2 - y1 );
 		if( dx > dy ){
 			if( x1 > x2 ){
 				step = (y1 > y2) ? 1 : -1;
@@ -2685,7 +2516,7 @@ _Loop.prototype = {
 			code = _get_code;
 			token = _get_token;
 			if( (code == 10) && (token < 17) ){
-				if( (ret = _Loop._loopSub[token]( this, tmp, beforeFlag )) != 0x00 ){
+				if( (ret = _loopSub[token]( this, tmp, beforeFlag )) != 0x00 ){
 					return ret;
 				}
 			}
@@ -2785,7 +2616,7 @@ _Loop.prototype = {
 		return this._curLoop._contFlag;
 	}
 };
-_Loop._loopSub = [
+_loopSub = [
 	_Loop.prototype._loopStart,
 	_Loop.prototype._loopEnd,
 	_Loop.prototype._loopEnd,
@@ -3864,7 +3695,7 @@ _Proc.prototype = {
 				return 0x102;
 			}
 			this._setError( code, token );
-			return _Proc._procSubLoop[token]( this );
+			return _procSubLoop[token]( this );
 		case 9:
 			if( !(param._enableCommand) ){
 				return 0x101;
@@ -3893,7 +3724,7 @@ _Proc.prototype = {
 		} else if( newCode == 0x44 ){
 			return this._procArrayFirst( param, newToken, value );
 		} else if( (newCode & 0x1F) < 14 ){
-			return _Proc._procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
+			return _procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
 		} else {
 			return this._retError( 0x210A, newCode, newToken );
 		}
@@ -3907,7 +3738,7 @@ _Proc.prototype = {
 		newCode = _get_code;
 		newToken = _get_token;
 		if( (newCode & 0x1F) < 14 ){
-			return _Proc._procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
+			return _procSub[newCode & 0x1F]( this, param, newCode, newToken, value );
 		} else {
 			return this._retError( 0x210A, newCode, newToken );
 		}
@@ -4000,7 +3831,7 @@ _Proc.prototype = {
 		code = _get_code;
 		token = _get_token;
 		if( (code == 11) && (token >= 6) ){
-			return _Proc._procSubOp[token]( this, param, code, token, value );
+			return _procSubOp[token]( this, param, code, token, value );
 		} else {
 			return this._retError( 0x2101, code, token );
 		}
@@ -4239,7 +4070,7 @@ _Proc.prototype = {
 		var saveArray = this._curInfo._curArray;
 		var saveArraySize = this._curInfo._curArraySize;
 		if( param._seToken < 69 ){
-			ret = _Proc._procSubSe[param._seToken]( this, param, 22, param._seToken, value );
+			ret = _procSubSe[param._seToken]( this, param, 22, param._seToken, value );
 		} else {
 			ret = this._procFuncSe( this, param, 12, param._seToken - 69, value );
 		}
@@ -4736,9 +4567,9 @@ _Proc.prototype = {
 	},
 	main : function( func, childParam, step , err , ret ){
 		if( func instanceof __Func ){
-			return _Proc._procMainCache[step.val()]( this, func, childParam, step, err, ret );
+			return _procMainCache[step.val()]( this, func, childParam, step, err, ret );
 		}
-		return _Proc._procMain[step.val()]( this, func, childParam, step, err, ret );
+		return _procMain[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termMain : function( func, childParam, parentParam ){
 		if( func instanceof __Func ){
@@ -4786,7 +4617,7 @@ _Proc.prototype = {
 		return this._beginMain( func, childParam, step, err, ret, null, null );
 	},
 	test : function( func, childParam, step , err , ret ){
-		return _Proc._procTest[step.val()]( this, func, childParam, step, err, ret );
+		return _procTest[step.val()]( this, func, childParam, step, err, ret );
 	},
 	termTest : function( func, childParam ){
 		this._termMain( func, childParam, null );
@@ -10420,7 +10251,7 @@ _Proc.prototype = {
 	_procCommand : function( _this, param, code, token, value ){
 		var ret;
 		if( token < 97 ){
-			if( (ret = _Proc._procSubCommand[token]( _this, param, code, token )) != 0x03 ){
+			if( (ret = _procSubCommand[token]( _this, param, code, token )) != 0x03 ){
 				return ret;
 			}
 		} else {
@@ -10436,11 +10267,11 @@ _Proc.prototype = {
 		}
 	},
 	_procStat : function( _this, param, code, token, value ){
-		return _Proc._procSubStat[token]( _this, param, code, token );
+		return _procSubStat[token]( _this, param, code, token );
 	},
 	_procUnary : function( _this, param, code, token, value ){
 		if( token < 6 ){
-			return _Proc._procSubOp[token]( _this, param, code, token, value );
+			return _procSubOp[token]( _this, param, code, token, value );
 		} else {
 			return _this._retError( 0x2100, code, token );
 		}
@@ -10449,7 +10280,7 @@ _Proc.prototype = {
 		var ret;
 		clearValueError();
 		clearMatrixError();
-		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, false )) != 0x00 ){
+		if( (ret = _procSubFunc[token]( _this, param, code, token, value, false )) != 0x00 ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -10463,7 +10294,7 @@ _Proc.prototype = {
 		var ret;
 		clearValueError();
 		clearMatrixError();
-		if( (ret = _Proc._procSubFunc[token]( _this, param, code, token, value, true )) != 0x00 ){
+		if( (ret = _procSubFunc[token]( _this, param, code, token, value, true )) != 0x00 ){
 			return ret;
 		}
 		_this._updateMatrix( param, value );
@@ -10574,7 +10405,7 @@ _Proc.prototype = {
 		return true;
 	}
 };
-_Proc._procSubFunc = [
+_procSubFunc = [
 	_Proc.prototype._funcDefined,
 	_Proc.prototype._funcIndexOf,
 	_Proc.prototype._funcIsInf,
@@ -10663,7 +10494,7 @@ _Proc._procSubFunc = [
 	_Proc.prototype._funcCall,
 	_Proc.prototype._funcEval
 ];
-_Proc._procSubOp = [
+_procSubOp = [
 	_Proc.prototype._unaryIncrement,
 	_Proc.prototype._unaryDecrement,
 	_Proc.prototype._unaryComplement,
@@ -10706,7 +10537,7 @@ _Proc._procSubOp = [
 	_Proc.prototype._opPow,
 	_Proc.prototype._opPowAndAss
 ];
-_Proc._procSubLoop = [
+_procSubLoop = [
 	_Proc.prototype._loopBegin,
 	_Proc.prototype._loopEnd,
 	_Proc.prototype._loopEnd,
@@ -10742,7 +10573,7 @@ _Proc._procSubLoop = [
 	_Proc.prototype._loopReturn,
 	_Proc.prototype._loopReturn
 ];
-_Proc._procSubStat = [
+_procSubStat = [
 	_Proc.prototype._statStart,
 	_Proc.prototype._statEnd,
 	_Proc.prototype._statEndInc,
@@ -10778,7 +10609,7 @@ _Proc._procSubStat = [
 	_Proc.prototype._statReturn2,
 	_Proc.prototype._statReturn3
 ];
-_Proc._procSubCommand = [
+_procSubCommand = [
 	_Proc.prototype._commandNull,
 	_Proc.prototype._commandEFloat,
 	_Proc.prototype._commandFFloat,
@@ -10877,7 +10708,7 @@ _Proc._procSubCommand = [
 	_Proc.prototype._commandDump,
 	_Proc.prototype._commandPrint
 ];
-_Proc._procSubSe = [
+_procSubSe = [
 	_Proc.prototype._seNull,
 	_Proc.prototype._seIncrement,
 	_Proc.prototype._seDecrement,
@@ -10936,7 +10767,7 @@ _Proc._procSubSe = [
 	_Proc.prototype._seSetTRUE,
 	_Proc.prototype._seSetZero
 ];
-_Proc._procSub = [
+_procSub = [
 	_Proc.prototype._procTop,
 	_Proc.prototype._procVariable,
 	_Proc.prototype._procAutoVar,
@@ -10952,17 +10783,17 @@ _Proc._procSub = [
 	_Proc.prototype._procFunc,
 	_Proc.prototype._procExtFunc
 ];
-_Proc._procMain = [
+_procMain = [
 	_Proc.prototype._procMain1,
 	_Proc.prototype._procMain2,
 	_Proc.prototype._procMain3
 ];
-_Proc._procMainCache = [
+_procMainCache = [
 	_Proc.prototype._procMain1Cache,
 	_Proc.prototype._procMain2Cache,
 	_Proc.prototype._procMain3Cache
 ];
-_Proc._procTest = [
+_procTest = [
 	_Proc.prototype._procTest1,
 	_Proc.prototype._procTest2,
 	_Proc.prototype._procTest3
@@ -13460,8 +13291,8 @@ assert( im != undefined );
 	},
 	polar : function( rho, theta ){
 		theta = _angToRad( theta );
-		this._re = rho * Math.cos( theta );
-		this._im = rho * Math.sin( theta );
+		this._re = rho * _COS( theta );
+		this._im = rho * _SIN( theta );
 	},
 	real : function(){
 		return this._re;
@@ -13553,7 +13384,7 @@ assert( r != undefined );
 			if( r._im == 0.0 ){
 				return new _Complex( this._re / r._re, this._im / r._re );
 			}
-			if( Math.abs( r._re ) < Math.abs( r._im ) ){
+			if( _ABS( r._re ) < _ABS( r._im ) ){
 				var w = r._re / r._im;
 				var d = r._re * w + r._im;
 				return new _Complex( (this._re * w + this._im) / d, (this._im * w - this._re) / d );
@@ -13570,7 +13401,7 @@ assert( r != undefined );
 			if( r._im == 0.0 ){
 				this._re /= r._re;
 				this._im /= r._re;
-			} else if( Math.abs( r._re ) < Math.abs( r._im ) ){
+			} else if( _ABS( r._re ) < _ABS( r._im ) ){
 				var w = r._re / r._im;
 				var d = r._re * w + r._im;
 				var t = (this._re * w + this._im) / d;
@@ -13638,17 +13469,17 @@ assert( r != undefined );
 	},
 	fabs : function(){
 		if( this._re == 0.0 ){
-			return Math.abs( this._im );
+			return _ABS( this._im );
 		}
 		if( this._im == 0.0 ){
-			return Math.abs( this._re );
+			return _ABS( this._re );
 		}
-		if( Math.abs( this._re ) < Math.abs( this._im ) ){
+		if( _ABS( this._re ) < _ABS( this._im ) ){
 			var t = this._re / this._im;
-			return Math.abs( this._im ) * Math.sqrt( 1.0 + t * t );
+			return _ABS( this._im ) * _SQRT( 1.0 + t * t );
 		}
 		var t = this._im / this._re;
-		return Math.abs( this._re ) * Math.sqrt( 1.0 + t * t );
+		return _ABS( this._re ) * _SQRT( 1.0 + t * t );
 	},
 	farg : function(){
 		return fatan2( this._im, this._re );
@@ -13666,8 +13497,8 @@ assert( r != undefined );
 		var re = _angToRad( this._re );
 		var im = _angToRad( this._im );
 		return new _Complex(
-			Math.sin( re ) * fcosh( im ),
-			Math.cos( re ) * fsinh( im )
+			_SIN( re ) * fcosh( im ),
+			_COS( re ) * fsinh( im )
 			);
 	},
 	cos : function(){
@@ -13677,8 +13508,8 @@ assert( r != undefined );
 		var re = _angToRad( this._re );
 		var im = _angToRad( this._im );
 		return new _Complex(
-				Math.cos( re ) * fcosh( im ),
-			-Math.sin( re ) * fsinh( im )
+				_COS( re ) * fcosh( im ),
+			-_SIN( re ) * fsinh( im )
 			);
 	},
 	tan : function(){
@@ -13687,12 +13518,12 @@ assert( r != undefined );
 		}
 		var re2 = _angToRad( this._re ) * 2.0;
 		var im2 = _angToRad( this._im ) * 2.0;
-		var d = Math.cos( re2 ) + fcosh( im2 );
+		var d = _COS( re2 ) + fcosh( im2 );
 		if( d == 0.0 ){
 			_complex_err = true;
 		}
 		return new _Complex(
-			Math.sin( re2 ) / d,
+			_SIN( re2 ) / d,
 			fsinh( im2 ) / d
 			);
 	},
@@ -13749,8 +13580,8 @@ assert( r != undefined );
 			return floatToComplex( fsinh( this._re ) );
 		}
 		return new _Complex(
-			fsinh( this._re ) * Math.cos( this._im ),
-			fcosh( this._re ) * Math.sin( this._im )
+			fsinh( this._re ) * _COS( this._im ),
+			fcosh( this._re ) * _SIN( this._im )
 			);
 	},
 	cosh : function(){
@@ -13758,8 +13589,8 @@ assert( r != undefined );
 			return floatToComplex( fcosh( this._re ) );
 		}
 		return new _Complex(
-			fcosh( this._re ) * Math.cos( this._im ),
-			fsinh( this._re ) * Math.sin( this._im )
+			fcosh( this._re ) * _COS( this._im ),
+			fsinh( this._re ) * _SIN( this._im )
 			);
 	},
 	tanh : function(){
@@ -13768,13 +13599,13 @@ assert( r != undefined );
 		}
 		var re2 = this._re * 2.0;
 		var im2 = this._im * 2.0;
-		var d = fcosh( re2 ) + Math.cos( im2 );
+		var d = fcosh( re2 ) + _COS( im2 );
 		if( d == 0.0 ){
 			_complex_err = true;
 		}
 		return new _Complex(
 			fsinh( re2 ) / d,
-			Math.sin( im2 ) / d
+			_SIN( im2 ) / d
 			);
 	},
 	asinh : function(){
@@ -13815,35 +13646,35 @@ assert( r != undefined );
 	},
 	ceil : function(){
 		return new _Complex(
-			Math.ceil( this._re ),
-			Math.ceil( this._im )
+			_CEIL( this._re ),
+			_CEIL( this._im )
 			);
 	},
 	floor : function(){
 		return new _Complex(
-			Math.floor( this._re ),
-			Math.floor( this._im )
+			_FLOOR( this._re ),
+			_FLOOR( this._im )
 			);
 	},
 	exp : function(){
 		if( this._im == 0.0 ){
-			return floatToComplex( Math.exp( this._re ) );
+			return floatToComplex( _EXP( this._re ) );
 		}
-		var e = Math.exp( this._re );
+		var e = _EXP( this._re );
 		return new _Complex(
-			e * Math.cos( this._im ),
-			e * Math.sin( this._im )
+			e * _COS( this._im ),
+			e * _SIN( this._im )
 			);
 	},
 	exp10 : function(){
 		if( this._im == 0.0 ){
-			return floatToComplex( Math.exp( this._re / _NORMALIZE ) );
+			return floatToComplex( _EXP( this._re / _NORMALIZE ) );
 		}
 		var im = this._im / _NORMALIZE;
-		var e = Math.exp( this._re / _NORMALIZE );
+		var e = _EXP( this._re / _NORMALIZE );
 		return new _Complex(
-			e * Math.cos( im ),
-			e * Math.sin( im )
+			e * _COS( im ),
+			e * _SIN( im )
 			);
 	},
 	log : function(){
@@ -13851,15 +13682,15 @@ assert( r != undefined );
 			if( this._re <= 0.0 ){
 				if( _complex_isreal ){
 					_complex_err = true;
-					return floatToComplex( Math.log( this._re ) );
+					return floatToComplex( _LOG( this._re ) );
 				}
 			} else {
-				return floatToComplex( Math.log( this._re ) );
+				return floatToComplex( _LOG( this._re ) );
 			}
 		}
 		return new _Complex(
-			Math.log( this.fabs() ),
-			Math.atan2( this._im, this._re )
+			_LOG( this.fabs() ),
+			_ATAN2( this._im, this._re )
 			);
 	},
 	log10 : function(){
@@ -13867,32 +13698,32 @@ assert( r != undefined );
 			if( this._re <= 0.0 ){
 				if( _complex_isreal ){
 					_complex_err = true;
-					return floatToComplex( Math.log( this._re ) * _NORMALIZE );
+					return floatToComplex( _LOG( this._re ) * _NORMALIZE );
 				}
 			} else {
-				return floatToComplex( Math.log( this._re ) * _NORMALIZE );
+				return floatToComplex( _LOG( this._re ) * _NORMALIZE );
 			}
 		}
 		return new _Complex(
-			Math.log( this.fabs() ) * _NORMALIZE,
-			Math.atan2( this._im, this._re ) * _NORMALIZE
+			_LOG( this.fabs() ) * _NORMALIZE,
+			_ATAN2( this._im, this._re ) * _NORMALIZE
 			);
 	},
 	pow : function( y ){
 		if( y instanceof _Complex ){
 			if( y._im == 0.0 ){
 				if( this._im == 0.0 ){
-					return floatToComplex( Math.pow( this._re, y._re ) );
+					return floatToComplex( _POW( this._re, y._re ) );
 				}
 				return this.log().mul( y._re ).exp();
 			}
 			if( this._im == 0.0 ){
-				return y.mul( Math.log( this._re ) ).exp();
+				return y.mul( _LOG( this._re ) ).exp();
 			}
 			return this.log().mul( y ).exp();
 		}
 		if( this._im == 0.0 ){
-			return floatToComplex( Math.pow( this._re, y ) );
+			return floatToComplex( _POW( this._re, y ) );
 		}
 		return this.log().mul( y ).exp();
 	},
@@ -13907,27 +13738,27 @@ assert( r != undefined );
 			if( this._re < 0.0 ){
 				if( _complex_isreal ){
 					_complex_err = true;
-					return floatToComplex( Math.sqrt( this._re ) );
+					return floatToComplex( _SQRT( this._re ) );
 				}
 			} else {
-				return floatToComplex( Math.sqrt( this._re ) );
+				return floatToComplex( _SQRT( this._re ) );
 			}
 		}
 		if( this._re >= 0.0 ){
-			var r = Math.sqrt( this.fabs() + this._re );
+			var r = _SQRT( this.fabs() + this._re );
 			return new _Complex(
 				_SQRT05 * r,
 				_SQRT05 * this._im / r
 				);
 		}
 		if( this._im >= 0.0 ){
-			var r = Math.sqrt( this.fabs() - this._re );
+			var r = _SQRT( this.fabs() - this._re );
 			return new _Complex(
 				_SQRT05 * this._im / r,
 				_SQRT05 * r
 				);
 		}
-		var r = Math.sqrt( this.fabs() - this._re );
+		var r = _SQRT( this.fabs() - this._re );
 		return new _Complex(
 			-_SQRT05 * this._im / r,
 			-_SQRT05 * r
@@ -13956,61 +13787,61 @@ function _angToRad( ang ){
 	return _complex_israd ? ang : ang * _PI / _complex_ang_coef;
 }
 function fsin( x ){
-	return Math.sin( _angToRad( x ) );
+	return _SIN( _angToRad( x ) );
 }
 function fcos( x ){
-	return Math.cos( _angToRad( x ) );
+	return _COS( _angToRad( x ) );
 }
 function ftan( x ){
-	return Math.tan( _angToRad( x ) );
+	return _TAN( _angToRad( x ) );
 }
 function fasin( x ){
-	return _radToAng( Math.asin( x ) );
+	return _radToAng( _ASIN( x ) );
 }
 function facos( x ){
-	return _radToAng( Math.acos( x ) );
+	return _radToAng( _ACOS( x ) );
 }
 function fatan( x ){
-	return _radToAng( Math.atan( x ) );
+	return _radToAng( _ATAN( x ) );
 }
 function fatan2( y, x ){
-	return _radToAng( Math.atan2( y, x ) );
+	return _radToAng( _ATAN2( y, x ) );
 }
 function fsinh( x ){
-	if( Math.abs( x ) > _EPS5 ){
-		var t = Math.exp( x );
+	if( _ABS( x ) > _EPS5 ){
+		var t = _EXP( x );
 		return (t - 1.0 / t) / 2.0;
 	}
 	return x * (1.0 + x * x / 6.0);
 }
 function fcosh( x ){
-	var t = Math.exp( x );
+	var t = _EXP( x );
 	return (t + 1.0 / t) / 2.0;
 }
 function ftanh( x ){
 	if( x > _EPS5 ){
-		return 2.0 / (1.0 + Math.exp( -2.0 * x )) - 1.0;
+		return 2.0 / (1.0 + _EXP( -2.0 * x )) - 1.0;
 	}
 	if( x < -_EPS5 ){
-		return 1.0 - 2.0 / (Math.exp( 2.0 * x ) + 1.0);
+		return 1.0 - 2.0 / (_EXP( 2.0 * x ) + 1.0);
 	}
 	return x * (1.0 - x * x / 3.0);
 }
 function fasinh( x ){
 	if( x > _EPS5 ){
-		return Math.log( Math.sqrt( x * x + 1.0 ) + x );
+		return _LOG( _SQRT( x * x + 1.0 ) + x );
 	}
 	if( x < -_EPS5 ){
-		return -Math.log( Math.sqrt( x * x + 1.0 ) - x );
+		return -_LOG( _SQRT( x * x + 1.0 ) - x );
 	}
 	return x * (1.0 - x * x / 6.0);
 }
 function facosh( x ){
-	return Math.log( x + Math.sqrt( x * x - 1.0 ) );
+	return _LOG( x + _SQRT( x * x - 1.0 ) );
 }
 function fatanh( x ){
-	if( Math.abs( x ) > _EPS5 ){
-		return Math.log( (1.0 + x) / (1.0 - x) ) * 0.5;
+	if( _ABS( x ) > _EPS5 ){
+		return _LOG( (1.0 + x) / (1.0 - x) ) * 0.5;
 	}
 	return x * (1.0 + x * x / 3.0);
 }
@@ -14082,7 +13913,7 @@ _Fract.prototype = {
 			for( i = 0; i < p; i++ ){
 				this._nu = this._nu * 10 + array_y[i];
 			}
-			this._de = (Math.pow( 10.0, p ) - 1) * Math.pow( 10.0, k );
+			this._de = (_POW( 10.0, p ) - 1) * _POW( 10.0, k );
 			return 1;
 		}
 		return 0;
@@ -14092,8 +13923,8 @@ _Fract.prototype = {
 		var k = 1;
 		var i;
 		for( i = 0; ; i++ ){
-			if( xx / Math.pow( 10.0, i ) < 10 ){
-				k = Math.pow( 10.0, i );
+			if( xx / _POW( 10.0, i ) < 10 ){
+				k = _POW( 10.0, i );
 				xx /= k;
 				break;
 			}
@@ -14106,7 +13937,7 @@ _Fract.prototype = {
 			}
 			if( ret > 0 ){
 				this._nu = (ii * this._de + this._nu) * k;
-				this._de *= Math.pow( 10.0, i );
+				this._de *= _POW( 10.0, i );
 				if( !_APPROX( x, this._nu / this._de ) ){
 					return false;
 				}
@@ -14139,7 +13970,7 @@ _Fract.prototype = {
 	},
 	_setFloat : function( x ){
 		if( !this._recurring( x ) ){
-			var de = Math.pow( 10.0, _FPREC( x ) );
+			var de = _POW( 10.0, _FPREC( x ) );
 			this._set( x * de, de );
 		}
 	},
@@ -14463,8 +14294,8 @@ _Fract.prototype = {
 		return new _Fract( false, this._nu, this._de );
 	},
 	_powInt : function( y ){
-		var nu = Math.pow( this._nu, y );
-		var de = Math.pow( this._de, y );
+		var nu = _POW( this._nu, y );
+		var de = _POW( this._de, y );
 		return new _Fract(
 			((nu < 0.0) != (de < 0.0)),
 			(nu < 0.0) ? -nu : nu,
@@ -14476,12 +14307,12 @@ _Fract.prototype = {
 			if( y.toFloat() == _INT( y.toFloat() ) ){
 				return this._powInt( y.toFloat() );
 			}
-			return floatToFract( Math.pow( this.toFloat(), y.toFloat() ) );
+			return floatToFract( _POW( this.toFloat(), y.toFloat() ) );
 		}
 		if( y == _INT( y ) ){
 			return this._powInt( y );
 		}
-		return floatToFract( Math.pow( this.toFloat(), y ) );
+		return floatToFract( _POW( this.toFloat(), y ) );
 	},
 	sqr : function(){
 		return new _Fract(
@@ -14511,6 +14342,20 @@ function floatToFract( x ){
 var _DBL_EPSILON = 2.2204460492503131e-016;
 var _NORMALIZE = 0.434294481903251816668;
 var _RAND_MAX = 32767;
+var _ABS = Math.abs;
+var _ACOS = Math.acos;
+var _ASIN = Math.asin;
+var _ATAN = Math.atan;
+var _ATAN2 = Math.atan2;
+var _CEIL = Math.ceil;
+var _COS = Math.cos;
+var _EXP = Math.exp;
+var _FLOOR = Math.floor;
+var _LOG = Math.log;
+var _POW = Math.pow;
+var _SIN = Math.sin;
+var _SQRT = Math.sqrt;
+var _TAN = Math.tan;
 var _rand_next = 1;
 function srand( seed ){
 	_rand_next = seed;
@@ -14524,29 +14369,29 @@ function assert( expr ){
 }
 function _INT( x ){
 	if( x < 0.0 ){
-		return Math.ceil( x );
+		return _CEIL( x );
 	}
-	return Math.floor( x );
+	return _FLOOR( x );
 }
 function _DIV( a, b ){
 	if( a < 0 ){
-		return Math.ceil( a / b );
+		return _CEIL( a / b );
 	}
-	return Math.floor( a / b );
+	return _FLOOR( a / b );
 }
 function _MOD( a, b ){
 	if( a < 0 ){
 		a = -_INT( a );
-		return -(a - Math.floor( a / b ) * b);
+		return -(a - _FLOOR( a / b ) * b);
 	}
 	a = _INT( a );
-	return a - Math.floor( a / b ) * b;
+	return a - _FLOOR( a / b ) * b;
 }
 function _SHIFTL( a, b ){
-	return a * Math.pow( 2, b );
+	return a * _POW( 2, b );
 }
 function _SHIFTR( a, b ){
-	return _DIV( a, Math.pow( 2, b ) );
+	return _DIV( a, _POW( 2, b ) );
 }
 function _AND( a, b ){
 	return (_DIV( a, 0x10000 ) & _DIV( b, 0x10000 )) * 0x10000 + ((a & 0xFFFF) & (b & 0xFFFF));
@@ -14596,9 +14441,9 @@ function _ISZERO( x ){
 }
 function _APPROX( x, y ){
 	if( y == 0 ){
-		return Math.abs( x ) < (_DBL_EPSILON * 4.0);
+		return _ABS( x ) < (_DBL_EPSILON * 4.0);
 	}
-	return Math.abs( (y - x) / y ) < (_DBL_EPSILON * 4.0);
+	return _ABS( (y - x) / y ) < (_DBL_EPSILON * 4.0);
 }
 function _APPROX_M( x, y ){
 	if( x._row != y._row ) return false;
@@ -14617,7 +14462,7 @@ function _EPREC( x ){
 	}
 	q = 0;
 	for( p = 0; ; p++ ){
-		t = x * Math.pow( 10.0, p );
+		t = x * _POW( 10.0, p );
 		i = _INT( t );
 		if( (t - i) == 0.0 ){
 			break;
@@ -14627,7 +14472,7 @@ function _EPREC( x ){
 		}
 	}
 	if( q == 0 ){
-		return p + _INT( Math.log( Math.abs( x ) ) * _NORMALIZE ) ;
+		return p + _INT( _LOG( _ABS( x ) ) * _NORMALIZE ) ;
 	}
 	return p - q;
 }
@@ -14638,7 +14483,7 @@ function _FPREC( x ){
 		return 0;
 	}
 	for( p = 0; ; p++ ){
-		t = x * Math.pow( 10.0, p );
+		t = x * _POW( 10.0, p );
 		i = _INT( t );
 		if( (t - i) == 0.0 ){
 			break;
@@ -16586,6 +16431,189 @@ function localtime( t ){
 	tm._yday = _DIV( date.getTime() - startDate.getTime(), 86400000 );
 	return tm;
 }
+window._Array = _Array;
+window._FuncInfo = _FuncInfo;
+window._Func = _Func;
+window.isCharSpace = isCharSpace;
+window.isCharEnter = isCharEnter;
+window.isCharEscape = isCharEscape;
+window._GraphAns = _GraphAns;
+window.newGraphAnsArray = newGraphAnsArray;
+window._Graph = _Graph;
+window.newGWorldCharInfo = newGWorldCharInfo;
+window.regGWorldCharInfo = regGWorldCharInfo;
+window.regGWorldBgColor = regGWorldBgColor;
+window.gWorldBgColor = gWorldBgColor;
+window._GWorld = _GWorld;
+window.defGWorldFunction = defGWorldFunction;
+window._Label = _Label;
+window._Line = _Line;
+window._Loop = _Loop;
+window._Param = _Param;
+window._MIN_VALUE = _MIN_VALUE;
+window._MAX_VALUE = _MAX_VALUE;
+window.setGlobalParam = setGlobalParam;
+window.globalParam = globalParam;
+window.setProcWarnFlowFlag = setProcWarnFlowFlag;
+window.setProcTraceFlag = setProcTraceFlag;
+window.setProcLoopMax = setProcLoopMax;
+window.initProcLoopCount = initProcLoopCount;
+window.resetProcLoopCount = resetProcLoopCount;
+window.procLoopCount = procLoopCount;
+window.procLoopCountMax = procLoopCountMax;
+window.procLoopTotal = procLoopTotal;
+window._Proc = _Proc;
+window.defProcFunction = defProcFunction;
+window._TOKEN_OP = _TOKEN_OP;
+window._TOKEN_FUNC = _TOKEN_FUNC;
+window._TOKEN_STAT = _TOKEN_STAT;
+window._TOKEN_COMMAND = _TOKEN_COMMAND;
+window._TOKEN_SE = _TOKEN_SE;
+window._TOKEN_DEFINE = _TOKEN_DEFINE;
+window._VALUE_DEFINE = _VALUE_DEFINE;
+window.indexOf = indexOf;
+window.getCode = getCode;
+window.getToken = getToken;
+window.regCustomCommand = regCustomCommand;
+window._Token = _Token;
+window._Variable = _Variable;
+window._EPS5 = _EPS5;
+window._PI = _PI;
+window._SQRT05 = _SQRT05;
+window.setComplexAngType = setComplexAngType;
+window.complexAngType = complexAngType;
+window.setComplexIsReal = setComplexIsReal;
+window.complexIsReal = complexIsReal;
+window.clearComplexError = clearComplexError;
+window.complexError = complexError;
+window._Complex = _Complex;
+window.getComplex = getComplex;
+window.setComplex = setComplex;
+window.dupComplex = dupComplex;
+window.floatToComplex = floatToComplex;
+window.fsin = fsin;
+window.fcos = fcos;
+window.ftan = ftan;
+window.fasin = fasin;
+window.facos = facos;
+window.fatan = fatan;
+window.fatan2 = fatan2;
+window.fsinh = fsinh;
+window.fcosh = fcosh;
+window.ftanh = ftanh;
+window.fasinh = fasinh;
+window.facosh = facosh;
+window.fatanh = fatanh;
+window._FRACT_MAX = _FRACT_MAX;
+window.clearFractError = clearFractError;
+window.fractError = fractError;
+window._Fract = _Fract;
+window.getFract = getFract;
+window.setFract = setFract;
+window.dupFract = dupFract;
+window.floatToFract = floatToFract;
+window._DBL_EPSILON = _DBL_EPSILON;
+window._NORMALIZE = _NORMALIZE;
+window._RAND_MAX = _RAND_MAX;
+window._ABS = _ABS;
+window._ACOS = _ACOS;
+window._ASIN = _ASIN;
+window._ATAN = _ATAN;
+window._ATAN2 = _ATAN2;
+window._CEIL = _CEIL;
+window._COS = _COS;
+window._EXP = _EXP;
+window._FLOOR = _FLOOR;
+window._LOG = _LOG;
+window._POW = _POW;
+window._SIN = _SIN;
+window._SQRT = _SQRT;
+window._TAN = _TAN;
+window.srand = srand;
+window.rand = rand;
+window.assert = assert;
+window._INT = _INT;
+window._DIV = _DIV;
+window._MOD = _MOD;
+window._SHIFTL = _SHIFTL;
+window._SHIFTR = _SHIFTR;
+window._AND = _AND;
+window._OR = _OR;
+window._XOR = _XOR;
+window._SIGNED = _SIGNED;
+window._UNSIGNED = _UNSIGNED;
+window._CHAR = _CHAR;
+window._CHAR_CODE_0 = _CHAR_CODE_0;
+window._CHAR_CODE_9 = _CHAR_CODE_9;
+window._CHAR_CODE_LA = _CHAR_CODE_LA;
+window._CHAR_CODE_LZ = _CHAR_CODE_LZ;
+window._CHAR_CODE_UA = _CHAR_CODE_UA;
+window._CHAR_CODE_UZ = _CHAR_CODE_UZ;
+window._CHAR_CODE_EX = _CHAR_CODE_EX;
+window._CHAR_CODE_COLON = _CHAR_CODE_COLON;
+window._ISINF = _ISINF;
+window._ISNAN = _ISNAN;
+window._ISZERO = _ISZERO;
+window._APPROX = _APPROX;
+window._APPROX_M = _APPROX_M;
+window._EPREC = _EPREC;
+window._FPREC = _FPREC;
+window._GCD = _GCD;
+window._LCM = _LCM;
+window.stringToFloat = stringToFloat;
+window.stringToInt = stringToInt;
+window.floatToExponential = floatToExponential;
+window.floatToFixed = floatToFixed;
+window.floatToString = floatToString;
+window.floatToStringPoint = floatToStringPoint;
+window.intToString = intToString;
+window.clearMatrixError = clearMatrixError;
+window.matrixError = matrixError;
+window._Matrix = _Matrix;
+window.deleteMatrix = deleteMatrix;
+window.dupMatrix = dupMatrix;
+window.arrayToMatrix = arrayToMatrix;
+window.valueToMatrix = valueToMatrix;
+window.floatToMatrix = floatToMatrix;
+window.newMatrixArray = newMatrixArray;
+window.setTimeFps = setTimeFps;
+window.timeFps = timeFps;
+window.clearTimeError = clearTimeError;
+window.timeError = timeError;
+window._Time = _Time;
+window.getTime = getTime;
+window.setTime = setTime;
+window.dupTime = dupTime;
+window.floatToTime = floatToTime;
+window.setValueType = setValueType;
+window.valueType = valueType;
+window.clearValueError = clearValueError;
+window.valueError = valueError;
+window._Value = _Value;
+window.deleteValue = deleteValue;
+window.getValue = getValue;
+window.setValue = setValue;
+window.copyValue = copyValue;
+window.dupValue = dupValue;
+window.floatToValue = floatToValue;
+window.complexToValue = complexToValue;
+window.fractToValue = fractToValue;
+window.timeToValue = timeToValue;
+window.newValueArray = newValueArray;
+window._Boolean = _Boolean;
+window.newBooleanArray = newBooleanArray;
+window._Float = _Float;
+window.newFloatArray = newFloatArray;
+window._Integer = _Integer;
+window.newIntegerArray = newIntegerArray;
+window._String = _String;
+window.newStringArray = newStringArray;
+window._Void = _Void;
+window.newVoidArray = newVoidArray;
+window._Tm = _Tm;
+window.time = time;
+window.mktime = mktime;
+window.localtime = localtime;
 window._CLIP_MODE_FLOAT = 0x0010;
 window._CLIP_MODE_COMPLEX = 0x0020;
 window._CLIP_MODE_FRACT = 0x0040;
@@ -16975,15 +17003,6 @@ window._CLIP_SE_BREAK = 66;
 window._CLIP_SE_RETURN = 67;
 window._CLIP_SE_RETURN_ANS = 68;
 window._CLIP_SE_FUNC = 69;
-window._CLIP_DEFINE_DBL_EPSILON = 0;
-window._CLIP_DEFINE_HUGE_VAL = 1;
-window._CLIP_DEFINE_RAND_MAX = 2;
-window._CLIP_DEFINE_FALSE = 3;
-window._CLIP_DEFINE_TRUE = 4;
-window._CLIP_DEFINE_BG_COLOR = 5;
-window._CLIP_DEFINE_TIME_ZONE = 6;
-window._CLIP_DEFINE_INFINITY = 7;
-window._CLIP_DEFINE_NAN = 8;
 window._CLIP_NO_ERR = 0x00;
 window._CLIP_LOOP_STOP = 0x01;
 window._CLIP_LOOP_CONT = 0x02;

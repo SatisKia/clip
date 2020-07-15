@@ -6,8 +6,24 @@
 #include "_Math.h"
 
 var _DBL_EPSILON = 2.2204460492503131e-016;
-var _NORMALIZE   = 0.434294481903251816668;	// 1/log 10
+var _NORMALIZE   = 0.434294481903251816668;	// 1/log(10)
 var _RAND_MAX    = 32767;
+
+// 数学関数
+var _ABS   = Math.abs;
+var _ACOS  = Math.acos;
+var _ASIN  = Math.asin;
+var _ATAN  = Math.atan;
+var _ATAN2 = Math.atan2;
+var _CEIL  = Math.ceil;
+var _COS   = Math.cos;
+var _EXP   = Math.exp;
+var _FLOOR = Math.floor;
+var _LOG   = Math.log;
+var _POW   = Math.pow;
+var _SIN   = Math.sin;
+var _SQRT  = Math.sqrt;
+var _TAN   = Math.tan;
 
 // 乱数
 var _rand_next = 1;
@@ -29,31 +45,31 @@ function assert( expr ){
 // 整数値
 function _INT( x ){
 	if( x < 0.0 ){
-		return Math.ceil( x );
+		return _CEIL( x );
 	}
-	return Math.floor( x );
+	return _FLOOR( x );
 }
 
 // 整数演算
 function _DIV( a, b/*符号なし整数値*/ ){
 	if( a < 0 ){
-		return Math.ceil( a / b );
+		return _CEIL( a / b );
 	}
-	return Math.floor( a / b );
+	return _FLOOR( a / b );
 }
 function _MOD( a, b/*符号なし整数値*/ ){
 	if( a < 0 ){
 		a = -_INT( a );
-		return -(a - Math.floor( a / b ) * b);
+		return -(a - _FLOOR( a / b ) * b);
 	}
 	a = _INT( a );
-	return a - Math.floor( a / b ) * b;
+	return a - _FLOOR( a / b ) * b;
 }
 function _SHIFTL( a, b ){
-	return a * Math.pow( 2, b );
+	return a * _POW( 2, b );
 }
 function _SHIFTR( a, b ){
-	return _DIV( a, Math.pow( 2, b ) );
+	return _DIV( a, _POW( 2, b ) );
 }
 function _AND( a, b ){
 	return (_DIV( a, 0x10000 ) & _DIV( b, 0x10000 )) * 0x10000 + ((a & 0xFFFF) & (b & 0xFFFF));
@@ -112,9 +128,9 @@ function _ISZERO( x ){
 }
 function _APPROX( x, y ){
 	if( y == 0 ){
-		return Math.abs( x ) < (_DBL_EPSILON * 4.0);
+		return _ABS( x ) < (_DBL_EPSILON * 4.0);
 	}
-	return Math.abs( (y - x) / y ) < (_DBL_EPSILON * 4.0);
+	return _ABS( (y - x) / y ) < (_DBL_EPSILON * 4.0);
 }
 function _APPROX_M( x, y ){
 	if( x._row != y._row ) return false;
@@ -137,7 +153,7 @@ function _EPREC( x ){
 
 	q = 0;
 	for( p = 0; ; p++ ){
-		t = x * Math.pow( 10.0, p );
+		t = x * _POW( 10.0, p );
 		i = _INT( t );
 		if( (t - i) == 0.0 ){
 			break;
@@ -148,7 +164,7 @@ function _EPREC( x ){
 	}
 
 	if( q == 0 ){
-		return p + _INT( Math.log( Math.abs( x ) ) * _NORMALIZE )/*整数部の桁数-1*/;
+		return p + _INT( _LOG( _ABS( x ) ) * _NORMALIZE )/*整数部の桁数-1*/;
 	}
 	return p - q;
 }
@@ -161,7 +177,7 @@ function _FPREC( x ){
 	}
 
 	for( p = 0; ; p++ ){
-		t = x * Math.pow( 10.0, p );
+		t = x * _POW( 10.0, p );
 		i = _INT( t );
 		if( (t - i) == 0.0 ){
 			break;
