@@ -19,8 +19,7 @@ endfunc
 func text3d_z
 	:ans FALSE
 	:sprint @@s (@0 * @4)
-	:gtext @@s 0 (gheight + 8) 0 # 画面外に描画
-	:gtext @@s (gx @1 - gcx) (gy @2 + 3) @3
+	:gtextr @@s (gx @1) (gy @2 + 3) @3
 endfunc
 func window3d l b r t x y z every z_scale
 	:ans FALSE

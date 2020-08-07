@@ -105,7 +105,7 @@ function _GWorld(){
 	// 文字セット
 	this._charSet = 0;
 
-	this._gWorldLine = false;
+	this._gWorldPut = true;
 }
 
 _GWorld.prototype = {
@@ -288,9 +288,9 @@ _GWorld.prototype = {
 	},
 
 	// カレントカラーを確認する
-	color : function(){
-		return this._color;
-	},
+//	color : function(){
+//		return this._color;
+//	},
 
 	// ドットを描画する
 	putColor : function( x, y, color ){
@@ -298,11 +298,11 @@ _GWorld.prototype = {
 			return false;
 		}
 		this._image[y * this._offset + x] = color;
-		if( !this._gWorldLine ){
+		if( this._gWorldPut ){
 			if( color == this._color ){
 				gWorldPut( this, x, y );
 			} else {
-				gWorldPutColor( this, x, y, color, this._color );
+				gWorldPutColor( this, x, y, color );
 			}
 		}
 		return true;
@@ -320,7 +320,7 @@ _GWorld.prototype = {
 		}
 		var color = 255 - this._image[y * this._offset + x];
 		this._image[y * this._offset + x] = color;
-		if( !this._gWorldLine ){
+		if( this._gWorldPut ){
 			gWorldPutColor( this, x, y, color );
 		}
 		return true;
@@ -381,10 +381,10 @@ _GWorld.prototype = {
 	},
 	wndFill : function( x, y, w, h ){
 		// 論理座標から実座標に変換
-		var gx = imgPosX( x );
-		var gy = imgPosY( y );
-		var gw = imgPosX( x + w ) - gx;
-		var gh = imgPosY( y + h ) - gy;
+		var gx = this.imgPosX( x );
+		var gy = this.imgPosY( y );
+		var gw = this.imgPosX( x + w ) - gx;
+		var gh = this.imgPosY( y + h ) - gy;
 		if( gw < 0 ){
 			gx += (gw + 1);
 			gw = -gw;
@@ -401,7 +401,7 @@ _GWorld.prototype = {
 	_clipLine : function( x1, y1, x2, y2, x/*_Integer*/, y/*_Integer*/ ){
 		var a, b;
 
-		if( x.val() < 0 ){
+		if( x._val < 0 ){
 			if( y1 == y2 ){
 				x.set( 0 );
 			} else {
@@ -410,17 +410,17 @@ _GWorld.prototype = {
 				x.set( 0 );
 				y.set( _INT( b ) );
 			}
-		} else if( x.val() > this.width() ){
+		} else if( x._val > this._width ){
 			if( y1 == y2 ){
-				x.set( this.width() );
+				x.set( this._width );
 			} else {
 				a = (y1 - y2) / (x1 - x2);
 				b = y1 - a * x1;
-				x.set( this.width() );
-				y.set( _INT( a * this.width() + b ) );
+				x.set( this._width );
+				y.set( _INT( a * this._width + b ) );
 			}
 		}
-		if( y.val() < 0 ){
+		if( y._val < 0 ){
 			if( x1 == x2 ){
 				y.set( 0 );
 			} else {
@@ -429,14 +429,14 @@ _GWorld.prototype = {
 				x.set( _INT( -b / a ) );
 				y.set( 0 );
 			}
-		} else if( y.val() > this.height() ){
+		} else if( y._val > this._height ){
 			if( x1 == x2 ){
-				y.set( this.height() );
+				y.set( this._height );
 			} else {
 				a = (y1 - y2) / (x1 - x2);
 				b = y1 - a * x1;
-				x.set( _INT( (this.height() - b) / a ) );
-				y.set( this.height() );
+				x.set( _INT( (this._height - b) / a ) );
+				y.set( this._height );
 			}
 		}
 	},
@@ -444,38 +444,38 @@ _GWorld.prototype = {
 		var ret;
 
 		if(
-			(x1.val() >= 0) && (x1.val() <= this.width ()) &&
-			(y1.val() >= 0) && (y1.val() <= this.height()) &&
-			(x2.val() >= 0) && (x2.val() <= this.width ()) &&
-			(y2.val() >= 0) && (y2.val() <= this.height())
+			(x1._val >= 0) && (x1._val <= this._width ) &&
+			(y1._val >= 0) && (y1._val <= this._height) &&
+			(x2._val >= 0) && (x2._val <= this._width ) &&
+			(y2._val >= 0) && (y2._val <= this._height)
 		){
 			return 1;
 		} else {
 			if(
-				(x1.val() >= 0) && (x1.val() <= this.width ()) &&
-				(y1.val() >= 0) && (y1.val() <= this.height())
+				(x1._val >= 0) && (x1._val <= this._width ) &&
+				(y1._val >= 0) && (y1._val <= this._height)
 			){
 				// (x2,y2)を修正
-				this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x2, y2 );
+				this._clipLine( x1._val, y1._val, x2._val, y2._val, x2, y2 );
 				ret = 1;
 			} else if(
-				(x2.val() >= 0) && (x2.val() <= this.width ()) &&
-				(y2.val() >= 0) && (y2.val() <= this.height())
+				(x2._val >= 0) && (x2._val <= this._width ) &&
+				(y2._val >= 0) && (y2._val <= this._height)
 			){
 				// (x1,y1)を修正
-				this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x1, y1 );
+				this._clipLine( x1._val, y1._val, x2._val, y2._val, x1, y1 );
 				ret = 1;
 			} else {
 				// (x1,y1),(x2,y2)を修正
-				this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x1, y1 );
-				this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x2, y2 );
+				this._clipLine( x1._val, y1._val, x2._val, y2._val, x1, y1 );
+				this._clipLine( x1._val, y1._val, x2._val, y2._val, x2, y2 );
 				ret = 2;
 			}
 			if(
-				((x1.val() <= 0            ) && (x2.val() <= 0            )) ||
-				((y1.val() <= 0            ) && (y2.val() <= 0            )) ||
-				((x1.val() >= this.width ()) && (x2.val() >= this.width ())) ||
-				((y1.val() >= this.height()) && (y2.val() >= this.height()))
+				((x1._val <= 0           ) && (x2._val <= 0           )) ||
+				((y1._val <= 0           ) && (y2._val <= 0           )) ||
+				((x1._val >= this._width ) && (x2._val >= this._width )) ||
+				((y1._val >= this._height) && (y2._val >= this._height))
 			){
 				return 0;
 			}
@@ -484,7 +484,7 @@ _GWorld.prototype = {
 	},
 	drawLine : function( x1, y1, x2, y2 ){
 		gWorldLine( this, x1, y1, x2, y2 );
-		this._gWorldLine = true;
+		this._gWorldPut = false;
 
 		var dx, dy;
 		var step;
@@ -529,7 +529,7 @@ _GWorld.prototype = {
 			}
 		}
 
-		this._gWorldLine = false;
+		this._gWorldPut = true;
 	},
 	drawLineXOR : function( x1, y1, x2, y2 ){
 		var dx, dy;
@@ -583,7 +583,7 @@ _GWorld.prototype = {
 		if( this.clipLine( xx1, yy1, xx2, yy2 ) == 0 ){
 			return false;
 		}
-		this.drawLine( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+		this.drawLine( xx1._val, yy1._val, xx2._val, yy2._val );
 		this.moveTo( x2, y2 );
 		return true;
 	},
@@ -595,7 +595,7 @@ _GWorld.prototype = {
 		if( this.clipLine( xx1, yy1, xx2, yy2 ) == 0 ){
 			return false;
 		}
-		this.drawLineXOR( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+		this.drawLineXOR( xx1._val, yy1._val, xx2._val, yy2._val );
 		this.moveTo( x2, y2 );
 		return true;
 	},
@@ -609,7 +609,7 @@ _GWorld.prototype = {
 		if( this.clipLine( gx1, gy1, gx2, gy2 ) == 0 ){
 			return false;
 		}
-		this.drawLine( gx1.val(), gy1.val(), gx2.val(), gy2.val() );
+		this.drawLine( gx1._val, gy1._val, gx2._val, gy2._val );
 		this.wndMoveTo( x2, y2 );
 		return true;
 	},
@@ -657,7 +657,10 @@ _GWorld.prototype = {
 			}
 		}
 	},
-	drawTextColor : function( text, x, y, color ){
+	drawTextColor : function( text, x, y, color, right ){
+		gWorldTextColor( this, text, x, y, color, right );
+		this._gWorldPut = false;
+
 		this._imgMoveX = x;
 		this._imgMoveY = y;
 
@@ -666,8 +669,13 @@ _GWorld.prototype = {
 
 		var chr;
 		for( var i = 0; i < text.length; i++ ){
-			chr = text.charCodeAt( i );
+			chr = text.charCodeAt( right ? text.length - 1 - i : i );
 			if( _gworld_char_info[this._charSet][chr]._data != null ){
+				if( right ){
+					// 現在点を移動させる
+					this._imgMoveX -= _gworld_char_info[this._charSet][chr]._width;
+				}
+
 				// 文字の描画
 				top = 0;
 				for( yy = this._imgMoveY - _gworld_char_info[this._charSet][chr]._sizeY; ; yy++ ){
@@ -685,60 +693,64 @@ _GWorld.prototype = {
 					top += _gworld_char_info[this._charSet][chr]._sizeX;
 				}
 
-				// 現在点を移動させる
-				this._imgMoveX += _gworld_char_info[this._charSet][chr]._width;
+				if( !right ){
+					// 現在点を移動させる
+					this._imgMoveX += _gworld_char_info[this._charSet][chr]._width;
+				}
 			}
 		}
 
 		// 現在点の更新に伴う処理
 		this._wndMoveX = this.wndPosX( this._imgMoveX );
+
+		this._gWorldPut = true;
 	},
-	drawText : function( text, x, y ){
-		this.drawTextColor( text, x, y, this._color );
+	drawText : function( text, x, y, right ){
+		this.drawTextColor( text, x, y, this._color, right );
 	},
-	drawTextTo : function( text ){
-		this.drawTextColor( text, this._imgMoveX, this._imgMoveY, this._color );
+	drawTextTo : function( text, right ){
+		this.drawTextColor( text, this._imgMoveX, this._imgMoveY, this._color, right );
 	},
-	wndDrawTextColor : function( text, x, y, color ){
+	wndDrawTextColor : function( text, x, y, color, right ){
 		// 論理座標から実座標に変換
 		var gx = this.imgPosX( x );
 		var gy = this.imgPosY( y );
 
-		this.drawTextColor( text, gx, gy, color );
+		this.drawTextColor( text, gx, gy, color, right );
 	},
-	wndDrawText : function( text, x, y ){
-		this.wndDrawTextColor( text, x, y, this._color );
+	wndDrawText : function( text, x, y, right ){
+		this.wndDrawTextColor( text, x, y, this._color, right );
 	},
-	wndDrawTextTo : function( text ){
-		this.wndDrawTextColor( text, this._wndMoveX, this._wndMoveY, this._color );
+	wndDrawTextTo : function( text, right ){
+		this.wndDrawTextColor( text, this._wndMoveX, this._wndMoveY, this._color, right );
 	},
 
-	imgMoveX : function(){
-		return this._imgMoveX;
-	},
-	imgMoveY : function(){
-		return this._imgMoveY;
-	},
-	wndMoveX : function(){
-		return this._wndMoveX;
-	},
-	wndMoveY : function(){
-		return this._wndMoveY;
-	},
+//	imgMoveX : function(){
+//		return this._imgMoveX;
+//	},
+//	imgMoveY : function(){
+//		return this._imgMoveY;
+//	},
+//	wndMoveX : function(){
+//		return this._wndMoveX;
+//	},
+//	wndMoveY : function(){
+//		return this._wndMoveY;
+//	},
 
 	// イメージ情報を確認する
-	image : function(){
-		return this._image;
-	},
-	offset : function(){
-		return this._offset;
-	},
-	width : function(){
-		return this._width;
-	},
-	height : function(){
-		return this._height;
-	}
+//	image : function(){
+//		return this._image;
+//	},
+//	offset : function(){
+//		return this._offset;
+//	},
+//	width : function(){
+//		return this._width;
+//	},
+//	height : function(){
+//		return this._height;
+//	}
 
 };
 
@@ -749,4 +761,5 @@ function defGWorldFunction(){
 	if( window.gWorldPut == undefined ) window.gWorldPut = function( gWorld, x, y ){};
 	if( window.gWorldFill == undefined ) window.gWorldFill = function( gWorld, x, y, w, h ){};
 	if( window.gWorldLine == undefined ) window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){};
+	if( window.gWorldTextColor == undefined ) window.gWorldTextColor = function( gWorld, text, x, y, color, right ){};
 }

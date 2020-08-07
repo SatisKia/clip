@@ -3,26 +3,9 @@
  * Copyright (C) SatisKia. All rights reserved.
  */
 
-var _time_fps = 30.0;	// 秒間フレーム数（グローバル）
-var _time_err = false;	// エラーが起こったかどうかのフラグ
-
-function setTimeFps( fps ){
-	_time_fps = fps;
-}
-function timeFps(){
-	return _time_fps;
-}
-
-function clearTimeError(){
-	_time_err = false;
-}
-function timeError(){
-	return _time_err;
-}
-
 // 時間
 function _Time( i, h, m, s, f ){
-	this._fps   = _time_fps;					// 秒間フレーム数（ローカル）
+	this._fps   = timeFps();					// 秒間フレーム数（ローカル）
 	this._minus = (i == undefined) ? false : i;	// 負かどうかのフラグ
 	this._hour  = (h == undefined) ? 0.0   : h;	// 時
 	this._min   = (m == undefined) ? 0.0   : m;	// 分
@@ -33,9 +16,9 @@ function _Time( i, h, m, s, f ){
 _Time.prototype = {
 
 	_update : function(){
-		if( _time_fps != this._fps ){
-			this._frame = this._frame * _time_fps / this._fps;
-			this._fps = _time_fps;
+		if( timeFps() != this._fps ){
+			this._frame = this._frame * timeFps() / this._fps;
+			this._fps = timeFps();
 			this.reduce();
 		}
 	},
@@ -101,7 +84,7 @@ _Time.prototype = {
 	},
 
 	_set : function( x ){
-		this._fps = _time_fps;
+		this._fps = timeFps();
 		if( x < 0.0 ){
 			this._minus = true;
 			x = -x;

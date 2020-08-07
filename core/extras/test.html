@@ -7,17 +7,69 @@
 <script type="text/javascript" src="_Canvas.js"></script>
 <script type="text/javascript" src="_ColorWin.js"></script>
 <script type="text/javascript" src="_DefCharInfo.js"></script>
-<script type="text/javascript" src="_DefCharInfoLarge.js"></script>
 <script type="text/javascript" src="_EasyClip.js"></script>
+<script type="text/javascript" src="_StringUtil.js"></script>
 <script type="text/javascript" src="../clip.js"></script>
 <script type="text/javascript">
-var _clip;
-
 function main(){
-	_clip = new _EasyClip();
-	_clip.commandGWorld( 256, 256 );
-	_clip.commandGColor( 252 );
-	_clip.procScript( [
+	// 文字情報を登録する
+	regGWorldDefCharInfo( 0 );
+
+	var su = new _StringUtil();
+
+	window.doCommandGWorld = function( width, height ){
+		var canvas = curClip().createCanvas( width, height );
+		canvas.setFont( 8, "Helvetica" );
+		su.setFont( 8, "Helvetica" );
+	};
+
+	window.gWorldClear = function( gWorld, color ){
+		var canvas = curClip()._canvas;
+		canvas.setColorRGB( gWorldBgColor() );
+		canvas.fill( 0, 0, canvas.width(), canvas.height() );
+		canvas.setColorBGR( curClip()._palette[color] );
+		canvas.fill( 0, 0, gWorld._width, gWorld._height );
+		canvas.setColorBGR( curClip()._palette[gWorld._color] );
+	};
+	window.gWorldSetColor = function( gWorld, color ){
+		curClip()._canvas.setColorBGR( curClip()._palette[color] );
+	};
+	window.gWorldPutColor = function( gWorld, x, y, color ){
+		var canvas = curClip()._canvas;
+		canvas.setColorBGR( curClip()._palette[color] );
+		canvas.put( x, y );
+		canvas.setColorBGR( curClip()._palette[gWorld._color] );
+	};
+	window.gWorldPut = function( gWorld, x, y ){
+		curClip()._canvas.put( x, y );
+	};
+	window.gWorldFill = function( gWorld, x, y, w, h ){
+		curClip()._canvas.fill( x, y, w, h );
+	};
+	window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){
+		var canvas = curClip()._canvas;
+		if( gWorld._color == 252 ){
+			canvas.setStrokeWidth( 0.5 );
+		} else {
+			canvas.setStrokeWidth( 1.0 );
+		}
+		canvas.line( x1, y1, x2, y2 );
+	};
+	window.gWorldTextColor = function( gWorld, text, x, y, color, right ){
+		if( right ){
+			x -= su.stringWidth( text );
+		}
+		var canvas = curClip()._canvas;
+		canvas.setColorBGR( curClip()._palette[color] );
+		canvas.drawString( text, x, y );
+		canvas.setColorBGR( curClip()._palette[gWorld._color] );
+	};
+
+	var clip = new _EasyClip();
+	clip.setPalette( COLOR_WIN );
+	clip.commandGWorld( 256, 256 );
+	clip.commandGColor( 252 );
+	clip.procScript( [
 		"func text3d_x",
 		"    :ans FALSE",
 		"    :sprint @@s @0",
@@ -31,8 +83,7 @@ function main(){
 		"func text3d_z",
 		"    :ans FALSE",
 		"    :sprint @@s (@0 * @4)",
-		"    :gtext @@s 0 (gheight + 8) 0 # 画面外に描画",
-		"    :gtext @@s (gx @1 - gcx) (gy @2 + 3) @3",
+		"    :gtextr @@s (gx @1) (gy @2 + 3) @3",
 		"endfunc",
 		"func window3d l b r t x y z every z_scale",
 		"    :ans FALSE",
@@ -165,72 +216,15 @@ function main(){
 		"    :gcolor @c # 現在色を戻す",
 		"endfunc"
 	] );
-	_clip.procLine( "plot3d [\"exp([-\\](x*x+y*y] \\-2 2 0.2 \\-2 2 0.2 0.2 5 1" );
-	_clip.updateCanvas();
-}
+	clip.procLine( "plot3d [\"exp([-\\](x*x+y*y] \\-2 2 0.2 \\-2 2 0.2 0.2 5 1" );
+//	clip.updateCanvas();
 
-function doFuncGColor( rgb ){
-	var i, j;
-	var r = (rgb & 0xFF0000) >> 16;
-	var g = (rgb & 0x00FF00) >> 8;
-	var b =  rgb & 0x0000FF;
-	var rr, gg, bb, tmp;
-	var d = 766/*255*3+1*/;
-	for( i = 0, j = 0; i < 256; i++ ){
-		rr =  COLOR_WIN[i] & 0x0000FF;
-		gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
-		bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
-		tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
-		if( tmp < d ){
-			j = i;
-			d = tmp;
-		}
-	}
-	return j;
-}
-function doFuncGColor24( index ){
-	return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
-}
-
-function doCommandGWorld( gWorld, width, height ){
-	if( _clip.setCanvas( "canvas0" ) ){
-		// 文字情報を登録する
-		regGWorldDefCharInfo( 0 );
-		regGWorldDefCharInfoLarge( 1 );
-	}
-
-	var div = document.getElementById( "div0" );
-	div.style.width  = "" + width  + "px";
-	div.style.height = "" + height + "px";
-
-	_clip._canvas.element().setAttribute( "width" , "" + width  );
-	_clip._canvas.element().setAttribute( "height", "" + height );
-
-	gWorld.create( width, height, true );
-}
-function doCommandGColor( color, rgb ){
-	COLOR_WIN[color] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
-}
-function doCommandGPut24End(){
-	var bgrColor = COLOR_WIN[_clip._proc.gWorld().color()];
-	_clip._canvas.setColor( bgrColor & 0x0000FF, (bgrColor & 0x00FF00) >> 8, (bgrColor & 0xFF0000) >> 16 );
-}
-
-function canvasPut( canvas, x, y, index ){
-	var bgrColor = COLOR_WIN[index];
-	canvas.setColor( bgrColor & 0x0000FF, (bgrColor & 0x00FF00) >> 8, (bgrColor & 0xFF0000) >> 16 );
-	canvas.put( x, y );
-}
-
-function canvasSave(){
-	var data = _clip._canvas.element().toDataURL( "image/png" ).replace( "image/png", "image/octet-stream" );
-	window.open( data, "save" );
+	var img = document.getElementById( "img0" );
+	img.src = clip.canvas().element().toDataURL( "image/png" );
 }
 </script>
 </head>
 <body onload="main()">
-<div id="div0" style="width:1px; height:1px"><canvas id="canvas0" width="1" height="1"></canvas></div>
-<hr style="border:0; margin:0; height:10px">
-<form action="javascript:canvasSave()"><button type="submit">ダウンロード</button></form>
+<img id="img0">
 </body>
 </html>

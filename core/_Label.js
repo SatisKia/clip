@@ -25,7 +25,7 @@ _Label.prototype = {
 		if( label != null ){
 			for( var i = 255; i >= 0; i-- ){
 				if( this._flag[i] == _LABEL_UNUSED ){
-					this.setFlag( i, _LABEL_MOVABLE );
+					this._flag[i] = _LABEL_MOVABLE;
 					this.setLabel( i, label, false );
 					return i;
 				}
@@ -39,7 +39,7 @@ _Label.prototype = {
 		var index;
 		if( (index = this.checkLabel( label )) >= 0 ){
 			this.setLabel( index, null, false );
-			this.setFlag( index, _LABEL_UNUSED );
+			this._flag[index] = _LABEL_UNUSED;
 		}
 		return index;
 	},
@@ -67,6 +67,13 @@ _Label.prototype = {
 	// ラベルを確認する
 //	label : function( index ){ return this._label[index]; },
 
+//	setFlag : function( index, flag ){
+//		this._flag[index] = flag;
+//	},
+//	flag : function( index ){
+//		return this._flag[index];
+//	},
+
 	// ラベルを検索する
 	checkLabel : function( label ){
 //		for( var i = 0; i < 256; i++ ){
@@ -80,13 +87,6 @@ _Label.prototype = {
 			return this._index[label];
 		}
 		return -1;
-	},
-
-	setFlag : function( index, flag ){
-		this._flag[index] = flag;
-	},
-	flag : function( index ){
-		return this._flag[index];
 	}
 
 };

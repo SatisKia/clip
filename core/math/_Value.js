@@ -5,27 +5,9 @@
 
 #include "_Math.h"
 
-var _value_type = _VALUE_TYPE_COMPLEX;	// 型（グローバル）
-
-function setValueType( type ){
-	_value_type = type;
-}
-function valueType(){
-	return _value_type;
-}
-
-function clearValueError(){
-	clearComplexError();
-	clearFractError();
-	clearTimeError();
-}
-function valueError(){
-	return complexError() || fractError() || timeError();
-}
-
 // 基本型
 function _Value(){
-	this._type = _value_type;		// 型（ローカル）
+	this._type = valueType();		// 型（ローカル）
 	this._c    = new _Complex();	// 複素数型
 	this._f    = new _Fract();		// 分数型
 	this._t    = new _Time();		// 時間型
@@ -34,8 +16,8 @@ function _Value(){
 _Value.prototype = {
 
 	type : function(){
-		if( _value_type != this._type ){
-			switch( _value_type ){
+		if( valueType() != this._type ){
+			switch( valueType() ){
 			case _VALUE_TYPE_COMPLEX:
 				switch( this._type ){
 				case _VALUE_TYPE_FRACT: this._c.ass( this._f.toFloat() ); break;
@@ -55,7 +37,7 @@ _Value.prototype = {
 				}
 				break;
 			}
-			this._type = _value_type;
+			this._type = valueType();
 		}
 		return this._type;
 	},
@@ -224,7 +206,7 @@ _Value.prototype = {
 			case _VALUE_TYPE_TIME   : this._t.ass( r._t ); break;
 			}
 		} else {
-			this._type = _value_type;	// 代入の場合は左辺値の変換は不要なのでtype関数は使わない
+			this._type = valueType();	// 代入の場合は左辺値の変換は不要なのでtype関数は使わない
 			switch( this._type ){
 			case _VALUE_TYPE_COMPLEX: this._c.ass( r ); break;
 			case _VALUE_TYPE_FRACT  : this._f.ass( r ); break;

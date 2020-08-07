@@ -43,8 +43,14 @@ dl {
 	margin:4px;
 }
 </style>
+<script type="text/javascript" src="_Canvas.js"></script>
+<script type="text/javascript" src="_ColorWin.js"></script>
+<script type="text/javascript" src="_DefCharInfoLarge.js"></script>
+<script type="text/javascript" src="_EasyClip.js"></script>
+<script type="text/javascript" src="clip.js"></script>
+<script type="text/javascript" src="window.js"></script>
 </head>
-<body>
+<body onload="setWindowImg( 'window' )">
 <div class="div_body">
 
 <hr class="hr">
@@ -435,9 +441,7 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dd><span class="pink">:window \-3 \-2 10 8</span><br>
 </dl>
 <dd>で、次のような座標系が設定される。<br>
-<dl>
-<dd><img src="window.jpg"><br>
-</dl>
+<dd><img id="window" width="300"><br>
 </dl>
 <span class="pink">:wfill </span><i>x</i><span class="pink"> </span><i>y</i><span class="pink"> </span><i>w</i><span class="pink"> </span><i>h</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ウィンドウ内を塗りつぶす<br></dl>
 <dl>

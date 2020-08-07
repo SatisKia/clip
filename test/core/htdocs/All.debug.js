@@ -6,37 +6,7 @@ var extFuncData = new Array();
 
 
 var _EPS5 = 0.001;
-var _PI = 3.14159265358979323846264;
 var _SQRT05 = 0.7071067811865475244008444;
-
-var _complex_ang_type = 0;
-var _complex_israd = true;
-var _complex_ang_coef = _PI;
-var _complex_isreal = false;
-var _complex_err = false;
-
-function setComplexAngType( angType ){
- _complex_ang_type = angType;
- _complex_israd = (_complex_ang_type == 0);
- _complex_ang_coef = (_complex_ang_type == 1) ? 180.0 : 200.0;
-}
-function complexAngType(){
- return _complex_ang_type;
-}
-
-function setComplexIsReal( isReal ){
- _complex_isreal = isReal;
-}
-function complexIsReal(){
- return _complex_isreal;
-}
-
-function clearComplexError(){
- _complex_err = false;
-}
-function complexError(){
- return _complex_err;
-}
 
 
 function _Complex( re, im ){
@@ -366,7 +336,7 @@ assert( r != undefined );
   var im2 = _angToRad( this._im ) * 2.0;
   var d = _COS( re2 ) + fcosh( im2 );
   if( d == 0.0 ){
-   _complex_err = true;
+   setComplexError();
   }
   return new _Complex(
    _SIN( re2 ) / d,
@@ -378,8 +348,8 @@ assert( r != undefined );
  asin : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( fasin( this._re ) );
     }
    } else {
@@ -398,8 +368,8 @@ assert( r != undefined );
  acos : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( facos( this._re ) );
     }
    } else {
@@ -425,7 +395,7 @@ assert( r != undefined );
   }
   var d = new _Complex( -this._re, 1.0 - this._im );
   if( d.equal( 0.0 ) ){
-   _complex_err = true;
+   setComplexError();
   }
 
   var i = new _Complex( 0.0, 1.0 );
@@ -466,7 +436,7 @@ assert( r != undefined );
   var im2 = this._im * 2.0;
   var d = fcosh( re2 ) + _COS( im2 );
   if( d == 0.0 ){
-   _complex_err = true;
+   setComplexError();
   }
   return new _Complex(
    fsinh( re2 ) / d,
@@ -487,8 +457,8 @@ assert( r != undefined );
  acosh : function(){
   if( this._im == 0.0 ){
    if( this._re < 1.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( facosh( this._re ) );
     }
    } else {
@@ -503,8 +473,8 @@ assert( r != undefined );
  atanh : function(){
   if( this._im == 0.0 ){
    if( (this._re <= -1.0) || (this._re >= 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( fatanh( this._re ) );
     }
    } else {
@@ -513,7 +483,7 @@ assert( r != undefined );
   }
   var d = new _Complex( 1.0 - this._re, -this._im );
   if( d.equal( 0.0 ) ){
-   _complex_err = true;
+   setComplexError();
   }
 
   return this.add( 1.0 ).div( d ).log().mul( 0.5 );
@@ -562,8 +532,8 @@ assert( r != undefined );
  log : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _LOG( this._re ) );
     }
    } else {
@@ -578,8 +548,8 @@ assert( r != undefined );
  log10 : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _LOG( this._re ) * _NORMALIZE );
     }
    } else {
@@ -628,8 +598,8 @@ assert( r != undefined );
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _SQRT( this._re ) );
     }
    } else {
@@ -679,12 +649,12 @@ function floatToComplex( x ){
 
 
 function _radToAng( rad ){
- return _complex_israd ? rad : rad * _complex_ang_coef / _PI;
+ return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
 
 
 function _angToRad( ang ){
- return _complex_israd ? ang : ang * _PI / _complex_ang_coef;
+ return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
 
 
@@ -748,13 +718,6 @@ function fatanh( x ){
  return x * (1.0 + x * x / 3.0);
 }
 var _FRACT_MAX = Number.MAX_SAFE_INTEGER ;
-var _fract_err = false;
-function clearFractError(){
- _fract_err = false;
-}
-function fractError(){
- return _fract_err;
-}
 function _Fract( mi, nu, de ){
  this._mi = (mi == undefined) ? false : mi;
  this._nu = (nu == undefined) ? 0 : _INT( nu );
@@ -1612,12 +1575,98 @@ function intToString( val, radix, width ){
  }
  return str2;
 }
-var _matrix_err = false;
+var _PI = 3.14159265358979323846264;
+var _math_env;
+function _MathEnv(){
+ this._complex_ang_type = 0;
+ this._complex_israd = true;
+ this._complex_ang_coef = _PI;
+ this._complex_isreal = false;
+ this._complex_err = false;
+ this._fract_err = false;
+ this._matrix_err = false;
+ this._time_fps = 30.0;
+ this._time_err = false;
+ this._value_type = 0;
+}
+function setMathEnv( env ){
+ _math_env = env;
+}
+function setComplexAngType( angType ){
+ _math_env._complex_ang_type = angType;
+ _math_env._complex_israd = (_math_env._complex_ang_type == 0);
+ _math_env._complex_ang_coef = (_math_env._complex_ang_type == 1) ? 180.0 : 200.0;
+}
+function complexAngType(){
+ return _math_env._complex_ang_type;
+}
+function complexIsRad(){
+ return _math_env._complex_israd;
+}
+function complexAngCoef(){
+ return _math_env._complex_ang_coef;
+}
+function setComplexIsReal( isReal ){
+ _math_env._complex_isreal = isReal;
+}
+function complexIsReal(){
+ return _math_env._complex_isreal;
+}
+function clearComplexError(){
+ _math_env._complex_err = false;
+}
+function setComplexError(){
+ _math_env._complex_err = true;
+}
+function complexError(){
+ return _math_env._complex_err;
+}
+function clearFractError(){
+ _math_env._fract_err = false;
+}
+function setFractError(){
+ _math_env._fract_err = true;
+}
+function fractError(){
+ return _math_env._fract_err;
+}
 function clearMatrixError(){
- _matrix_err = false;
+ _math_env._matrix_err = false;
+}
+function setMatrixError(){
+ _math_env._matrix_err = true;
 }
 function matrixError(){
- return _matrix_err;
+ return _math_env._matrix_err;
+}
+function setTimeFps( fps ){
+ _math_env._time_fps = fps;
+}
+function timeFps(){
+ return _math_env._time_fps;
+}
+function clearTimeError(){
+ _math_env._time_err = false;
+}
+function setTimeError(){
+ _math_env._time_err = true;
+}
+function timeError(){
+ return _math_env._time_err;
+}
+function setValueType( type ){
+ _math_env._value_type = type;
+}
+function valueType(){
+ return _math_env._value_type;
+}
+function clearValueError(){
+ clearComplexError();
+ clearFractError();
+ clearTimeError();
+}
+function valueError(){
+ return complexError() || fractError() || timeError();
 }
 function _Matrix( row, col ){
  this._row = (row == undefined) ? 1 : row;
@@ -2014,22 +2063,8 @@ function newMatrixArray( len ){
  }
  return a;
 }
-var _time_fps = 30.0;
-var _time_err = false;
-function setTimeFps( fps ){
- _time_fps = fps;
-}
-function timeFps(){
- return _time_fps;
-}
-function clearTimeError(){
- _time_err = false;
-}
-function timeError(){
- return _time_err;
-}
 function _Time( i, h, m, s, f ){
- this._fps = _time_fps;
+ this._fps = timeFps();
  this._minus = (i == undefined) ? false : i;
  this._hour = (h == undefined) ? 0.0 : h;
  this._min = (m == undefined) ? 0.0 : m;
@@ -2038,9 +2073,9 @@ function _Time( i, h, m, s, f ){
 }
 _Time.prototype = {
  _update : function(){
-  if( _time_fps != this._fps ){
-   this._frame = this._frame * _time_fps / this._fps;
-   this._fps = _time_fps;
+  if( timeFps() != this._fps ){
+   this._frame = this._frame * timeFps() / this._fps;
+   this._fps = timeFps();
    this.reduce();
   }
  },
@@ -2090,7 +2125,7 @@ _Time.prototype = {
   this._reduce2();
  },
  _set : function( x ){
-  this._fps = _time_fps;
+  this._fps = timeFps();
   if( x < 0.0 ){
    this._minus = true;
    x = -x;
@@ -2421,31 +2456,16 @@ function dupTime( x ){
 function floatToTime( x ){
  return (new _Time()).ass( x );
 }
-var _value_type = 0;
-function setValueType( type ){
- _value_type = type;
-}
-function valueType(){
- return _value_type;
-}
-function clearValueError(){
- clearComplexError();
- clearFractError();
- clearTimeError();
-}
-function valueError(){
- return complexError() || fractError() || timeError();
-}
 function _Value(){
- this._type = _value_type;
+ this._type = valueType();
  this._c = new _Complex();
  this._f = new _Fract();
  this._t = new _Time();
 }
 _Value.prototype = {
  type : function(){
-  if( _value_type != this._type ){
-   switch( _value_type ){
+  if( valueType() != this._type ){
+   switch( valueType() ){
    case 0:
     switch( this._type ){
     case 1: this._c.ass( this._f.toFloat() ); break;
@@ -2465,7 +2485,7 @@ _Value.prototype = {
     }
     break;
    }
-   this._type = _value_type;
+   this._type = valueType();
   }
   return this._type;
  },
@@ -2623,7 +2643,7 @@ _Value.prototype = {
    case 2 : this._t.ass( r._t ); break;
    }
   } else {
-   this._type = _value_type;
+   this._type = valueType();
    switch( this._type ){
    case 0: this._c.ass( r ); break;
    case 1 : this._f.ass( r ); break;
@@ -3523,11 +3543,11 @@ _Array.prototype = {
   }
  },
  move : function( index ){
-  if( this._label.flag( index ) == 2 ){
+  if( this._label._flag[index] == 2 ){
    this._moveData( index );
    this._label.setLabel( index, null, false );
   }
-  this._label.setFlag( index, 1 );
+  this._label._flag[index] = 1;
  },
  set : function( index, subIndex, dim, value, moveFlag ){
   if( moveFlag ){
@@ -3642,9 +3662,9 @@ function _FuncInfo(){
 }
 function __Func( createFlag ){
  this._createFlag = createFlag;
- this._info = new _FuncInfo();
- this._label = new _Token();
- this._line = new _Line();
+ this._info = null;
+ this._label = null;
+ this._line = null;
  this._topNum = 1;
  this._before = null;
  this._next = null;
@@ -3652,20 +3672,17 @@ function __Func( createFlag ){
 function _Func(){
  this._top = null;
  this._end = null;
- this._funcNum = 0;
- this._funcMax = -1;
+ this._num = 0;
+ this._max = -1;
 }
 _Func.prototype = {
  setMaxNum : function( max ){
   if( max >= 0 ){
-   for( var i = this._funcNum - max; i > 0; i-- ){
+   for( var i = this._num - max; i > 0; i-- ){
     this._del();
    }
   }
-  this._funcMax = max;
- },
- maxNum : function(){
-  return this._funcMax;
+  this._max = max;
  },
  getInfo : function( num, info ){
   var tmp = 0;
@@ -3712,24 +3729,27 @@ _Func.prototype = {
   return tmp;
  },
  create : function( name, topNum ){
-  if( this._funcMax == 0 ){
+  if( this._max == 0 ){
    return null;
   }
-  if( this._funcNum == this._funcMax ){
+  if( this._num == this._max ){
    this._del();
   }
   var tmp = this._ins( true );
+  tmp._info = new _FuncInfo();
   tmp._info._name = name;
   tmp._info._cnt = 0;
+  tmp._label = new _Token();
+  tmp._line = new _Line();
   tmp._topNum = (topNum == undefined) ? 1 : topNum;
-  this._funcNum++;
+  this._num++;
   return tmp;
  },
  open : function( srcFunc ){
-  if( this._funcMax == 0 ){
+  if( this._max == 0 ){
    return null;
   }
-  if( this._funcNum == this._funcMax ){
+  if( this._num == this._max ){
    this._del();
   }
   var tmp = this._ins( false );
@@ -3737,7 +3757,7 @@ _Func.prototype = {
   tmp._label = srcFunc._label;
   tmp._line = srcFunc._line;
   tmp._topNum = srcFunc._topNum;
-  this._funcNum++;
+  this._num++;
   return tmp;
  },
  openAll : function( src ){
@@ -3753,8 +3773,8 @@ _Func.prototype = {
    dstFunc._topNum = srcFunc._topNum;
    srcFunc = srcFunc._next;
   }
-  this._funcNum = src._funcNum;
-  this._funcMax = src._funcMax;
+  this._num = src._num;
+  this._max = src._max;
  },
  del : function( func ){
   if( func._before != null ){
@@ -3767,7 +3787,7 @@ _Func.prototype = {
   } else {
    this._end = func._before;
   }
-  this._funcNum--;
+  this._num--;
  },
  _del : function(){
   if( this._top == null ){
@@ -3785,7 +3805,7 @@ _Func.prototype = {
  },
  delAll : function(){
   this._top = null;
-  this._funcNum = 0;
+  this._num = 0;
  },
  search : function( name, updateCnt, nameSpace ){
   if( name.startsWith( ":" ) ){
@@ -3868,12 +3888,6 @@ function _Graph(){
  this.addGraph();
 }
 _Graph.prototype = {
- gWorld : function(){
-  return this._gWorld;
- },
- graphIndex : function(){
-  return this._curIndex;
- },
  addGraph : function(){
   this._curIndex = this._infoNum;
   this._infoNum++;
@@ -4022,32 +4036,32 @@ _Graph.prototype = {
  },
  create : function( width, height ){
   this._gWorld.scroll(
-   (width - this._gWorld.width ()) / 2.0,
-   (height - this._gWorld.height()) / 2.0
+   (width - this._gWorld._width ) / 2.0,
+   (height - this._gWorld._height) / 2.0
    );
   return this._gWorld.create( width, height, false );
  },
  open : function( image , offset, width, height ){
   this._gWorld.scroll(
-   (width - this._gWorld.width ()) / 2.0,
-   (height - this._gWorld.height()) / 2.0
+   (width - this._gWorld._width ) / 2.0,
+   (height - this._gWorld._height) / 2.0
    );
   return this._gWorld.open( image, offset, width, height, false );
  },
  _drawHLine : function( y ){
   var yy = this._gWorld.imgPosY( y );
-  gWorldLine( this._gWorld, 0, yy, this._gWorld.width() - 1, yy );
+  gWorldLine( this._gWorld, 0, yy, this._gWorld._width - 1, yy );
   this._gWorld._gWorldLine = true;
-  for( var i = 0; i < this._gWorld.width(); i++ ){
+  for( var i = 0; i < this._gWorld._width; i++ ){
    this._gWorld.put( i, yy );
   }
   this._gWorld._gWorldLine = false;
  },
  _drawVLine : function( x ){
   var xx = this._gWorld.imgPosX( x );
-  gWorldLine( this._gWorld, xx, 0, xx, this._gWorld.height() - 1 );
+  gWorldLine( this._gWorld, xx, 0, xx, this._gWorld._height - 1 );
   this._gWorld._gWorldLine = true;
-  for( var i = 0; i < this._gWorld.height(); i++ ){
+  for( var i = 0; i < this._gWorld._height; i++ ){
    this._gWorld.put( xx, i );
   }
   this._gWorld._gWorldLine = false;
@@ -4062,15 +4076,16 @@ _Graph.prototype = {
   var descent = tmp._descent;
   if( this._gWorld.imgPosY( y ) < 0 ){
    yy = ascent + 1;
-  } else if( (this._gWorld.imgPosY( y ) + (ascent + descent + 1)) >= this._gWorld.height() ){
-   yy = this._gWorld.height() - descent;
+  } else if( (this._gWorld.imgPosY( y ) + (ascent + descent + 1)) >= this._gWorld._height ){
+   yy = this._gWorld._height - descent;
   } else {
    yy = this._gWorld.imgPosY( y ) + ascent + 2;
   }
   this._gWorld.drawText(
    text,
    this._gWorld.imgPosX( x ) + 2,
-   yy
+   yy,
+   false
    );
  },
  _drawYText : function( x, y ){
@@ -4083,15 +4098,16 @@ _Graph.prototype = {
   var descent = tmp._descent;
   if( (this._gWorld.imgPosX( x ) - (width + 1)) < 0 ){
    xx = 1;
-  } else if( this._gWorld.imgPosX( x ) >= this._gWorld.width() ){
-   xx = this._gWorld.width() - width;
+  } else if( this._gWorld.imgPosX( x ) >= this._gWorld._width ){
+   xx = this._gWorld._width - width;
   } else {
    xx = this._gWorld.imgPosX( x ) - width;
   }
   this._gWorld.drawText(
    text,
    xx,
-   this._gWorld.imgPosY( y ) - descent
+   this._gWorld.imgPosY( y ) - descent,
+   false
    );
  },
  clear : function( backColor, scaleColor, unitColor, unitX, unitY, textColor, textX, textY ){
@@ -4117,11 +4133,11 @@ _Graph.prototype = {
    }
   }
   this._gWorld.clear( backColor );
-  var saveColor = this._gWorld.color();
+  var saveColor = this._gWorld._color;
   this._gWorld.setColor( unitColor );
   if( unitX > 0.0 ){
    pos = this._gWorld.wndPosX( 0 );
-   end = this._gWorld.wndPosX( this._gWorld.width() - 1 );
+   end = this._gWorld.wndPosX( this._gWorld._width - 1 );
    i = _DIV( pos, unitX );
    if( (this._gWorld.wndPosX( 1 ) - pos) > 0.0 ){
     while( (pos = i * unitX) <= end ){
@@ -4137,7 +4153,7 @@ _Graph.prototype = {
   }
   if( unitY > 0.0 ){
    pos = this._gWorld.wndPosY( 0 );
-   end = this._gWorld.wndPosY( this._gWorld.height() - 1 );
+   end = this._gWorld.wndPosY( this._gWorld._height - 1 );
    i = _DIV( pos, unitY );
    if( (this._gWorld.wndPosY( 1 ) - pos) > 0.0 ){
     while( (pos = i * unitY) <= end ){
@@ -4158,7 +4174,7 @@ _Graph.prototype = {
   unitX *= textX;
   if( unitX > 0.0 ){
    pos = this._gWorld.wndPosX( 0 );
-   end = this._gWorld.wndPosX( this._gWorld.width() - 1 );
+   end = this._gWorld.wndPosX( this._gWorld._width - 1 );
    i = _DIV( pos, unitX );
    if( (this._gWorld.wndPosX( 1 ) - pos) > 0.0 ){
     while( (pos = i * unitX) <= end ){
@@ -4175,7 +4191,7 @@ _Graph.prototype = {
   unitY *= textY;
   if( unitY > 0.0 ){
    pos = this._gWorld.wndPosY( 0 );
-   end = this._gWorld.wndPosY( this._gWorld.height() - 1 );
+   end = this._gWorld.wndPosY( this._gWorld._height - 1 );
    i = _DIV( pos, unitY );
    if( (this._gWorld.wndPosY( 1 ) - pos) > 0.0 ){
     while( (pos = i * unitY) <= end ){
@@ -4194,8 +4210,8 @@ _Graph.prototype = {
  _process : function( proc, param, expr, x, y ){
   var ret = false;
   param._var.set( this._info[this._curIndex]._index, x, false );
-  var saveAnsFlag = proc.ansFlag();
-  proc.setAnsFlag( false );
+  var saveAnsFlag = proc._printAns;
+  proc._printAns = false;
   if( proc.processLoop( expr, param ) == 0x04 ){
    if( param.val( 0 ).imag() == 0.0 ){
     y.set( param.val( 0 ).toFloat() );
@@ -4204,7 +4220,7 @@ _Graph.prototype = {
    }
    ret = true;
   }
-  proc.setAnsFlag( saveAnsFlag );
+  proc._printAns = saveAnsFlag;
   return ret;
  },
  _drawLine : function( x1, y1, x2, y2 ){
@@ -4213,7 +4229,7 @@ _Graph.prototype = {
   var xx2 = new _Integer( x2 );
   var yy2 = new _Integer( y2 );
   if( this._gWorld.clipLine( xx1, yy1, xx2, yy2 ) == 1 ){
-   this._gWorld.drawLine( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+   this._gWorld.drawLine( xx1._val, yy1._val, xx2._val, yy2._val );
    return true;
   }
   return false;
@@ -4228,12 +4244,12 @@ _Graph.prototype = {
    var tmp = start; start = end; end = tmp;
   }
   ansNum.set( end - start + 1 );
-  if( ansNum.val() <= 0 ){
+  if( ansNum._val <= 0 ){
    ansNum.set( 0 );
   } else {
    var saveFlag = param._fileFlag;
    param._fileFlag = false;
-   for( i = 0; i < ansNum.val(); i++ ){
+   for( i = 0; i < ansNum._val; i++ ){
     ans[i] = new _GraphAns();
    }
    this._gWorld.setColor( this._info[this._curIndex]._color );
@@ -4242,10 +4258,10 @@ _Graph.prototype = {
     posX = this._gWorld.imgPosX( this.logX( startAns[startIndex]._x ) );
     posY = this._gWorld.imgPosY( this.logY( startAns[startIndex]._y1 ) );
    }
-   for( i = 0; i < ansNum.val(); i++ ){
+   for( i = 0; i < ansNum._val; i++ ){
     ans[i]._x = this.expX( this._gWorld.wndPosX( start + i ) );
     if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-     ans[i]._y1 = yy.val();
+     ans[i]._y1 = yy._val;
      var tmp = this.logY( ans[i]._y1 );
      if( _ISINF( tmp ) || _ISNAN( tmp ) ){
       drawFlag = false;
@@ -4296,12 +4312,12 @@ _Graph.prototype = {
   } else {
    ansNum.set( _INT( (end - start) / step ) + 1 );
   }
-  if( ansNum.val() <= 0 ){
+  if( ansNum._val <= 0 ){
    ansNum.set( 0 );
   } else {
    var saveFlag = param._fileFlag;
    param._fileFlag = false;
-   for( i = 0; i < ansNum.val(); i++ ){
+   for( i = 0; i < ansNum._val; i++ ){
     ans[i] = new _GraphAns();
    }
    this._gWorld.setColor( this._info[this._curIndex]._color );
@@ -4312,12 +4328,12 @@ _Graph.prototype = {
      posX = this._gWorld.imgPosX( startAns[startIndex]._y1 );
      posY = this._gWorld.imgPosY( startAns[startIndex]._y2 );
     }
-    for( i = 0; i < ansNum.val(); i++ ){
+    for( i = 0; i < ansNum._val; i++ ){
      ans[i]._x = start + step * i;
      if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-      ans[i]._y1 = yy.val();
+      ans[i]._y1 = yy._val;
       if( this._process( proc, param, this._info[this._curIndex]._expr2, ans[i]._x, yy ) ){
-       ans[i]._y2 = yy.val();
+       ans[i]._y2 = yy._val;
        if( drawFlag ){
         oldX = posX;
         oldY = posY;
@@ -4354,10 +4370,10 @@ _Graph.prototype = {
      posX = this._gWorld.imgPosX( startAns[startIndex]._y1 * fcos( startAns[startIndex]._x ) );
      posY = this._gWorld.imgPosY( startAns[startIndex]._y1 * fsin( startAns[startIndex]._x ) );
     }
-    for( i = 0; i < ansNum.val(); i++ ){
+    for( i = 0; i < ansNum._val; i++ ){
      ans[i]._x = start + step * i;
      if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-      ans[i]._y1 = yy.val();
+      ans[i]._y1 = yy._val;
       var tmp = ans[i]._y1;
       if( _ISINF( tmp ) || _ISNAN( tmp ) ){
        drawFlag = false;
@@ -4417,7 +4433,7 @@ _Graph.prototype = {
     );
    break;
   }
-  return (this._info[this._curIndex]._ansNum.val() != 0);
+  return (this._info[this._curIndex]._ansNum._val != 0);
  },
  _plotPos : function( proc, param, pos ){
   var i;
@@ -4425,18 +4441,18 @@ _Graph.prototype = {
   var beforeFlag;
   var tmpAns = new Array();
   var tmpAnsNum = new _Integer();
-  if( this._info[this._curIndex]._ansNum.val() <= 0 ){
+  if( this._info[this._curIndex]._ansNum._val <= 0 ){
    return false;
   }
   switch( this._info[this._curIndex]._mode ){
   case 0:
-   if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
+   if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
     if( pos < this.logX( this._info[this._curIndex]._ans[0]._x ) ){
      start = this._gWorld.imgPosX( pos );
      end = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[0]._x ) ) - 1;
      beforeFlag = true;
-    } else if( pos > this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ){
-     start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ) + 1;
+    } else if( pos > this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ){
+     start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ) + 1;
      end = this._gWorld.imgPosX( pos );
      beforeFlag = false;
     } else {
@@ -4447,8 +4463,8 @@ _Graph.prototype = {
      start = this._gWorld.imgPosX( pos );
      end = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[0]._x ) ) - 1;
      beforeFlag = true;
-    } else if( pos < this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ){
-     start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ) + 1;
+    } else if( pos < this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ){
+     start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ) + 1;
      end = this._gWorld.imgPosX( pos );
      beforeFlag = false;
     } else {
@@ -4459,7 +4475,7 @@ _Graph.prototype = {
     proc, param,
     start, end,
     tmpAns, tmpAnsNum,
-    this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum.val() - 1
+    this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum._val - 1
     );
    break;
   case 1:
@@ -4468,13 +4484,13 @@ _Graph.prototype = {
    if( step < 0.0 ){
     step = -step;
    }
-   if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
+   if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
     if( pos < this._info[this._curIndex]._ans[0]._x ){
      start = pos;
      end = this._info[this._curIndex]._ans[0]._x - step;
      beforeFlag = true;
-    } else if( pos > this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
-     start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x + step;
+    } else if( pos > this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
+     start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x + step;
      end = pos;
      beforeFlag = false;
     } else {
@@ -4485,8 +4501,8 @@ _Graph.prototype = {
      start = pos;
      end = this._info[this._curIndex]._ans[0]._x - step;
      beforeFlag = true;
-    } else if( pos < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
-     start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x + step;
+    } else if( pos < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
+     start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x + step;
      end = pos;
      beforeFlag = false;
     } else {
@@ -4497,28 +4513,28 @@ _Graph.prototype = {
     proc, param,
     start, end, step,
     tmpAns, tmpAnsNum,
-    this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum.val() - 1
+    this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum._val - 1
     );
    break;
   }
-  if( tmpAnsNum == 0 ){
+  if( tmpAnsNum._val == 0 ){
    return false;
   }
-  var newAnsNum = this._info[this._curIndex]._ansNum.val() + tmpAnsNum.val();
+  var newAnsNum = this._info[this._curIndex]._ansNum._val + tmpAnsNum._val;
   var newAns = newGraphAnsArray( newAnsNum );
   if( beforeFlag ){
-   for( i = 0; i < tmpAnsNum.val(); i++ ){
+   for( i = 0; i < tmpAnsNum._val; i++ ){
     newAns[i].set( tmpAns[i] );
    }
    for( ; i < newAnsNum; i++ ){
-    newAns[i].set( this._info[this._curIndex]._ans[i - tmpAnsNum.val()] );
+    newAns[i].set( this._info[this._curIndex]._ans[i - tmpAnsNum._val] );
    }
   } else {
-   for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
     newAns[i].set( this._info[this._curIndex]._ans[i] );
    }
    for( ; i < newAnsNum; i++ ){
-    newAns[i].set( tmpAns[i - this._info[this._curIndex]._ansNum.val()] );
+    newAns[i].set( tmpAns[i - this._info[this._curIndex]._ansNum._val] );
    }
   }
   this._info[this._curIndex]._ans = newAns;
@@ -4531,10 +4547,10 @@ _Graph.prototype = {
   var posX, posY;
   var oldX, oldY;
   this._gWorld.setColor( this._info[this._curIndex]._color );
-  if( this._info[this._curIndex]._ansNum.val() > 0 ){
+  if( this._info[this._curIndex]._ansNum._val > 0 ){
    switch( this._info[this._curIndex]._mode ){
    case 0:
-    for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+    for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
      var tmp = this.logY( this._info[this._curIndex]._ans[i]._y1 );
      if( _ISINF( tmp ) || _ISNAN( tmp ) ){
       drawFlag = false;
@@ -4554,7 +4570,7 @@ _Graph.prototype = {
     }
     break;
    case 1:
-    for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+    for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
      if( drawFlag ){
       oldX = posX;
       oldY = posY;
@@ -4569,7 +4585,7 @@ _Graph.prototype = {
     }
     break;
    case 2:
-    for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+    for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
      var tmp = this._info[this._curIndex]._ans[i]._y1;
      if( _ISINF( tmp ) || _ISNAN( tmp ) ){
       drawFlag = false;
@@ -4596,7 +4612,7 @@ _Graph.prototype = {
  rePlot : function( proc, param ){
   if( proc == undefined ){
    return this._rePlot();
-  } else if( this._info[this._curIndex]._ansNum.val() <= 0 ){
+  } else if( this._info[this._curIndex]._ansNum._val <= 0 ){
    return this.plot( proc, param );
   } else {
    var ret = new Array( 3 );
@@ -4612,31 +4628,31 @@ _Graph.prototype = {
   switch( this._info[this._curIndex]._mode ){
   case 0:
    posX = this._gWorld.imgPosX( this.logX( x ) );
-   for( i = 0; i < this._gWorld.height(); i++ ){
+   for( i = 0; i < this._gWorld._height; i++ ){
     this._gWorld.putXOR( posX, i );
    }
    posY = this._gWorld.imgPosY( this.logY( y1 ) );
-   for( i = 0; i < this._gWorld.width(); i++ ){
+   for( i = 0; i < this._gWorld._width; i++ ){
     this._gWorld.putXOR( i, posY );
    }
    break;
   case 1:
    posX = this._gWorld.imgPosX( y1 );
-   for( i = 0; i < this._gWorld.height(); i++ ){
+   for( i = 0; i < this._gWorld._height; i++ ){
     this._gWorld.putXOR( posX, i );
    }
    posY = this._gWorld.imgPosY( y2 );
-   for( i = 0; i < this._gWorld.width(); i++ ){
+   for( i = 0; i < this._gWorld._width; i++ ){
     this._gWorld.putXOR( i, posY );
    }
    break;
   case 2:
    posX = this._gWorld.imgPosX( y1 * fcos( x ) );
-   for( i = 0; i < this._gWorld.height(); i++ ){
+   for( i = 0; i < this._gWorld._height; i++ ){
     this._gWorld.putXOR( posX, i );
    }
    posY = this._gWorld.imgPosY( y1 * fsin( x ) );
-   for( i = 0; i < this._gWorld.width(); i++ ){
+   for( i = 0; i < this._gWorld._width; i++ ){
     this._gWorld.putXOR( i, posY );
    }
    break;
@@ -4666,13 +4682,13 @@ _Graph.prototype = {
  },
  _search : function( x, ratio ){
   var i;
-  if( this._info[this._curIndex]._ansNum.val() > 0 ){
-   var num = this._info[this._curIndex]._ansNum.val() - 1;
+  if( this._info[this._curIndex]._ansNum._val > 0 ){
+   var num = this._info[this._curIndex]._ansNum._val - 1;
    if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[1]._x ){
     if( x < this._info[this._curIndex]._ans[0]._x ){
      return -1;
     } else if( x > this._info[this._curIndex]._ans[num]._x ){
-     return this._info[this._curIndex]._ansNum.val();
+     return this._info[this._curIndex]._ansNum._val;
     } else if( x == this._info[this._curIndex]._ans[num]._x ){
      ratio.set( 0.0 );
      return num;
@@ -4687,7 +4703,7 @@ _Graph.prototype = {
     if( x > this._info[this._curIndex]._ans[0]._x ){
      return -1;
     } else if( x < this._info[this._curIndex]._ans[num]._x ){
-     return this._info[this._curIndex]._ansNum.val();
+     return this._info[this._curIndex]._ansNum._val;
     } else if( x == this._info[this._curIndex]._ans[num]._x ){
      ratio.set( 0.0 );
      return num;
@@ -4711,10 +4727,10 @@ _Graph.prototype = {
  _searchParam : function( x, y ){
   var i;
   var tmp;
-  if( this._info[this._curIndex]._ansNum.val() > 0 ){
+  if( this._info[this._curIndex]._ansNum._val > 0 ){
    var num = 0;
    var dist = this._dist( x, y, this._info[this._curIndex]._ans[0]._y1, this._info[this._curIndex]._ans[0]._y2 );
-   for( i = 1; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   for( i = 1; i < this._info[this._curIndex]._ansNum._val; i++ ){
     tmp = this._dist( x, y, this._info[this._curIndex]._ans[i]._y1, this._info[this._curIndex]._ans[i]._y2 );
     if( (tmp >= 0.0) && ((dist < 0.0) || (tmp < dist)) ){
      num = i;
@@ -4727,14 +4743,14 @@ _Graph.prototype = {
  },
  _searchPolar : function( x, y, ratio ){
   var tmp;
-  if( this._info[this._curIndex]._ansNum.val() > 0 ){
+  if( this._info[this._curIndex]._ansNum._val > 0 ){
    var num = 0;
    var dist = this._dist(
     x, y,
     this._info[this._curIndex]._ans[0]._y1 * fcos( this._info[this._curIndex]._ans[0]._x ),
     this._info[this._curIndex]._ans[0]._y1 * fsin( this._info[this._curIndex]._ans[0]._x )
     );
-   for( var i = 1; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   for( var i = 1; i < this._info[this._curIndex]._ansNum._val; i++ ){
     tmp = this._dist(
      x, y,
      this._info[this._curIndex]._ans[i]._y1 * fcos( this._info[this._curIndex]._ans[i]._x ),
@@ -4761,14 +4777,14 @@ _Graph.prototype = {
    }
    if( num == -1 ){
     return false;
-   } else if( num == this._info[this._curIndex]._ansNum.val() ){
+   } else if( num == this._info[this._curIndex]._ansNum._val ){
     return false;
-   } else if( ratio.val() == 0.0 ){
+   } else if( ratio._val == 0.0 ){
     ans._y1 = this._info[this._curIndex]._ans[num]._y1;
     ans._y2 = this._info[this._curIndex]._ans[num]._y2;
    } else {
-    ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio.val();
-    ans._y2 = this._info[this._curIndex]._ans[num]._y2 + (this._info[this._curIndex]._ans[num + 1]._y2 - this._info[this._curIndex]._ans[num]._y2) * ratio.val();
+    ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio._val;
+    ans._y2 = this._info[this._curIndex]._ans[num]._y2 + (this._info[this._curIndex]._ans[num + 1]._y2 - this._info[this._curIndex]._ans[num]._y2) * ratio._val;
    }
    break;
   case 1:
@@ -4777,7 +4793,7 @@ _Graph.prototype = {
    }
    if( num == -1 ){
     return false;
-   } else if( num == this._info[this._curIndex]._ansNum.val() ){
+   } else if( num == this._info[this._curIndex]._ansNum._val ){
     return false;
    } else {
     ans._x = this._info[this._curIndex]._ans[num]._x ;
@@ -4791,14 +4807,14 @@ _Graph.prototype = {
    }
    if( num == -1 ){
     return false;
-   } else if( num == this._info[this._curIndex]._ansNum.val() ){
+   } else if( num == this._info[this._curIndex]._ansNum._val ){
     return false;
-   } else if( ratio.val() == 0.0 ){
+   } else if( ratio._val == 0.0 ){
     ans._x = this._info[this._curIndex]._ans[num]._x ;
     ans._y1 = this._info[this._curIndex]._ans[num]._y1;
    } else {
-    ans._x = this._info[this._curIndex]._ans[num]._x + (this._info[this._curIndex]._ans[num + 1]._x - this._info[this._curIndex]._ans[num]._x ) * ratio.val();
-    ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio.val();
+    ans._x = this._info[this._curIndex]._ans[num]._x + (this._info[this._curIndex]._ans[num + 1]._x - this._info[this._curIndex]._ans[num]._x ) * ratio._val;
+    ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio._val;
    }
    break;
   }
@@ -4821,12 +4837,12 @@ _Graph.prototype = {
      return false;
     }
    }
-   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
-   for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
+   for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
     tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
    }
    num = 0;
-  } else if( num == this._info[this._curIndex]._ansNum.val() ){
+  } else if( num == this._info[this._curIndex]._ansNum._val ){
    if( !this._process( proc, param, this._info[this._curIndex]._expr1, x, y1 ) ){
     return false;
    }
@@ -4835,12 +4851,12 @@ _Graph.prototype = {
      return false;
     }
    }
-   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
-   for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
+   for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
     tmp[i].set( this._info[this._curIndex]._ans[i] );
    }
-   num = this._info[this._curIndex]._ansNum.val();
-  } else if( ratio.val() == 0.0 ){
+   num = this._info[this._curIndex]._ansNum._val;
+  } else if( ratio._val == 0.0 ){
    y1.set( this._info[this._curIndex]._ans[num]._y1 );
    y2.set( this._info[this._curIndex]._ans[num]._y2 );
    return true;
@@ -4853,19 +4869,19 @@ _Graph.prototype = {
      return false;
     }
    }
-   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
+   tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
    for( i = 0; i <= num; i++ ){
     tmp[i].set( this._info[this._curIndex]._ans[i] );
    }
-   for( ; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+   for( ; i < this._info[this._curIndex]._ansNum._val; i++ ){
     tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
    }
    num++;
   }
   tmp[num]._x = x;
-  tmp[num]._y1 = y1.val();
-  tmp[num]._y2 = y2.val();
-  this._info[this._curIndex]._ansNum.set( this._info[this._curIndex]._ansNum.val() + 1 );
+  tmp[num]._y1 = y1._val;
+  tmp[num]._y2 = y2._val;
+  this._info[this._curIndex]._ansNum.set( this._info[this._curIndex]._ansNum._val + 1 );
   this._info[this._curIndex]._ans = tmp;
   return true;
  }
@@ -4924,7 +4940,7 @@ function _GWorld(){
  this._wndMoveY = 0.0;
  this._color = 0;
  this._charSet = 0;
- this._gWorldLine = false;
+ this._gWorldPut = true;
 }
 _GWorld.prototype = {
  create : function( width, height, initWindow ){
@@ -5058,19 +5074,16 @@ _GWorld.prototype = {
   this._color = color;
   gWorldSetColor( this, this._color );
  },
- color : function(){
-  return this._color;
- },
  putColor : function( x, y, color ){
   if( (x < 0) || (x >= _INT( this._width )) || (y < 0) || (y >= _INT( this._height )) ){
    return false;
   }
   this._image[y * this._offset + x] = color;
-  if( !this._gWorldLine ){
+  if( this._gWorldPut ){
    if( color == this._color ){
     gWorldPut( this, x, y );
    } else {
-    gWorldPutColor( this, x, y, color, this._color );
+    gWorldPutColor( this, x, y, color );
    }
   }
   return true;
@@ -5087,7 +5100,7 @@ _GWorld.prototype = {
   }
   var color = 255 - this._image[y * this._offset + x];
   this._image[y * this._offset + x] = color;
-  if( !this._gWorldLine ){
+  if( this._gWorldPut ){
    gWorldPutColor( this, x, y, color );
   }
   return true;
@@ -5136,10 +5149,10 @@ _GWorld.prototype = {
   gWorldFill( this, x, y, w, h );
  },
  wndFill : function( x, y, w, h ){
-  var gx = imgPosX( x );
-  var gy = imgPosY( y );
-  var gw = imgPosX( x + w ) - gx;
-  var gh = imgPosY( y + h ) - gy;
+  var gx = this.imgPosX( x );
+  var gy = this.imgPosY( y );
+  var gw = this.imgPosX( x + w ) - gx;
+  var gh = this.imgPosY( y + h ) - gy;
   if( gw < 0 ){
    gx += (gw + 1);
    gw = -gw;
@@ -5152,7 +5165,7 @@ _GWorld.prototype = {
  },
  _clipLine : function( x1, y1, x2, y2, x , y ){
   var a, b;
-  if( x.val() < 0 ){
+  if( x._val < 0 ){
    if( y1 == y2 ){
     x.set( 0 );
    } else {
@@ -5161,17 +5174,17 @@ _GWorld.prototype = {
     x.set( 0 );
     y.set( _INT( b ) );
    }
-  } else if( x.val() > this.width() ){
+  } else if( x._val > this._width ){
    if( y1 == y2 ){
-    x.set( this.width() );
+    x.set( this._width );
    } else {
     a = (y1 - y2) / (x1 - x2);
     b = y1 - a * x1;
-    x.set( this.width() );
-    y.set( _INT( a * this.width() + b ) );
+    x.set( this._width );
+    y.set( _INT( a * this._width + b ) );
    }
   }
-  if( y.val() < 0 ){
+  if( y._val < 0 ){
    if( x1 == x2 ){
     y.set( 0 );
    } else {
@@ -5180,49 +5193,49 @@ _GWorld.prototype = {
     x.set( _INT( -b / a ) );
     y.set( 0 );
    }
-  } else if( y.val() > this.height() ){
+  } else if( y._val > this._height ){
    if( x1 == x2 ){
-    y.set( this.height() );
+    y.set( this._height );
    } else {
     a = (y1 - y2) / (x1 - x2);
     b = y1 - a * x1;
-    x.set( _INT( (this.height() - b) / a ) );
-    y.set( this.height() );
+    x.set( _INT( (this._height - b) / a ) );
+    y.set( this._height );
    }
   }
  },
  clipLine : function( x1 , y1 , x2 , y2 ){
   var ret;
   if(
-   (x1.val() >= 0) && (x1.val() <= this.width ()) &&
-   (y1.val() >= 0) && (y1.val() <= this.height()) &&
-   (x2.val() >= 0) && (x2.val() <= this.width ()) &&
-   (y2.val() >= 0) && (y2.val() <= this.height())
+   (x1._val >= 0) && (x1._val <= this._width ) &&
+   (y1._val >= 0) && (y1._val <= this._height) &&
+   (x2._val >= 0) && (x2._val <= this._width ) &&
+   (y2._val >= 0) && (y2._val <= this._height)
   ){
    return 1;
   } else {
    if(
-    (x1.val() >= 0) && (x1.val() <= this.width ()) &&
-    (y1.val() >= 0) && (y1.val() <= this.height())
+    (x1._val >= 0) && (x1._val <= this._width ) &&
+    (y1._val >= 0) && (y1._val <= this._height)
    ){
-    this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x2, y2 );
+    this._clipLine( x1._val, y1._val, x2._val, y2._val, x2, y2 );
     ret = 1;
    } else if(
-    (x2.val() >= 0) && (x2.val() <= this.width ()) &&
-    (y2.val() >= 0) && (y2.val() <= this.height())
+    (x2._val >= 0) && (x2._val <= this._width ) &&
+    (y2._val >= 0) && (y2._val <= this._height)
    ){
-    this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x1, y1 );
+    this._clipLine( x1._val, y1._val, x2._val, y2._val, x1, y1 );
     ret = 1;
    } else {
-    this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x1, y1 );
-    this._clipLine( x1.val(), y1.val(), x2.val(), y2.val(), x2, y2 );
+    this._clipLine( x1._val, y1._val, x2._val, y2._val, x1, y1 );
+    this._clipLine( x1._val, y1._val, x2._val, y2._val, x2, y2 );
     ret = 2;
    }
    if(
-    ((x1.val() <= 0 ) && (x2.val() <= 0 )) ||
-    ((y1.val() <= 0 ) && (y2.val() <= 0 )) ||
-    ((x1.val() >= this.width ()) && (x2.val() >= this.width ())) ||
-    ((y1.val() >= this.height()) && (y2.val() >= this.height()))
+    ((x1._val <= 0 ) && (x2._val <= 0 )) ||
+    ((y1._val <= 0 ) && (y2._val <= 0 )) ||
+    ((x1._val >= this._width ) && (x2._val >= this._width )) ||
+    ((y1._val >= this._height) && (y2._val >= this._height))
    ){
     return 0;
    }
@@ -5231,7 +5244,7 @@ _GWorld.prototype = {
  },
  drawLine : function( x1, y1, x2, y2 ){
   gWorldLine( this, x1, y1, x2, y2 );
-  this._gWorldLine = true;
+  this._gWorldPut = false;
   var dx, dy;
   var step;
   var temp;
@@ -5273,7 +5286,7 @@ _GWorld.prototype = {
     this.put( x1, y1 );
    }
   }
-  this._gWorldLine = false;
+  this._gWorldPut = true;
  },
  drawLineXOR : function( x1, y1, x2, y2 ){
   var dx, dy;
@@ -5326,7 +5339,7 @@ _GWorld.prototype = {
   if( this.clipLine( xx1, yy1, xx2, yy2 ) == 0 ){
    return false;
   }
-  this.drawLine( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+  this.drawLine( xx1._val, yy1._val, xx2._val, yy2._val );
   this.moveTo( x2, y2 );
   return true;
  },
@@ -5338,7 +5351,7 @@ _GWorld.prototype = {
   if( this.clipLine( xx1, yy1, xx2, yy2 ) == 0 ){
    return false;
   }
-  this.drawLineXOR( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+  this.drawLineXOR( xx1._val, yy1._val, xx2._val, yy2._val );
   this.moveTo( x2, y2 );
   return true;
  },
@@ -5350,7 +5363,7 @@ _GWorld.prototype = {
   if( this.clipLine( gx1, gy1, gx2, gy2 ) == 0 ){
    return false;
   }
-  this.drawLine( gx1.val(), gy1.val(), gx2.val(), gy2.val() );
+  this.drawLine( gx1._val, gy1._val, gx2._val, gy2._val );
   this.wndMoveTo( x2, y2 );
   return true;
  },
@@ -5393,15 +5406,20 @@ _GWorld.prototype = {
    }
   }
  },
- drawTextColor : function( text, x, y, color ){
+ drawTextColor : function( text, x, y, color, right ){
+  gWorldTextColor( this, text, x, y, color, right );
+  this._gWorldPut = false;
   this._imgMoveX = x;
   this._imgMoveY = y;
   var xx, yy;
   var top;
   var chr;
   for( var i = 0; i < text.length; i++ ){
-   chr = text.charCodeAt( i );
+   chr = text.charCodeAt( right ? text.length - 1 - i : i );
    if( _gworld_char_info[this._charSet][chr]._data != null ){
+    if( right ){
+     this._imgMoveX -= _gworld_char_info[this._charSet][chr]._width;
+    }
     top = 0;
     for( yy = this._imgMoveY - _gworld_char_info[this._charSet][chr]._sizeY; ; yy++ ){
      for( xx = 0; xx < _gworld_char_info[this._charSet][chr]._sizeX; xx++ ){
@@ -5417,52 +5435,31 @@ _GWorld.prototype = {
      }
      top += _gworld_char_info[this._charSet][chr]._sizeX;
     }
-    this._imgMoveX += _gworld_char_info[this._charSet][chr]._width;
+    if( !right ){
+     this._imgMoveX += _gworld_char_info[this._charSet][chr]._width;
+    }
    }
   }
   this._wndMoveX = this.wndPosX( this._imgMoveX );
+  this._gWorldPut = true;
  },
- drawText : function( text, x, y ){
-  this.drawTextColor( text, x, y, this._color );
+ drawText : function( text, x, y, right ){
+  this.drawTextColor( text, x, y, this._color, right );
  },
- drawTextTo : function( text ){
-  this.drawTextColor( text, this._imgMoveX, this._imgMoveY, this._color );
+ drawTextTo : function( text, right ){
+  this.drawTextColor( text, this._imgMoveX, this._imgMoveY, this._color, right );
  },
- wndDrawTextColor : function( text, x, y, color ){
+ wndDrawTextColor : function( text, x, y, color, right ){
   var gx = this.imgPosX( x );
   var gy = this.imgPosY( y );
-  this.drawTextColor( text, gx, gy, color );
+  this.drawTextColor( text, gx, gy, color, right );
  },
- wndDrawText : function( text, x, y ){
-  this.wndDrawTextColor( text, x, y, this._color );
+ wndDrawText : function( text, x, y, right ){
+  this.wndDrawTextColor( text, x, y, this._color, right );
  },
- wndDrawTextTo : function( text ){
-  this.wndDrawTextColor( text, this._wndMoveX, this._wndMoveY, this._color );
+ wndDrawTextTo : function( text, right ){
+  this.wndDrawTextColor( text, this._wndMoveX, this._wndMoveY, this._color, right );
  },
- imgMoveX : function(){
-  return this._imgMoveX;
- },
- imgMoveY : function(){
-  return this._imgMoveY;
- },
- wndMoveX : function(){
-  return this._wndMoveX;
- },
- wndMoveY : function(){
-  return this._wndMoveY;
- },
- image : function(){
-  return this._image;
- },
- offset : function(){
-  return this._offset;
- },
- width : function(){
-  return this._width;
- },
- height : function(){
-  return this._height;
- }
 };
 function defGWorldFunction(){
  if( window.gWorldClear == undefined ) window.gWorldClear = function( gWorld, color ){};
@@ -5471,6 +5468,7 @@ function defGWorldFunction(){
  if( window.gWorldPut == undefined ) window.gWorldPut = function( gWorld, x, y ){};
  if( window.gWorldFill == undefined ) window.gWorldFill = function( gWorld, x, y, w, h ){};
  if( window.gWorldLine == undefined ) window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){};
+ if( window.gWorldTextColor == undefined ) window.gWorldTextColor = function( gWorld, text, x, y, color, right ){};
 }
 function _Label( obj ){
  this._obj = obj;
@@ -5487,7 +5485,7 @@ _Label.prototype = {
   if( label != null ){
    for( var i = 255; i >= 0; i-- ){
     if( this._flag[i] == 0 ){
-     this.setFlag( i, 2 );
+     this._flag[i] = 2;
      this.setLabel( i, label, false );
      return i;
     }
@@ -5499,7 +5497,7 @@ _Label.prototype = {
   var index;
   if( (index = this.checkLabel( label )) >= 0 ){
    this.setLabel( index, null, false );
-   this.setFlag( index, 0 );
+   this._flag[index] = 0;
   }
   return index;
  },
@@ -5525,16 +5523,10 @@ _Label.prototype = {
    return this._index[label];
   }
   return -1;
- },
- setFlag : function( index, flag ){
-  this._flag[index] = flag;
- },
- flag : function( index ){
-  return this._flag[index];
  }
 };
 function __Line(){
- this._line = null;
+ this._token = null;
  this._num = 0;
  this._comment = null;
  this._next = null;
@@ -5590,18 +5582,18 @@ _Line.prototype = {
   var len;
   var curLine = "";
   var tmp = this._newLine();
-  tmp._line = new _Token();
+  tmp._token = new _Token();
   var top = 0;
   var cur = 0;
   while( top + cur < line.length ){
    if( line.charAt( top + cur ) == ';' ){
     if( !this._checkEscape( line, top, cur ) ){
      curLine = line.substr( top, cur );
-     if( (ret = tmp._line.regString( param, curLine, strToVal )) != 0x00 ){
+     if( (ret = tmp._token.regString( param, curLine, strToVal )) != 0x00 ){
       return ret;
      }
      tmp = this._newLine();
-     tmp._line = new _Token;
+     tmp._token = new _Token;
      top = top + cur + 1;
      cur = 0;
      continue;
@@ -5626,13 +5618,13 @@ _Line.prototype = {
    curLine = line.substr( top, cur );
   }
   this._nextNum++;
-  return tmp._line.regString( param, curLine, strToVal );
+  return tmp._token.regString( param, curLine, strToVal );
  },
  regLine : function( line ){
   var ret;
   var tmp = this._newLine();
-  tmp._line = new _Token();
-  if( (ret = line._line.dup( tmp._line )) != 0x00 ){
+  tmp._token = new _Token();
+  if( (ret = line._token.dup( tmp._token )) != 0x00 ){
    return ret;
   }
   if( line._num > 0 ){
@@ -5706,7 +5698,7 @@ _Loop.prototype = {
   if( tmp._subFlag ){
    tmp._line = null;
   } else {
-   tmp._line._line = null;
+   tmp._line._token = null;
    if( tmp._line._comment != null ){
     tmp._line._comment = null;
    }
@@ -5716,44 +5708,44 @@ _Loop.prototype = {
  },
  _loopStart : function( _this, line , beforeFlag ){
   if( _this._curLoop._loopType != 5 ){
-   line.obj()._subFlag = true;
-   line.obj()._line = new _Loop();
-   line.obj()._line._loopType = 1;
-   line.obj()._line._beforeLoop = _this._curLoop;
-   _this._curLoop = line.obj()._line;
+   line._obj._subFlag = true;
+   line._obj._line = new _Loop();
+   line._obj._line._loopType = 1;
+   line._obj._line._beforeLoop = _this._curLoop;
+   _this._curLoop = line._obj._line;
    line.set( _this._curLoop._newLine() );
   }
   return 0x00;
  },
  _loopDo : function( _this, line , beforeFlag ){
   if( _this._curLoop._loopType != 5 ){
-   line.obj()._subFlag = true;
-   line.obj()._line = new _Loop();
-   line.obj()._line._loopType = 2;
-   line.obj()._line._beforeLoop = _this._curLoop;
-   _this._curLoop = line.obj()._line;
+   line._obj._subFlag = true;
+   line._obj._line = new _Loop();
+   line._obj._line._loopType = 2;
+   line._obj._line._beforeLoop = _this._curLoop;
+   _this._curLoop = line._obj._line;
    line.set( _this._curLoop._newLine() );
   }
   return 0x00;
  },
  _loopWhile : function( _this, line , beforeFlag ){
   if( _this._curLoop._loopType != 5 ){
-   line.obj()._subFlag = true;
-   line.obj()._line = new _Loop();
-   line.obj()._line._loopType = 3;
-   line.obj()._line._beforeLoop = _this._curLoop;
-   _this._curLoop = line.obj()._line;
+   line._obj._subFlag = true;
+   line._obj._line = new _Loop();
+   line._obj._line._loopType = 3;
+   line._obj._line._beforeLoop = _this._curLoop;
+   _this._curLoop = line._obj._line;
    line.set( _this._curLoop._newLine() );
   }
   return 0x00;
  },
  _loopFor : function( _this, line , beforeFlag ){
   if( _this._curLoop._loopType != 5 ){
-   line.obj()._subFlag = true;
-   line.obj()._line = new _Loop();
-   line.obj()._line._loopType = 4;
-   line.obj()._line._beforeLoop = _this._curLoop;
-   _this._curLoop = line.obj()._line;
+   line._obj._subFlag = true;
+   line._obj._line = new _Loop();
+   line._obj._line._loopType = 4;
+   line._obj._line._beforeLoop = _this._curLoop;
+   _this._curLoop = line._obj._line;
    line.set( _this._curLoop._newLine() );
   }
   return 0x00;
@@ -5762,11 +5754,11 @@ _Loop.prototype = {
   if( _this._curLoop._loopType == 5 ){
    return 0x212C;
   }
-  line.obj()._subFlag = true;
-  line.obj()._line = new _Loop();
-  line.obj()._line._loopType = 5;
-  line.obj()._line._beforeLoop = _this._curLoop;
-  _this._curLoop = line.obj()._line;
+  line._obj._subFlag = true;
+  line._obj._line = new _Loop();
+  line._obj._line._loopType = 5;
+  line._obj._line._beforeLoop = _this._curLoop;
+  _this._curLoop = line._obj._line;
   line.set( _this._curLoop._newLine() );
   return 0x00;
  },
@@ -5798,7 +5790,7 @@ _Loop.prototype = {
   var tmp;
   var ret;
   if( _this._curLoop._loopType == 4 ){
-   tmp = _this._curLoop._top._line._line;
+   tmp = _this._curLoop._top._line._token;
    tmp.del( 0 );
    tmp.del( 0 );
    tmp.del( -1 );
@@ -5807,7 +5799,7 @@ _Loop.prototype = {
    } else if( _this._curLoop._top._next._subFlag ){
     return 0x2126;
    }
-   tmp = _this._curLoop._top._next._line._line;
+   tmp = _this._curLoop._top._next._line._token;
    if( tmp.count() > 0 ){
     tmp.insCode( 0, 10, 12 );
     tmp.insCode( 1, 0, null );
@@ -5840,8 +5832,8 @@ _Loop.prototype = {
   var ret;
   var tmp = new _Void( this._curLoop._newLine() );
   var beforeFlag = new _Boolean( false );
-  line._line.beginGetToken();
-  if( line._line.getToken() ){
+  line._token.beginGetToken();
+  if( line._token.getToken() ){
    code = _get_code;
    token = _get_token;
    if( (code == 10) && (token < 17) ){
@@ -5850,17 +5842,17 @@ _Loop.prototype = {
     }
    }
   }
-  tmp.obj()._line = new __Line();
-  tmp.obj()._line._line = new _Token();
-  line._line.dup( tmp.obj()._line._line );
-  tmp.obj()._line._num = line._num;
+  tmp._obj._line = new __Line();
+  tmp._obj._line._token = new _Token();
+  line._token.dup( tmp._obj._line._token );
+  tmp._obj._line._num = line._num;
   if( line._comment != null ){
-   tmp.obj()._line._comment = new String();
-   tmp.obj()._line._comment = line._comment;
+   tmp._obj._line._comment = new String();
+   tmp._obj._line._comment = line._comment;
   }
-  tmp.obj()._line._next = line._next;
-  tmp.obj()._subFlag = false;
-  if( beforeFlag.val() ){
+  tmp._obj._line._next = line._next;
+  tmp._obj._subFlag = false;
+  if( beforeFlag._val ){
    this._curLoop._getFlag = false;
    this._curLoop = this._curLoop._beforeLoop;
    if( this._curLoop._loopType == 0 ){
@@ -5945,7 +5937,7 @@ _Loop.prototype = {
   return this._curLoop._contFlag;
  }
 };
-_loopSub = [
+var _loopSub = [
  _Loop.prototype._loopStart,
  _Loop.prototype._loopEnd,
  _Loop.prototype._loopEnd,
@@ -6026,27 +6018,6 @@ _Param.prototype = {
    globalParam().setFps( this._saveFps );
   }
  },
- setEnableCommand : function( flag ){
-  this._enableCommand = flag;
- },
- setEnableOpPow : function( flag ){
-  this._enableOpPow = flag;
- },
- setEnableStat : function( flag ){
-  this._enableStat = flag;
- },
- setCalculator : function( flag ){
-  this._calculator = flag;
- },
- isCalculator : function(){
-  return this._calculator;
- },
- setBase : function( base ){
-  this._base = base;
- },
- base : function(){
-  return this._base;
- },
  updateMode : function(){
   setComplexIsReal( (this._mode & 0x0020) == 0 );
   if( (this._mode & 0x0040) != 0 ){
@@ -6061,9 +6032,6 @@ _Param.prototype = {
   this._mode = mode;
   this.updateMode();
  },
- mode : function(){
-  return this._mode;
- },
  updateFps : function(){
   setTimeFps( this._fps );
  },
@@ -6075,18 +6043,12 @@ _Param.prototype = {
   }
   this.updateFps();
  },
- fps : function(){
-  return this._fps;
- },
  setPrec : function( prec ){
   if( prec < 0 ){
    this._prec = 6;
   } else {
    this._prec = prec;
   }
- },
- prec : function(){
-  return this._prec;
  },
  setRadix : function( radix ){
   if( radix < 2 ){
@@ -6096,15 +6058,6 @@ _Param.prototype = {
   } else {
    this._radix = radix;
   }
- },
- radix : function(){
-  return this._radix;
- },
- setAnsFlag : function( flag ){
-  this._printAns = (flag != 0);
- },
- ansFlag : function(){
-  return this._printAns;
  },
  setVal : function( index, value, moveFlag ){
   if( index == 0 ){
@@ -6234,21 +6187,89 @@ _Param.prototype = {
   this._defNameSpace = defNameSpace;
   this._nameSpace = this._defNameSpace;
  },
- defNameSpace : function(){
-  return this._defNameSpace;
- },
- setNameSpace : function( nameSpace ){
-  this._nameSpace = nameSpace;
- },
- nameSpace : function(){
-  return this._nameSpace;
- },
  resetNameSpace : function(){
   this._nameSpace = this._defNameSpace;
  }
 };
 var _MIN_VALUE = [ -128, 0 , -32768, 0 , -2147483648, 0 ];
 var _MAX_VALUE = [ 127, 256 - 1, 32767, 65536 - 1, 2147483647, 4294967296 - 1 ];
+var _proc_env;
+function _ProcEnv(){
+ this._proc_graph = new _Graph();
+ this._proc_gworld = this._proc_graph._gWorld;
+ this._proc_func = new _Func();
+ this._global_param = null;
+ this._proc_warn_flow = false;
+ this._proc_trace = false;
+ this._proc_loop_max = 0;
+ this._proc_loop_count = 0;
+ this._proc_loop_count_max = 0;
+ this._proc_loop_total = 0;
+ this._math_env = new _MathEnv();
+}
+function setProcEnv( env ){
+ _proc_env = env;
+ setMathEnv( env._math_env );
+}
+function procGraph(){
+ return _proc_env._proc_graph;
+}
+function procGWorld(){
+ return _proc_env._proc_gworld;
+}
+function procFunc(){
+ return _proc_env._proc_func;
+}
+function setGlobalParam( param ){
+ _proc_env._global_param = param;
+}
+function globalParam(){
+ return _proc_env._global_param;
+}
+function setProcWarnFlowFlag( flag ){
+ _proc_env._proc_warn_flow = flag;
+}
+function procWarnFlowFlag(){
+ return _proc_env._proc_warn_flow;
+}
+function setProcTraceFlag( flag ){
+ _proc_env._proc_trace = flag;
+}
+function procTraceFlag(){
+ return _proc_env._proc_trace;
+}
+function setProcLoopMax( max ){
+ _proc_env._proc_loop_max = max;
+}
+function procLoopMax(){
+ return _proc_env._proc_loop_max;
+}
+function initProcLoopCount(){
+ _proc_env._proc_loop_count = 0;
+ _proc_env._proc_loop_count_max = 0;
+ _proc_env._proc_loop_total = 0;
+}
+function resetProcLoopCount(){
+ if( _proc_env._proc_loop_count_max < _proc_env._proc_loop_count ){
+  _proc_env._proc_loop_count_max = _proc_env._proc_loop_count;
+ }
+ _proc_env._proc_loop_count = 0;
+}
+function setProcLoopCount( count ){
+ _proc_env._proc_loop_count = count;
+}
+function procLoopCount(){
+ return _proc_env._proc_loop_count;
+}
+function procLoopCountMax(){
+ return _proc_env._proc_loop_count_max;
+}
+function incProcLoopTotal(){
+ _proc_env._proc_loop_total++;
+}
+function procLoopTotal(){
+ return _proc_env._proc_loop_total;
+}
 function __Inc(){
  this._flag = false;
  this._code = 0;
@@ -6261,14 +6282,6 @@ function __ProcPrint(){
  this._string = null;
  this._next = null;
 }
-__ProcPrint.prototype = {
- string : function(){
-  return this._string;
- },
- next : function(){
-  return this._next;
- }
-};
 function __ProcScan(){
  this._title = null;
  this._code = 0;
@@ -6283,29 +6296,17 @@ __ProcScan.prototype = {
   }
   return this._title;
  },
- code : function(){
-  return this._code;
- },
- token : function(){
-  return this._token;
- },
- before : function(){
-  return this._before;
- },
- next : function(){
-  return this._next;
- },
  getDefString : function( proc, param ){
   var defString = new String();
   switch( this._code ){
   case 0x46:
-   param = _global_param;
+   param = globalParam();
   case 0x44:
   case 0x45:
    defString = proc.strGet( param._array, proc.arrayIndexDirect( param, this._code, this._token ) );
    break;
   case 0x23:
-   param = _global_param;
+   param = globalParam();
   default:
    var token = new _Token();
    var real = new _String();
@@ -6319,7 +6320,7 @@ __ProcScan.prototype = {
  setNewValue : function( newString, proc, param ){
   switch( this._code ){
   case 0x46:
-   param = _global_param;
+   param = globalParam();
   case 0x44:
   case 0x45:
    proc.strSet( param._array, proc.arrayIndexDirect( param, this._code, this._token ), newString );
@@ -6330,7 +6331,7 @@ __ProcScan.prototype = {
    if( token.stringToValue( param, newString, value ) ){
     var moveFlag = new _Boolean();
     var index = proc.varIndexDirectMove( param, this._code, this._token, moveFlag );
-    param.setVal( index, value, moveFlag.val() );
+    param.setVal( index, value, moveFlag._val );
    }
    break;
   }
@@ -6340,14 +6341,6 @@ function __ProcUsage(){
  this._string = null;
  this._next = null;
 }
-__ProcUsage.prototype = {
- string : function(){
-  return this._string;
- },
- next : function(){
-  return this._next;
- }
-};
 function __ProcInfo(){
  this._assCode = 14;
  this._assToken = null;
@@ -6362,59 +6355,8 @@ __Index.prototype = {
  set : function( param, index ){
   this._param = param;
   this._index = index;
- },
- param : function(){
-  return this._param;
- },
- val : function(){
-  return this._index;
  }
 };
-var _proc_graph = null;
-var _proc_gworld = null;
-var _proc_func = null;
-var _global_param = null;
-function setGlobalParam( param ){
- _global_param = param;
-}
-function globalParam(){
- return _global_param;
-}
-var _proc_warn_flow = false;
-function setProcWarnFlowFlag( flag ){
- _proc_warn_flow = flag;
-}
-var _proc_trace = false;
-function setProcTraceFlag( flag ){
- _proc_trace = flag;
-}
-var _proc_loop_max = 0;
-var _proc_loop_count = 0;
-var _proc_loop_count_max = 0;
-var _proc_loop_total = 0;
-function setProcLoopMax( max ){
- _proc_loop_max = max;
-}
-function initProcLoopCount(){
- _proc_loop_count = 0;
- _proc_loop_count_max = 0;
- _proc_loop_total = 0;
-}
-function resetProcLoopCount(){
- if( _proc_loop_count_max < _proc_loop_count ){
-  _proc_loop_count_max = _proc_loop_count;
- }
- _proc_loop_count = 0;
-}
-function procLoopCount(){
- return _proc_loop_count;
-}
-function procLoopCountMax(){
- return _proc_loop_count_max;
-}
-function procLoopTotal(){
- return _proc_loop_total;
-}
 function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
  this._token = new _Token();
  this._value = new _Value();
@@ -6462,73 +6404,39 @@ function _Proc( parentMode, printAssert, printWarn, gUpdateFlag ){
  this._endInc = null;
  this._topUsage = null;
  this._curUsage = null;
- if( _proc_graph == null ){
-  _proc_graph = new _Graph();
-  _proc_gworld = _proc_graph.gWorld();
- }
- if( _proc_func == null ){
-  _proc_func = new _Func();
- }
 }
 _Proc.prototype = {
  end : function(){
   setComplexAngType( this._parentAngType );
  },
- graph : function(){
-  return _proc_graph;
- },
- gWorld : function(){
-  return _proc_gworld;
- },
- curLine : function(){
-  return this._curLine._line;
- },
- setCurLine : function( line ){
-  this._curLine._line = line;
- },
- curNum : function(){
-  return this._curLine._num;
- },
- curComment : function(){
-  return this._curLine._comment;
- },
  setFuncCacheSize : function( size ){
-  _proc_func.setMaxNum( size );
+  procFunc().setMaxNum( size );
  },
  funcCacheSize : function(){
-  return _proc_func.maxNum();
+  return procFunc()._max;
  },
  clearFuncCache : function( name ){
   var curFunc;
-  if( (curFunc = _proc_func.search( name, false, null )) != null ){
-   _proc_func.del( curFunc );
+  if( (curFunc = procFunc().search( name, false, null )) != null ){
+   procFunc().del( curFunc );
   }
  },
  clearAllFuncCache : function(){
-  _proc_func.delAll();
+  procFunc().delAll();
  },
  getFuncCacheInfo : function( num, info ){
-  return _proc_func.getInfo( num, info );
+  return procFunc().getInfo( num, info );
  },
  canClearFuncCache : function(){
-  return _proc_func.canDel();
- },
- postQuit : function(){
-  this._quitFlag = true;
- },
- setAnsFlag : function( flag ){
-  this._printAns = flag;
- },
- ansFlag : function(){
-  return this._printAns;
+  return procFunc().canDel();
  },
  _setFlag : function( flag, newFlag , prevFlag ){
   if( flag < 0 ){
-   var tmpFlag = newFlag.val();
-   newFlag .set( prevFlag.val() );
+   var tmpFlag = newFlag._val;
+   newFlag .set( prevFlag._val );
    prevFlag.set( tmpFlag );
   } else {
-   prevFlag.set( newFlag.val() );
+   prevFlag.set( newFlag._val );
    newFlag .set( flag != 0 );
   }
  },
@@ -6536,31 +6444,22 @@ _Proc.prototype = {
   var printAssert = new _Boolean( this._printAssert );
   var prevPrintAssert = new _Boolean( this._prevPrintAssert );
   this._setFlag( flag, printAssert, prevPrintAssert );
-  this._printAssert = printAssert .val();
-  this._prevPrintAssert = prevPrintAssert.val();
- },
- assertFlag : function(){
-  return this._printAssert;
+  this._printAssert = printAssert ._val;
+  this._prevPrintAssert = prevPrintAssert._val;
  },
  setWarnFlag : function( flag ){
   var printWarn = new _Boolean( this._printWarn );
   var prevPrintWarn = new _Boolean( this._prevPrintWarn );
   this._setFlag( flag, printWarn, prevPrintWarn );
-  this._printWarn = printWarn .val();
-  this._prevPrintWarn = prevPrintWarn.val();
- },
- warnFlag : function(){
-  return this._printWarn;
+  this._printWarn = printWarn ._val;
+  this._prevPrintWarn = prevPrintWarn._val;
  },
  setGUpdateFlag : function( flag ){
   var gUpdateFlag = new _Boolean( this._gUpdateFlag );
   var prevGUpdateFlag = new _Boolean( this._prevGUpdateFlag );
   this._setFlag( flag, gUpdateFlag, prevGUpdateFlag );
-  this._gUpdateFlag = gUpdateFlag .val();
-  this._prevGUpdateFlag = prevGUpdateFlag.val();
- },
- gUpdateFlag : function(){
-  return this._gUpdateFlag;
+  this._gUpdateFlag = gUpdateFlag ._val;
+  this._prevGUpdateFlag = prevGUpdateFlag._val;
  },
  setAngType : function( type, updateFlag ){
   this._angType = type;
@@ -6591,14 +6490,14 @@ _Proc.prototype = {
  },
  varIndexIndirectMove : function( param, code, token, moveFlag ){
   moveFlag.set( code == 0x21 );
-  return moveFlag.val() ? this._index( param, code, token ) : this.autoVarIndex( param, token );
+  return moveFlag._val ? this._index( param, code, token ) : this.autoVarIndex( param, token );
  },
  varIndexDirect : function( param, code, token ){
   return (code == 0x21) ? token : this.autoVarIndex( param, token );
  },
  varIndexDirectMove : function( param, code, token, moveFlag ){
   moveFlag.set( code == 0x21 );
-  return moveFlag.val() ? token : this.autoVarIndex( param, token );
+  return moveFlag._val ? token : this.autoVarIndex( param, token );
  },
  arrayIndexParam : function( param, token ){
   return this._index( param, 0x44, token );
@@ -6611,14 +6510,14 @@ _Proc.prototype = {
  },
  arrayIndexIndirectMove : function( param, code, token, moveFlag ){
   moveFlag.set( code == 0x44 );
-  return moveFlag.val() ? this._index( param, code, token ) : this.autoArrayIndex( param, token );
+  return moveFlag._val ? this._index( param, code, token ) : this.autoArrayIndex( param, token );
  },
  arrayIndexDirect : function( param, code, token ){
   return (code == 0x44) ? token : this.autoArrayIndex( param, token );
  },
  arrayIndexDirectMove : function( param, code, token, moveFlag ){
   moveFlag.set( code == 0x44 );
-  return moveFlag.val() ? token : this.autoArrayIndex( param, token );
+  return moveFlag._val ? token : this.autoArrayIndex( param, token );
  },
  _strSet : function( array, index, top, str ){
   var src, dst;
@@ -6688,24 +6587,24 @@ _Proc.prototype = {
  },
  _updateMatrix : function( param, value ){
   var i;
-  if( (param.mode() & 0x0010) != 0 ){
+  if( (param._mode & 0x0010) != 0 ){
    for( i = 0; i < value._len; i++ ){
     value._mat[i].setImag( 0.0 );
    }
-  } else if( (param.mode() & 0x0100) != 0 ){
-   if( this.warnFlag() && _proc_warn_flow ){
-    var index = (param.mode() & 0x000F);
+  } else if( (param._mode & 0x0100) != 0 ){
+   if( this._printWarn && procWarnFlowFlag() ){
+    var index = (param._mode & 0x000F);
     var minValue = _MIN_VALUE[index];
     var maxValue = _MAX_VALUE[index];
     var intValue;
     for( i = 0; i < value._len; i++ ){
      intValue = _INT( value._mat[i].toFloat() );
      if( (intValue < minValue) || (intValue > maxValue) ){
-      this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this.curNum(), param, 8, "" + intValue );
+      this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this._curLine._num, param, 8, "" + intValue );
      }
     }
    }
-   switch( param.mode() ){
+   switch( param._mode ){
    case 0x0100:
     for( i = 0; i < value._len; i++ ){
      value._mat[i].ass( _SIGNED( value._mat[i].toFloat(), 256, -128, 127 ) );
@@ -6747,24 +6646,24 @@ _Proc.prototype = {
    }
   }
   if( node._vectorNum > 0 ){
-   if( (param.mode() & 0x0010) != 0 ){
+   if( (param._mode & 0x0010) != 0 ){
     for( i = 0; i < node._vectorNum; i++ ){
      node._vector[i].setImag( 0.0 );
     }
-   } else if( (param.mode() & 0x0100) != 0 ){
-    if( this.warnFlag() && _proc_warn_flow ){
-     var index = (param.mode() & 0x000F);
+   } else if( (param._mode & 0x0100) != 0 ){
+    if( this._printWarn && procWarnFlowFlag() ){
+     var index = (param._mode & 0x000F);
      var minValue = _MIN_VALUE[index];
      var maxValue = _MAX_VALUE[index];
      var intValue;
      for( i = 0; i < node._vectorNum; i++ ){
       intValue = _INT( node._vector[i].toFloat() );
       if( (intValue < minValue) || (intValue > maxValue) ){
-       this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this.curNum(), param, 8, "" + intValue );
+       this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this._curLine._num, param, 8, "" + intValue );
       }
      }
     }
-    switch( param.mode() ){
+    switch( param._mode ){
     case 0x0100:
      for( i = 0; i < node._vectorNum; i++ ){
       node._vector[i].ass( _SIGNED( node._vector[i].toFloat(), 256, -128, 127 ) );
@@ -6804,19 +6703,19 @@ _Proc.prototype = {
   this._updateMatrix( param, array._mat[index] );
  },
  _updateValue : function( param, value ){
-  if( (param.mode() & 0x0010) != 0 ){
+  if( (param._mode & 0x0010) != 0 ){
    value.setImag( 0.0 );
-  } else if( (param.mode() & 0x0100) != 0 ){
-   if( this.warnFlag() && _proc_warn_flow ){
-    var index = (param.mode() & 0x000F);
+  } else if( (param._mode & 0x0100) != 0 ){
+   if( this._printWarn && procWarnFlowFlag() ){
+    var index = (param._mode & 0x000F);
     var minValue = _MIN_VALUE[index];
     var maxValue = _MAX_VALUE[index];
     var intValue = _INT( value.toFloat() );
     if( (intValue < minValue) || (intValue > maxValue) ){
-     this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this.curNum(), param, 8, "" + intValue );
+     this._errorProc( (intValue < minValue) ? 0x1002 : 0x1003, this._curLine._num, param, 8, "" + intValue );
     }
    }
-   switch( param.mode() ){
+   switch( param._mode ){
    case 0x0100:
     value.ass( _SIGNED( value.toFloat(), 256, -128, 127 ) );
     break;
@@ -6850,7 +6749,7 @@ _Proc.prototype = {
   var lock;
   var value = new _Matrix();
   flag = false;
-  while( this.curLine().getToken() ){
+  while( this._curLine._token.getToken() ){
    code = _get_code;
    token = _get_token;
    this._initArray.addCode( code, token );
@@ -6872,8 +6771,8 @@ _Proc.prototype = {
      resizeList[0] = 0;
      resizeList[1] = 0;
      resizeList[2] = -1;
-     saveLine = this.curLine();
-     this.setCurLine( this._initArray );
+     saveLine = this._curLine._token;
+     this._curLine._token = this._initArray;
      i = 0;
      this._initArray.beginGetToken();
      while( true ){
@@ -6908,7 +6807,7 @@ _Proc.prototype = {
          this._initArrayIndex,
          resizeList, arrayList, this._initArrayCnt,
          value._mat[0],
-         this._initArrayMoveFlag.val()
+         this._initArrayMoveFlag._val
          );
         arrayList[this._initArrayCnt - 1]++;
        } else {
@@ -6919,7 +6818,7 @@ _Proc.prototype = {
       }
       i++;
      }
-     this.setCurLine( saveLine );
+     this._curLine._token = saveLine;
      arrayList = null;
      resizeList = null;
      flag = true;
@@ -6939,14 +6838,14 @@ _Proc.prototype = {
   var index;
   this._curInfo._curArray = new Array( 16 );
   for( this._curInfo._curArraySize = 0; ; this._curInfo._curArraySize++ ){
-   lock = this.curLine().lock();
+   lock = this._curLine._token.lock();
    if( this._const( param, code, token, value ) != 0x00 ){
-    this.curLine().unlock( lock );
+    this._curLine._token.unlock( lock );
     break;
    }
-   index = _INT( value._mat[0].toFloat() ) - param.base();
+   index = _INT( value._mat[0].toFloat() ) - param._base;
    if( index < 0 ){
-    this._errorProc( 0x1000, this.curNum(), param, 14, null );
+    this._errorProc( 0x1000, this._curLine._num, param, 14, null );
     this._curInfo._curArray[this._curInfo._curArraySize] = 0xFFFFFFFF;
    } else {
     this._curInfo._curArray[this._curInfo._curArraySize] = index;
@@ -6960,8 +6859,8 @@ _Proc.prototype = {
   var newToken;
   var tmpValue = new _Matrix();
   while( true ){
-   lock = this.curLine().lock();
-   if( !(this.curLine().getTokenParam( parentParam )) ){
+   lock = this._curLine._token.lock();
+   if( !(this._curLine._token.getTokenParam( parentParam )) ){
     break;
    }
    newCode = _get_code;
@@ -6973,7 +6872,7 @@ _Proc.prototype = {
    ){
     funcParam.addCode( newCode, newToken );
    } else {
-    this.curLine().unlock( lock );
+    this._curLine._token.unlock( lock );
     if( this._const( parentParam, code, token, tmpValue ) == 0x00 ){
      if( tmpValue._len > 1 ){
       funcParam.addMatrix( tmpValue );
@@ -6981,7 +6880,7 @@ _Proc.prototype = {
       funcParam.addValue( tmpValue._mat[0] );
      }
     } else {
-     this.curLine().unlock( lock );
+     this._curLine._token.unlock( lock );
      break;
     }
    }
@@ -7012,8 +6911,8 @@ _Proc.prototype = {
  _processLoop : function( param ){
   var code;
   var token;
-  this.curLine().beginGetToken();
-  if( !(this.curLine().getTokenLock()) ){
+  this._curLine._token.beginGetToken();
+  if( !(this._curLine._token.getTokenLock()) ){
    return 0x03;
   }
   code = _get_code;
@@ -7040,7 +6939,7 @@ _Proc.prototype = {
  _constFirst : function( param, code, token, value ){
   var newCode;
   var newToken;
-  if( !(this.curLine().getTokenParam( param )) ){
+  if( !(this._curLine._token.getTokenParam( param )) ){
    return this._retError( 0x2106, code, token );
   }
   newCode = _get_code;
@@ -7061,7 +6960,7 @@ _Proc.prototype = {
  _const : function( param, code, token, value ){
   var newCode;
   var newToken;
-  if( !(this.curLine().getTokenParam( param )) ){
+  if( !(this._curLine._token.getTokenParam( param )) ){
    return this._retError( 0x2106, code, token );
   }
   newCode = _get_code;
@@ -7077,8 +6976,8 @@ _Proc.prototype = {
   var lock;
   subStep = 0;
   while( true ){
-   lock = this.curLine().lock();
-   if( this.curLine().getToken() ){
+   lock = this._curLine._token.lock();
+   if( this._curLine._token.getToken() ){
     switch( _get_code ){
     case 0:
      subStep++;
@@ -7086,13 +6985,13 @@ _Proc.prototype = {
     case 15:
      subStep--;
      if( subStep < 0 ){
-      this.curLine().unlock( lock );
+      this._curLine._token.unlock( lock );
       return 0x00;
      }
      break;
     case 11:
      if( subStep <= 0 ){
-      this.curLine().unlock( lock );
+      this._curLine._token.unlock( lock );
       return 0x00;
      }
      break;
@@ -7107,7 +7006,7 @@ _Proc.prototype = {
   var subStep;
   subStep = 0;
   while( true ){
-   if( this.curLine().getToken() ){
+   if( this._curLine._token.getToken() ){
     switch( _get_code ){
     case 0:
      subStep++;
@@ -7131,14 +7030,14 @@ _Proc.prototype = {
  _getString : function( param, string ){
   var code;
   var token;
-  if( this.curLine().getTokenParam( param ) ){
+  if( this._curLine._token.getTokenParam( param ) ){
    code = _get_code;
    token = _get_token;
    if( code == 19 ){
     string.set( token );
    } else if( (code & 0x40) != 0 ){
     if( code == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
     var arrayIndex = this.arrayIndexIndirect( param, code, token );
     string.set( this.strGet( param._array, arrayIndex ) );
@@ -7154,7 +7053,7 @@ _Proc.prototype = {
  _processOp : function( param, value ){
   var code;
   var token;
-  if( !(this.curLine().getToken()) ){
+  if( !(this._curLine._token.getToken()) ){
    return this._retError( 0x2101, 14, null );
   }
   code = _get_code;
@@ -7174,7 +7073,7 @@ _Proc.prototype = {
    this._regIncSub( flag, this._curInfo._assCode, this._curInfo._assToken, null, 0 );
    break;
   case 0x23:
-   param = _global_param;
+   param = globalParam();
   case 0x22:
    if( param._var.isLocked( this.autoVarIndex( param, this._curInfo._assToken ) ) ){
     return this._retError( 0x210E, code, token );
@@ -7265,15 +7164,15 @@ _Proc.prototype = {
     param.setVal( index, value, false );
     break;
    case 0x23:
-    index = this.autoVarIndex( _global_param, cur._token );
-    value.ass( _global_param.val( index ) );
-    this._updateValue( _global_param, value );
+    index = this.autoVarIndex( globalParam(), cur._token );
+    value.ass( globalParam().val( index ) );
+    this._updateValue( globalParam(), value );
     if( cur._flag ){
      value.addAndAss( 1.0 );
     } else {
      value.subAndAss( 1.0 );
     }
-    _global_param.setVal( index, value, false );
+    globalParam().setVal( index, value, false );
     break;
    case 0x44:
     index = cur._token;
@@ -7298,15 +7197,15 @@ _Proc.prototype = {
     param._array.set( index, cur._array, cur._arraySize, value, false );
     break;
    case 0x46:
-    index = this.autoArrayIndex( _global_param, cur._token );
-    value.ass( _global_param._array.val( index, cur._array, cur._arraySize ) );
-    this._updateValue( _global_param, value );
+    index = this.autoArrayIndex( globalParam(), cur._token );
+    value.ass( globalParam()._array.val( index, cur._array, cur._arraySize ) );
+    this._updateValue( globalParam(), value );
     if( cur._flag ){
      value.addAndAss( 1.0 );
     } else {
      value.subAndAss( 1.0 );
     }
-    _global_param._array.set( index, cur._array, cur._arraySize, value, false );
+    globalParam()._array.set( index, cur._array, cur._arraySize, value, false );
     break;
    }
    cur = cur._next;
@@ -7322,9 +7221,9 @@ _Proc.prototype = {
   var subInfo = new __ProcInfo();
   savInfo = this._curInfo;
   this._curInfo = subInfo;
-  lock = this.curLine().lock();
+  lock = this._curLine._token.lock();
   if( (ret = this._processOp( param, value )) != 0x00 ){
-   this.curLine().unlock( lock );
+   this._curLine._token.unlock( lock );
    if( (ret = this._constFirst( param, 14, null, value )) != 0x00 ){
     this._curInfo = savInfo;
     this._token.delToken( subInfo._assCode, subInfo._assToken );
@@ -7332,12 +7231,12 @@ _Proc.prototype = {
     return ret;
    }
    var tmpValue1 = new _Matrix();
-   lock = this.curLine().lock();
+   lock = this._curLine._token.lock();
    if( this._const( param, 14, null, tmpValue1 ) != 0x00 ){
-    this.curLine().unlock( lock );
-   } else if( (param.mode() & 0x0020) != 0 ){
-    if( this.curLine().checkToken( 15 ) ){
-     this.curLine().getToken();
+    this._curLine._token.unlock( lock );
+   } else if( (param._mode & 0x0020) != 0 ){
+    if( this._curLine._token.checkToken( 15 ) ){
+     this._curLine._token.getToken();
      code = _get_code;
      token = _get_token;
      this._curInfo = savInfo;
@@ -7346,20 +7245,20 @@ _Proc.prototype = {
      return this._retError( 0x210C, code, token );
     } else {
      value._mat[0].setImag( tmpValue1._mat[0].real() );
-     this.curLine().getToken();
+     this._curLine._token.getToken();
      this._curInfo = savInfo;
      this._token.delToken( subInfo._assCode, subInfo._assToken );
      subInfo._curArray = null;
      return 0x00;
     }
-   } else if( (param.mode() & (0x0010 | 0x0040)) != 0 ){
+   } else if( (param._mode & (0x0010 | 0x0040)) != 0 ){
     var tmpValue2 = new _Matrix();
-    lock = this.curLine().lock();
+    lock = this._curLine._token.lock();
     if( this._const( param, 14, null, tmpValue2 ) != 0x00 ){
      value.divAndAss( tmpValue1._mat[0].toFloat() );
-     this.curLine().unlock( lock );
-    } else if( this.curLine().checkToken( 15 ) ){
-     this.curLine().getToken();
+     this._curLine._token.unlock( lock );
+    } else if( this._curLine._token.checkToken( 15 ) ){
+     this._curLine._token.getToken();
      code = _get_code;
      token = _get_token;
      this._curInfo = savInfo;
@@ -7369,7 +7268,7 @@ _Proc.prototype = {
     } else {
      tmpValue1.divAndAss( tmpValue2._mat[0].toFloat() );
      value.addAndAss( tmpValue1 );
-     this.curLine().getToken();
+     this._curLine._token.getToken();
      this._curInfo = savInfo;
      this._token.delToken( subInfo._assCode, subInfo._assToken );
      subInfo._curArray = null;
@@ -7377,7 +7276,7 @@ _Proc.prototype = {
     }
    }
   }
-  while( this.curLine().checkToken( 15 ) ){
+  while( this._curLine._token.checkToken( 15 ) ){
    if( (ret = this._processOp( param, value )) != 0x00 ){
     this._curInfo = savInfo;
     this._token.delToken( subInfo._assCode, subInfo._assToken );
@@ -7385,7 +7284,7 @@ _Proc.prototype = {
     return ret;
    }
   }
-  this.curLine().getToken();
+  this._curLine._token.getToken();
   this._curInfo = savInfo;
   this._token.delToken( subInfo._assCode, subInfo._assToken );
   subInfo._curArray = null;
@@ -7404,7 +7303,7 @@ _Proc.prototype = {
    ret = this._procFuncSe( this, param, 12, param._seToken - 69, value );
   }
   if( ret == 0x00 ){
-   if( this.curLine()._get != null ){
+   if( this._curLine._token._get != null ){
     ret = this._retError( 0x2181, 22, param._seToken );
    } else {
     this._updateMatrix( param, value );
@@ -7415,37 +7314,39 @@ _Proc.prototype = {
   return ret;
  },
  _processFirst : function( param, ret ){
-  if( this.curLine()._top == null ){
+  if( this._curLine._token._top == null ){
    ret.set( 0x04 );
    return false;
   }
-  this._delInc();
-  if( _proc_trace ){
-   printTrace( param, this.curLine(), this.curNum(), this.curComment(), this._checkSkip() );
+  if( this._topInc != null ){
+   this._delInc();
+  }
+  if( procTraceFlag() ){
+   printTrace( param, this._curLine._token, this._curLine._num, this._curLine._comment, this._checkSkip() );
   }
   return true;
  },
  _processNext : function( param, ret ){
   while( true ){
-   if( ret.set( this._processLoop( param ) ).val() != 0x00 ){
+   if( ret.set( this._processLoop( param ) )._val != 0x00 ){
     break;
    }
    if( this._initArrayFlag ){
-    this.curLine().beginGetToken();
+    this._curLine._token.beginGetToken();
     ret.set( this._procInitArray( param ) );
     break;
    }
    param._assFlag = false;
    param._subStep = 0;
-   this.curLine().beginGetToken();
+   this._curLine._token.beginGetToken();
    if( param._seFlag ){
-    this.curLine().skipToken();
-    if( ret.set( this._processSe( param, this._matSeAns ) ).val() != 0x00 ){
+    this._curLine._token.skipToken();
+    if( ret.set( this._processSe( param, this._matSeAns ) )._val != 0x00 ){
      break;
     }
    } else {
     this._matAns.ass( param._array._mat[0] );
-    if( ret.set( this._processSub( param, this._matAns ) ).val() != 0x00 ){
+    if( ret.set( this._processSub( param, this._matAns ) )._val != 0x00 ){
      break;
     }
     param._array.setMatrix( 0, this._matAns, true );
@@ -7453,12 +7354,14 @@ _Proc.prototype = {
    ret.set( 0x04 );
    break;
   }
-  this._processInc( param );
+  if( this._topInc != null ){
+   this._processInc( param );
+  }
   if( param._seFlag ){
    param._seFlag = false;
   } else {
    if( (this._curLine._next == null) && this._printAns && !(param._assFlag) ){
-    if( ret.val() == 0x04 ){
+    if( ret._val == 0x04 ){
      this.printAns( param );
     }
    }
@@ -7468,7 +7371,7 @@ _Proc.prototype = {
   this._curLine = line;
   if( this._statMode == 1 ){
    err.set( this._stat.regLine( this._curLine ) );
-   switch( err.val() ){
+   switch( err._val ){
    case 0x02:
     break;
    case 0x04:
@@ -7486,7 +7389,7 @@ _Proc.prototype = {
   case 0:
    if( this._processFirst( param, err ) ){
     this._processNext( param, err );
-    if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
+    if( ((err._val != 0x04) && (err._val != 0x03)) || this._quitFlag ){
      return false;
     }
    }
@@ -7497,7 +7400,7 @@ _Proc.prototype = {
     this._curLine = line;
     if( this._processFirst( param, err ) ){
      this._processNext( param, err );
-     if( ((err.val() != 0x04) && (err.val() != 0x03)) || this._quitFlag ){
+     if( ((err._val != 0x04) && (err._val != 0x03)) || this._quitFlag ){
       this._statMode = 0;
       return false;
      }
@@ -7516,7 +7419,7 @@ _Proc.prototype = {
    return true;
   }
   this._procLine = new _Line( param._lineNum );
-  if( err.set( this._procLine.regString( param, line, this._statMode != 1 ) ).val() == 0x00 ){
+  if( err.set( this._procLine.regString( param, line, this._statMode != 1 ) )._val == 0x00 ){
    this._procLine.beginGetLine();
    return true;
   }
@@ -7533,12 +7436,12 @@ _Proc.prototype = {
   if( !this._process( param, err ) ){
    return false;
   }
-  if( err.val() >= 0x100 ){
+  if( err._val >= 0x100 ){
    if( this._quitFlag ){
-    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
-   } else if( err.val() == 0x01 ){
+    this._errorProc( err._val, this._curLine._num, param, this._errCode, this._errToken );
+   } else if( err._val == 0x01 ){
    } else {
-    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+    this._errorProc( err._val, this._curLine._num, param, this._errCode, this._errToken );
    }
   }
   if( (this._statMode == 0) && (this._stat != null) ){
@@ -7549,15 +7452,15 @@ _Proc.prototype = {
  termProcess : function( param, err ){
   var ret;
   if( this._quitFlag ){
-   if( err.val() >= 0x100 ){
-    this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken );
+   if( err._val >= 0x100 ){
+    this._errorProc( err._val, this._curLine._num, param, this._errCode, this._errToken );
    }
    ret = 0x04;
-  } else if( err.val() == 0x01 ){
+  } else if( err._val == 0x01 ){
    ret = 0x01;
   } else {
-   if( err.val() >= 0x100 ){
-    ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+   if( err._val >= 0x100 ){
+    ret = this._errorProc( err._val, this._curLine._num, param, this._errCode, this._errToken ) ? 0x01 : 0x02;
    } else {
     ret = 0x02;
    }
@@ -7570,8 +7473,8 @@ _Proc.prototype = {
   return ret;
  },
  resetLoopCount : function(){
-  if( this._loopCnt > _proc_loop_count ){
-   _proc_loop_count = this._loopCnt;
+  if( this._loopCnt > procLoopCount() ){
+   setProcLoopCount( this._loopCnt );
   }
   this._loopCnt = 0;
  },
@@ -7582,11 +7485,11 @@ _Proc.prototype = {
    while( this.process( param, err ) ){}
   }
   this.termProcess( param, err );
-  return err.val();
+  return err._val;
  },
  beginTestProcess : function( line, param, err ){
   this._procLine = new _Line( param._lineNum );
-  if( err.set( this._procLine.regString( param, line, false ) ).val() == 0x00 ){
+  if( err.set( this._procLine.regString( param, line, false ) )._val == 0x00 ){
    this._procLine.beginGetLine();
    return true;
   }
@@ -7597,13 +7500,13 @@ _Proc.prototype = {
   if( (line = this._procLine.getLine()) == null ){
    return false;
   }
-  printTest( param, line._line, line._num, line._comment );
+  printTest( param, line._token, line._num, line._comment );
   return true;
  },
  termTestProcess : function( param, err ){
   var ret;
-  if( err.val() >= 0x100 ){
-   ret = this._errorProc( err.val(), this.curNum(), param, this._errCode, this._errToken ) ? 0x01 : 0x02;
+  if( err._val >= 0x100 ){
+   ret = this._errorProc( err._val, this._curLine._num, param, this._errCode, this._errToken ) ? 0x01 : 0x02;
   } else {
    ret = 0x02;
   }
@@ -7617,14 +7520,14 @@ _Proc.prototype = {
    while( this.testProcess( param, err ) ){}
   }
   this.termTestProcess( param, err );
-  return err.val();
+  return err._val;
  },
  getParam : function( funcParam, parentParam, childParam ){
   var code;
   var token;
   var index;
-  var saveLine = this.curLine();
-  this.setCurLine( funcParam );
+  var saveLine = this._curLine._token;
+  this._curLine._token = funcParam;
   var i = _CHAR_CODE_0;
   var j = 0;
   funcParam.beginGetToken();
@@ -7632,7 +7535,7 @@ _Proc.prototype = {
    code = _get_code;
    token = _get_token;
    if( j > 9 ){
-    this.setCurLine( saveLine );
+    this._curLine._token = saveLine;
     return this._retError( 0x2161, code, token );
    }
    childParam._updateParamCode[j] = code;
@@ -7650,10 +7553,10 @@ _Proc.prototype = {
     this._updateValue( parentParam, childParam._var.val( i ) );
     break;
    case 0x23:
-    index = this.autoVarIndex( _global_param, token );
+    index = this.autoVarIndex( globalParam(), token );
     childParam._updateParamIndex[j] = index;
-    childParam._var.set( i, _global_param.val( index ), true );
-    this._updateValue( _global_param, childParam._var.val( i ) );
+    childParam._var.set( i, globalParam().val( index ), true );
+    this._updateValue( globalParam(), childParam._var.val( i ) );
     break;
    case 0x44:
     index = this.arrayIndexParam( parentParam, token );
@@ -7672,10 +7575,10 @@ _Proc.prototype = {
     this._updateArray( parentParam, childParam._array, i );
     break;
    case 0x46:
-    index = this.autoArrayIndex( _global_param, token );
+    index = this.autoArrayIndex( globalParam(), token );
     childParam._updateParamIndex[j] = index;
-    _global_param._array.dup( childParam._array, index, i, true );
-    this._updateArray( _global_param, childParam._array, i );
+    globalParam()._array.dup( childParam._array, index, i, true );
+    this._updateArray( globalParam(), childParam._array, i );
     break;
    case 19:
     this.strSet( childParam._array, i, token );
@@ -7689,13 +7592,13 @@ _Proc.prototype = {
     this._updateMatrix( parentParam, childParam._array._mat[i] );
     break;
    default:
-    this.setCurLine( saveLine );
+    this._curLine._token = saveLine;
     return this._retError( 0x2162, code, token );
    }
    i++;
    j++;
   }
-  this.setCurLine( saveLine );
+  this._curLine._token = saveLine;
   childParam._var.set( _CHAR_CODE_EX, j, true );
   return 0x00;
  },
@@ -7728,11 +7631,11 @@ _Proc.prototype = {
      break;
     case 0x23:
      index = childParam._updateParamIndex[i];
-     if( _global_param.setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
+     if( globalParam().setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
       if( index == 0 ){
-       this._updateMatrix( childParam, _global_param._array._mat[index] );
+       this._updateMatrix( childParam, globalParam()._array._mat[index] );
       } else {
-       this._updateValue( childParam, _global_param._var.val( index ) );
+       this._updateValue( childParam, globalParam()._var.val( index ) );
       }
      }
      break;
@@ -7743,7 +7646,7 @@ _Proc.prototype = {
      childParam._array.dup( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
      break;
     case 0x46:
-     childParam._array.dup( _global_param._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
+     childParam._array.dup( globalParam()._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
      break;
     }
    }
@@ -7792,7 +7695,7 @@ _Proc.prototype = {
  },
  newFuncCache : function( func, childParam, nameSpace ){
   var curFunc;
-  if( _proc_func.maxNum() == 0 ){
+  if( procFunc()._max == 0 ){
    return null;
   }
   var func2 = new _String( func );
@@ -7800,7 +7703,7 @@ _Proc.prototype = {
   if( fileData == null ){
    return null;
   }
-  curFunc = _proc_func.create( func2.str() );
+  curFunc = procFunc().create( func2.str() );
   for( var i = 0; i < fileData.length; i++ ){
    if( curFunc._line.regString( childParam, fileData[i], false ) == 0x100D ){
     errorProc( 0x100D, curFunc._line._nextNum - 1, func, "" );
@@ -7817,8 +7720,8 @@ _Proc.prototype = {
   childParam._fileFlag = false;
   childParam._fileData = null;
   if( funcParam != null ){
-   if( err.set( this.getParam( funcParam, parentParam, childParam ) ).val() != 0x00 ){
-    this._errorProc( err.val(), 0, childParam, this._errCode, this._errToken );
+   if( err.set( this.getParam( funcParam, parentParam, childParam ) )._val != 0x00 ){
+    this._errorProc( err._val, 0, childParam, this._errCode, this._errToken );
     ret.set( 0x01 );
     return false;
    }
@@ -7826,7 +7729,7 @@ _Proc.prototype = {
   childParam.updateMode();
   childParam.updateFps ();
   var func2 = new _String( func );
-  childParam._fileData = this.getExtFuncData( func2, (parentParam == null) ? null : parentParam.nameSpace() );
+  childParam._fileData = this.getExtFuncData( func2, (parentParam == null) ? null : parentParam._nameSpace );
   childParam._fileDataGet = 0;
   if( childParam._fileData == null ){
    this._errorProc( 0x2160, 0, childParam, 13, func );
@@ -7850,8 +7753,8 @@ _Proc.prototype = {
   childParam._fileData = null;
   childParam._fileLine = func._line;
   if( funcParam != null ){
-   if( err.set( this.getParam( funcParam, parentParam, childParam ) ).val() != 0x00 ){
-    this._errorProc( err.val(), 0, childParam, this._errCode, this._errToken );
+   if( err.set( this.getParam( funcParam, parentParam, childParam ) )._val != 0x00 ){
+    this._errorProc( err._val, 0, childParam, this._errCode, this._errToken );
     ret.set( 0x01 );
     return false;
    }
@@ -7896,9 +7799,9 @@ _Proc.prototype = {
  },
  main : function( func, childParam, step , err , ret ){
   if( func instanceof __Func ){
-   return _procMainCache[step.val()]( this, func, childParam, step, err, ret );
+   return _procMainCache[step._val]( this, func, childParam, step, err, ret );
   }
-  return _procMain[step.val()]( this, func, childParam, step, err, ret );
+  return _procMain[step._val]( this, func, childParam, step, err, ret );
  },
  termMain : function( func, childParam, parentParam ){
   if( func instanceof __Func ){
@@ -7927,7 +7830,7 @@ _Proc.prototype = {
   if( parentParam != null ){
    parentParam.dupDefine( childParam );
    childParam._func.openAll( parentParam._func );
-   childParam.setDefNameSpace( parentParam.defNameSpace() );
+   childParam.setDefNameSpace( parentParam._defNameSpace );
   }
   childParam.setLabel( func._label );
  },
@@ -7940,13 +7843,13 @@ _Proc.prototype = {
    while( this.main( func, childParam, step, err, ret ) ){}
   }
   this.termMain( func, childParam, parentParam );
-  return ret.val();
+  return ret._val;
  },
  beginTest : function( func, childParam, step , err , ret ){
   return this._beginMain( func, childParam, step, err, ret, null, null );
  },
  test : function( func, childParam, step , err , ret ){
-  return _procTest[step.val()]( this, func, childParam, step, err, ret );
+  return _procTest[step._val]( this, func, childParam, step, err, ret );
  },
  termTest : function( func, childParam ){
   this._termMain( func, childParam, null );
@@ -7960,7 +7863,7 @@ _Proc.prototype = {
    while( this.test( func, childParam, step, err, ret ) ){}
   }
   this.termTest( func, childParam );
-  return ret.val();
+  return ret._val;
  },
  _firstChar : function( line ){
   var i = 0;
@@ -8013,7 +7916,7 @@ _Proc.prototype = {
  },
  usage : function( func, childParam, cacheFlag ){
   var curFunc;
-  if( (curFunc = _proc_func.search( func, false, null )) == null ){
+  if( (curFunc = procFunc().search( func, false, null )) == null ){
    if( cacheFlag ){
     curFunc = this.newFuncCache( func, childParam, null );
    }
@@ -8023,7 +7926,7 @@ _Proc.prototype = {
    var line;
    curFunc._line.beginGetLine();
    while( (line = curFunc._line.getLine()) != null ){
-    if( (line._line.count() == 0) && (line._comment != null) ){
+    if( (line._token.count() == 0) && (line._comment != null) ){
      if( line._comment.charAt( 0 ) != '!' ){
       this._addUsage( line._comment, func );
      }
@@ -8067,7 +7970,7 @@ _Proc.prototype = {
   }
  },
  getAns : function( childParam, value, parentParam ){
-  if( childParam.ansFlag() ){
+  if( childParam._printAns ){
    value.ass( childParam._array._mat[0] );
    if( parentParam != null ){
     this._updateMatrix( parentParam, value );
@@ -8088,7 +7991,7 @@ _Proc.prototype = {
  },
  _errorProc : function( err, num, param, code, token ){
   if( (err & 0x1000) != 0 ){
-   if( !this.warnFlag() ){
+   if( !this._printWarn ){
     return false;
    }
    errorProc(
@@ -8155,13 +8058,13 @@ _Proc.prototype = {
   onEndRePlot();
  },
  _getSeOperand : function( param, code, token, value ){
-  if( this.curLine().skipComma() ){
+  if( this._curLine._token.skipComma() ){
    return this._const( param, code, token, value );
   }
   return this._retError( 0x2181, code, token );
  },
  _skipSeOperand : function( code, token ){
-  if( this.curLine().skipComma() ){
+  if( this._curLine._token.skipComma() ){
    return this._constSkip( code, token );
   }
   return this._retError( 0x2181, code, token );
@@ -8270,8 +8173,8 @@ _Proc.prototype = {
   if( (ret = _this._getSeOperand( param, code, token, tmpValue )) != 0x00 ){
    return ret;
   }
-  if( _this.warnFlag() && tmpValue.equal( 0.0 ) ){
-   _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+  if( _this._printWarn && tmpValue.equal( 0.0 ) ){
+   _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
   }
   value.divAndAss( tmpValue );
   return 0x00;
@@ -8282,8 +8185,8 @@ _Proc.prototype = {
   if( (ret = _this._getSeOperand( param, code, token, tmpValue )) != 0x00 ){
    return ret;
   }
-  if( _this.warnFlag() && tmpValue.equal( 0.0 ) ){
-   _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+  if( _this._printWarn && tmpValue.equal( 0.0 ) ){
+   _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
   }
   value.modAndAss( tmpValue );
   return 0x00;
@@ -8507,8 +8410,8 @@ _Proc.prototype = {
   if( (ret = _this._getSeOperand( param, code, token, tmpValue )) != 0x00 ){
    return ret;
   }
-  if( _this.warnFlag() && tmpValue.equal( 0.0 ) ){
-   _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+  if( _this._printWarn && tmpValue.equal( 0.0 ) ){
+   _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
   }
   value.divAndAss( tmpValue );
   return 0x00;
@@ -8522,8 +8425,8 @@ _Proc.prototype = {
   if( (ret = _this._getSeOperand( param, code, token, tmpValue )) != 0x00 ){
    return ret;
   }
-  if( _this.warnFlag() && tmpValue.equal( 0.0 ) ){
-   _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+  if( _this._printWarn && tmpValue.equal( 0.0 ) ){
+   _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
   }
   value.modAndAss( tmpValue );
   return 0x00;
@@ -8811,7 +8714,7 @@ _Proc.prototype = {
  _getFuncParam : function( param, code, token, value , seFlag ){
   var ret;
   if( seFlag ){
-   if( !(this.curLine().skipComma()) ){
+   if( !(this._curLine._token.skipComma()) ){
     return this._retError( 0x2181, code, token );
    }
   }
@@ -8824,11 +8727,11 @@ _Proc.prototype = {
  _getFuncParamIndex : function( param, code, token, index , moveFlag , seFlag ){
   var newToken;
   if( seFlag ){
-   if( !(this.curLine().skipComma()) ){
+   if( !(this._curLine._token.skipComma()) ){
     return this._retError( 0x2181, code, token );
    }
   }
-  if( !(this.curLine().getTokenParam( param )) ){
+  if( !(this._curLine._token.getTokenParam( param )) ){
    return this._retError( 0x2103, code, token );
   }
   newToken = _get_token;
@@ -8838,7 +8741,7 @@ _Proc.prototype = {
    moveFlag.set( true );
    break;
   case 0x23:
-   param = _global_param;
+   param = globalParam();
   case 0x22:
    index.set( param, this.autoVarIndex( param, newToken ) );
    moveFlag.set( false );
@@ -8853,19 +8756,19 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var index;
-  lock = this.curLine().lock();
+  lock = this._curLine._token.lock();
   if( seFlag ){
-   if( !(this.curLine().skipComma()) ){
-    this.curLine().unlock( lock );
+   if( !(this._curLine._token.skipComma()) ){
+    this._curLine._token.unlock( lock );
     return null;
    }
   }
-  if( this.curLine().getTokenParam( param ) ){
+  if( this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
    case 0x46:
-    param = _global_param;
+    param = globalParam();
    case 0x44:
    case 0x45:
     index = this.arrayIndexIndirectMove( param, newCode, newToken, moveFlag );
@@ -8883,7 +8786,7 @@ _Proc.prototype = {
    index = -1;
   }
   if( index < 0 ){
-   this.curLine().unlock( lock );
+   this._curLine._token.unlock( lock );
    return null;
   }
   return param._array._mat[index];
@@ -8891,11 +8794,11 @@ _Proc.prototype = {
  _funcDefined : function( _this, param, code, token, value, seFlag ){
   var newCode;
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    value.ass( ((newCode == 8) || (newCode == 0x23) || (newCode == 0x46)) ? 0.0 : 1.0 );
    return 0x00;
@@ -8905,11 +8808,11 @@ _Proc.prototype = {
  _funcIndexOf : function( _this, param, code, token, value, seFlag ){
   var newToken;
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newToken = _get_token;
    switch( _get_code ){
    case 0x22:
@@ -8957,7 +8860,7 @@ _Proc.prototype = {
   var errFlag;
   var tmpValue = new _Matrix();
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
@@ -9185,7 +9088,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].asin() );
   if( valueError() ){
-   _this._errorProc( 0x1004, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1004, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9198,7 +9101,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].acos() );
   if( valueError() ){
-   _this._errorProc( 0x1005, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1005, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9268,7 +9171,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].acosh() );
   if( valueError() ){
-   _this._errorProc( 0x1006, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1006, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9281,7 +9184,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].atanh() );
   if( valueError() ){
-   _this._errorProc( 0x1007, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1007, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9312,7 +9215,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].log() );
   if( valueError() ){
-   _this._errorProc( 0x1008, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1008, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9323,13 +9226,13 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
   }
-  if( param.isCalculator() ){
+  if( param._calculator ){
    value.ass( tmpValue._mat[0].log10() );
   } else {
    value.ass( tmpValue._mat[0].log() );
   }
   if( valueError() ){
-   _this._errorProc( param.isCalculator() ? 0x1009 : 0x1008, _this.curNum(), param, 14, null );
+   _this._errorProc( param._calculator ? 0x1009 : 0x1008, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9342,7 +9245,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].log10() );
   if( valueError() ){
-   _this._errorProc( 0x1009, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x1009, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9376,7 +9279,7 @@ _Proc.prototype = {
   }
   value.ass( tmpValue._mat[0].sqrt() );
   if( valueError() ){
-   _this._errorProc( 0x100A, _this.curNum(), param, 14, null );
+   _this._errorProc( 0x100A, _this._curLine._num, param, 14, null );
    clearValueError();
   }
   return 0x00;
@@ -9433,7 +9336,7 @@ _Proc.prototype = {
   }
   var _n = new _Integer();
   value.ass( tmpValue._mat[0].frexp( _n ) );
-  if( !(index.param().setVal( index.val(), _n.val(), moveFlag.val() )) ){
+  if( !(index._param.setVal( index._index, _n._val, moveFlag._val )) ){
    return _this._retError( 0x210E, code, token );
   }
   return 0x00;
@@ -9451,7 +9354,7 @@ _Proc.prototype = {
   }
   var _f = new _Float();
   value.ass( tmpValue._mat[0].modf( _f ) );
-  if( !(index.param().setVal( index.val(), _f.val(), moveFlag.val() )) ){
+  if( !(index._param.setVal( index._index, _f._val, moveFlag._val )) ){
    return _this._retError( 0x210E, code, token );
   }
   return 0x00;
@@ -9592,14 +9495,14 @@ _Proc.prototype = {
  },
  _funcStrCmp : function( _this, param, code, token, value, seFlag ){
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
   var string1 = new _String();
   if( _this._getString( param, string1 ) ){
    if( seFlag ){
-    if( !(_this.curLine().skipComma()) ){
+    if( !(_this._curLine._token.skipComma()) ){
      return _this._retError( 0x2181, code, token );
     }
    }
@@ -9646,7 +9549,7 @@ _Proc.prototype = {
  },
  _funcStrLen : function( _this, param, code, token, value, seFlag ){
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
@@ -9658,39 +9561,39 @@ _Proc.prototype = {
   return _this._retError( 0x2103, code, token );
  },
  _funcGWidth : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.width() );
+  value.ass( procGWorld()._width );
   return 0x00;
  },
  _funcGHeight : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.height() );
+  value.ass( procGWorld()._height );
   return 0x00;
  },
  _funcGColor : function( _this, param, code, token, value, seFlag ){
   var lock;
   var tmpValue = new _Matrix();
-  lock = _this.curLine().lock();
+  lock = _this._curLine._token.lock();
   if( _this._getFuncParam( param, code, token, tmpValue, seFlag ) == 0x00 ){
-   _proc_gworld.setColor( doFuncGColor( _UNSIGNED( tmpValue._mat[0].toFloat(), 16777216 ) ) );
+   procGWorld().setColor( doFuncGColor( _UNSIGNED( tmpValue._mat[0].toFloat(), 16777216 ) ) );
   } else {
-   _this.curLine().unlock( lock );
+   _this._curLine._token.unlock( lock );
   }
-  value.ass( (token == 73) ? _proc_gworld.color() : doFuncGColor24( _proc_gworld.color() ) );
+  value.ass( (token == 73) ? procGWorld()._color : doFuncGColor24( procGWorld()._color ) );
   return 0x00;
  },
  _funcGCX : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.imgMoveX() );
+  value.ass( procGWorld()._imgMoveX );
   return 0x00;
  },
  _funcGCY : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.imgMoveY() );
+  value.ass( procGWorld()._imgMoveY );
   return 0x00;
  },
  _funcWCX : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.wndMoveX() );
+  value.ass( procGWorld()._wndMoveX );
   return 0x00;
  },
  _funcWCY : function( _this, param, code, token, value, seFlag ){
-  value.ass( _proc_gworld.wndMoveY() );
+  value.ass( procGWorld()._wndMoveY );
   return 0x00;
  },
  _funcGGet : function( _this, param, code, token, value, seFlag ){
@@ -9702,7 +9605,7 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.get( _INT( tmpValue[0]._mat[0].toFloat() ), _INT( tmpValue[1]._mat[0].toFloat() ) ) );
+  value.ass( procGWorld().get( _INT( tmpValue[0]._mat[0].toFloat() ), _INT( tmpValue[1]._mat[0].toFloat() ) ) );
   return 0x00;
  },
  _funcWGet : function( _this, param, code, token, value, seFlag ){
@@ -9714,7 +9617,7 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.wndGet( tmpValue[0]._mat[0].toFloat(), tmpValue[1]._mat[0].toFloat() ) );
+  value.ass( procGWorld().wndGet( tmpValue[0]._mat[0].toFloat(), tmpValue[1]._mat[0].toFloat() ) );
   return 0x00;
  },
  _funcGX : function( _this, param, code, token, value, seFlag ){
@@ -9723,7 +9626,7 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.imgPosX( tmpValue._mat[0].toFloat() ) );
+  value.ass( procGWorld().imgPosX( tmpValue._mat[0].toFloat() ) );
   return 0x00;
  },
  _funcGY : function( _this, param, code, token, value, seFlag ){
@@ -9732,7 +9635,7 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.imgPosY( tmpValue._mat[0].toFloat() ) );
+  value.ass( procGWorld().imgPosY( tmpValue._mat[0].toFloat() ) );
   return 0x00;
  },
  _funcWX : function( _this, param, code, token, value, seFlag ){
@@ -9741,7 +9644,7 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.wndPosX( _INT( tmpValue._mat[0].toFloat() ) ) );
+  value.ass( procGWorld().wndPosX( _INT( tmpValue._mat[0].toFloat() ) ) );
   return 0x00;
  },
  _funcWY : function( _this, param, code, token, value, seFlag ){
@@ -9750,13 +9653,13 @@ _Proc.prototype = {
   if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
    return ret;
   }
-  value.ass( _proc_gworld.wndPosY( _INT( tmpValue._mat[0].toFloat() ) ) );
+  value.ass( procGWorld().wndPosY( _INT( tmpValue._mat[0].toFloat() ) ) );
   return 0x00;
  },
  _funcCall : function( _this, param, code, token, value, seFlag ){
   var ret;
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
@@ -9772,7 +9675,7 @@ _Proc.prototype = {
    if( !_this._token.checkFunc( func.str(), _func ) ){
     ret = _this._retError( 0x210F, code, token );
    } else {
-    ret = _this._procFunc( _this, param, 12, _func.val(), value );
+    ret = _this._procFunc( _this, param, 12, _func._val, value );
    }
   }
   return ret;
@@ -9780,7 +9683,7 @@ _Proc.prototype = {
  _funcEval : function( _this, param, code, token, value, seFlag ){
   var ret;
   if( seFlag ){
-   if( !(_this.curLine().skipComma()) ){
+   if( !(_this._curLine._token.skipComma()) ){
     return _this._retError( 0x2181, code, token );
    }
   }
@@ -9789,10 +9692,10 @@ _Proc.prototype = {
   if( string.isNull() ){
    return _this._retError( 0x210B, code, token );
   }
-  var childProc = new _Proc( param.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
-  var childParam = new _Param( _this.curNum(), param, true );
-  childParam.setEnableCommand( false );
-  childParam.setEnableStat( false );
+  var childProc = new _Proc( param._mode, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+  var childParam = new _Param( _this._curLine._num, param, true );
+  childParam._enableCommand = false;
+  childParam._enableStat = false;
   ret = doFuncEval( _this, childProc, childParam, string.str(), value );
   childProc.end();
   childParam.end();
@@ -9815,7 +9718,7 @@ _Proc.prototype = {
    }
    break;
   case 0x23:
-   param = _global_param;
+   param = globalParam();
   case 0x22:
    if( !(param.setVal( this.autoVarIndex( param, this._curInfo._assToken ), value._mat[0], false )) ){
     return this._retError( 0x210E, code, token );
@@ -9833,7 +9736,7 @@ _Proc.prototype = {
    }
    break;
   case 0x46:
-   param = _global_param;
+   param = globalParam();
   case 0x45:
    if( this._curInfo._curArraySize == 0 ){
     return this._retError( 0x2105, code, token );
@@ -9858,7 +9761,7 @@ _Proc.prototype = {
    }
    break;
   case 0x23:
-   param = _global_param;
+   param = globalParam();
   case 0x22:
    if( !(param.setVal( this.autoVarIndex( param, this._curInfo._assToken ), value._mat[0], false )) ){
     return this._retError( 0x210E, code, token );
@@ -9872,7 +9775,7 @@ _Proc.prototype = {
    }
    break;
   case 0x46:
-   param = _global_param;
+   param = globalParam();
   case 0x45:
    if( arraySize == 0 ){
     param._array.setMatrix( this.autoArrayIndex( param, this._curInfo._assToken ), value, false );
@@ -9968,8 +9871,8 @@ _Proc.prototype = {
    param._assFlag = false;
   }
   if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
-   if( _this.warnFlag() && rightValue.equal( 0.0 ) ){
-    _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+   if( _this._printWarn && rightValue.equal( 0.0 ) ){
+    _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
    }
    value.divAndAss( rightValue );
    _this._updateMatrix( param, value );
@@ -9983,8 +9886,8 @@ _Proc.prototype = {
    param._assFlag = false;
   }
   if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
-   if( _this.warnFlag() && rightValue.equal( 0.0 ) ){
-    _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+   if( _this._printWarn && rightValue.equal( 0.0 ) ){
+    _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
    }
    value.modAndAss( rightValue );
    _this._updateMatrix( param, value );
@@ -10235,8 +10138,8 @@ _Proc.prototype = {
   var saveArray = _this._curInfo._curArray;
   var saveArraySize = _this._curInfo._curArraySize;
   if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
-   if( _this.warnFlag() && rightValue.equal( 0.0 ) ){
-    _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+   if( _this._printWarn && rightValue.equal( 0.0 ) ){
+    _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
    }
    value.divAndAss( rightValue );
    _this._updateMatrix( param, value );
@@ -10254,8 +10157,8 @@ _Proc.prototype = {
   var saveArray = _this._curInfo._curArray;
   var saveArraySize = _this._curInfo._curArraySize;
   if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
-   if( _this.warnFlag() && rightValue.equal( 0.0 ) ){
-    _this._errorProc( 0x1001, _this.curNum(), param, 14, null );
+   if( _this._printWarn && rightValue.equal( 0.0 ) ){
+    _this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
    }
    value.modAndAss( rightValue );
    _this._updateMatrix( param, value );
@@ -10627,8 +10530,8 @@ _Proc.prototype = {
  _statStart : function( _this, param, code, token ){
   if( _this._statMode == 2 ){
    _this._loopCnt++;
-   _proc_loop_total++;
-   if( (_proc_loop_max > 0) && (_this._loopCnt > _proc_loop_max) ){
+   incProcLoopTotal();
+   if( (procLoopMax() > 0) && (_this._loopCnt > procLoopMax()) ){
     return 0x2130;
    }
   }
@@ -10656,7 +10559,7 @@ _Proc.prototype = {
    if( step == 0 ){
     return _this._retError( 0x2181, code, token );
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].addAndAss( step );
@@ -10692,7 +10595,7 @@ _Proc.prototype = {
    if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
     return ret;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].addAndAss( 1 );
@@ -10722,7 +10625,7 @@ _Proc.prototype = {
    if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
     return ret;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].subAndAss( 1 );
@@ -10760,7 +10663,7 @@ _Proc.prototype = {
    if( step == 0 ){
     return _this._retError( 0x2181, code, token );
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].addAndAss( step );
@@ -10796,7 +10699,7 @@ _Proc.prototype = {
    if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
     return ret;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].addAndAss( 1 );
@@ -10826,7 +10729,7 @@ _Proc.prototype = {
    if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
     return ret;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return _this._retError( 0x2181, code, token );
    }
    tmpValue[0].subAndAss( 1 );
@@ -10855,8 +10758,8 @@ _Proc.prototype = {
  _statDo : function( _this, param, code, token ){
   if( _this._statMode == 2 ){
    _this._loopCnt++;
-   _proc_loop_total++;
-   if( (_proc_loop_max > 0) && (_this._loopCnt > _proc_loop_max) ){
+   incProcLoopTotal();
+   if( (procLoopMax() > 0) && (_this._loopCnt > procLoopMax()) ){
     return 0x2130;
    }
   }
@@ -10881,8 +10784,8 @@ _Proc.prototype = {
  _statWhile : function( _this, param, code, token ){
   if( _this._statMode == 2 ){
    _this._loopCnt++;
-   _proc_loop_total++;
-   if( (_proc_loop_max > 0) && (_this._loopCnt > _proc_loop_max) ){
+   incProcLoopTotal();
+   if( (procLoopMax() > 0) && (_this._loopCnt > procLoopMax()) ){
     return 0x2130;
    }
    var ret;
@@ -10909,8 +10812,8 @@ _Proc.prototype = {
  _statFor : function( _this, param, code, token ){
   if( _this._statMode == 2 ){
    _this._loopCnt++;
-   _proc_loop_total++;
-   if( (_proc_loop_max > 0) && (_this._loopCnt > _proc_loop_max) ){
+   incProcLoopTotal();
+   if( (procLoopMax() > 0) && (_this._loopCnt > procLoopMax()) ){
     return 0x2130;
    }
    var ret;
@@ -10927,8 +10830,8 @@ _Proc.prototype = {
  _statFor2 : function( _this, param, code, token ){
   if( _this._statMode == 2 ){
    _this._loopCnt++;
-   _proc_loop_total++;
-   if( (_proc_loop_max > 0) && (_this._loopCnt > _proc_loop_max) ){
+   incProcLoopTotal();
+   if( (procLoopMax() > 0) && (_this._loopCnt > procLoopMax()) ){
     return 0x2130;
    }
   }
@@ -10949,11 +10852,11 @@ _Proc.prototype = {
   if( _this._statMode == 2 ){
    var newCode;
    var newToken;
-   if( _this.curLine().getTokenParam( param ) ){
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( newCode == 0 ){
-     if( !(_this.curLine().getTokenParam( param )) ){
+     if( !(_this._curLine._token.getTokenParam( param )) ){
       return _this._retError( 0x212E, newCode, newToken );
      }
      newCode = _get_code;
@@ -10965,9 +10868,9 @@ _Proc.prototype = {
       return _this._retError( 0x212E, newCode, newToken );
      }
      var func;
-     if( (func = param._func.create( newToken, _this.curNum() + 1 )) != null ){
+     if( (func = param._func.create( newToken, _this._curLine._num + 1 )) != null ){
       i = 0;
-      while( _this.curLine().getToken() ){
+      while( _this._curLine._token.getToken() ){
        newCode = _get_code;
        newToken = _get_token;
        switch( newCode ){
@@ -11120,7 +11023,7 @@ _Proc.prototype = {
    if( (ret = _this._const( param, code, token, tmpValue )) != 0x00 ){
     return 0x2181;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return 0x2181;
    }
    if( tmpValue.notEqual( 0.0 ) ){
@@ -11140,7 +11043,7 @@ _Proc.prototype = {
    if( (ret = _this._const( param, code, token, tmpValue )) != 0x00 ){
     return 0x2181;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return 0x2181;
    }
    if( tmpValue.notEqual( 0.0 ) ){
@@ -11151,12 +11054,12 @@ _Proc.prototype = {
   return 0x03;
  },
  _statAssert : function( _this, param, code, token ){
-  if( _this.assertFlag() ){
+  if( _this._printAssert ){
    var ret;
    var tmpValue = new _Matrix();
    if( (ret = _this._const( param, code, token, tmpValue )) == 0x00 ){
     if( tmpValue.equal( 0.0 ) ){
-     if( _this._assertProc( _this.curNum(), param ) ){
+     if( _this._assertProc( _this._curLine._num, param ) ){
       return 0x2001;
      }
     }
@@ -11167,20 +11070,20 @@ _Proc.prototype = {
   return 0x03;
  },
  _statReturn : function( _this, param, code, token ){
-  if( _this.curLine().getTokenLock() ){
+  if( _this._curLine._token.getTokenLock() ){
    var ret;
    var tmpValue = new _Matrix();
    if( (ret = _this._const( param, code, token, tmpValue )) == 0x00 ){
-    if( param.ansFlag() ){
+    if( param._printAns ){
      param._array.setMatrix( 0, tmpValue, true );
     } else {
-     _this._errorProc( 0x100C, _this.curNum(), param, 14, null );
+     _this._errorProc( 0x100C, _this._curLine._num, param, 14, null );
     }
    } else {
     return ret;
    }
   }
-  _this.postQuit();
+  _this._quitFlag = true;
   return 0x03;
  },
  _statReturn2 : function( _this, param, code, token ){
@@ -11189,11 +11092,11 @@ _Proc.prototype = {
   if( (ret = _this._const( param, code, token, tmpValue )) != 0x00 ){
    return 0x2181;
   }
-  if( _this.curLine()._get != null ){
+  if( _this._curLine._token._get != null ){
    return 0x2181;
   }
   if( tmpValue.notEqual( 0.0 ) ){
-   _this.postQuit();
+   _this._quitFlag = true;
   }
   return 0x03;
  },
@@ -11207,20 +11110,20 @@ _Proc.prototype = {
    if( (ret = _this._getSeOperand( param, code, token, tmpValue )) != 0x00 ){
     return 0x2181;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return 0x2181;
    }
-   if( param.ansFlag() ){
+   if( param._printAns ){
     param._array.setMatrix( 0, tmpValue, true );
    } else {
-    _this._errorProc( 0x100E, _this.curNum(), param, 14, null );
+    _this._errorProc( 0x100E, _this._curLine._num, param, 14, null );
    }
-   _this.postQuit();
+   _this._quitFlag = true;
   } else {
    if( (ret = _this._skipSeOperand( code, token )) != 0x00 ){
     return 0x2181;
    }
-   if( _this.curLine()._get != null ){
+   if( _this._curLine._token._get != null ){
     return 0x2181;
    }
   }
@@ -11232,8 +11135,8 @@ _Proc.prototype = {
  _commandEFloat : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0010 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0010 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0010 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11243,8 +11146,8 @@ _Proc.prototype = {
  _commandFFloat : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0011 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0011 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0011 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11254,8 +11157,8 @@ _Proc.prototype = {
  _commandGFloat : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0012 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0012 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0012 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11265,8 +11168,8 @@ _Proc.prototype = {
  _commandEComplex : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0020 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0020 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0020 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11276,8 +11179,8 @@ _Proc.prototype = {
  _commandFComplex : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0021 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0021 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0021 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11287,8 +11190,8 @@ _Proc.prototype = {
  _commandGComplex : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0022 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0022 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0022 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setPrec( _INT( value._mat[0].toFloat() ) );
@@ -11305,29 +11208,29 @@ _Proc.prototype = {
  },
  _commandIFract : function( _this, param, code, token ){
   param.setMode( 0x0040 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0040 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0040 );
   }
   return 0x03;
  },
  _commandMFract : function( _this, param, code, token ){
   param.setMode( 0x0041 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0041 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0041 );
   }
   return 0x03;
  },
  _commandHTime : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0080 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0080 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0080 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    var fps = value._mat[0].toFloat();
    param.setFps( fps );
-   if( _global_param != param ){
-    _global_param.setFps( fps );
+   if( globalParam() != param ){
+    globalParam().setFps( fps );
    }
   }
   return 0x03;
@@ -11335,14 +11238,14 @@ _Proc.prototype = {
  _commandMTime : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0081 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0081 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0081 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    var fps = value._mat[0].toFloat();
    param.setFps( fps );
-   if( _global_param != param ){
-    _global_param.setFps( fps );
+   if( globalParam() != param ){
+    globalParam().setFps( fps );
    }
   }
   return 0x03;
@@ -11350,14 +11253,14 @@ _Proc.prototype = {
  _commandSTime : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0082 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0082 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0082 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    var fps = value._mat[0].toFloat();
    param.setFps( fps );
-   if( _global_param != param ){
-    _global_param.setFps( fps );
+   if( globalParam() != param ){
+    globalParam().setFps( fps );
    }
   }
   return 0x03;
@@ -11365,14 +11268,14 @@ _Proc.prototype = {
  _commandFTime : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0083 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0083 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0083 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    var fps = value._mat[0].toFloat();
    param.setFps( fps );
-   if( _global_param != param ){
-    _global_param.setFps( fps );
+   if( globalParam() != param ){
+    globalParam().setFps( fps );
    }
   }
   return 0x03;
@@ -11382,8 +11285,8 @@ _Proc.prototype = {
   if( _this._const( param, code, token, value ) == 0x00 ){
    var fps = value._mat[0].toFloat();
    param.setFps( fps );
-   if( _global_param != param ){
-    _global_param.setFps( fps );
+   if( globalParam() != param ){
+    globalParam().setFps( fps );
    }
    return 0x03;
   }
@@ -11392,8 +11295,8 @@ _Proc.prototype = {
  _commandSChar : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0100 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0100 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0100 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11403,8 +11306,8 @@ _Proc.prototype = {
  _commandUChar : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0101 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0101 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0101 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11414,8 +11317,8 @@ _Proc.prototype = {
  _commandSShort : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0102 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0102 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0102 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11425,8 +11328,8 @@ _Proc.prototype = {
  _commandUShort : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0103 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0103 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0103 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11436,8 +11339,8 @@ _Proc.prototype = {
  _commandSLong : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0104 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0104 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0104 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11447,8 +11350,8 @@ _Proc.prototype = {
  _commandULong : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0105 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0105 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0105 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11458,8 +11361,8 @@ _Proc.prototype = {
  _commandSInt : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0104 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0104 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0104 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11469,8 +11372,8 @@ _Proc.prototype = {
  _commandUInt : function( _this, param, code, token ){
   var value = new _Matrix();
   param.setMode( 0x0105 );
-  if( _global_param != param ){
-   _global_param.setMode( 0x0105 );
+  if( globalParam() != param ){
+   globalParam().setMode( 0x0105 );
   }
   if( _this._const( param, code, token, value ) == 0x00 ){
    param.setRadix( _INT( value._mat[0].toFloat() ) );
@@ -11487,8 +11390,8 @@ _Proc.prototype = {
  },
  _commandPType : function( _this, param, code, token ){
   param.setMode( _this._parentMode );
-  if( _global_param != param ){
-   _global_param.setMode( _this._parentMode );
+  if( globalParam() != param ){
+   globalParam().setMode( _this._parentMode );
   }
   return 0x03;
  },
@@ -11532,7 +11435,7 @@ _Proc.prototype = {
  _commandAns : function( _this, param, code, token ){
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
-   param.setAnsFlag( _INT( value._mat[0].toFloat() ) );
+   param._printAns = (_INT( value._mat[0].toFloat() ) != 0);
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -11550,12 +11453,12 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var error = new _String();
-  lock = _this.curLine().lock();
-  if( _this.curLine().getTokenParam( param ) ){
+  lock = _this._curLine._token.lock();
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( newCode == 19 ){
-    if( _this.warnFlag() ){
+    if( _this._printWarn ){
      _this._formatError(
       newToken,
       param._fileFlag ? param._funcName : null,
@@ -11565,9 +11468,9 @@ _Proc.prototype = {
     }
     return 0x03;
    } else if( (newCode & 0x40) != 0 ){
-    if( _this.warnFlag() ){
+    if( _this._printWarn ){
      if( newCode == 0x46 ){
-      param = _global_param;
+      param = globalParam();
      }
      _this._formatError(
       _this.strGet( param._array, _this.arrayIndexIndirect( param, newCode, newToken ) ),
@@ -11579,7 +11482,7 @@ _Proc.prototype = {
     return 0x03;
    } else {
     var value = new _Matrix();
-    _this.curLine().unlock( lock );
+    _this._curLine._token.unlock( lock );
     if( _this._const( param, code, token, value ) == 0x00 ){
      _this.setWarnFlag( _INT( value._mat[0].toFloat() ) );
      return 0x03;
@@ -11607,12 +11510,12 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var label;
-  lock = _this.curLine().lock();
-  if( _this.curLine().getTokenParam( param ) ){
+  lock = _this._curLine._token.lock();
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode == 20) || ((newCode == 11) && (newToken >= 21)) ){
-    if( !(_this.curLine().getTokenParam( param )) ){
+    if( !(_this._curLine._token.getTokenParam( param )) ){
      return _this._retError( 0x2141, code, token );
     }
     newCode = _get_code;
@@ -11623,29 +11526,29 @@ _Proc.prototype = {
    }
    if( (newCode == 8) || (newCode == 0x23) || (newCode == 0x46) ){
     label = newToken;
-    lock = _this.curLine().lock();
-    if( _this.curLine().getToken() ){
+    lock = _this._curLine._token.lock();
+    if( _this._curLine._token.getToken() ){
      newCode = _get_code;
      newToken = _get_token;
      if( newCode == 21 ){
       param._array._label.setLabel( _CHAR_CODE_0, label, true );
      } else {
-      _this.curLine().unlock( lock );
+      _this._curLine._token.unlock( lock );
       param._var._label.setLabel( _CHAR_CODE_0, label, true );
      }
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
      param._var._label.setLabel( _CHAR_CODE_0, label, true );
     }
     i = 1;
-    while( _this.curLine().getTokenParam( param ) ){
+    while( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      if( i > 9 ){
       return _this._retError( 0x2144, code, token );
      }
      if( (newCode == 20) || ((newCode == 11) && (newToken >= 21)) ){
-      if( !(_this.curLine().getTokenParam( param )) ){
+      if( !(_this._curLine._token.getTokenParam( param )) ){
        return _this._retError( 0x2141, code, token );
       }
       newCode = _get_code;
@@ -11662,18 +11565,18 @@ _Proc.prototype = {
      case 0x23:
      case 0x46:
       label = newToken;
-      lock = _this.curLine().lock();
-      if( _this.curLine().getToken() ){
+      lock = _this._curLine._token.lock();
+      if( _this._curLine._token.getToken() ){
        newCode = _get_code;
        newToken = _get_token;
        if( newCode == 21 ){
         param._array._label.setLabel( _CHAR_CODE_0 + i, label, true );
        } else {
-        _this.curLine().unlock( lock );
+        _this._curLine._token.unlock( lock );
         param._var._label.setLabel( _CHAR_CODE_0 + i, label, true );
        }
       } else {
-       _this.curLine().unlock( lock );
+       _this._curLine._token.unlock( lock );
        param._var._label.setLabel( _CHAR_CODE_0 + i, label, true );
       }
       i++;
@@ -11686,7 +11589,7 @@ _Proc.prototype = {
    }
   }
   var value = new _Matrix();
-  _this.curLine().unlock( lock );
+  _this._curLine._token.unlock( lock );
   i = 0;
   while( _this._const( param, code, token, value ) == 0x00 ){
    if( i > 9 ){
@@ -11700,7 +11603,7 @@ _Proc.prototype = {
  _commandDefine : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11729,7 +11632,7 @@ _Proc.prototype = {
   var tmpCode;
   var tmpToken;
   value.ass( 0.0 );
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11739,20 +11642,20 @@ _Proc.prototype = {
    case 8:
    case 0x23:
    case 0x46:
-    lock = _this.curLine().lock();
-    if( _this.curLine().getTokenParam( param ) ){
+    lock = _this._curLine._token.lock();
+    if( _this._curLine._token.getTokenParam( param ) ){
      tmpCode = _get_code;
      tmpToken = _get_token;
      if( (tmpCode == 8) || (tmpCode == 0x23) || (tmpCode == 0x46) ){
-      _this.curLine().unlock( lock );
+      _this._curLine._token.unlock( lock );
      } else {
-      _this.curLine().unlock( lock );
+      _this._curLine._token.unlock( lock );
       if( _this._const( param, tmpCode, tmpToken, value ) != 0x00 ){
        return _this._retError( 0x2141, code, token );
       }
      }
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
     }
     param._var.define( newToken, _INT( value._mat[0].toFloat() ), true );
     value.addAndAss( 1.0 );
@@ -11766,7 +11669,7 @@ _Proc.prototype = {
  _commandUnDef : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode == 8) || (newCode == 0x23) || (newCode == 0x46) ){
@@ -11781,7 +11684,7 @@ _Proc.prototype = {
  _commandVar : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11802,7 +11705,7 @@ _Proc.prototype = {
  _commandArray : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11825,7 +11728,7 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var label;
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11836,18 +11739,18 @@ _Proc.prototype = {
    case 0x23:
    case 0x46:
     label = newToken;
-    lock = _this.curLine().lock();
-    if( _this.curLine().getToken() ){
+    lock = _this._curLine._token.lock();
+    if( _this._curLine._token.getToken() ){
      newCode = _get_code;
      newToken = _get_token;
      if( newCode == 21 ){
       param._array.define( label );
      } else {
-      _this.curLine().unlock( lock );
+      _this._curLine._token.unlock( lock );
       param._var.define( label, 0.0, false );
      }
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
      param._var.define( label, 0.0, false );
     }
     break;
@@ -11862,37 +11765,37 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var label;
-  while( _this.curLine().getTokenParam( _global_param ) ){
+  while( _this._curLine._token.getTokenParam( globalParam() ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( newCode == 8 ){
     label = newToken;
-    lock = _this.curLine().lock();
-    if( _this.curLine().getToken() ){
+    lock = _this._curLine._token.lock();
+    if( _this._curLine._token.getToken() ){
      newCode = _get_code;
      newToken = _get_token;
      if( newCode == 21 ){
-      _global_param._array.define( label );
+      globalParam()._array.define( label );
      } else {
-      _this.curLine().unlock( lock );
-      _global_param._var.define( label, 0.0, false );
+      _this._curLine._token.unlock( lock );
+      globalParam()._var.define( label, 0.0, false );
      }
     } else {
-     _this.curLine().unlock( lock );
-     _global_param._var.define( label, 0.0, false );
+     _this._curLine._token.unlock( lock );
+     globalParam()._var.define( label, 0.0, false );
     }
    } else {
-    lock = _this.curLine().lock();
-    if( _this.curLine().getToken() ){
+    lock = _this._curLine._token.lock();
+    if( _this._curLine._token.getToken() ){
      if( _get_code == 21 ){
       if( (newCode & 0x40) == 0 ){
        return _this._retError( 0x2142, newCode, newToken );
       }
      } else {
-      _this.curLine().unlock( lock );
+      _this._curLine._token.unlock( lock );
      }
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
      if( (newCode & 0x20) == 0 ){
       return _this._retError( 0x2142, newCode, newToken );
      }
@@ -11905,7 +11808,7 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var label;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    switch( newCode ){
@@ -11916,7 +11819,7 @@ _Proc.prototype = {
    case 0x23:
    case 0x46:
     label = newToken;
-    if( _this.curLine().getTokenParam( param ) ){
+    if( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      if( newCode == 0x21 ){
@@ -11936,7 +11839,7 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var index;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( newCode == 0x21 ){
@@ -11950,7 +11853,7 @@ _Proc.prototype = {
      }
      param._updateParentVar[param._updateParentVar.length] = index;
     }
-    if( _this.curLine().getTokenParam( param ) ){
+    if( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      switch( newCode ){
@@ -11973,7 +11876,7 @@ _Proc.prototype = {
      param._parent._array.dup( param._array, index, index, true );
      param._updateParentArray[param._updateParentArray.length] = index;
     }
-    if( _this.curLine().getTokenParam( param ) ){
+    if( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      switch( newCode ){
@@ -11997,18 +11900,18 @@ _Proc.prototype = {
  _commandReal : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    var value = new _Matrix();
    if( _this._const( param, code, token, value ) == 0x00 ){
     if( (newCode & 0x20) != 0 ){
      if( newCode == 0x23 ){
-      param = _global_param;
+      param = globalParam();
      }
      var moveFlag = new _Boolean();
      var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
-     if( !(param.setReal( index, value._mat[0].toFloat(), moveFlag.val() )) ){
+     if( !(param.setReal( index, value._mat[0].toFloat(), moveFlag._val )) ){
       return _this._retError( 0x210E, newCode, newToken );
      }
      return 0x03;
@@ -12020,18 +11923,18 @@ _Proc.prototype = {
  _commandImag : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    var value = new _Matrix();
    if( _this._const( param, code, token, value ) == 0x00 ){
     if( (newCode & 0x20) != 0 ){
      if( newCode == 0x23 ){
-      param = _global_param;
+      param = globalParam();
      }
      var moveFlag = new _Boolean();
      var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
-     if( !(param.setImag( index, value._mat[0].toFloat(), moveFlag.val() )) ){
+     if( !(param.setImag( index, value._mat[0].toFloat(), moveFlag._val )) ){
       return _this._retError( 0x210E, newCode, newToken );
      }
      return 0x03;
@@ -12043,18 +11946,18 @@ _Proc.prototype = {
  _commandNum : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    var value = new _Matrix();
    if( _this._const( param, code, token, value ) == 0x00 ){
     if( (newCode & 0x20) != 0 ){
      if( newCode == 0x23 ){
-      param = _global_param;
+      param = globalParam();
      }
      var moveFlag = new _Boolean();
      var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
-     if( !(param.setNum( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag.val() )) ){
+     if( !(param.setNum( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag._val )) ){
       return _this._retError( 0x210E, newCode, newToken );
      }
      return 0x03;
@@ -12066,18 +11969,18 @@ _Proc.prototype = {
  _commandDenom : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    var value = new _Matrix();
    if( _this._const( param, code, token, value ) == 0x00 ){
     if( (newCode & 0x20) != 0 ){
      if( newCode == 0x23 ){
-      param = _global_param;
+      param = globalParam();
      }
      var moveFlag = new _Boolean();
      var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
-     if( !(param.setDenom( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag.val() )) ){
+     if( !(param.setDenom( index, _UNSIGNED( value._mat[0].toFloat(), 4294967296 ), moveFlag._val )) ){
       return _this._retError( 0x210E, newCode, newToken );
      }
      return 0x03;
@@ -12092,12 +11995,12 @@ _Proc.prototype = {
   var newToken;
   if( _this._const( param, code, token, value[0] ) == 0x00 ){
    if( _this._const( param, code, token, value[1] ) == 0x00 ){
-    if( _this.curLine().getTokenParam( param ) ){
+    if( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      if( (newCode & 0x40) != 0 ){
       if( newCode == 0x46 ){
-       param = _global_param;
+       param = globalParam();
       }
       var index = _this.arrayIndexIndirect( param, newCode, newToken );
       param._array._mat[index].resize( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
@@ -12115,12 +12018,12 @@ _Proc.prototype = {
  _commandTrans : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
     var index = _this.arrayIndexIndirect( param, newCode, newToken );
     param._array.setMatrix( index, param._array._mat[index].trans(), false );
@@ -12163,12 +12066,12 @@ _Proc.prototype = {
      errFlag = true;
      break;
     }
-    if( _this.curLine().getTokenParam( param ) ){
+    if( _this._curLine._token.getTokenParam( param ) ){
      newCode = _get_code;
      newToken = _get_token;
      if( (newCode & 0x20) != 0 ){
       if( newCode == 0x23 ){
-       curIndex = _this.varIndexIndirectMove( _global_param, newCode, newToken, moveFlag );
+       curIndex = _this.varIndexIndirectMove( globalParam(), newCode, newToken, moveFlag );
       } else {
        curIndex = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
       }
@@ -12178,14 +12081,14 @@ _Proc.prototype = {
      }
     }
     switch( format.str().charAt( i ) ){
-    case 's': param._var.set( curIndex, tm._sec , moveFlag.val() ); break;
-    case 'm': param._var.set( curIndex, tm._min , moveFlag.val() ); break;
-    case 'h': param._var.set( curIndex, tm._hour, moveFlag.val() ); break;
-    case 'D': param._var.set( curIndex, tm._mday, moveFlag.val() ); break;
-    case 'M': param._var.set( curIndex, tm._mon , moveFlag.val() ); break;
-    case 'Y': param._var.set( curIndex, tm._year, moveFlag.val() ); break;
-    case 'w': param._var.set( curIndex, tm._wday, moveFlag.val() ); break;
-    case 'y': param._var.set( curIndex, tm._yday, moveFlag.val() ); break;
+    case 's': param._var.set( curIndex, tm._sec , moveFlag._val ); break;
+    case 'm': param._var.set( curIndex, tm._min , moveFlag._val ); break;
+    case 'h': param._var.set( curIndex, tm._hour, moveFlag._val ); break;
+    case 'D': param._var.set( curIndex, tm._mday, moveFlag._val ); break;
+    case 'M': param._var.set( curIndex, tm._mon , moveFlag._val ); break;
+    case 'Y': param._var.set( curIndex, tm._year, moveFlag._val ); break;
+    case 'w': param._var.set( curIndex, tm._wday, moveFlag._val ); break;
+    case 'y': param._var.set( curIndex, tm._yday, moveFlag._val ); break;
     default:
      errFlag = true;
      break;
@@ -12213,7 +12116,7 @@ _Proc.prototype = {
   var dstCode;
   var dstToken;
   var dstIndex = new Array();
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
@@ -12233,8 +12136,8 @@ _Proc.prototype = {
    return _this._retError( 0x2141, code, token );
   }
   while( true ){
-   lock = _this.curLine().lock();
-   if( _this.curLine().getTokenParam( param ) ){
+   lock = _this._curLine._token.lock();
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( (newCode & 0x40) != 0 ){
@@ -12243,7 +12146,7 @@ _Proc.prototype = {
      break;
     }
    }
-   _this.curLine().unlock( lock );
+   _this._curLine._token.unlock( lock );
    if( _this._const( param, code, token, value ) == 0x00 ){
     srcIndex[i] = _INT( value._mat[0].toFloat() );
     i++;
@@ -12270,14 +12173,14 @@ _Proc.prototype = {
    var srcParam;
    var srcValue = newValueArray( len );
    for( i = 0; i < srcIndexSize; i++ ){
-    srcIndex[i] -= param.base();
+    srcIndex[i] -= param._base;
     if( srcIndex[i] < 0 ){
      return _this._retError( 0x2141, code, token );
     }
    }
    srcIndex[srcIndexSize] = -1;
    for( i = 0; i < dstIndexSize; i++ ){
-    dstIndex[i] -= param.base();
+    dstIndex[i] -= param._base;
     if( dstIndex[i] < 0 ){
      return _this._retError( 0x2141, code, token );
     }
@@ -12286,7 +12189,7 @@ _Proc.prototype = {
    srcIndex[srcIndexSize - 1] += len;
    for( i = 0; i < len; i++ ){
     srcIndex[srcIndexSize - 1]--;
-    srcParam = (srcCode == 0x46) ? _global_param : param;
+    srcParam = (srcCode == 0x46) ? globalParam() : param;
     copyValue( srcValue[i], srcParam._array.val( _this.arrayIndexIndirect( srcParam, srcCode, srcToken ), srcIndex, srcIndexSize ) );
    }
    dstIndex[dstIndexSize - 1] += len;
@@ -12300,7 +12203,7 @@ _Proc.prototype = {
      param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
      break;
     case 0x46:
-     _global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
+     globalParam()._array.set( _this.autoArrayIndex( globalParam(), dstToken ), dstIndex, dstIndexSize, srcValue[i], false );
      break;
     }
    }
@@ -12319,7 +12222,7 @@ _Proc.prototype = {
   if( _this._const( param, code, token, srcValue ) != 0x00 ){
    return _this._retError( 0x2141, code, token );
   }
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
@@ -12347,7 +12250,7 @@ _Proc.prototype = {
   var len = dstIndex[dstIndexSize];
   if( len > 0 ){
    for( i = 0; i < dstIndexSize; i++ ){
-    dstIndex[i] -= param.base();
+    dstIndex[i] -= param._base;
     if( dstIndex[i] < 0 ){
      return _this._retError( 0x2141, code, token );
     }
@@ -12364,7 +12267,7 @@ _Proc.prototype = {
      param._array.set( _this.autoArrayIndex( param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
      break;
     case 0x46:
-     _global_param._array.set( _this.autoArrayIndex( _global_param, dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
+     globalParam()._array.set( _this.autoArrayIndex( globalParam(), dstToken ), dstIndex, dstIndexSize, srcValue._mat[0], false );
      break;
     }
    }
@@ -12374,11 +12277,11 @@ _Proc.prototype = {
  _commandStrCpy : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
-    var tmpParam = (newCode == 0x46) ? _global_param : param;
+    var tmpParam = (newCode == 0x46) ? globalParam() : param;
     var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
     var string = new _String();
     _this._getString( param, string );
@@ -12398,11 +12301,11 @@ _Proc.prototype = {
  _commandStrLwr : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
-    var tmpParam = (newCode == 0x46) ? _global_param : param;
+    var tmpParam = (newCode == 0x46) ? globalParam() : param;
     var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
     _this.strLwr( tmpParam._array, _arrayIndex );
     return 0x03;
@@ -12413,11 +12316,11 @@ _Proc.prototype = {
  _commandStrUpr : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
-    var tmpParam = (newCode == 0x46) ? _global_param : param;
+    var tmpParam = (newCode == 0x46) ? globalParam() : param;
     var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
     _this.strUpr( tmpParam._array, _arrayIndex );
     return 0x03;
@@ -12439,12 +12342,12 @@ _Proc.prototype = {
   var imag = new _String();
   switch( token ){
   case 61:
-   if( _this.curLine().getTokenParam( param ) ){
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( (newCode & 0x40) != 0 ){
      if( newCode == 0x46 ){
-      _arrayIndex[0] = _this.arrayIndexIndirect( _global_param, newCode, newToken );
+      _arrayIndex[0] = _this.arrayIndexIndirect( globalParam(), newCode, newToken );
      } else {
       _arrayIndex[0] = _this.arrayIndexIndirect( param, newCode, newToken );
      }
@@ -12458,10 +12361,10 @@ _Proc.prototype = {
   case 59:
   case 60:
    break;
-  case 96:
+  case 100:
    if( skipCommandLog() ){
     while( true ){
-     if( !(_this.curLine().getTokenParam( param )) ){
+     if( !(_this._curLine._token.getTokenParam( param )) ){
       break;
      }
     }
@@ -12472,8 +12375,8 @@ _Proc.prototype = {
   topPrint = null;
   errFlag = false;
   while( true ){
-   lock = _this.curLine().lock();
-   if( !(_this.curLine().getTokenParam( param )) ){
+   lock = _this._curLine._token.lock();
+   if( !(_this._curLine._token.getTokenParam( param )) ){
     break;
    }
    newCode = _get_code;
@@ -12491,12 +12394,12 @@ _Proc.prototype = {
     curPrint._string = new String();
     curPrint._string = newToken;
    } else if( (newCode & 0x40) != 0 ){
-    var tmpParam = (newCode == 0x46) ? _global_param : param;
+    var tmpParam = (newCode == 0x46) ? globalParam() : param;
     _arrayIndex[1] = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
     curPrint._string = new String();
     curPrint._string = _this.strGet( tmpParam._array, _arrayIndex[1] );
    } else {
-    _this.curLine().unlock( lock );
+    _this._curLine._token.unlock( lock );
     if( _this._const( param, code, token, value ) == 0x00 ){
      _this._token.valueToString( param, value._mat[0], real, imag );
      curPrint._string = new String();
@@ -12525,7 +12428,7 @@ _Proc.prototype = {
    case 60:
     doCommandPrint( topPrint, true );
     break;
-   case 96:
+   case 100:
     doCommandLog( topPrint );
     break;
    }
@@ -12553,7 +12456,7 @@ _Proc.prototype = {
   var tmpScan;
   topScan = new __ProcScan();
   curScan = topScan;
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( newCode == 19 ){
@@ -12572,7 +12475,7 @@ _Proc.prototype = {
      }
      break;
     case 0x23:
-     if( _global_param._var.isLocked( _this.autoVarIndex( _global_param, newToken ) ) ){
+     if( globalParam()._var.isLocked( _this.autoVarIndex( globalParam(), newToken ) ) ){
       ret = _this._retError( 0x210E, code, token );
      }
      break;
@@ -12627,7 +12530,7 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var error = new _String();
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( newCode == 19 ){
@@ -12640,7 +12543,7 @@ _Proc.prototype = {
     return 0x03;
    } else if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
     _this._formatError(
      _this.strGet( param._array, _this.arrayIndexIndirect( param, newCode, newToken ) ),
@@ -12660,7 +12563,10 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[i] );
   }
   if( ret == 0x00 ){
-   doCommandGWorld( _proc_gworld, _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
+   var width = _INT( value[0]._mat[0].toFloat() );
+   var height = _INT( value[1]._mat[0].toFloat() );
+   doCommandGWorld( width, height );
+   procGWorld().create( width, height, true );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12672,7 +12578,12 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[i] );
   }
   if( ret == 0x00 ){
-   doCommandWindow( _proc_gworld, value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), value[2]._mat[0].toFloat(), value[3]._mat[0].toFloat() );
+   var left = value[0]._mat[0].toFloat();
+   var bottom = value[1]._mat[0].toFloat();
+   var right = value[2]._mat[0].toFloat();
+   var top = value[3]._mat[0].toFloat();
+   doCommandWindow( left, bottom, right, top );
+   procGWorld().setWindowIndirect( left, bottom, right, top );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12680,9 +12591,9 @@ _Proc.prototype = {
  _commandGClear : function( _this, param, code, token ){
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
-   _proc_gworld.clear( _UNSIGNED( value._mat[0].toFloat(), 256 ) );
+   procGWorld().clear( _UNSIGNED( value._mat[0].toFloat(), 256 ) );
   } else {
-   _proc_gworld.clear( 0 );
+   procGWorld().clear( 0 );
   }
   return 0x03;
  },
@@ -12693,7 +12604,7 @@ _Proc.prototype = {
    if( _this._const( param, code, token, value[1] ) == 0x00 ){
     doCommandGColor( color, _UNSIGNED( value[1]._mat[0].toFloat(), 16777216 ) );
    }
-   _proc_gworld.setColor( color );
+   procGWorld().setColor( color );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12706,9 +12617,9 @@ _Proc.prototype = {
   }
   if( ret == 0x00 ){
    if( _this._const( param, code, token, value[4] ) == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.fill(
+   procGWorld().fill(
     _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ),
     _INT( value[2]._mat[0].toFloat() ), _INT( value[3]._mat[0].toFloat() )
     );
@@ -12724,9 +12635,9 @@ _Proc.prototype = {
   }
   if( ret == 0x00 ){
    if( _this._const( param, code, token, value[4] ) == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.wndFill(
+   procGWorld().wndFill(
     value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(),
     value[2]._mat[0].toFloat(), value[3]._mat[0].toFloat()
     );
@@ -12741,7 +12652,7 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[i] );
   }
   if( ret == 0x00 ){
-   _proc_gworld.moveTo( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
+   procGWorld().moveTo( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12753,7 +12664,7 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[i] );
   }
   if( ret == 0x00 ){
-   _proc_gworld.wndMoveTo( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() );
+   procGWorld().wndMoveTo( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12769,14 +12680,36 @@ _Proc.prototype = {
   ret = _this._const( param, code, token, value[0] );
   if( _this._const( param, code, token, value[1] ) == 0x00 ){
    if( _this._const( param, code, token, value[2] ) == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.drawText( text.str(), _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
+   procGWorld().drawText( text.str(), _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ), false );
   } else {
    if( ret == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.drawText( text.str() );
+   procGWorld().drawTextTo( text.str(), false );
+  }
+  return 0x03;
+ },
+ _commandGTextR : function( _this, param, code, token ){
+  var text = new _String();
+  var ret = 0x00;
+  var value = newMatrixArray( 3 );
+  _this._getString( param, text );
+  if( text.isNull() ){
+   return _this._retError( 0x210B, code, token );
+  }
+  ret = _this._const( param, code, token, value[0] );
+  if( _this._const( param, code, token, value[1] ) == 0x00 ){
+   if( _this._const( param, code, token, value[2] ) == 0x00 ){
+    procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+   }
+   procGWorld().drawText( text.str(), _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ), true );
+  } else {
+   if( ret == 0x00 ){
+    procGWorld().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+   }
+   procGWorld().drawTextTo( text.str(), true );
   }
   return 0x03;
  },
@@ -12791,27 +12724,61 @@ _Proc.prototype = {
   ret = _this._const( param, code, token, value[0] );
   if( _this._const( param, code, token, value[1] ) == 0x00 ){
    if( _this._const( param, code, token, value[2] ) == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.wndDrawText( text.str(), value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() );
+   procGWorld().wndDrawText( text.str(), value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), false );
   } else {
    if( ret == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.drawText( text.str() );
+   procGWorld().wndDrawTextTo( text.str(), false );
+  }
+  return 0x03;
+ },
+ _commandWTextR : function( _this, param, code, token ){
+  var text = new _String();
+  var ret = 0x00;
+  var value = newMatrixArray( 3 );
+  _this._getString( param, text );
+  if( text.isNull() ){
+   return _this._retError( 0x210B, code, token );
+  }
+  ret = _this._const( param, code, token, value[0] );
+  if( _this._const( param, code, token, value[1] ) == 0x00 ){
+   if( _this._const( param, code, token, value[2] ) == 0x00 ){
+    procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+   }
+   procGWorld().wndDrawText( text.str(), value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), true );
+  } else {
+   if( ret == 0x00 ){
+    procGWorld().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+   }
+   procGWorld().wndDrawTextTo( text.str(), true );
   }
   return 0x03;
  },
  _commandGTextL : function( _this, param, code, token ){
-  _proc_gworld.selectCharSet( 1 );
+  procGWorld().selectCharSet( 1 );
   var ret = _this._commandGText( _this, param, code, token );
-  _proc_gworld.selectCharSet( 0 );
+  procGWorld().selectCharSet( 0 );
+  return ret;
+ },
+ _commandGTextRL : function( _this, param, code, token ){
+  procGWorld().selectCharSet( 1 );
+  var ret = _this._commandGTextR( _this, param, code, token );
+  procGWorld().selectCharSet( 0 );
   return ret;
  },
  _commandWTextL : function( _this, param, code, token ){
-  _proc_gworld.selectCharSet( 1 );
+  procGWorld().selectCharSet( 1 );
   var ret = _this._commandWText( _this, param, code, token );
-  _proc_gworld.selectCharSet( 0 );
+  procGWorld().selectCharSet( 0 );
+  return ret;
+ },
+ _commandWTextRL : function( _this, param, code, token ){
+  procGWorld().selectCharSet( 1 );
+  var ret = _this._commandWTextR( _this, param, code, token );
+  procGWorld().selectCharSet( 0 );
   return ret;
  },
  _commandGLine : function( _this, param, code, token ){
@@ -12824,18 +12791,18 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[2] );
    if( _this._const( param, code, token, value[3] ) == 0x00 ){
     if( _this._const( param, code, token, value[4] ) == 0x00 ){
-     _proc_gworld.setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
+     procGWorld().setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
     }
-    _proc_gworld.line(
+    procGWorld().line(
      _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ),
      _INT( value[2]._mat[0].toFloat() ), _INT( value[3]._mat[0].toFloat() )
      );
     return 0x03;
    } else {
     if( ret == 0x00 ){
-     _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+     procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
     }
-    _proc_gworld.lineTo(
+    procGWorld().lineTo(
      _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() )
      );
     return 0x03;
@@ -12853,18 +12820,18 @@ _Proc.prototype = {
    ret = _this._const( param, code, token, value[2] );
    if( _this._const( param, code, token, value[3] ) == 0x00 ){
     if( _this._const( param, code, token, value[4] ) == 0x00 ){
-     _proc_gworld.setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
+     procGWorld().setColor( _UNSIGNED( value[4]._mat[0].toFloat(), 256 ) );
     }
-    _proc_gworld.wndLine(
+    procGWorld().wndLine(
      value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(),
      value[2]._mat[0].toFloat(), value[3]._mat[0].toFloat()
      );
     return 0x03;
    } else {
     if( ret == 0x00 ){
-     _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+     procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
     }
-    _proc_gworld.wndLineTo(
+    procGWorld().wndLineTo(
      value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat()
      );
     return 0x03;
@@ -12876,16 +12843,16 @@ _Proc.prototype = {
   var lock;
   var newCode;
   var newToken;
-  lock = _this.curLine().lock();
-  if( _this.curLine().getTokenParam( param ) ){
+  lock = _this._curLine._token.lock();
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
-    var width = _proc_gworld.width ();
-    var height = _proc_gworld.height();
+    var width = procGWorld()._width;
+    var height = procGWorld()._height;
     var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
     var arrayList = new Array( 3 );
     arrayList[2] = -1;
@@ -12894,7 +12861,7 @@ _Proc.prototype = {
      arrayList[0] = y;
      for( x = 0; x < width; x++ ){
       arrayList[1] = x;
-      _proc_gworld.putColor(
+      procGWorld().putColor(
        x, y,
        _UNSIGNED( param._array.val( _arrayIndex, arrayList, 2 ).toFloat(), 256 )
        );
@@ -12904,15 +12871,15 @@ _Proc.prototype = {
    } else {
     var ret = 0x00;
     var value = newMatrixArray( 3 );
-    _this.curLine().unlock( lock );
+    _this._curLine._token.unlock( lock );
     for( var i = 0; i < 2; i++ ){
      ret = _this._const( param, code, token, value[i] );
     }
     if( ret == 0x00 ){
      if( _this._const( param, code, token, value[2] ) == 0x00 ){
-      _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+      procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
      }
-     _proc_gworld.put( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
+     procGWorld().put( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) );
      return 0x03;
     }
    }
@@ -12922,19 +12889,20 @@ _Proc.prototype = {
  _commandGPut24 : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
-    var width = _proc_gworld.width ();
-    var height = _proc_gworld.height();
+    var width = procGWorld()._width;
+    var height = procGWorld()._height;
     var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
     var arrayList = new Array( 3 );
     arrayList[2] = -1;
     var x, y;
+    doCommandGPut24Begin();
     for( y = 0; y < height; y++ ){
      arrayList[0] = y;
      for( x = 0; x < width; x++ ){
@@ -12960,9 +12928,9 @@ _Proc.prototype = {
   }
   if( ret == 0x00 ){
    if( _this._const( param, code, token, value[2] ) == 0x00 ){
-    _proc_gworld.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+    procGWorld().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
    }
-   _proc_gworld.wndPut( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() );
+   procGWorld().wndPut( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -12971,16 +12939,16 @@ _Proc.prototype = {
   var lock;
   var newCode;
   var newToken;
-  lock = _this.curLine().lock();
-  if( _this.curLine().getTokenParam( param ) ){
+  lock = _this._curLine._token.lock();
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
-    var width = _proc_gworld.width ();
-    var height = _proc_gworld.height();
+    var width = procGWorld()._width;
+    var height = procGWorld()._height;
     var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
     var arrayList = new Array( 3 );
     var resizeList = new Array( 3 );
@@ -12996,7 +12964,7 @@ _Proc.prototype = {
       arrayList[1] = x;
       param._array.resize(
        _arrayIndex, resizeList, arrayList, 2,
-       _proc_gworld.get( x, y ), moveFlag
+       procGWorld().get( x, y ), moveFlag
        );
      }
     }
@@ -13004,24 +12972,24 @@ _Proc.prototype = {
    } else {
     var ret = 0x00;
     var value = newMatrixArray( 2 );
-    _this.curLine().unlock( lock );
+    _this._curLine._token.unlock( lock );
     for( var i = 0; i < 2; i++ ){
      ret = _this._const( param, code, token, value[i] );
     }
     if( ret == 0x00 ){
-     if( _this.curLine().getTokenParam( param ) ){
+     if( _this._curLine._token.getTokenParam( param ) ){
       newCode = _get_code;
       newToken = _get_token;
       if( (newCode & 0x20) != 0 ){
        if( newCode == 0x23 ){
-        param = _global_param;
+        param = globalParam();
        }
        var moveFlag = new _Boolean();
        var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
        if( !(param.setVal(
         index,
-        _proc_gworld.get( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) ),
-        moveFlag.val()
+        procGWorld().get( _INT( value[0]._mat[0].toFloat() ), _INT( value[1]._mat[0].toFloat() ) ),
+        moveFlag._val
        )) ){
         return _this._retError( 0x210E, code, token );
        }
@@ -13036,19 +13004,19 @@ _Proc.prototype = {
  _commandGGet24 : function( _this, param, code, token ){
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     param = _global_param;
+     param = globalParam();
     }
     var w = new _Integer();
     var h = new _Integer();
     var data = doCommandGGet24Begin( w, h );
     if( data != null ){
-     var width = w.val();
-     var height = h.val();
+     var width = w._val;
+     var height = h._val;
      var _arrayIndex = _this.arrayIndexIndirect( param, newCode, newToken );
      var arrayList = new Array( 3 );
      var resizeList = new Array( 3 );
@@ -13090,19 +13058,19 @@ _Proc.prototype = {
   if( ret == 0x00 ){
    var newCode;
    var newToken;
-   if( _this.curLine().getTokenParam( param ) ){
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( (newCode & 0x20) != 0 ){
      if( newCode == 0x23 ){
-      param = _global_param;
+      param = globalParam();
      }
      var moveFlag = new _Boolean();
      var index = _this.varIndexIndirectMove( param, newCode, newToken, moveFlag );
      if( !(param.setVal(
       index,
-      _proc_gworld.wndGet( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() ),
-      moveFlag.val()
+      procGWorld().wndGet( value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat() ),
+      moveFlag._val
      )) ){
       return _this._retError( 0x210E, code, token );
      }
@@ -13119,26 +13087,26 @@ _Proc.prototype = {
   } else {
    _this.setGUpdateFlag( 1 );
   }
-  if( _this.gUpdateFlag() ){
-   doCommandGUpdate( _proc_gworld );
+  if( _this._gUpdateFlag ){
+   doCommandGUpdate( procGWorld() );
   }
   return 0x03;
  },
  _commandRectangular : function( _this, param, code, token ){
-  _proc_graph.setMode( 0 );
+  procGraph().setMode( 0 );
   return 0x03;
  },
  _commandParametric : function( _this, param, code, token ){
-  _proc_graph.setMode( 1 );
+  procGraph().setMode( 1 );
   return 0x03;
  },
  _commandPolar : function( _this, param, code, token ){
-  _proc_graph.setMode( 2 );
+  procGraph().setMode( 2 );
   return 0x03;
  },
  _commandLogScale : function( _this, param, code, token ){
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = _get_token;
    if( _get_code == 8 ){
     var value = new _Matrix();
@@ -13150,12 +13118,12 @@ _Proc.prototype = {
      value.ass( 10.0 );
     }
     if( newToken == "x" ){
-     _proc_graph.setLogScaleX( value._mat[0].toFloat() );
+     procGraph().setLogScaleX( value._mat[0].toFloat() );
     } else if( newToken == "y" ){
-     _proc_graph.setLogScaleY( value._mat[0].toFloat() );
+     procGraph().setLogScaleY( value._mat[0].toFloat() );
     } else if( newToken == "xy" ){
-     _proc_graph.setLogScaleX( value._mat[0].toFloat() );
-     _proc_graph.setLogScaleY( value._mat[0].toFloat() );
+     procGraph().setLogScaleX( value._mat[0].toFloat() );
+     procGraph().setLogScaleY( value._mat[0].toFloat() );
     } else {
      return _this._retError( 0x2141, code, token );
     }
@@ -13166,16 +13134,16 @@ _Proc.prototype = {
  },
  _commandNoLogScale : function( _this, param, code, token ){
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = _get_token;
    if( _get_code == 8 ){
     if( newToken == "x" ){
-     _proc_graph.setLogScaleX( 0.0 );
+     procGraph().setLogScaleX( 0.0 );
     } else if( newToken == "y" ){
-     _proc_graph.setLogScaleY( 0.0 );
+     procGraph().setLogScaleY( 0.0 );
     } else if( newToken == "xy" ){
-     _proc_graph.setLogScaleX( 0.0 );
-     _proc_graph.setLogScaleY( 0.0 );
+     procGraph().setLogScaleX( 0.0 );
+     procGraph().setLogScaleY( 0.0 );
     } else {
      return _this._retError( 0x2141, code, token );
     }
@@ -13189,51 +13157,51 @@ _Proc.prototype = {
   var newCode;
   var newToken;
   var value = newMatrixArray( 4 );
-  switch( _proc_graph.mode() ){
+  switch( procGraph().mode() ){
   case 0:
   case 2:
-   lock = _this.curLine().lock();
-   if( _this.curLine().getTokenParam( param ) ){
+   lock = _this._curLine._token.lock();
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( newCode == 19 ){
-     _proc_graph.setExpr( newToken );
+     procGraph().setExpr( newToken );
     } else if( (newCode & 0x40) != 0 ){
-     var tmpParam = (newCode == 0x46) ? _global_param : param;
+     var tmpParam = (newCode == 0x46) ? globalParam() : param;
      var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
-     _proc_graph.setExpr( _this.strGet( tmpParam._array, _arrayIndex ) );
+     procGraph().setExpr( _this.strGet( tmpParam._array, _arrayIndex ) );
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
      break;
     }
    }
    break;
   case 1:
-   lock = _this.curLine().lock();
-   if( _this.curLine().getTokenParam( param ) ){
+   lock = _this._curLine._token.lock();
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( newCode == 19 ){
-     _proc_graph.setExpr1( newToken );
+     procGraph().setExpr1( newToken );
     } else if( (newCode & 0x40) != 0 ){
-     var tmpParam = (newCode == 0x46) ? _global_param : param;
+     var tmpParam = (newCode == 0x46) ? globalParam() : param;
      var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
-     _proc_graph.setExpr1( _this.strGet( tmpParam._array, _arrayIndex ) );
+     procGraph().setExpr1( _this.strGet( tmpParam._array, _arrayIndex ) );
     } else {
-     _this.curLine().unlock( lock );
+     _this._curLine._token.unlock( lock );
      break;
     }
    }
-   lock = _this.curLine().lock();
-   if( _this.curLine().getTokenParam( param ) ){
+   lock = _this._curLine._token.lock();
+   if( _this._curLine._token.getTokenParam( param ) ){
     newCode = _get_code;
     newToken = _get_token;
     if( newCode == 19 ){
-     _proc_graph.setExpr2( newToken );
+     procGraph().setExpr2( newToken );
     } else if( (newCode & 0x40) != 0 ){
-     var tmpParam = (newCode == 0x46) ? _global_param : param;
+     var tmpParam = (newCode == 0x46) ? globalParam() : param;
      var _arrayIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
-     _proc_graph.setExpr2( _this.strGet( tmpParam._array, _arrayIndex ) );
+     procGraph().setExpr2( _this.strGet( tmpParam._array, _arrayIndex ) );
     } else {
      return _this._retError( 0x2141, code, token );
     }
@@ -13242,13 +13210,13 @@ _Proc.prototype = {
    }
    break;
   }
-  _proc_graph.setColor( _proc_gworld.color() );
+  procGraph().setColor( procGWorld()._color );
   if( _this._const( param, code, token, value[0] ) == 0x00 ){
    if( _this._const( param, code, token, value[1] ) == 0x00 ){
-    switch( _proc_graph.mode() ){
+    switch( procGraph().mode() ){
     case 0:
      if( _this._const( param, code, token, value[2] ) == 0x00 ){
-      _proc_graph.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+      procGraph().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
      } else {
      }
      break;
@@ -13256,7 +13224,7 @@ _Proc.prototype = {
     case 2:
      if( _this._const( param, code, token, value[2] ) == 0x00 ){
       if( _this._const( param, code, token, value[3] ) == 0x00 ){
-       _proc_graph.setColor( _UNSIGNED( value[3]._mat[0].toFloat(), 256 ) );
+       procGraph().setColor( _UNSIGNED( value[3]._mat[0].toFloat(), 256 ) );
       } else {
       }
      } else {
@@ -13265,11 +13233,11 @@ _Proc.prototype = {
      break;
     }
    } else {
-    _proc_graph.setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
-    switch( _proc_graph.mode() ){
+    procGraph().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+    switch( procGraph().mode() ){
     case 0:
-     value[0].ass( _proc_gworld.wndPosX( 0 ) );
-     value[1].ass( _proc_gworld.wndPosX( _proc_gworld.width() - 1 ) );
+     value[0].ass( procGWorld().wndPosX( 0 ) );
+     value[1].ass( procGWorld().wndPosX( procGWorld()._width - 1 ) );
      break;
     case 1:
     case 2:
@@ -13280,10 +13248,10 @@ _Proc.prototype = {
     }
    }
   } else {
-   switch( _proc_graph.mode() ){
+   switch( procGraph().mode() ){
    case 0:
-    value[0].ass( _proc_gworld.wndPosX( 0 ) );
-    value[1].ass( _proc_gworld.wndPosX( _proc_gworld.width() - 1 ) );
+    value[0].ass( procGWorld().wndPosX( 0 ) );
+    value[1].ass( procGWorld().wndPosX( procGWorld()._width - 1 ) );
     break;
    case 1:
    case 2:
@@ -13293,18 +13261,18 @@ _Proc.prototype = {
     break;
    }
   }
-  doCommandPlot( _this, param, _proc_graph, value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), value[2]._mat[0].toFloat() );
+  doCommandPlot( _this, param, procGraph(), value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), value[2]._mat[0].toFloat() );
   return 0x03;
  },
  _commandRePlot : function( _this, param, code, token ){
   var value = newMatrixArray( 4 );
-  _proc_graph.setColor( _proc_gworld.color() );
+  procGraph().setColor( procGWorld()._color );
   if( _this._const( param, code, token, value[0] ) == 0x00 ){
    if( _this._const( param, code, token, value[1] ) == 0x00 ){
-    switch( _proc_graph.mode() ){
+    switch( procGraph().mode() ){
     case 0:
      if( _this._const( param, code, token, value[2] ) == 0x00 ){
-      _proc_graph.setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
+      procGraph().setColor( _UNSIGNED( value[2]._mat[0].toFloat(), 256 ) );
      } else {
      }
      break;
@@ -13312,7 +13280,7 @@ _Proc.prototype = {
     case 2:
      if( _this._const( param, code, token, value[2] ) == 0x00 ){
       if( _this._const( param, code, token, value[3] ) == 0x00 ){
-       _proc_graph.setColor( _UNSIGNED( value[3]._mat[0].toFloat(), 256 ) );
+       procGraph().setColor( _UNSIGNED( value[3]._mat[0].toFloat(), 256 ) );
       } else {
       }
      } else {
@@ -13321,11 +13289,11 @@ _Proc.prototype = {
      break;
     }
    } else {
-    _proc_graph.setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
-    switch( _proc_graph.mode() ){
+    procGraph().setColor( _UNSIGNED( value[0]._mat[0].toFloat(), 256 ) );
+    switch( procGraph().mode() ){
     case 0:
-     value[0].ass( _proc_gworld.wndPosX( 0 ) );
-     value[1].ass( _proc_gworld.wndPosX( _proc_gworld.width() - 1 ) );
+     value[0].ass( procGWorld().wndPosX( 0 ) );
+     value[1].ass( procGWorld().wndPosX( procGWorld()._width - 1 ) );
      break;
     case 1:
     case 2:
@@ -13336,10 +13304,10 @@ _Proc.prototype = {
     }
    }
   } else {
-   switch( _proc_graph.mode() ){
+   switch( procGraph().mode() ){
    case 0:
-    value[0].ass( _proc_gworld.wndPosX( 0 ) );
-    value[1].ass( _proc_gworld.wndPosX( _proc_gworld.width() - 1 ) );
+    value[0].ass( procGWorld().wndPosX( 0 ) );
+    value[1].ass( procGWorld().wndPosX( procGWorld()._width - 1 ) );
     break;
    case 1:
    case 2:
@@ -13349,13 +13317,13 @@ _Proc.prototype = {
     break;
    }
   }
-  doCommandRePlot( _this, param, _proc_graph, value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), value[2]._mat[0].toFloat() );
+  doCommandRePlot( _this, param, procGraph(), value[0]._mat[0].toFloat(), value[1]._mat[0].toFloat(), value[2]._mat[0].toFloat() );
   return 0x03;
  },
  _commandCalculator : function( _this, param, code, token ){
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
-   param.setCalculator( value.notEqual( 0.0 ) );
+   param._calculator = value.notEqual( 0.0 );
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
@@ -13366,12 +13334,12 @@ _Proc.prototype = {
   var saveProcLine = _this._procLine;
   var saveFuncName = param._funcName;
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = _get_token;
    if( _get_code == 13 ){
     var name = newToken + ".inc";
     var func;
-    if( (func = _proc_func.search( name, true, null )) != null ){
+    if( (func = procFunc().search( name, true, null )) != null ){
      if( _this.mainLoop( func, param, null, null ) == 0x04 ){
       ret = 0x00;
      } else {
@@ -13402,17 +13370,17 @@ _Proc.prototype = {
  _commandBase : function( _this, param, code, token ){
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
-   param.setBase( value.notEqual( 0.0 ) ? 1 : 0 );
+   param._base = value.notEqual( 0.0 ) ? 1 : 0;
    return 0x03;
   }
   return _this._retError( 0x2141, code, token );
  },
  _commandNameSpace : function( _this, param, code, token ){
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = _get_token;
    if( _get_code == 8 ){
-    param.setNameSpace( newToken );
+    param._nameSpace = newToken;
     return 0x03;
    }
    return _this._retError( 0x2141, code, token );
@@ -13425,24 +13393,24 @@ _Proc.prototype = {
   var newToken;
   if( skipCommandLog() ){
    while( true ){
-    if( !(_this.curLine().getTokenParam( param )) ){
+    if( !(_this._curLine._token.getTokenParam( param )) ){
      break;
     }
    }
    return 0x03;
   }
-  while( _this.curLine().getTokenParam( param ) ){
+  while( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
    if( (newCode & 0x20) != 0 ){
     if( newCode == 0x23 ){
-     doCommandDumpVar( _global_param, _this.varIndexIndirect( _global_param, newCode, newToken ) );
+     doCommandDumpVar( globalParam(), _this.varIndexIndirect( globalParam(), newCode, newToken ) );
     } else {
      doCommandDumpVar( param, _this.varIndexIndirect( param, newCode, newToken ) );
     }
    } else if( (newCode & 0x40) != 0 ){
     if( newCode == 0x46 ){
-     doCommandDumpArray( _global_param, _this.arrayIndexIndirect( _global_param, newCode, newToken ) );
+     doCommandDumpArray( globalParam(), _this.arrayIndexIndirect( globalParam(), newCode, newToken ) );
     } else {
      doCommandDumpArray( param, _this.arrayIndexIndirect( param, newCode, newToken ) );
     }
@@ -13479,13 +13447,13 @@ _Proc.prototype = {
   return 0x00;
  },
  _procGlobalVar : function( _this, param, code, token, value ){
-  value.ass( _global_param.val( _this.autoVarIndex( _global_param, token ) ) );
+  value.ass( globalParam().val( _this.autoVarIndex( globalParam(), token ) ) );
   _this._updateMatrix( param, value );
   return 0x00;
  },
  _procArrayFirst : function( param, token, value ){
   this._curInfo._assToken = this.arrayIndexParam( param, token );
-  if( this.curLine().getTokenLock() ){
+  if( this._curLine._token.getTokenLock() ){
    if( _get_code == 16 ){
     this._initArrayFlag = true;
     this._initArrayCnt = 0;
@@ -13506,7 +13474,7 @@ _Proc.prototype = {
  },
  _procArray : function( _this, param, code, token, value ){
   var index = _this.arrayIndexParam( param, token );
-  if( _this.curLine().getTokenLock() ){
+  if( _this._curLine._token.getTokenLock() ){
    if( _get_code == 16 ){
     _this._initArrayFlag = true;
     _this._initArrayCnt = 0;
@@ -13528,9 +13496,9 @@ _Proc.prototype = {
  _procAutoArray : function( _this, param, code, token, value ){
   var curParam = param;
   if( code == 0x46 ){
-   param = _global_param;
+   param = globalParam();
   }
-  if( _this.curLine().getTokenLock() ){
+  if( _this._curLine._token.getTokenLock() ){
    if( _get_code == 16 ){
     _this._initArrayFlag = true;
     _this._initArrayCnt = 0;
@@ -13560,8 +13528,8 @@ _Proc.prototype = {
   _this._getParams( parentParam, code, token, funcParam );
   if( (func = parentParam._func.search( token, false, null )) != null ){
    var ret;
-   var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
-   var childParam = new _Param( _this.curNum(), parentParam, false );
+   var childProc = new _Proc( parentParam._mode, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+   var childParam = new _Param( _this._curLine._num, parentParam, false );
    _this.initInternalProc( childProc, func, childParam, parentParam );
    if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
     childProc.end();
@@ -13579,7 +13547,7 @@ _Proc.prototype = {
  },
  _procCommand : function( _this, param, code, token, value ){
   var ret;
-  if( token < 97 ){
+  if( token < 101 ){
    if( (ret = _procSubCommand[token]( _this, param, code, token )) != 0x03 ){
     return ret;
    }
@@ -13614,7 +13582,7 @@ _Proc.prototype = {
   }
   _this._updateMatrix( param, value );
   if( valueError() ){
-   _this._errorProc( 0x100B, _this.curNum(), param, code, token );
+   _this._errorProc( 0x100B, _this._curLine._num, param, code, token );
    clearValueError();
   }
   return 0x00;
@@ -13628,7 +13596,7 @@ _Proc.prototype = {
   }
   _this._updateMatrix( param, value );
   if( valueError() ){
-   _this._errorProc( 0x100B, _this.curNum(), param, code, token );
+   _this._errorProc( 0x100B, _this._curLine._num, param, code, token );
    clearValueError();
   }
   return 0x00;
@@ -13638,9 +13606,9 @@ _Proc.prototype = {
   var funcParam = new _Token();
   var func;
   _this._getParams( parentParam, code, token, funcParam );
-  var childProc = new _Proc( parentParam.mode(), _this.assertFlag(), _this.warnFlag(), _this.gUpdateFlag() );
-  var childParam = new _Param( _this.curNum(), parentParam, false );
-  if( (func = _proc_func.search( token, true, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
+  var childProc = new _Proc( parentParam._mode, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+  var childParam = new _Param( _this._curLine._num, parentParam, false );
+  if( (func = procFunc().search( token, true, (parentParam == null) ? null : parentParam._nameSpace )) != null ){
    if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
     childProc.end();
     _this.getAns( childParam, value, parentParam );
@@ -13649,7 +13617,7 @@ _Proc.prototype = {
     childProc.end();
     ret = _this._retError( 0x2108, code, token );
    }
-  } else if( (func = _this.newFuncCache( token, childParam, (parentParam == null) ? null : parentParam.nameSpace() )) != null ){
+  } else if( (func = _this.newFuncCache( token, childParam, (parentParam == null) ? null : parentParam._nameSpace )) != null ){
    if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == 0x04 ){
     childProc.end();
     _this.getAns( childParam, value, parentParam );
@@ -13685,7 +13653,7 @@ _Proc.prototype = {
   return true;
  },
  _procMain3 : function( _this, func, childParam, step , err , ret ){
-  if( ret.set( _this.termProcess( childParam, err ) ).val() != 0x02 ){
+  if( ret.set( _this.termProcess( childParam, err ) )._val != 0x02 ){
    return false;
   }
   step.set( 0 );
@@ -13703,7 +13671,7 @@ _Proc.prototype = {
   return true;
  },
  _procMain3Cache : function( _this, func, childParam, step , err , ret ){
-  if( ret.set( _this.termProcess( childParam, err ) ).val() != 0x02 ){
+  if( ret.set( _this.termProcess( childParam, err ) )._val != 0x02 ){
    return false;
   }
   step.set( 0 );
@@ -13726,7 +13694,7 @@ _Proc.prototype = {
   return true;
  },
  _procTest3 : function( _this, func, childParam, step , err , ret ){
-  if( ret.set( _this.termTestProcess( childParam, err ) ).val() != 0x02 ){
+  if( ret.set( _this.termTestProcess( childParam, err ) )._val != 0x02 ){
    return false;
   }
   step.set( 0 );
@@ -13734,7 +13702,7 @@ _Proc.prototype = {
   return true;
  }
 };
-_procSubFunc = [
+var _procSubFunc = [
  _Proc.prototype._funcDefined,
  _Proc.prototype._funcIndexOf,
  _Proc.prototype._funcIsInf,
@@ -13823,7 +13791,7 @@ _procSubFunc = [
  _Proc.prototype._funcCall,
  _Proc.prototype._funcEval
 ];
-_procSubOp = [
+var _procSubOp = [
  _Proc.prototype._unaryIncrement,
  _Proc.prototype._unaryDecrement,
  _Proc.prototype._unaryComplement,
@@ -13866,7 +13834,7 @@ _procSubOp = [
  _Proc.prototype._opPow,
  _Proc.prototype._opPowAndAss
 ];
-_procSubLoop = [
+var _procSubLoop = [
  _Proc.prototype._loopBegin,
  _Proc.prototype._loopEnd,
  _Proc.prototype._loopEnd,
@@ -13902,7 +13870,7 @@ _procSubLoop = [
  _Proc.prototype._loopReturn,
  _Proc.prototype._loopReturn
 ];
-_procSubStat = [
+var _procSubStat = [
  _Proc.prototype._statStart,
  _Proc.prototype._statEnd,
  _Proc.prototype._statEndInc,
@@ -13938,7 +13906,7 @@ _procSubStat = [
  _Proc.prototype._statReturn2,
  _Proc.prototype._statReturn3
 ];
-_procSubCommand = [
+var _procSubCommand = [
  _Proc.prototype._commandNull,
  _Proc.prototype._commandEFloat,
  _Proc.prototype._commandFFloat,
@@ -14008,7 +13976,9 @@ _procSubCommand = [
  _Proc.prototype._commandGFill,
  _Proc.prototype._commandGMove,
  _Proc.prototype._commandGText,
+ _Proc.prototype._commandGTextR,
  _Proc.prototype._commandGTextL,
+ _Proc.prototype._commandGTextRL,
  _Proc.prototype._commandGLine,
  _Proc.prototype._commandGPut,
  _Proc.prototype._commandGPut24,
@@ -14019,7 +13989,9 @@ _procSubCommand = [
  _Proc.prototype._commandWFill,
  _Proc.prototype._commandWMove,
  _Proc.prototype._commandWText,
+ _Proc.prototype._commandWTextR,
  _Proc.prototype._commandWTextL,
+ _Proc.prototype._commandWTextRL,
  _Proc.prototype._commandWLine,
  _Proc.prototype._commandWPut,
  _Proc.prototype._commandWGet,
@@ -14037,7 +14009,7 @@ _procSubCommand = [
  _Proc.prototype._commandDump,
  _Proc.prototype._commandPrint
 ];
-_procSubSe = [
+var _procSubSe = [
  _Proc.prototype._seNull,
  _Proc.prototype._seIncrement,
  _Proc.prototype._seDecrement,
@@ -14096,7 +14068,7 @@ _procSubSe = [
  _Proc.prototype._seSetTRUE,
  _Proc.prototype._seSetZero
 ];
-_procSub = [
+var _procSub = [
  _Proc.prototype._procTop,
  _Proc.prototype._procVariable,
  _Proc.prototype._procAutoVar,
@@ -14112,17 +14084,17 @@ _procSub = [
  _Proc.prototype._procFunc,
  _Proc.prototype._procExtFunc
 ];
-_procMain = [
+var _procMain = [
  _Proc.prototype._procMain1,
  _Proc.prototype._procMain2,
  _Proc.prototype._procMain3
 ];
-_procMainCache = [
+var _procMainCache = [
  _Proc.prototype._procMain1Cache,
  _Proc.prototype._procMain2Cache,
  _Proc.prototype._procMain3Cache
 ];
-_procTest = [
+var _procTest = [
  _Proc.prototype._procTest1,
  _Proc.prototype._procTest2,
  _Proc.prototype._procTest3
@@ -14145,9 +14117,10 @@ function defProcFunction(){
  if( window.doCommandClear == undefined ) window.doCommandClear = function(){};
  if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
  if( window.doCommandScan == undefined ) window.doCommandScan = function( topScan, proc, param ){};
- if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( gWorld, width, height ){};
- if( window.doCommandWindow == undefined ) window.doCommandWindow = function( gWorld, left, bottom, right, top ){};
+ if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( width, height ){};
+ if( window.doCommandWindow == undefined ) window.doCommandWindow = function( left, bottom, right, top ){};
  if( window.doCommandGColor == undefined ) window.doCommandGColor = function( index, rgb ){};
+ if( window.doCommandGPut24Begin == undefined ) window.doCommandGPut24Begin = function(){};
  if( window.doCommandGPut24 == undefined ) window.doCommandGPut24 = function( x, y, rgb ){};
  if( window.doCommandGPut24End == undefined ) window.doCommandGPut24End = function(){};
  if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width , height ){ return null; };
@@ -14165,6 +14138,28 @@ function defProcFunction(){
  if( window.onEndPlot == undefined ) window.onEndPlot = function(){};
  if( window.onStartRePlot == undefined ) window.onStartRePlot = function(){};
  if( window.onEndRePlot == undefined ) window.onEndRePlot = function(){};
+}
+function doFuncGColorBGR( rgb, bgrColorArray ){
+ var i, j;
+ var r = (rgb & 0xFF0000) >> 16;
+ var g = (rgb & 0x00FF00) >> 8;
+ var b = rgb & 0x0000FF;
+ var rr, gg, bb, tmp;
+ var d = 766 ;
+ for( i = 0, j = 0; i < 256; i++ ){
+  rr = bgrColorArray[i] & 0x0000FF;
+  gg = (bgrColorArray[i] & 0x00FF00) >> 8;
+  bb = (bgrColorArray[i] & 0xFF0000) >> 16;
+  tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
+  if( tmp < d ){
+   j = i;
+   d = tmp;
+  }
+ }
+ return j;
+}
+function _RGB2BGR( data ){
+ return ((data & 0x0000FF) << 16) + (data & 0x00FF00) + ((data & 0xFF0000) >> 16);
 }
 var _TOKEN_OP = [
  "[++]",
@@ -14403,7 +14398,9 @@ var _TOKEN_COMMAND = [
  "gfill",
  "gmove",
  "gtext",
+ "gtextr",
  "gtextl",
+ "gtextrl",
  "gline",
  "gput",
  "gput24",
@@ -14414,7 +14411,9 @@ var _TOKEN_COMMAND = [
  "wfill",
  "wmove",
  "wtext",
+ "wtextr",
  "wtextl",
+ "wtextrl",
  "wline",
  "wput",
  "wget",
@@ -14524,7 +14523,7 @@ var _VALUE_DEFINE = [
  Number.POSITIVE_INFINITY,
  Number.NaN
 ];
-function indexOf( stringArray, string ){
+function _indexOf( stringArray, string ){
  var len = stringArray.length;
  for( var i = 0; i < len; i++ ){
   if( stringArray[i] == string ){
@@ -14645,16 +14644,16 @@ _Token.prototype = {
   return false;
  },
  checkFunc : function( string, func ){
-  func.set( indexOf( _TOKEN_FUNC, string ) );
-  return (func.val() >= 0);
+  func.set( _indexOf( _TOKEN_FUNC, string ) );
+  return (func._val >= 0);
  },
  checkStat : function( string, stat ){
-  stat.set( indexOf( _TOKEN_STAT, string ) );
-  return (stat.val() >= 0);
+  stat.set( _indexOf( _TOKEN_STAT, string ) );
+  return (stat._val >= 0);
  },
  checkCommand : function( string, command ){
-  command.set( indexOf( _TOKEN_COMMAND, string ) + 1 );
-  if( command.val() >= 1 ){
+  command.set( _indexOf( _TOKEN_COMMAND, string ) + 1 );
+  if( command._val >= 1 ){
     return true;
   }
   for( var i = 0; i < _custom_command_num; i++ ){
@@ -14666,18 +14665,18 @@ _Token.prototype = {
   return false;
  },
  checkSe : function( string, se ){
-  se.set( indexOf( _TOKEN_SE, string ) + 1 );
-  if( se.val() >= 1 ){
+  se.set( _indexOf( _TOKEN_SE, string ) + 1 );
+  if( se._val >= 1 ){
     return true;
   }
   if( this.checkFunc( string, se ) ){
-   se.set( 69 + se.val() );
+   se.set( 69 + se._val );
    return true;
   }
   return false;
  },
  checkDefine : function( string, value ){
-  var define = indexOf( _TOKEN_DEFINE, string );
+  var define = _indexOf( _TOKEN_DEFINE, string );
   if( define >= 0 ){
    value.ass( _VALUE_DEFINE[define] );
    return true;
@@ -14734,13 +14733,13 @@ _Token.prototype = {
    case 'b':
    case 'B':
     value.ass( stringToInt( string, top + 2, stop, 2 ) );
-    if( stop.val() < string.length ){
+    if( stop._val < string.length ){
      return false;
     }
     break;
    case '0':
     value.ass( stringToInt( string, top + 2, stop, 8 ) );
-    if( stop.val() < string.length ){
+    if( stop._val < string.length ){
      return false;
     }
     break;
@@ -14754,14 +14753,14 @@ _Token.prototype = {
    case '8':
    case '9':
     value.ass( stringToInt( string, top + 1, stop, 10 ) );
-    if( stop.val() < string.length ){
+    if( stop._val < string.length ){
      return false;
     }
     break;
    case 'x':
    case 'X':
     value.ass( stringToInt( string, top + 2, stop, 16 ) );
-    if( stop.val() < string.length ){
+    if( stop._val < string.length ){
      return false;
     }
     break;
@@ -14772,34 +14771,34 @@ _Token.prototype = {
     value.ass( value.minus() );
    }
   } else {
-   if( (param.mode() & 0x0020) != 0 ){
+   if( (param._mode & 0x0020) != 0 ){
     tmp[0] = stringToFloat( string, top, stop );
-    switch( string.charAt( stop.val() ) ){
+    switch( string.charAt( stop._val ) ){
     case '\\':
     case '¥':
     case '+':
     case '-':
-     if( stop.val() == top ){
+     if( stop._val == top ){
       return false;
      }
      value.setReal( swi ? -tmp[0] : tmp[0] );
-     if( isCharEscape( string, stop.val() ) ){
+     if( isCharEscape( string, stop._val ) ){
       stop.add( 1 );
      }
-     switch( string.charAt( stop.val() ) ){
+     switch( string.charAt( stop._val ) ){
      case '+': swi = false; break;
      case '-': swi = true ; break;
      default : return false;
      }
-     top = stop.val() + 1;
+     top = stop._val + 1;
      tmp[0] = stringToFloat( string, top, stop );
-     if( (string.charAt( stop.val() ) != 'i') && (string.charAt( stop.val() ) != 'I') ){
+     if( (string.charAt( stop._val ) != 'i') && (string.charAt( stop._val ) != 'I') ){
       return false;
      } else {
-      if( stop.val() + 1 < string.length ){
+      if( stop._val + 1 < string.length ){
        return false;
       }
-      if( stop.val() == top ){
+      if( stop._val == top ){
        value.setImag( swi ? -1.0 : 1.0 );
       } else {
        value.setImag( swi ? -tmp[0] : tmp[0] );
@@ -14808,23 +14807,23 @@ _Token.prototype = {
      break;
     case 'i':
     case 'I':
-     if( stop.val() + 1 < string.length ){
+     if( stop._val + 1 < string.length ){
       return false;
      }
      value.setReal( 0.0 );
-     if( stop.val() == top ){
+     if( stop._val == top ){
       value.setImag( swi ? -1.0 : 1.0 );
      } else {
       value.setImag( swi ? -tmp[0] : tmp[0] );
      }
      break;
     default:
-     if( stop.val() == top ){
+     if( stop._val == top ){
       return false;
      }
      value.ass( swi ? -tmp[0] : tmp[0] );
-     if( stop.val() < string.length ){
-      switch( string.charAt( stop.val() ) ){
+     if( stop._val < string.length ){
+      switch( string.charAt( stop._val ) ){
       case 'd': case 'D': value.angToAng( 1 , complexAngType() ); break;
       case 'g': case 'G': value.angToAng( 2, complexAngType() ); break;
       case 'r': case 'R': value.angToAng( 0 , complexAngType() ); break;
@@ -14833,32 +14832,32 @@ _Token.prototype = {
      }
      break;
     }
-   } else if( (param.mode() & (0x0010 | 0x0040)) != 0 ){
+   } else if( (param._mode & (0x0010 | 0x0040)) != 0 ){
     tmp[0] = stringToFloat( string, top, stop );
-    switch( string.charAt( stop.val() ) ){
+    switch( string.charAt( stop._val ) ){
     case '_':
     case '」':
-     if( stop.val() == top ){
+     if( stop._val == top ){
       return false;
      }
      value.fractSetMinus( swi );
      value.setNum( tmp[0] );
-     if( isCharEscape( string, stop.val() + 1 ) ){
-      top = stop.val() + 2;
+     if( isCharEscape( string, stop._val + 1 ) ){
+      top = stop._val + 2;
      } else {
-      top = stop.val() + 1;
+      top = stop._val + 1;
      }
      tmp[0] = stringToFloat( string, top, stop );
-     switch( string.charAt( stop.val() ) ){
+     switch( string.charAt( stop._val ) ){
      case '_':
      case '」':
-      if( stop.val() == top ){
+      if( stop._val == top ){
        return false;
       }
-      if( isCharEscape( string, stop.val() + 1 ) ){
-       top = stop.val() + 2;
+      if( isCharEscape( string, stop._val + 1 ) ){
+       top = stop._val + 2;
       } else {
-       top = stop.val() + 1;
+       top = stop._val + 1;
       }
       tmp[1] = stringToFloat( string, top, stop );
       if( (tmp[0] < 0.0) || (tmp[1] < 0.0) ){
@@ -14878,34 +14877,34 @@ _Token.prototype = {
      }
      break;
     default:
-     if( stop.val() == top ){
+     if( stop._val == top ){
       return false;
      }
      value.ass( swi ? -tmp[0] : tmp[0] );
      break;
     }
-    if( stop.val() < string.length ){
-     switch( string.charAt( stop.val() ) ){
+    if( stop._val < string.length ){
+     switch( string.charAt( stop._val ) ){
      case 'd': case 'D': value.angToAng( 1 , complexAngType() ); break;
      case 'g': case 'G': value.angToAng( 2, complexAngType() ); break;
      case 'r': case 'R': value.angToAng( 0 , complexAngType() ); break;
      default : return false;
      }
     }
-   } else if( (param.mode() & 0x0080) != 0 ){
+   } else if( (param._mode & 0x0080) != 0 ){
     var _break = false;
     for( i = 0; i < 4; i++ ){
      if( isCharEscape( string, top ) ){
       top++;
      }
      tmp[i] = stringToFloat( string, top, stop );
-     if( stop.val() == top ){
+     if( stop._val == top ){
       return false;
      }
-     if( stop.val() >= string.length ){
+     if( stop._val >= string.length ){
       break;
      }
-     switch( string.charAt( stop.val() ) ){
+     switch( string.charAt( stop._val ) ){
      case 'h':
      case 'H':
      case 'm':
@@ -14914,7 +14913,7 @@ _Token.prototype = {
      case 'S':
      case 'f':
      case 'F':
-      if( stop.val() + 1 < string.length ){
+      if( stop._val + 1 < string.length ){
        return false;
       }
       _break = true;
@@ -14927,13 +14926,13 @@ _Token.prototype = {
      if( _break ){
       break;
      }
-     top = stop.val() + 1;
+     top = stop._val + 1;
     }
     value.timeSetMinus( swi );
     switch( i ){
     case 0:
-     if( stop.val() < string.length ){
-      switch( string.charAt( stop.val() ) ){
+     if( stop._val < string.length ){
+      switch( string.charAt( stop._val ) ){
       case 'h': case 'H': value.setHour ( tmp[0] ); value.timeReduce(); break;
       case 'm': case 'M': value.setMin ( tmp[0] ); value.timeReduce(); break;
       case 's': case 'S': value.setSec ( tmp[0] ); value.timeReduce(); break;
@@ -14945,15 +14944,15 @@ _Token.prototype = {
      }
      break;
     case 1:
-     if( stop.val() < string.length ){
-      switch( string.charAt( stop.val() ) ){
+     if( stop._val < string.length ){
+      switch( string.charAt( stop._val ) ){
       case 'h': case 'H': return false;
       case 'm': case 'M': value.setHour( tmp[0] ); value.setMin ( tmp[1] ); value.timeReduce(); break;
       case 's': case 'S': value.setMin ( tmp[0] ); value.setSec ( tmp[1] ); value.timeReduce(); break;
       case 'f': case 'F': value.setSec ( tmp[0] ); value.setFrame( tmp[1] ); value.timeReduce(); break;
       }
      } else {
-      switch( param.mode() ){
+      switch( param._mode ){
       case 0x0080:
       case 0x0081: value.setHour( tmp[0] ); value.setMin ( tmp[1] ); value.timeReduce(); break;
       case 0x0082: value.setMin ( tmp[0] ); value.setSec ( tmp[1] ); value.timeReduce(); break;
@@ -14962,15 +14961,15 @@ _Token.prototype = {
      }
      break;
     case 2:
-     if( stop.val() < string.length ){
-      switch( string.charAt( stop.val() ) ){
+     if( stop._val < string.length ){
+      switch( string.charAt( stop._val ) ){
       case 'h': case 'H':
       case 'm': case 'M': return false;
       case 's': case 'S': value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec ( tmp[2] ); value.timeReduce(); break;
       case 'f': case 'F': value.setMin ( tmp[0] ); value.setSec( tmp[1] ); value.setFrame( tmp[2] ); value.timeReduce(); break;
       }
      } else {
-      switch( param.mode() ){
+      switch( param._mode ){
       case 0x0080:
       case 0x0081:
       case 0x0082: value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec ( tmp[2] ); value.timeReduce(); break;
@@ -14979,15 +14978,15 @@ _Token.prototype = {
      }
      break;
     case 3:
-     if( stop.val() < string.length ){
-      switch( string.charAt( stop.val() ) ){
+     if( stop._val < string.length ){
+      switch( string.charAt( stop._val ) ){
       case 'h': case 'H':
       case 'm': case 'M':
       case 's': case 'S': return false;
       case 'f': case 'F': value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec( tmp[2] ); value.setFrame( tmp[3] ); value.timeReduce(); break;
       }
      } else {
-      switch( param.mode() ){
+      switch( param._mode ){
       case 0x0080:
       case 0x0081:
       case 0x0082:
@@ -14996,9 +14995,9 @@ _Token.prototype = {
      }
      break;
     }
-   } else if( (param.mode() & 0x0100) != 0 ){
-    value.ass( stringToInt( string, top, stop, param.radix() ) );
-    if( stop.val() < string.length ){
+   } else if( (param._mode & 0x0100) != 0 ){
+    value.ass( stringToInt( string, top, stop, param._radix ) );
+    if( stop._val < string.length ){
      return false;
     }
     if( swi ){
@@ -15010,8 +15009,8 @@ _Token.prototype = {
  },
  _floatToString : function( param, value ){
   var str = "";
-  var prec = param.prec();
-  switch( param.mode() ){
+  var prec = param._prec;
+  switch( param._mode ){
   case 0x0010:
   case 0x0020:
    str = floatToExponential( value, (prec == 0) ? _EPREC( value ) : prec );
@@ -15028,7 +15027,7 @@ _Token.prototype = {
   return str;
  },
  valueToString : function( param, value, real , imag ){
-  switch( param.mode() ){
+  switch( param._mode ){
   case 0x0020:
   case 0x0021:
   case 0x0022:
@@ -15145,27 +15144,27 @@ _Token.prototype = {
    imag.set( "" );
    break;
   case 0x0100:
-   real.set( intToString( _SIGNED( value.toFloat(), 256, -128, 127 ), param.radix() ) );
+   real.set( intToString( _SIGNED( value.toFloat(), 256, -128, 127 ), param._radix ) );
    imag.set( "" );
    break;
   case 0x0101:
-   real.set( intToString( _UNSIGNED( value.toFloat(), 256 ), param.radix() ) );
+   real.set( intToString( _UNSIGNED( value.toFloat(), 256 ), param._radix ) );
    imag.set( "" );
    break;
   case 0x0102:
-   real.set( intToString( _SIGNED( value.toFloat(), 65536, -32768, 32767 ), param.radix() ) );
+   real.set( intToString( _SIGNED( value.toFloat(), 65536, -32768, 32767 ), param._radix ) );
    imag.set( "" );
    break;
   case 0x0103:
-   real.set( intToString( _UNSIGNED( value.toFloat(), 65536 ), param.radix() ) );
+   real.set( intToString( _UNSIGNED( value.toFloat(), 65536 ), param._radix ) );
    imag.set( "" );
    break;
   case 0x0104:
-   real.set( intToString( _SIGNED( value.toFloat(), 4294967296, -2147483648, 2147483647 ), param.radix() ) );
+   real.set( intToString( _SIGNED( value.toFloat(), 4294967296, -2147483648, 2147483647 ), param._radix ) );
    imag.set( "" );
    break;
   case 0x0105:
-   real.set( intToString( _UNSIGNED( value.toFloat(), 4294967296 ), param.radix() ) );
+   real.set( intToString( _UNSIGNED( value.toFloat(), 4294967296 ), param._radix ) );
    imag.set( "" );
    break;
   }
@@ -15311,7 +15310,7 @@ _Token.prototype = {
    tmp = token.substring( 0, len );
    if( tmp.charAt( 0 ) == '$' ){
     if( this.checkSe( tmp.substring( 1, len ).toLowerCase(), code ) ){
-     switch( code.val() ){
+     switch( code._val ){
      case 57:
       cur._code = 10;
       cur._token = 0;
@@ -15362,7 +15361,7 @@ _Token.prototype = {
       break;
      default:
       cur._code = 22;
-      cur._token = code.val();
+      cur._token = code._val;
       break;
      }
     } else {
@@ -15371,11 +15370,11 @@ _Token.prototype = {
     }
    } else if( this.checkSqOp( tmp, code ) ){
     cur._code = 11;
-    cur._token = code.val();
+    cur._token = code._val;
    } else if( tmp.charAt( 0 ) == ':' ){
     cur._code = 9;
     if( this.checkCommand( tmp.substring( 1, len ), code ) ){
-     cur._token = code.val();
+     cur._token = code._val;
     } else {
      cur._token = 0;
     }
@@ -15409,10 +15408,10 @@ _Token.prototype = {
     }
    } else if( this.checkFunc( tmp, code ) ){
     cur._code = 12;
-    cur._token = code.val();
+    cur._token = code._val;
    } else if( this.checkStat( tmp, code ) ){
     cur._code = 10;
-    cur._token = code.val();
+    cur._token = code._val;
    } else {
     cur._code = 7;
     cur._token = new _Value();
@@ -15763,7 +15762,7 @@ _Token.prototype = {
       case '/': token += String.fromCharCode( 29 ); break;
       case '%': token += String.fromCharCode( 30 ); break;
       case '^':
-       if( param._enableOpPow && ((param.mode() & 0x0100) == 0) ){
+       if( param._enableOpPow && ((param._mode & 0x0100) == 0) ){
         token += String.fromCharCode( 40 );
        } else {
         token += String.fromCharCode( 37 );
@@ -15789,7 +15788,7 @@ _Token.prototype = {
       case '/': token += String.fromCharCode( 9 ); break;
       case '%': token += String.fromCharCode( 10 ); break;
       case '^':
-       if( param._enableOpPow && ((param.mode() & 0x0100) == 0) ){
+       if( param._enableOpPow && ((param._mode & 0x0100) == 0) ){
         token += String.fromCharCode( 39 );
        } else {
         token += String.fromCharCode( 22 );
@@ -15879,7 +15878,7 @@ _Token.prototype = {
      break;
     case 'e':
     case 'E':
-     if( ((param.mode() & 0x0100) == 0) && (len > 0) ){
+     if( ((param._mode & 0x0100) == 0) && (len > 0) ){
       if( (line.charAt( cur + 1 ) == '+') || (line.charAt( cur + 1 ) == '-') ){
        var _break = false;
        for( var i = 0; i < len; i++ ){
@@ -16461,12 +16460,12 @@ _Variable.prototype = {
   return index;
  },
  move : function( index ){
-  if( this._label.flag( index ) == 2 ){
+  if( this._label._flag[index] == 2 ){
    this.define( this._label._label[index], this.val( index ), this.isLocked( index ) );
    this.unlock( index );
    this._label.setLabel( index, null, false );
   }
-  this._label.setFlag( index, 1 );
+  this._label._flag[index] = 1;
  },
  set : function( index, value, moveFlag ){
 assert( index != 0 );
@@ -16559,1240 +16558,6 @@ assert( index != 0 );
   return this._lock[index];
  }
 };
-var COLOR_WIN = [
- 0x000000, 0x000080, 0x008000, 0x008080, 0x800000, 0x800080, 0x808000, 0x808080,
- 0xC0DCC0, 0xF0CAA6,
-                     0xAA3F2A, 0xFF3F2A, 0x005F2A, 0x555F2A, 0xAA5F2A, 0xFF5F2A,
- 0x007F2A, 0x557F2A, 0xAA7F2A, 0xFF7F2A, 0x009F2A, 0x559F2A, 0xAA9F2A, 0xFF9F2A,
- 0x00BF2A, 0x55BF2A, 0xAABF2A, 0xFFBF2A, 0x00DF2A, 0x55DF2A, 0xAADF2A, 0xFFDF2A,
- 0x00FF2A, 0x55FF2A, 0xAAFF2A, 0xFFFF2A,
- 0x000055, 0x550055, 0xAA0055, 0xFF0055, 0x001F55, 0x551F55, 0xAA1F55, 0xFF1F55,
- 0x003F55, 0x553F55, 0xAA3F55, 0xFF3F55, 0x005F55, 0x555F55, 0xAA5F55, 0xFF5F55,
- 0x007F55, 0x557F55, 0xAA7F55, 0xFF7F55, 0x009F55, 0x559F55, 0xAA9F55, 0xFF9F55,
- 0x00BF55, 0x55BF55, 0xAABF55, 0xFFBF55, 0x00DF55, 0x55DF55, 0xAADF55, 0xFFDF55,
- 0x00FF55, 0x55FF55, 0xAAFF55, 0xFFFF55,
- 0x00007F, 0x55007F, 0xAA007F, 0xFF007F, 0x001F7F, 0x551F7F, 0xAA1F7F, 0xFF1F7F,
- 0x003F7F, 0x553F7F, 0xAA3F7F, 0xFF3F7F, 0x005F7F, 0x555F7F, 0xAA5F7F, 0xFF5F7F,
- 0x007F7F, 0x557F7F, 0xAA7F7F, 0xFF7F7F, 0x009F7F, 0x559F7F, 0xAA9F7F, 0xFF9F7F,
- 0x00BF7F, 0x55BF7F, 0xAABF7F, 0xFFBF7F, 0x00DF7F, 0x55DF7F, 0xAADF7F, 0xFFDF7F,
- 0x00FF7F, 0x55FF7F, 0xAAFF7F, 0xFFFF7F,
- 0x0000AA, 0x5500AA, 0xAA00AA, 0xFF00AA, 0x001FAA, 0x551FAA, 0xAA1FAA, 0xFF1FAA,
- 0x003FAA, 0x553FAA, 0xAA3FAA, 0xFF3FAA, 0x005FAA, 0x555FAA, 0xAA5FAA, 0xFF5FAA,
- 0x007FAA, 0x557FAA, 0xAA7FAA, 0xFF7FAA, 0x009FAA, 0x559FAA, 0xAA9FAA, 0xFF9FAA,
- 0x00BFAA, 0x55BFAA, 0xAABFAA, 0xFFBFAA, 0x00DFAA, 0x55DFAA, 0xAADFAA, 0xFFDFAA,
- 0x00FFAA, 0x55FFAA, 0xAAFFAA, 0xFFFFAA,
- 0x0000D4, 0x5500D4, 0xAA00D4, 0xFF00D4, 0x001FD4, 0x551FD4, 0xAA1FD4, 0xFF1FD4,
- 0x003FD4, 0x553FD4, 0xAA3FD4, 0xFF3FD4, 0x005FD4, 0x555FD4, 0xAA5FD4, 0xFF5FD4,
- 0x007FD4, 0x557FD4, 0xAA7FD4, 0xFF7FD4, 0x009FD4, 0x559FD4, 0xAA9FD4, 0xFF9FD4,
- 0x00BFD4, 0x55BFD4, 0xAABFD4, 0xFFBFD4, 0x00DFD4, 0x55DFD4, 0xAADFD4, 0xFFDFD4,
- 0x00FFD4, 0x55FFD4, 0xAAFFD4, 0xFFFFD4,
-           0x5500FF, 0xAA00FF, 0x001FFF, 0x551FFF, 0xAA1FFF, 0xFF1FFF,
- 0x003FFF, 0x553FFF, 0xAA3FFF, 0xFF3FFF, 0x005FFF, 0x555FFF, 0xAA5FFF, 0xFF5FFF,
- 0x007FFF, 0x557FFF, 0xAA7FFF, 0xFF7FFF, 0x009FFF, 0x559FFF, 0xAA9FFF, 0xFF9FFF,
- 0x00BFFF, 0x55BFFF, 0xAABFFF, 0xFFBFFF, 0x00DFFF, 0x55DFFF, 0xAADFFF, 0xFFDFFF,
-           0x55FFFF, 0xAAFFFF,
- 0xFFCCCC, 0xFFCCFF, 0xFFFF33, 0xFFFF66, 0xFFFF99, 0xFFFFCC,
- 0x007F00, 0x557F00, 0xAA7F00, 0xFF7F00, 0x009F00, 0x559F00, 0xAA9F00, 0xFF9F00,
- 0x00BF00, 0x55BF00, 0xAABF00, 0xFFBF00, 0x00DF00, 0x55DF00, 0xAADF00, 0xFFDF00,
-           0x55FF00, 0xAAFF00,
- 0x00002A, 0x55002A, 0xAA002A, 0xFF002A, 0x001F2A, 0x551F2A, 0xAA1F2A, 0xFF1F2A,
- 0x003F2A, 0x553F2A,
-                                                             0xF0FBFF, 0xA4A0A0,
- 0xC0C0C0, 0x0000FF, 0x00FF00, 0x00FFFF, 0xFF0000, 0xFF00FF, 0xFFFF00, 0xFFFFFF
-];
-function regGWorldDefCharInfo( i ){
- newGWorldCharInfo( i );
- regGWorldCharInfo( i, _CHAR( '0' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( '1' ), 4, 7, 1, 2, 7, "01110101010101" );
- regGWorldCharInfo( i, _CHAR( '2' ), 5, 7, 1, 4, 7, "0110100100010010010010001111" );
- regGWorldCharInfo( i, _CHAR( '3' ), 5, 7, 1, 4, 7, "011010010001001000011001011" );
- regGWorldCharInfo( i, _CHAR( '4' ), 5, 7, 1, 4, 7, "001001101010101011110010001" );
- regGWorldCharInfo( i, _CHAR( '5' ), 5, 7, 1, 4, 7, "111110001110100100011001011" );
- regGWorldCharInfo( i, _CHAR( '6' ), 5, 7, 1, 4, 7, "011010011000111010011001011" );
- regGWorldCharInfo( i, _CHAR( '7' ), 5, 7, 1, 4, 7, "11110001000100100010010001" );
- regGWorldCharInfo( i, _CHAR( '8' ), 5, 7, 1, 4, 7, "011010011001011010011001011" );
- regGWorldCharInfo( i, _CHAR( '9' ), 5, 7, 1, 4, 7, "011010011001011100011001011" );
- regGWorldCharInfo( i, _CHAR( 'A' ), 5, 7, 1, 4, 7, "0110100110011111100110011001" );
- regGWorldCharInfo( i, _CHAR( 'B' ), 5, 7, 1, 4, 7, "111010011001111010011001111" );
- regGWorldCharInfo( i, _CHAR( 'C' ), 5, 7, 1, 4, 7, "011010011000100010001001011" );
- regGWorldCharInfo( i, _CHAR( 'D' ), 5, 7, 1, 4, 7, "111010011001100110011001111" );
- regGWorldCharInfo( i, _CHAR( 'E' ), 5, 7, 1, 4, 7, "1111100010001111100010001111" );
- regGWorldCharInfo( i, _CHAR( 'F' ), 5, 7, 1, 4, 7, "1111100010001111100010001" );
- regGWorldCharInfo( i, _CHAR( 'G' ), 5, 7, 1, 4, 7, "011010011000101110011001011" );
- regGWorldCharInfo( i, _CHAR( 'H' ), 5, 7, 1, 4, 7, "1001100110011111100110011001" );
- regGWorldCharInfo( i, _CHAR( 'I' ), 4, 7, 1, 3, 7, "111010010010010010111" );
- regGWorldCharInfo( i, _CHAR( 'J' ), 5, 7, 1, 4, 7, "000100010001000100011001011" );
- regGWorldCharInfo( i, _CHAR( 'K' ), 5, 7, 1, 4, 7, "1001100110101100101010011001" );
- regGWorldCharInfo( i, _CHAR( 'L' ), 5, 7, 1, 4, 7, "1000100010001000100010001111" );
- regGWorldCharInfo( i, _CHAR( 'M' ), 6, 7, 1, 5, 7, "10001100011101111011101011010110101" );
- regGWorldCharInfo( i, _CHAR( 'N' ), 5, 7, 1, 4, 7, "1001110111011011101110011001" );
- regGWorldCharInfo( i, _CHAR( 'O' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'P' ), 5, 7, 1, 4, 7, "1110100110011110100010001" );
- regGWorldCharInfo( i, _CHAR( 'Q' ), 5, 7, 1, 4, 7, "0110100110011101101110110111" );
- regGWorldCharInfo( i, _CHAR( 'R' ), 5, 7, 1, 4, 7, "1110100110011110100110011001" );
- regGWorldCharInfo( i, _CHAR( 'S' ), 5, 7, 1, 4, 7, "011010011000011000011001011" );
- regGWorldCharInfo( i, _CHAR( 'T' ), 5, 7, 1, 4, 7, "111100100010001000100010001" );
- regGWorldCharInfo( i, _CHAR( 'U' ), 5, 7, 1, 4, 7, "100110011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'V' ), 5, 7, 1, 4, 7, "100110011001010101010010001" );
- regGWorldCharInfo( i, _CHAR( 'W' ), 6, 7, 1, 5, 7, "1010110101101011010101010010100101" );
- regGWorldCharInfo( i, _CHAR( 'X' ), 5, 7, 1, 4, 7, "1001100110010110100110011001" );
- regGWorldCharInfo( i, _CHAR( 'Y' ), 5, 7, 1, 4, 7, "100110011001010100100010001" );
- regGWorldCharInfo( i, _CHAR( 'Z' ), 5, 7, 1, 4, 7, "1111000100100100100010001111" );
- regGWorldCharInfo( i, _CHAR( 'a' ), 5, 7, 1, 4, 5, "01100001011110010111" );
- regGWorldCharInfo( i, _CHAR( 'b' ), 5, 7, 1, 4, 7, "100010001110100110011001111" );
- regGWorldCharInfo( i, _CHAR( 'c' ), 5, 7, 1, 4, 5, "0110100110001001011" );
- regGWorldCharInfo( i, _CHAR( 'd' ), 5, 7, 1, 4, 7, "0001000101111001100110010111" );
- regGWorldCharInfo( i, _CHAR( 'e' ), 5, 7, 1, 4, 5, "01101001111110000111" );
- regGWorldCharInfo( i, _CHAR( 'f' ), 4, 7, 1, 3, 7, "00101011101001001001" );
- regGWorldCharInfo( i, _CHAR( 'g' ), 5, 7, 1, 4, 5, "01111001100101110001111" );
- regGWorldCharInfo( i, _CHAR( 'h' ), 5, 7, 1, 4, 7, "1000100011101001100110011001" );
- regGWorldCharInfo( i, _CHAR( 'i' ), 3, 7, 1, 1, 7, "1011111" );
- regGWorldCharInfo( i, _CHAR( 'j' ), 4, 7, 1, 2, 7, "010001010101011" );
- regGWorldCharInfo( i, _CHAR( 'k' ), 5, 7, 1, 4, 7, "1000100010011010110010101001" );
- regGWorldCharInfo( i, _CHAR( 'l' ), 3, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( i, _CHAR( 'm' ), 6, 7, 1, 5, 5, "1101010101101011010110101" );
- regGWorldCharInfo( i, _CHAR( 'n' ), 5, 7, 1, 4, 5, "11101001100110011001" );
- regGWorldCharInfo( i, _CHAR( 'o' ), 5, 7, 1, 4, 5, "0110100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'p' ), 5, 7, 1, 4, 5, "111010011001111010001" );
- regGWorldCharInfo( i, _CHAR( 'q' ), 5, 7, 1, 4, 5, "011110011001011100010001" );
- regGWorldCharInfo( i, _CHAR( 'r' ), 5, 7, 1, 4, 5, "10111100100010001" );
- regGWorldCharInfo( i, _CHAR( 's' ), 5, 7, 1, 4, 5, "0111100001100001111" );
- regGWorldCharInfo( i, _CHAR( 't' ), 4, 7, 1, 3, 6, "010111010010010001" );
- regGWorldCharInfo( i, _CHAR( 'u' ), 5, 7, 1, 4, 5, "10011001100110010111" );
- regGWorldCharInfo( i, _CHAR( 'v' ), 5, 7, 1, 4, 5, "1001100101010101001" );
- regGWorldCharInfo( i, _CHAR( 'w' ), 6, 7, 1, 5, 5, "101011010110101010100101" );
- regGWorldCharInfo( i, _CHAR( 'x' ), 5, 7, 1, 4, 5, "10011001011010011001" );
- regGWorldCharInfo( i, _CHAR( 'y' ), 5, 7, 1, 4, 5, "10011001100101110001111" );
- regGWorldCharInfo( i, _CHAR( 'z' ), 5, 7, 1, 4, 5, "11110001011010001111" );
- regGWorldCharInfo( i, _CHAR( ' ' ), 5, 7, 1, 4, 7, "" );
- regGWorldCharInfo( i, _CHAR( '!' ), 2, 7, 1, 1, 7, "1111101" );
- regGWorldCharInfo( i, _CHAR( '"' ), 5, 7, 1, 4, 7, "01010101101" );
- regGWorldCharInfo( i, _CHAR( '#' ), 6, 7, 1, 5, 7, "0101011111010100101001010111110101" );
- regGWorldCharInfo( i, _CHAR( '$' ), 6, 7, 1, 5, 7, "001000111110100011100010111110001" );
- regGWorldCharInfo( i, _CHAR( '%' ), 6, 7, 1, 5, 7, "0100110110010100010001010011011001" );
- regGWorldCharInfo( i, _CHAR( '&' ), 6, 7, 1, 5, 7, "01100100100110010101101011001001101" );
- regGWorldCharInfo( i, _CHAR( '\'' ), 3, 7, 1, 2, 7, "01011" );
- regGWorldCharInfo( i, _CHAR( '(' ), 4, 7, 1, 3, 7, "001010100100100010001" );
- regGWorldCharInfo( i, _CHAR( ')' ), 4, 7, 1, 3, 7, "1000100010010010101" );
- regGWorldCharInfo( i, _CHAR( '*' ), 6, 7, 1, 5, 6, "00100101010111010101001" );
- regGWorldCharInfo( i, _CHAR( '+' ), 4, 7, 1, 3, 6, "01001011101001" );
- regGWorldCharInfo( i, _CHAR( ',' ), 3, 7, 1, 2, 2, "01011" );
- regGWorldCharInfo( i, _CHAR( '-' ), 4, 7, 1, 3, 4, "111" );
- regGWorldCharInfo( i, _CHAR( '.' ), 2, 7, 1, 1, 1, "1" );
- regGWorldCharInfo( i, _CHAR( '/' ), 6, 7, 1, 5, 7, "0000100010000100010001000010001" );
- regGWorldCharInfo( i, _CHAR( ':' ), 2, 7, 1, 1, 5, "1001" );
- regGWorldCharInfo( i, _CHAR( ';' ), 3, 7, 1, 2, 5, "010000011" );
- regGWorldCharInfo( i, _CHAR( '<' ), 5, 7, 1, 4, 7, "0001001001001000010000100001" );
- regGWorldCharInfo( i, _CHAR( '=' ), 4, 7, 1, 3, 5, "111000000111" );
- regGWorldCharInfo( i, _CHAR( '>' ), 5, 7, 1, 4, 7, "1000010000100001001001001" );
- regGWorldCharInfo( i, _CHAR( '?' ), 5, 7, 1, 4, 7, "01101001001001000100000001" );
- regGWorldCharInfo( i, _CHAR( '@' ), 6, 7, 1, 5, 7, "0111010001111011010111110100000111" );
- regGWorldCharInfo( i, _CHAR( '[' ), 4, 7, 1, 3, 7, "111100100100100100111" );
- regGWorldCharInfo( i, _CHAR( '\\' ), 6, 7, 1, 5, 7, "100010101011111001001111100100001" );
- regGWorldCharInfo( i, _CHAR( ']' ), 4, 7, 1, 3, 7, "111001001001001001111" );
- regGWorldCharInfo( i, _CHAR( '^' ), 4, 7, 1, 3, 7, "010101" );
- regGWorldCharInfo( i, _CHAR( '_' ), 5, 7, 1, 4, 1, "1111" );
- regGWorldCharInfo( i, _CHAR( '`' ), 3, 7, 1, 2, 7, "101001" );
- regGWorldCharInfo( i, _CHAR( '{' ), 4, 7, 1, 3, 7, "011010010100010010011" );
- regGWorldCharInfo( i, _CHAR( '|' ), 2, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( i, _CHAR( '}' ), 4, 7, 1, 3, 7, "11001001000101001011" );
- regGWorldCharInfo( i, _CHAR( '~' ), 5, 7, 1, 4, 7, "0101101" );
-}
-function regGWorldDefCharInfoLarge( i ){
- newGWorldCharInfo( i );
- regGWorldCharInfo( i, _CHAR( '0' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '1' ), 11, 12, 4, 10, 11,
-  "0000110000" +
-  "0011010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0011111110"
-  );
- regGWorldCharInfo( i, _CHAR( '2' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0100000010" +
-  "0000000010" +
-  "0000000100" +
-  "0000001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000010" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '3' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0000000100" +
-  "0000000100" +
-  "0000111000" +
-  "0000000100" +
-  "0000000010" +
-  "0000000010" +
-  "0000000010" +
-  "0100000100" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( '4' ), 11, 12, 4, 10, 11,
-  "0000011000" +
-  "0000101000" +
-  "0000101000" +
-  "0001001000" +
-  "0010001000" +
-  "0010001000" +
-  "0100001000" +
-  "0111111100" +
-  "0000001000" +
-  "0000001000" +
-  "0000111100"
-  );
- regGWorldCharInfo( i, _CHAR( '5' ), 11, 12, 4, 10, 11,
-  "0011111100" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010111000" +
-  "0011000100" +
-  "0000000010" +
-  "0000000010" +
-  "0000000010" +
-  "0110000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '6' ), 11, 12, 4, 10, 11,
-  "0000011110" +
-  "0001100000" +
-  "0010000000" +
-  "0010000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0010000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '7' ), 11, 12, 4, 10, 11,
-  "0111111100" +
-  "0100000100" +
-  "0000000100" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '8' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '9' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0010001100" +
-  "0001110100" +
-  "0000000100" +
-  "0000001000" +
-  "0000110000" +
-  "0111000000"
-  );
- regGWorldCharInfo( i, _CHAR( 'A' ), 11, 12, 4, 10, 10,
-  "0111110000" +
-  "0000110000" +
-  "0001001000" +
-  "0001001000" +
-  "0010000100" +
-  "0010000100" +
-  "0011111100" +
-  "0100000010" +
-  "0100000010" +
-  "1111001111"
-  );
- regGWorldCharInfo( i, _CHAR( 'B' ), 11, 12, 4, 10, 10,
-  "1111111000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0111111000" +
-  "0100000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "1111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'C' ), 11, 12, 4, 10, 10,
-  "0001111010" +
-  "0110000110" +
-  "0100000010" +
-  "1000000000" +
-  "1000000000" +
-  "1000000000" +
-  "1000000000" +
-  "0100000010" +
-  "0110000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'D' ), 11, 12, 4, 10, 10,
-  "1111110000" +
-  "0100001100" +
-  "0100000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000100" +
-  "0100001100" +
-  "1111110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'E' ), 11, 12, 4, 10, 10,
-  "1111111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100010000" +
-  "0111110000" +
-  "0100010000" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "1111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'F' ), 11, 12, 4, 10, 10,
-  "1111111110" +
-  "0100000010" +
-  "0100000010" +
-  "0100010000" +
-  "0111110000" +
-  "0100010000" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "1111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'G' ), 11, 12, 4, 10, 10,
-  "0001111010" +
-  "0110000110" +
-  "0100000010" +
-  "1000000000" +
-  "1000000000" +
-  "1000011111" +
-  "1000000010" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'H' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0111111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1110001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'I' ), 11, 12, 4, 10, 10,
-  "0111111100" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'J' ), 11, 12, 4, 10, 10,
-  "0001111110" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "1000001000" +
-  "1000001000" +
-  "1000001000" +
-  "0100011000" +
-  "0011110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'K' ), 11, 12, 4, 10, 10,
-  "1111001110" +
-  "0100000100" +
-  "0100001000" +
-  "0100010000" +
-  "0101100000" +
-  "0110010000" +
-  "0100001000" +
-  "0100001000" +
-  "0100000100" +
-  "1111000111"
-  );
- regGWorldCharInfo( i, _CHAR( 'L' ), 11, 12, 4, 10, 10,
-  "1111100000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000010" +
-  "0010000010" +
-  "0010000010" +
-  "1111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'M' ), 11, 12, 4, 10, 10,
-  "1100000011" +
-  "0110000110" +
-  "0101000110" +
-  "0101001010" +
-  "0100101010" +
-  "0100110010" +
-  "0100010010" +
-  "0100000010" +
-  "0100000010" +
-  "1110000111"
-  );
- regGWorldCharInfo( i, _CHAR( 'N' ), 11, 12, 4, 10, 10,
-  "1100001110" +
-  "0110000100" +
-  "0101000100" +
-  "0101000100" +
-  "0100100100" +
-  "0100100100" +
-  "0100010100" +
-  "0100010100" +
-  "0100001100" +
-  "1110000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'O' ), 11, 12, 4, 10, 10,
-  "0001111000" +
-  "0110000110" +
-  "0100000010" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'P' ), 11, 12, 4, 10, 10,
-  "1111111000" +
-  "0010000100" +
-  "0010000010" +
-  "0010000010" +
-  "0010000100" +
-  "0011111000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "1111110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'Q' ), 11, 12, 4, 10, 10,
-  "0001111000" +
-  "0110000110" +
-  "0100000010" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000" +
-  "0000100000" +
-  "0001111001" +
-  "0010000110"
-  );
- regGWorldCharInfo( i, _CHAR( 'R' ), 11, 12, 4, 10, 10,
-  "1111110000" +
-  "0100001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100001000" +
-  "0111110000" +
-  "0100001000" +
-  "0100001000" +
-  "0100000100" +
-  "1111000110"
-  );
- regGWorldCharInfo( i, _CHAR( 'S' ), 11, 12, 4, 10, 10,
-  "0011110100" +
-  "0100001100" +
-  "1000000100" +
-  "1100000000" +
-  "0011110000" +
-  "0000001100" +
-  "0000000010" +
-  "1000000010" +
-  "1100000100" +
-  "1011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'T' ), 11, 12, 4, 10, 10,
-  "1111111110" +
-  "1000100010" +
-  "1000100010" +
-  "1000100010" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'U' ), 11, 12, 4, 10, 10,
-  "1111001111" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'V' ), 11, 12, 4, 10, 10,
-  "1111001111" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0001001000" +
-  "0001001000" +
-  "0000110000" +
-  "0000110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'W' ), 11, 12, 4, 10, 10,
-  "1111000111" +
-  "0100000001" +
-  "0100010001" +
-  "0100010001" +
-  "0100110010" +
-  "0010101010" +
-  "0010101010" +
-  "0011000110" +
-  "0011000110" +
-  "0001000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'X' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0010001000" +
-  "0001010000" +
-  "0000100000" +
-  "0000100000" +
-  "0001010000" +
-  "0010001000" +
-  "0100000100" +
-  "1110001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'Y' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0010001000" +
-  "0001010000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'Z' ), 11, 12, 4, 10, 10,
-  "0111111110" +
-  "0100000010" +
-  "0100000100" +
-  "0100001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000010" +
-  "0010000010" +
-  "0100000010" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'a' ), 11, 12, 4, 10, 8,
-  "0001111000" +
-  "0110000100" +
-  "0000000100" +
-  "0011111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100001100" +
-  "0011110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'b' ), 11, 12, 4, 10, 11,
-  "1100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0110000100" +
-  "1101111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'c' ), 11, 12, 4, 10, 8,
-  "0001111010" +
-  "0010000110" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0010000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'd' ), 11, 12, 4, 10, 11,
-  "0000011100" +
-  "0000000100" +
-  "0000000100" +
-  "0011110100" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'e' ), 11, 12, 4, 10, 8,
-  "0011111000" +
-  "0100000100" +
-  "1000000010" +
-  "1111111110" +
-  "1000000000" +
-  "1000000000" +
-  "0100000110" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'f' ), 11, 12, 4, 10, 11,
-  "0000111000" +
-  "0001000110" +
-  "0001000000" +
-  "0111111100" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'g' ), 11, 12, 4, 10, 8,
-  "0011110110" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110100" +
-  "0000000100" +
-  "0000000100" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'h' ), 11, 12, 4, 10, 11,
-  "1100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1111011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'i' ), 11, 12, 4, 10, 12,
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0000000000" +
-  "0011100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'j' ), 11, 12, 4, 10, 12,
-  "0000010000" +
-  "0000010000" +
-  "0000000000" +
-  "0000000000" +
-  "0111111000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000010000" +
-  "0111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'k' ), 11, 12, 4, 10, 11,
-  "1110000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010011100" +
-  "0010001000" +
-  "0010010000" +
-  "0010100000" +
-  "0011100000" +
-  "0010010000" +
-  "0010001000" +
-  "1110011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'l' ), 11, 12, 4, 10, 11,
-  "0011110000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'm' ), 11, 12, 4, 10, 8,
-  "1101101100" +
-  "0110010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "1111011011"
-  );
- regGWorldCharInfo( i, _CHAR( 'n' ), 11, 12, 4, 10, 8,
-  "1101111000" +
-  "0110000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1111001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'o' ), 11, 12, 4, 10, 8,
-  "0001111000" +
-  "0010000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'p' ), 11, 12, 4, 10, 8,
-  "1101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0110000100" +
-  "0101111000" +
-  "0100000000" +
-  "0100000000" +
-  "1111000000"
-  );
- regGWorldCharInfo( i, _CHAR( 'q' ), 11, 12, 4, 10, 8,
-  "0011110110" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110100" +
-  "0000000100" +
-  "0000000100" +
-  "0000011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'r' ), 11, 12, 4, 10, 8,
-  "0111011100" +
-  "0001100010" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 's' ), 11, 12, 4, 10, 8,
-  "0011110100" +
-  "0100001100" +
-  "0100000000" +
-  "0011111000" +
-  "0000000100" +
-  "0000000010" +
-  "0110000100" +
-  "0101111000"
-  );
- regGWorldCharInfo( i, _CHAR( 't' ), 11, 12, 4, 10, 10,
-  "0001000000" +
-  "0001000000" +
-  "0111111100" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000010" +
-  "0000111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'u' ), 11, 12, 4, 10, 8,
-  "0110011100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010001100" +
-  "0001110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'v' ), 11, 12, 4, 10, 8,
-  "1110001110" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0010001000" +
-  "0001010000" +
-  "0001110000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'w' ), 11, 12, 4, 10, 8,
-  "1110000111" +
-  "0100000001" +
-  "0100010001" +
-  "0010110010" +
-  "0010111010" +
-  "0010101010" +
-  "0001101100" +
-  "0001000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'x' ), 11, 12, 4, 10, 8,
-  "0111001110" +
-  "0010000100" +
-  "0001001000" +
-  "0000110000" +
-  "0000110000" +
-  "0001001000" +
-  "0010000100" +
-  "0111001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'y' ), 11, 12, 4, 10, 8,
-  "1110000111" +
-  "0100000010" +
-  "0010000100" +
-  "0010000100" +
-  "0001001000" +
-  "0001010000" +
-  "0000110000" +
-  "0000100000" +
-  "0000100000" +
-  "0001000000" +
-  "0111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'z' ), 11, 12, 4, 10, 8,
-  "0111111100" +
-  "0100001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000000" +
-  "0100000100" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( ' ' ), 11, 12, 4, 10, 12,
-  ""
-  );
- regGWorldCharInfo( i, _CHAR( '!' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0001110000" +
-  "0001110000" +
-  "0001110000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '"' ), 11, 12, 4, 10, 11,
-  "0111011100" +
-  "0111011100" +
-  "0010001000" +
-  "0010001000" +
-  "0010001000"
-  );
- regGWorldCharInfo( i, _CHAR( '#' ), 11, 12, 4, 10, 11,
-  "0000101000" +
-  "0000101000" +
-  "0000101000" +
-  "0111111100" +
-  "0001010000" +
-  "0001010000" +
-  "0111111100" +
-  "0010100000" +
-  "0010100000" +
-  "0010100000" +
-  "0010100000"
-  );
- regGWorldCharInfo( i, _CHAR( '$' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0001110100" +
-  "0010001100" +
-  "0010000000" +
-  "0011000000" +
-  "0000111000" +
-  "0000000100" +
-  "0000000100" +
-  "0110000100" +
-  "0101111000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '%' ), 11, 12, 4, 10, 11,
-  "0011100000" +
-  "0100010000" +
-  "0100010000" +
-  "0011100000" +
-  "0000001110" +
-  "0001111000" +
-  "0111000000" +
-  "0000011100" +
-  "0000100010" +
-  "0000100010" +
-  "0000011100"
-  );
- regGWorldCharInfo( i, _CHAR( '&' ), 11, 12, 4, 10, 9,
-  "0001110000" +
-  "0010001000" +
-  "0010000000" +
-  "0001000000" +
-  "0011100000" +
-  "0100100100" +
-  "0100011000" +
-  "0100010000" +
-  "0011101100"
-  );
- regGWorldCharInfo( i, _CHAR( '\'' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0001110000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '(' ), 11, 12, 4, 10, 11,
-  "0000000100" +
-  "0000001000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000001000" +
-  "0000000100"
-  );
- regGWorldCharInfo( i, _CHAR( ')' ), 11, 12, 4, 10, 11,
-  "0010000000" +
-  "0001000000" +
-  "0000100000" +
-  "0000100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000000"
-  );
- regGWorldCharInfo( i, _CHAR( '*' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0000100000" +
-  "0110101100" +
-  "0001110000" +
-  "0000100000" +
-  "0001010000" +
-  "0010001000"
-  );
- regGWorldCharInfo( i, _CHAR( '+' ), 11, 12, 4, 10, 10,
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "1111111110" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( ',' ), 11, 12, 4, 10, 3,
-  "0000111000" +
-  "0000110000" +
-  "0000110000" +
-  "0001100000" +
-  "0001000000"
-  );
- regGWorldCharInfo( i, _CHAR( '-' ), 11, 12, 4, 10, 5,
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '.' ), 11, 12, 4, 10, 2,
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '/' ), 11, 12, 4, 10, 12,
-  "0000000110" +
-  "0000000100" +
-  "0000001100" +
-  "0000001000" +
-  "0000011000" +
-  "0000010000" +
-  "0000110000" +
-  "0000100000" +
-  "0001100000" +
-  "0001000000" +
-  "0011000000" +
-  "0010000000" +
-  "0110000000"
-  );
- regGWorldCharInfo( i, _CHAR( ':' ), 11, 12, 4, 10, 8,
-  "0001110000" +
-  "0001110000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( ';' ), 11, 12, 4, 10, 8,
-  "0001110000" +
-  "0001110000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001100000" +
-  "0011000000" +
-  "0010000000"
-  );
- regGWorldCharInfo( i, _CHAR( '<' ), 11, 12, 4, 10, 9,
-  "0000000110" +
-  "0000011000" +
-  "0001100000" +
-  "0110000000" +
-  "0110000000" +
-  "0001100000" +
-  "0000011000" +
-  "0000000110"
-  );
- regGWorldCharInfo( i, _CHAR( '=' ), 11, 12, 4, 10, 7,
-  "0111111110" +
-  "0000000000" +
-  "0000000000" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '>' ), 11, 12, 4, 10, 9,
-  "0110000000" +
-  "0001100000" +
-  "0000011000" +
-  "0000000110" +
-  "0000000110" +
-  "0000011000" +
-  "0001100000" +
-  "0110000000"
-  );
- regGWorldCharInfo( i, _CHAR( '?' ), 11, 12, 4, 10, 10,
-  "0011111000" +
-  "0100000100" +
-  "0100000100" +
-  "0000000100" +
-  "0000011000" +
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '@' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0100000100" +
-  "0100111100" +
-  "0101000100" +
-  "0101000100" +
-  "0101000100" +
-  "0100111100" +
-  "0100000000" +
-  "0100000000" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '[' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '\\' ), 11, 12, 4, 10, 12,
-  "0110000000" +
-  "0010000000" +
-  "0011000000" +
-  "0001000000" +
-  "0001100000" +
-  "0000100000" +
-  "0000110000" +
-  "0000010000" +
-  "0000011000" +
-  "0000001000" +
-  "0000001100" +
-  "0000000100" +
-  "0000000110"
-  );
- regGWorldCharInfo( i, _CHAR( ']' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '^' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0001110000" +
-  "0011011000" +
-  "0110001100" +
-  "0100000100"
-  );
- regGWorldCharInfo( i, _CHAR( '_' ), 11, 12, 4, 11, -3,
-  "11111111111"
-  );
- regGWorldCharInfo( i, _CHAR( '`' ), 11, 12, 4, 10, 11,
-  "0011000000" +
-  "0001100000" +
-  "0000110000"
-  );
- regGWorldCharInfo( i, _CHAR( '{' ), 11, 12, 4, 10, 11,
-  "0000011000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011000000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000011000"
-  );
- regGWorldCharInfo( i, _CHAR( '|' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '}' ), 11, 12, 4, 10, 11,
-  "0001100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000001100" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0001100000"
-  );
- regGWorldCharInfo( i, _CHAR( '~' ), 11, 12, 4, 10, 6,
-  "0011000000" +
-  "0100100100" +
-  "0000011000"
-  );
-}
 function cssGetPropertyValue( selector, property ){
  var i, j;
  var value = new String();
@@ -18129,6 +16894,7 @@ function consoleBreak(){
  return _console_break;
 }
 function _Console( id ){
+ if( window.onConsoleUpdate == undefined ) window.onConsoleUpdate = function( id ){};
  this._id = id;
  this._div = document.getElementById( this._id );
  this._html = "";
@@ -18272,6 +17038,7 @@ function onConsoleUpdate( id ){
  con.scrollBottom();
 }
 function _Error(){
+ if( window.onError == undefined ) window.onError = function( e ){};
  this._message = new String();
  this._name = new String();
  this._description = new String();
@@ -18342,112 +17109,13 @@ function onError( e ){
  con.println( "<b>stack:</b> " + tmp.str() );
  con.setColor();
 }
-function _Canvas( id ){
- this._canvas = document.getElementById( id );
- this._context = this._canvas.getContext( "2d" );
- this._r = 0;
- this._g = 0;
- this._b = 0;
- this._a = 255;
- this._setColor();
-}
-_Canvas.prototype = {
- element : function(){
-  return this._canvas;
- },
- left : function(){
-  var e = this._canvas;
-  var left = 0;
-  while( e ){
-   left += e.offsetLeft;
-   e = e.offsetParent;
-  }
-  return left;
- },
- top : function(){
-  var e = this._canvas;
-  var top = 0;
-  while( e ){
-   top += e.offsetTop;
-   e = e.offsetParent;
-  }
-  return top;
- },
- width : function(){
-  return parseInt( this._canvas.width );
- },
- height : function(){
-  return parseInt( this._canvas.height );
- },
- _setColor : function(){
-  if( this._r >= 0 ){
-   var color;
-   if( this._a == 255 ){
-    color = "rgb(" + this._r + "," + this._g + "," + this._b + ")";
-   } else {
-    color = "rgba(" + this._r + "," + this._g + "," + this._b + "," + (this._a / 255.0) + ")";
-   }
-   this._context.fillStyle = color;
-   this._context.strokeStyle = color;
-  }
- },
- setColor : function( r, g, b, a ){
-  if( r == undefined ){
-   this._r = -1;
-  } else {
-   if( a == undefined ){
-    a = 255;
-   }
-   if( (r != this._r) || (g != this._g) || (b != this._b) || (a != this._a) ){
-    this._r = r;
-    this._g = g;
-    this._b = b;
-    this._a = a;
-    this._setColor();
-   }
-  }
- },
- clear : function( x, y, w, h ){
-  if( (x == undefined) && (y == undefined) && (w == undefined) && (h == undefined) ){
-   this._canvas.width = this._canvas.width;
-  } else if( (w == undefined) && (h == undefined) ){
-   this._context.clearRect( x, y, 1, 1 );
-  } else {
-   this._context.clearRect( x, y, w, h );
-  }
- },
- put : function( x, y ){
-  this._context.fillRect( x, y, 1, 1 );
- },
- fill : function( x, y, w, h ){
-  this._context.fillRect( x, y, w, h );
- },
- line : function( x1, y1, x2, y2 ){
-  this._context.beginPath();
-  this._context.moveTo( x1 + 0.5, y1 + 0.5 );
-  this._context.lineTo( x2 + 0.5, y2 + 0.5 );
-  this._context.stroke();
-  this._context.closePath();
- },
- drawImage : function( image, w, h ){
-  if( (w == image.width) && (h == image.height) ){
-   this._context.drawImage( image, 0, 0 );
-  } else {
-   this._context.drawImage( image, 0, 0, image.width, image.height, 0, 0, w, h );
-  }
- },
- imageData : function( w, h ){
-  return this._context.getImageData( 0, 0, w, h );
- }
-};
 var canvas;
 function canvasClear(){
- var rgbColor = gWorldBgColor();
- canvas.setColor( (rgbColor & 0xFF0000) >> 16, (rgbColor & 0x00FF00) >> 8, rgbColor & 0x0000FF );
+ canvas.setColorRGB( gWorldBgColor() );
  canvas.fill( 0, 0, canvas.width(), canvas.height() );
 }
 function canvasSetColor( bgrColor ){
- canvas.setColor( bgrColor & 0x0000FF, (bgrColor & 0x00FF00) >> 8, (bgrColor & 0xFF0000) >> 16 );
+ canvas.setColorBGR( bgrColor );
 }
 function canvasPut( x, y ){
  canvas.put( x, y );
@@ -18464,6 +17132,9 @@ function canUseFile(){
  return (window.FileReader && window.FileList && window.File);
 }
 function _InputFile( id ){
+ if( window.onInputFileLoadImage == undefined ) window.onInputFileLoadImage = function( name, image ){};
+ if( window.onInputFileLoad == undefined ) window.onInputFileLoad = function( func, data ){};
+ if( window.onInputFileLoadEnd == undefined ) window.onInputFileLoadEnd = function( num ){};
  this._input = document.getElementById( id );
  this._input.addEventListener( "change", _onInputFileChange, false );
 }
@@ -18546,8 +17217,8 @@ function _onInputFileChange( e ){
 }
 var inputFile;
 function drawInputFileImage( image, w , h ){
- var width = topProc.gWorld().width ();
- var height = topProc.gWorld().height();
+ var width = procGWorld()._width;
+ var height = procGWorld()._height;
  if( (width > 0) && (height > 0) ){
   if( (image.width <= width) && (image.height <= height) ){
    width = image.width;
@@ -18569,8 +17240,8 @@ function onInputFileLoadImage( name, image ){
  var h = new _Integer();
  var data = drawInputFileImage( image, w, h );
  if( data != null ){
-  var width = w.val();
-  var height = h.val();
+  var width = w._val;
+  var height = h._val;
   con.setBold( true );
   con.println( "[" + name + "]" );
   if( (width != image.width) || (height != image.height) ){
@@ -18581,8 +17252,8 @@ function onInputFileLoadImage( name, image ){
  }
 }
 function doCommandGGet24Begin( w , h ){
- var width = topProc.gWorld().width ();
- var height = topProc.gWorld().height();
+ var width = procGWorld()._width;
+ var height = procGWorld()._height;
  if( (width > 0) && (height > 0) ){
   w.set( width );
   h.set( height );
@@ -18952,6 +17623,7 @@ function editorSmartFlag(){
  return _editor_smart;
 }
 function _Editor( id ){
+ if( window.onEditorUpdateText == undefined ) window.onEditorUpdateText = function( len ){};
  this._textarea = document.getElementById( id );
  this._textarea.addEventListener( "input", _onEditorInput, false );
  this._textarea.addEventListener( "keydown", _onEditorKeyDown, false );
@@ -19060,6 +17732,7 @@ function canUseWriteFile(){
  return (window.navigator.userAgent.toLowerCase().indexOf( "chrome" ) != -1);
 }
 function writeFile( name, text ){
+ if( window.onWriteFileEnd == undefined ) window.onWriteFileEnd = function( fileEntry ){};
  var size = encodeURI( text ).replace( new RegExp( "%..", "g" ), "*" ).length;
  webkitRequestFileSystem( TEMPORARY, size, function( fs ){
   fs.root.getFile( name, { create: true }, function( fileEntry ){
@@ -19081,6 +17754,8 @@ var englishFlag = false;
 var lastTouchEnd = 0;
 function main( inputId, divId, canvasId, inputFileId, editorId ){
  var i;
+ defGWorldFunction();
+ defProcFunction();
  var userAgent = window.navigator.userAgent;
  if( (userAgent.indexOf( "Android" ) != -1) || (userAgent.indexOf( "iPad" ) != -1) ){
   document.getElementById( "clip_loadextfunc" ).style.display = "none";
@@ -19109,29 +17784,31 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  regGWorldDefCharInfo( 0 );
  regGWorldDefCharInfoLarge( 1 );
  regGWorldBgColor( 0xC0C0C0 );
+ setCanvasEnv( new _CanvasEnv() );
  canvas = new _Canvas( canvasId );
  canvasClear();
  inputFile = new _InputFile( inputFileId );
  procError = new _ProcError();
+ setProcEnv( new _ProcEnv() );
  topProc = new _Proc( 0x0012, false, true, true );
- topProc.setAnsFlag( true );
+ topProc._printAns = true;
  setProcWarnFlowFlag( true );
  setProcTraceFlag( traceLevel > 0 );
  setProcLoopMax( loopMax );
  topParam = new _Param();
- topParam.setEnableCommand( true );
- topParam.setEnableOpPow( false );
- topParam.setEnableStat( true );
+ topParam._enableCommand = true;
+ topParam._enableOpPow = false;
+ topParam._enableStat = true;
  setGlobalParam( topParam );
- regCustomCommand( "env" , 97 );
- regCustomCommand( "list" , (97 + 1) );
- regCustomCommand( "listd" , (97 + 2) );
- regCustomCommand( "extfunc" , (97 + 3) );
- regCustomCommand( "usage" , (97 + 4) );
- regCustomCommand( "english" , (97 + 5) );
- regCustomCommand( "japanese", (97 + 6) );
- regCustomCommand( "test" , (97 + 7) );
- regCustomCommand( "trace" , (97 + 8) );
+ regCustomCommand( "env" , 101 );
+ regCustomCommand( "list" , (101 + 1) );
+ regCustomCommand( "listd" , (101 + 2) );
+ regCustomCommand( "extfunc" , (101 + 3) );
+ regCustomCommand( "usage" , (101 + 4) );
+ regCustomCommand( "english" , (101 + 5) );
+ regCustomCommand( "japanese", (101 + 6) );
+ regCustomCommand( "test" , (101 + 7) );
+ regCustomCommand( "trace" , (101 + 8) );
  srand( time() );
  rand();
  if( dispCache ){
@@ -19208,7 +17885,7 @@ try {
   topProc.processLoop( line, topParam );
 } catch( e ){ catchError( e ); }
   if( lockGUpdate && needGUpdate ){
-   gUpdate( topProc.gWorld() );
+   gUpdate( procGWorld() );
    needGUpdate = false;
   }
   if( (dispLoopCount > 0) && ((procLoopCount() > 0) || (procLoopTotal() > 0)) ){
@@ -19229,7 +17906,6 @@ try {
    con.setColor();
   }
   con.unlock();
-  addLogExpr();
  }
  input.value = "";
 }
@@ -19403,7 +18079,7 @@ function assertProc( num, func ){
 }
 function getErrorString( err, num, func, token ){
  var string = new String();
- var error = getProcErrorDefString( err, token, topParam.isCalculator(), englishFlag );
+ var error = getProcErrorDefString( err, token, topParam._calculator, englishFlag );
  if( error.length > 0 ){
   if( (func != null) && (func.length > 0) ){
    string += func + ": ";
@@ -19626,26 +18302,10 @@ function printError( error, num, func ){
  else con.println( "エラー: " + error );
 }
 function doFuncGColor( rgb ){
- var i, j;
- var r = (rgb & 0xFF0000) >> 16;
- var g = (rgb & 0x00FF00) >> 8;
- var b = rgb & 0x0000FF;
- var rr, gg, bb, tmp;
- var d = 766 ;
- for( i = 0, j = 0; i < 256; i++ ){
-  rr = COLOR_WIN[i] & 0x0000FF;
-  gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
-  bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
-  tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
-  if( tmp < d ){
-   j = i;
-   d = tmp;
-  }
- }
- return j;
+ return doFuncGColorBGR( rgb, COLOR_WIN );
 }
 function doFuncGColor24( index ){
- return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
+ return _RGB2BGR( COLOR_WIN[index] );
 }
 function doFuncEval( parentProc, childProc, childParam, string, value ){
  var ret;
@@ -19661,12 +18321,12 @@ function doCommandPrint( topPrint, flag ){
  con.setColor( "ff00ff" );
  var cur = topPrint;
  while( cur != null ){
-  if( cur.string() != null ){
-   var tmp = new _String( cur.string() );
+  if( cur._string != null ){
+   var tmp = new _String( cur._string );
    tmp.escape().replaceNewLine( consoleBreak() );
    con.print( tmp.str() );
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  if( flag ){
   con.println();
@@ -19679,10 +18339,10 @@ function skipCommandLog(){
 function doCommandLog( topPrint ){
  var cur = topPrint;
  while( cur != null ){
-  if( cur.string() != null ){
-   traceString += cur.string();
+  if( cur._string != null ){
+   traceString += cur._string;
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  traceString += "\n";
 }
@@ -19697,13 +18357,12 @@ function doCommandScan( topScan, proc, param ){
    newString = defString;
   }
   cur.setNewValue( newString, proc, param );
-  cur = cur.next();
+  cur = cur._next;
  }
 }
-function doCommandGWorld( gWorld, width, height ){
+function doCommandGWorld( width, height ){
  if( (width <= 0) || (height <= 0) ){
-  canvas.element().setAttribute( "width" , "1" );
-  canvas.element().setAttribute( "height", "1" );
+  canvas.setSize( 1, 1 );
   var div1 = document.getElementById( "savecanvas" );
   div1.style.display = "none";
   var div2 = document.getElementById( "gworld" );
@@ -19721,13 +18380,8 @@ function doCommandGWorld( gWorld, width, height ){
   div2.style.display = "block";
   var div3 = document.getElementById( "savecanvas" );
   div3.style.display = "block";
-  canvas.element().setAttribute( "width" , "" + width );
-  canvas.element().setAttribute( "height", "" + height );
+  canvas.setSize( width, height );
  }
- gWorld.create( width, height, true );
-}
-function doCommandWindow( gWorld, left, bottom, right, top ){
- gWorld.setWindowIndirect( left, bottom, right, top );
 }
 function gWorldClear( gWorld, color ){
  if( lockGUpdate ){
@@ -19736,8 +18390,8 @@ function gWorldClear( gWorld, color ){
  }
  canvasClear();
  canvasSetColor( COLOR_WIN[color] );
- canvasFill( 0, 0, gWorld.width(), gWorld.height() );
- canvasSetColor( COLOR_WIN[gWorld.color()] );
+ canvasFill( 0, 0, gWorld._width, gWorld._height );
+ canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function gWorldSetColor( gWorld, color ){
  if( lockGUpdate ){
@@ -19750,10 +18404,10 @@ function gWorldPutColor( gWorld, x, y, color ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasSetColor( COLOR_WIN[color] );
   canvasPut( x, y );
-  canvasSetColor( COLOR_WIN[gWorld.color()] );
+  canvasSetColor( COLOR_WIN[gWorld._color] );
  }
 }
 function gWorldPut( gWorld, x, y ){
@@ -19761,7 +18415,7 @@ function gWorldPut( gWorld, x, y ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasPut( x, y );
  }
 }
@@ -19770,7 +18424,7 @@ function gWorldFill( gWorld, x, y, w, h ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasFill( x, y, w, h );
  }
 }
@@ -19779,28 +18433,34 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasLine( x1, y1, x2, y2 );
  }
 }
+function gWorldTextColor( gWorld, text, x, y, color, right ){
+ if( lockGUpdate ){
+  needGUpdate = true;
+  return;
+ }
+}
 function doCommandGColor( index, rgb ){
- COLOR_WIN[index] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
+ COLOR_WIN[index] = _RGB2BGR( rgb );
  needGUpdate = true;
 }
 function doCommandGPut24( x, y, rgb ){
- canvas.setColor( (rgb & 0xFF0000) >> 16, (rgb & 0x00FF00) >> 8, rgb & 0x0000FF );
+ canvas.setColorRGB( rgb );
  canvasPut( x, y );
 }
 function doCommandGPut24End(){
- canvasSetColor( COLOR_WIN[topProc.gWorld().color()] );
+ canvasSetColor( COLOR_WIN[procGWorld()._color] );
  needGUpdate = false;
 }
 function gUpdate( gWorld ){
  canvasClear();
- var image = gWorld.image ();
- var offset = gWorld.offset();
- var width = gWorld.width ();
- var height = gWorld.height();
+ var image = gWorld._image;
+ var offset = gWorld._offset;
+ var width = gWorld._width;
+ var height = gWorld._height;
  var x, y, yy;
  for( y = 0; y < height; y++ ){
   yy = y * offset;
@@ -19809,7 +18469,7 @@ function gUpdate( gWorld ){
    canvasPut( x, y );
   }
  }
- canvasSetColor( COLOR_WIN[gWorld.color()] );
+ canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function doCommandGUpdate( gWorld ){
  if( lockGUpdate ){
@@ -19819,10 +18479,10 @@ function doCommandGUpdate( gWorld ){
  gUpdate( gWorld );
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentProc.curNum(), parentParam, true );
- childParam.setEnableCommand( false );
- childParam.setEnableStat( false );
+ var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false );
+ var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+ childParam._enableCommand = false;
+ childParam._enableStat = false;
 try {
  parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
@@ -19830,10 +18490,10 @@ try {
  childProc.end();
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentProc.curNum(), parentParam, true );
- childParam.setEnableCommand( false );
- childParam.setEnableStat( false );
+ var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false );
+ var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+ childParam._enableCommand = false;
+ childParam._enableStat = false;
 try {
  parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
@@ -19846,14 +18506,14 @@ function doCommandUsage( topUsage ){
  }
  var cur = topUsage;
  while( cur != null ){
-  if( cur.string() != null ){
-   con.print( (new _String( cur.string() )).escape().str() );
+  if( cur._string != null ){
+   con.print( (new _String( cur._string )).escape().str() );
    if( addExtFuncList ){
     break;
    }
    con.println();
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  if( !addExtFuncList ){
   con.setColor();
@@ -19868,7 +18528,7 @@ function doCommandDumpVar( param, index ){
  _token.valueToString( param, param.val( index ), real, imag );
  if( (label = param._var._label._label[index]) != null ){
   string = label;
-  if( param._var._label.flag( index ) != 2 ){
+  if( param._var._label._flag[index] != 2 ){
    string += "(@" + String.fromCharCode( index ) + ")";
   }
  } else {
@@ -19884,7 +18544,7 @@ function doCommandDumpArray( param, index ){
  param._array.makeToken( array, index );
  if( (label = param._array._label._label[index]) != null ){
   string = label;
-  if( param._array._label.flag( index ) != 2 ){
+  if( param._array._label._flag[index] != 2 ){
    string += "(@@" + String.fromCharCode( index ) + ")";
   }
  } else {
@@ -19896,9 +18556,9 @@ function doCommandDumpArray( param, index ){
 }
 function doCustomCommand( _this, param, code, token ){
  switch( token ){
- case (97 + 5):
- case (97 + 6):
-  englishFlag = (token == (97 + 5)) ? true : false;
+ case (101 + 5):
+ case (101 + 6):
+  englishFlag = (token == (101 + 5)) ? true : false;
   if( englishFlag ){
    con.print( "Change English mode. " );
   } else {
@@ -19907,11 +18567,11 @@ function doCustomCommand( _this, param, code, token ){
   updateLanguage();
   preference.set( "_CLIP_" + "ENV_Language", englishFlag ? "" + 1 : "" + 0 );
   break;
- case 97:
+ case 101:
   con.setColor( "0000ff" );
-  con.println( "calculator " + (param.isCalculator() ? "TRUE" : "FALSE") );
-  con.println( (param.base() == 0) ? "zero-based" : "one-based" );
-  switch( param.mode() ){
+  con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
+  con.println( (param._base == 0) ? "zero-based" : "one-based" );
+  switch( param._mode ){
   case 0x0010: con.print( "efloat" ); break;
   case 0x0011: con.print( "float" ); break;
   case 0x0012: con.print( "gfloat" ); break;
@@ -19931,53 +18591,53 @@ function doCustomCommand( _this, param, code, token ){
   case 0x0104: con.print( "long" ); break;
   case 0x0105: con.print( "ulong" ); break;
   }
-  con.print( ", " ); con.print( "fps " + param.fps() );
-  con.print( ", " ); con.print( "prec " + param.prec() );
-  con.print( ", " ); con.print( "radix " + param.radix() );
+  con.print( ", " ); con.print( "fps " + param._fps );
+  con.print( ", " ); con.print( "prec " + param._prec );
+  con.print( ", " ); con.print( "radix " + param._radix );
   con.print( ", " );
   var type = new _Integer();
   var updateFlag = new _Boolean();
   _this.getAngType( type, updateFlag );
-  switch( type.val() ){
+  switch( type._val ){
   case 0: con.print( "rad" ); break;
   case 1: con.print( "deg" ); break;
   case 2: con.print( "grad" ); break;
   }
   con.println();
-  con.print( "assert " + (_this.assertFlag() ? "TRUE" : "FALSE") );
-  con.print( ", " ); con.print( "warn " + (_this.warnFlag() ? "TRUE" : "FALSE") );
+  con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
+  con.print( ", " ); con.print( "warn " + (_this._printWarn ? "TRUE" : "FALSE") );
   con.println();
-  var left = _this.gWorld().wndPosX( 0 );
-  var top = _this.gWorld().wndPosY( 0 );
-  var right = _this.gWorld().wndPosX( _this.gWorld().width () );
-  var bottom = _this.gWorld().wndPosY( _this.gWorld().height() );
-  con.println( "gworld " + _this.gWorld().width() + " " + _this.gWorld().height() );
+  var left = procGWorld().wndPosX( 0 );
+  var top = procGWorld().wndPosY( 0 );
+  var right = procGWorld().wndPosX( procGWorld()._width );
+  var bottom = procGWorld().wndPosY( procGWorld()._height );
+  con.println( "gworld " + procGWorld()._width + " " + procGWorld()._height );
   con.println( "window " + left + " " + bottom + " " + right + " " + top );
-  switch( _this.graph().mode() ){
+  switch( procGraph().mode() ){
   case 0: con.print( "rectangular" ); break;
   case 1: con.print( "parametric" ); break;
   case 2: con.print( "polar" ); break;
   }
   con.print( ", " );
-  if( _this.graph().isLogScaleX() ){
-   con.print( "logscale x " + _this.graph().logBaseX() );
+  if( procGraph().isLogScaleX() ){
+   con.print( "logscale x " + procGraph().logBaseX() );
   } else {
    con.print( "nologscale x" );
   }
   con.print( ", " );
-  if( _this.graph().isLogScaleY() ){
-   con.print( "logscale y " + _this.graph().logBaseY() );
+  if( procGraph().isLogScaleY() ){
+   con.print( "logscale y " + procGraph().logBaseY() );
   } else {
    con.print( "nologscale y" );
   }
   con.println();
   con.setColor();
   break;
- case (97 + 1):
- case (97 + 2):
+ case (101 + 1):
+ case (101 + 2):
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = getCode();
    newToken = getToken();
    if( (newCode & 0x40) != 0 ){
@@ -19991,9 +18651,9 @@ function doCustomCommand( _this, param, code, token ){
     param._array.makeToken( array, index );
     if( (label = param._array._label._label[index]) != null ){
      string = label;
-     if( param._array._label.flag( index ) != 2 ){
+     if( param._array._label._flag[index] != 2 ){
       string += "(@@" + String.fromCharCode( index ) + ")";
-     } else if( token == (97 + 2) ){
+     } else if( token == (101 + 2) ){
       string += "(@@:" + index + ")";
      }
     } else {
@@ -20058,9 +18718,9 @@ function doCustomCommand( _this, param, code, token ){
      } else {
       if( step == 0 ){
        if( (label = param._var._label._label[index]) != null ){
-        if( param._var._label.flag( index ) == 2 ){
+        if( param._var._label._flag[index] == 2 ){
          _token.valueToString( param, param.val( index ), real, imag );
-         if( token == (97 + 2) ){
+         if( token == (101 + 2) ){
           tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
          } else {
           tmp[i] = label + "=" + real.str() + imag.str();
@@ -20071,7 +18731,7 @@ function doCustomCommand( _this, param, code, token ){
       }
       if( step == 2 ){
        if( (label = param._var._label._label[index]) != null ){
-        if( param._var._label.flag( index ) != 2 ){
+        if( param._var._label._flag[index] != 2 ){
          _token.valueToString( param, param.val( index ), real, imag );
          tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
          i++;
@@ -20102,7 +18762,7 @@ function doCustomCommand( _this, param, code, token ){
    break;
   }
   return 0x2140;
- case (97 + 3):
+ case (101 + 3):
   var i, j;
   addExtFuncList = true;
   con.setColor( "0000ff" );
@@ -20136,9 +18796,9 @@ function doCustomCommand( _this, param, code, token ){
   con.setColor();
   addExtFuncList = false;
   break;
- case (97 + 4):
+ case (101 + 4):
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = getToken();
    if( getCode() == 13 ){
     _this.usage( newToken, param, true );
@@ -20146,14 +18806,14 @@ function doCustomCommand( _this, param, code, token ){
    }
   }
   return 0x2140;
- case (97 + 7):
+ case (101 + 7):
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
    testFlag = (_INT( value.toFloat( 0, 0 ) ) != 0);
    break;
   }
   return 0x2140;
- case (97 + 8):
+ case (101 + 8):
   var value = new _Matrix();
   if( _this._const( param, code, token, value ) == 0x00 ){
    if( (traceLevel > 0) && (traceString.length > 0) ){
@@ -20188,7 +18848,7 @@ function onEndPlot(){
  var token = new _String();
  for( var i = 0; i < procError.num(); i++ ){
   procError.get( i, err, num, func, token );
-  errorProc( err.val(), num.val(), func.str(), token.str() );
+  errorProc( err._val, num._val, func.str(), token.str() );
  }
  procError.delAll();
 }
@@ -20197,8 +18857,6 @@ function onStartRePlot(){
 }
 function onEndRePlot(){
  onEndPlot();
-}
-function addLogExpr(){
 }
 function updateLanguage(){
  document.getElementById( "button_cache_clear" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Clear cache" : "外部関数ｷｬｯｼｭのｸﾘｱ") + "&nbsp;&nbsp;";

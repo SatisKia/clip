@@ -17,6 +17,8 @@ function editorSmartFlag(){
 
 // エディタ
 function _Editor( id ){
+	if( window.onEditorUpdateText == undefined ) window.onEditorUpdateText = function( len ){};
+
 	this._textarea = document.getElementById( id );
 
 	this._textarea.addEventListener( "input", _onEditorInput, false );
@@ -127,5 +129,3 @@ function _onEditorKeyDown( e ){
 
 	_editor_cursor_pos = elem.selectionStart;
 }
-
-//function onEditorUpdateText( len ){}

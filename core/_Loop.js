@@ -80,7 +80,7 @@ _Loop.prototype = {
 		if( tmp._subFlag ){
 			tmp._line = null;
 		} else {
-			tmp._line._line = null;
+			tmp._line._token = null;
 			if( tmp._line._comment != null ){
 				tmp._line._comment = null;
 			}
@@ -92,11 +92,11 @@ _Loop.prototype = {
 
 	_loopStart : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
 		if( _this._curLoop._loopType != _LOOP_TYPE_FUNC ){
-			line.obj()._subFlag = true;
-			line.obj()._line = new _Loop();
-			line.obj()._line._loopType   = _LOOP_TYPE_SE;
-			line.obj()._line._beforeLoop = _this._curLoop;
-			_this._curLoop = line.obj()._line;
+			line._obj._subFlag = true;
+			line._obj._line = new _Loop();
+			line._obj._line._loopType   = _LOOP_TYPE_SE;
+			line._obj._line._beforeLoop = _this._curLoop;
+			_this._curLoop = line._obj._line;
 
 			line.set( _this._curLoop._newLine() );
 		}
@@ -104,11 +104,11 @@ _Loop.prototype = {
 	},
 	_loopDo : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
 		if( _this._curLoop._loopType != _LOOP_TYPE_FUNC ){
-			line.obj()._subFlag = true;
-			line.obj()._line = new _Loop();
-			line.obj()._line._loopType   = _LOOP_TYPE_DO;
-			line.obj()._line._beforeLoop = _this._curLoop;
-			_this._curLoop = line.obj()._line;
+			line._obj._subFlag = true;
+			line._obj._line = new _Loop();
+			line._obj._line._loopType   = _LOOP_TYPE_DO;
+			line._obj._line._beforeLoop = _this._curLoop;
+			_this._curLoop = line._obj._line;
 
 			line.set( _this._curLoop._newLine() );
 		}
@@ -116,11 +116,11 @@ _Loop.prototype = {
 	},
 	_loopWhile : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
 		if( _this._curLoop._loopType != _LOOP_TYPE_FUNC ){
-			line.obj()._subFlag = true;
-			line.obj()._line = new _Loop();
-			line.obj()._line._loopType   = _LOOP_TYPE_WHILE;
-			line.obj()._line._beforeLoop = _this._curLoop;
-			_this._curLoop = line.obj()._line;
+			line._obj._subFlag = true;
+			line._obj._line = new _Loop();
+			line._obj._line._loopType   = _LOOP_TYPE_WHILE;
+			line._obj._line._beforeLoop = _this._curLoop;
+			_this._curLoop = line._obj._line;
 
 			line.set( _this._curLoop._newLine() );
 		}
@@ -128,11 +128,11 @@ _Loop.prototype = {
 	},
 	_loopFor : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
 		if( _this._curLoop._loopType != _LOOP_TYPE_FUNC ){
-			line.obj()._subFlag = true;
-			line.obj()._line = new _Loop();
-			line.obj()._line._loopType   = _LOOP_TYPE_FOR;
-			line.obj()._line._beforeLoop = _this._curLoop;
-			_this._curLoop = line.obj()._line;
+			line._obj._subFlag = true;
+			line._obj._line = new _Loop();
+			line._obj._line._loopType   = _LOOP_TYPE_FOR;
+			line._obj._line._beforeLoop = _this._curLoop;
+			_this._curLoop = line._obj._line;
 
 			line.set( _this._curLoop._newLine() );
 		}
@@ -143,11 +143,11 @@ _Loop.prototype = {
 			return _CLIP_PROC_ERR_STAT_FUNC_NEST;
 		}
 
-		line.obj()._subFlag = true;
-		line.obj()._line = new _Loop();
-		line.obj()._line._loopType   = _LOOP_TYPE_FUNC;
-		line.obj()._line._beforeLoop = _this._curLoop;
-		_this._curLoop = line.obj()._line;
+		line._obj._subFlag = true;
+		line._obj._line = new _Loop();
+		line._obj._line._loopType   = _LOOP_TYPE_FUNC;
+		line._obj._line._beforeLoop = _this._curLoop;
+		_this._curLoop = line._obj._line;
 
 		line.set( _this._curLoop._newLine() );
 
@@ -183,7 +183,7 @@ _Loop.prototype = {
 
 		if( _this._curLoop._loopType == _LOOP_TYPE_FOR ){
 			// for(<初期設定文>)を<初期設定文>に加工する
-			tmp = _this._curLoop._top._line._line;
+			tmp = _this._curLoop._top._line._token;
 			tmp.del(  0 );	// "for"
 			tmp.del(  0 );	// "("
 			tmp.del( -1 );	// ")"
@@ -194,7 +194,7 @@ _Loop.prototype = {
 			} else if( _this._curLoop._top._next._subFlag ){
 				return _CLIP_PROC_ERR_STAT_FOR_CON;
 			}
-			tmp = _this._curLoop._top._next._line._line;
+			tmp = _this._curLoop._top._next._line._token;
 			if( tmp.count() > 0 ){
 				tmp.insCode( 0, _CLIP_CODE_STATEMENT, _CLIP_STAT_FOR );	// "for"
 				tmp.insCode( 1, _CLIP_CODE_TOP,       null           );	// "("
@@ -233,8 +233,8 @@ _Loop.prototype = {
 		var tmp = new _Void( this._curLoop._newLine() );
 		var beforeFlag = new _Boolean( false );
 
-		line._line.beginGetToken();
-		if( line._line.getToken() ){
+		line._token.beginGetToken();
+		if( line._token.getToken() ){
 			code  = _get_code;
 			token = _get_token;
 			if( (code == _CLIP_CODE_STATEMENT) && (token < _CLIP_STAT_LOOP_END) ){
@@ -244,18 +244,18 @@ _Loop.prototype = {
 			}
 		}
 
-		tmp.obj()._line = new __Line();
-		tmp.obj()._line._line = new _Token();
-		line._line.dup( tmp.obj()._line._line );
-		tmp.obj()._line._num = line._num;
+		tmp._obj._line = new __Line();
+		tmp._obj._line._token = new _Token();
+		line._token.dup( tmp._obj._line._token );
+		tmp._obj._line._num = line._num;
 		if( line._comment != null ){
-			tmp.obj()._line._comment = new String();
-			tmp.obj()._line._comment = line._comment;
+			tmp._obj._line._comment = new String();
+			tmp._obj._line._comment = line._comment;
 		}
-		tmp.obj()._line._next = line._next;
-		tmp.obj()._subFlag = false;
+		tmp._obj._line._next = line._next;
+		tmp._obj._subFlag = false;
 
-		if( beforeFlag.val() ){
+		if( beforeFlag._val ){
 			this._curLoop._getFlag = false;
 			this._curLoop = this._curLoop._beforeLoop;
 			if( this._curLoop._loopType == _LOOP_TYPE_BASE ){
@@ -349,7 +349,7 @@ _Loop.prototype = {
 
 };
 
-_loopSub = [
+var _loopSub = [
 	_Loop.prototype._loopStart,
 	_Loop.prototype._loopEnd,
 	_Loop.prototype._loopEnd,

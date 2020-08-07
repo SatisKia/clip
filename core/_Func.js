@@ -12,9 +12,9 @@ function _FuncInfo(){
 // ユーザー定義関数データ
 function __Func( createFlag ){
 	this._createFlag = createFlag;
-	this._info       = new _FuncInfo();
-	this._label      = new _Token();	// 引数のラベル
-	this._line       = new _Line();
+	this._info       = null;	// _FuncInfo
+	this._label      = null;	// 引数のラベル（_Token）
+	this._line       = null;	// _Line
 	this._topNum     = 1;
 	this._before     = null;	// 前のユーザー定義関数データ
 	this._next       = null;	// 次のユーザー定義関数データ
@@ -23,28 +23,28 @@ function __Func( createFlag ){
 // ユーザー定義関数管理クラス
 function _Func(){
 	// ユーザー定義関数リスト
-	this._top     = null;
-	this._end     = null;
+	this._top = null;
+	this._end = null;
 
-	this._funcNum = 0;		// ユーザー定義関数の個数
-	this._funcMax = -1;		// ユーザー定義関数の登録可能数
+	this._num = 0;		// ユーザー定義関数の個数
+	this._max = -1;		// ユーザー定義関数の登録可能数
 }
 
 _Func.prototype = {
 
 	setMaxNum : function( max ){
 		if( max >= 0 ){
-			for( var i = this._funcNum - max; i > 0; i-- ){
+			for( var i = this._num - max; i > 0; i-- ){
 				// 優先度の最も低いユーザー定義関数を削除する
 				this._del();
 			}
 		}
 
-		this._funcMax = max;
+		this._max = max;
 	},
-	maxNum : function(){
-		return this._funcMax;
-	},
+//	maxNum : function(){
+//		return this._max;
+//	},
 
 	getInfo : function( num, info/*_FuncInfo*/ ){
 		var tmp = 0;
@@ -102,32 +102,35 @@ _Func.prototype = {
 	},
 
 	create : function( name, topNum ){
-		if( this._funcMax == 0 ){
+		if( this._max == 0 ){
 			return null;
 		}
 
-		if( this._funcNum == this._funcMax ){
+		if( this._num == this._max ){
 			// 優先度の最も低いユーザー定義関数を削除する
 			this._del();
 		}
 
 		var tmp = this._ins( true );
 
+		tmp._info       = new _FuncInfo();
 		tmp._info._name = name;
 		tmp._info._cnt  = 0;
+		tmp._label      = new _Token();
+		tmp._line       = new _Line();
 		tmp._topNum     = (topNum == undefined) ? 1 : topNum;
 
-		this._funcNum++;
+		this._num++;
 
 		return tmp;
 	},
 
 	open : function( srcFunc ){
-		if( this._funcMax == 0 ){
+		if( this._max == 0 ){
 			return null;
 		}
 
-		if( this._funcNum == this._funcMax ){
+		if( this._num == this._max ){
 			// 優先度の最も低いユーザー定義関数を削除する
 			this._del();
 		}
@@ -139,7 +142,7 @@ _Func.prototype = {
 		tmp._line   = srcFunc._line;
 		tmp._topNum = srcFunc._topNum;
 
-		this._funcNum++;
+		this._num++;
 
 		return tmp;
 	},
@@ -162,8 +165,8 @@ _Func.prototype = {
 			srcFunc = srcFunc._next;
 		}
 
-		this._funcNum = src._funcNum;
-		this._funcMax = src._funcMax;
+		this._num = src._num;
+		this._max = src._max;
 	},
 
 	// ユーザー定義関数を削除する
@@ -180,7 +183,7 @@ _Func.prototype = {
 			this._end = func._before;
 		}
 
-		this._funcNum--;
+		this._num--;
 	},
 
 	// 優先度の最も低いユーザー定義関数を削除する
@@ -204,8 +207,8 @@ _Func.prototype = {
 
 	// 全ユーザー定義関数を削除する
 	delAll : function(){
-		this._top     = null;
-		this._funcNum = 0;
+		this._top = null;
+		this._num = 0;
 	},
 
 	// 関数を検索する

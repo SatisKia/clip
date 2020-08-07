@@ -128,33 +128,7 @@ function newStringArray( len ){
  return a;
 }
 var _EPS5 = 0.001;
-var _PI = 3.14159265358979323846264;
 var _SQRT05 = 0.7071067811865475244008444;
-var _complex_ang_type = 0;
-var _complex_israd = true;
-var _complex_ang_coef = _PI;
-var _complex_isreal = false;
-var _complex_err = false;
-function setComplexAngType( angType ){
- _complex_ang_type = angType;
- _complex_israd = (_complex_ang_type == 0);
- _complex_ang_coef = (_complex_ang_type == 1) ? 180.0 : 200.0;
-}
-function complexAngType(){
- return _complex_ang_type;
-}
-function setComplexIsReal( isReal ){
- _complex_isreal = isReal;
-}
-function complexIsReal(){
- return _complex_isreal;
-}
-function clearComplexError(){
- _complex_err = false;
-}
-function complexError(){
- return _complex_err;
-}
 function _Complex( re, im ){
  this._re = (re == undefined) ? 0.0 : re;
  this._im = (im == undefined) ? 0.0 : im;
@@ -404,7 +378,7 @@ _Complex.prototype = {
   var im2 = _angToRad( this._im ) * 2.0;
   var d = _COS( re2 ) + fcosh( im2 );
   if( d == 0.0 ){
-   _complex_err = true;
+   setComplexError();
   }
   return new _Complex(
    _SIN( re2 ) / d,
@@ -414,8 +388,8 @@ _Complex.prototype = {
  asin : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( fasin( this._re ) );
     }
    } else {
@@ -431,8 +405,8 @@ _Complex.prototype = {
  acos : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( facos( this._re ) );
     }
    } else {
@@ -451,7 +425,7 @@ _Complex.prototype = {
   }
   var d = new _Complex( -this._re, 1.0 - this._im );
   if( d.equal( 0.0 ) ){
-   _complex_err = true;
+   setComplexError();
   }
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( i.add( this ).div( d ).log() ).mul( 0.5 );
@@ -485,7 +459,7 @@ _Complex.prototype = {
   var im2 = this._im * 2.0;
   var d = fcosh( re2 ) + _COS( im2 );
   if( d == 0.0 ){
-   _complex_err = true;
+   setComplexError();
   }
   return new _Complex(
    fsinh( re2 ) / d,
@@ -501,8 +475,8 @@ _Complex.prototype = {
  acosh : function(){
   if( this._im == 0.0 ){
    if( this._re < 1.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( facosh( this._re ) );
     }
    } else {
@@ -514,8 +488,8 @@ _Complex.prototype = {
  atanh : function(){
   if( this._im == 0.0 ){
    if( (this._re <= -1.0) || (this._re >= 1.0) ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( fatanh( this._re ) );
     }
    } else {
@@ -524,7 +498,7 @@ _Complex.prototype = {
   }
   var d = new _Complex( 1.0 - this._re, -this._im );
   if( d.equal( 0.0 ) ){
-   _complex_err = true;
+   setComplexError();
   }
   return this.add( 1.0 ).div( d ).log().mul( 0.5 );
  },
@@ -564,8 +538,8 @@ _Complex.prototype = {
  log : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _LOG( this._re ) );
     }
    } else {
@@ -580,8 +554,8 @@ _Complex.prototype = {
  log10 : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _LOG( this._re ) * _NORMALIZE );
     }
    } else {
@@ -599,20 +573,16 @@ _Complex.prototype = {
     if( this._im == 0.0 ){
      return floatToComplex( _POW( this._re, y._re ) );
     }
-
     return this.log().mul( y._re ).exp();
    }
    if( this._im == 0.0 ){
-
     return y.mul( _LOG( this._re ) ).exp();
    }
-
    return this.log().mul( y ).exp();
   }
   if( this._im == 0.0 ){
    return floatToComplex( _POW( this._re, y ) );
   }
-
   return this.log().mul( y ).exp();
  },
 
@@ -628,8 +598,8 @@ _Complex.prototype = {
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
-    if( _complex_isreal ){
-     _complex_err = true;
+    if( complexIsReal() ){
+     setComplexError();
      return floatToComplex( _SQRT( this._re ) );
     }
    } else {
@@ -679,12 +649,12 @@ function floatToComplex( x ){
 
 
 function _radToAng( rad ){
- return _complex_israd ? rad : rad * _complex_ang_coef / _PI;
+ return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
 
 
 function _angToRad( ang ){
- return _complex_israd ? ang : ang * _PI / _complex_ang_coef;
+ return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
 
 
@@ -748,13 +718,6 @@ function fatanh( x ){
  return x * (1.0 + x * x / 3.0);
 }
 var _FRACT_MAX = Number.MAX_SAFE_INTEGER ;
-var _fract_err = false;
-function clearFractError(){
- _fract_err = false;
-}
-function fractError(){
- return _fract_err;
-}
 function _Fract( mi, nu, de ){
  this._mi = (mi == undefined) ? false : mi;
  this._nu = (nu == undefined) ? 0 : _INT( nu );
@@ -1609,12 +1572,98 @@ function intToString( val, radix, width ){
  }
  return str2;
 }
-var _matrix_err = false;
+var _PI = 3.14159265358979323846264;
+var _math_env;
+function _MathEnv(){
+ this._complex_ang_type = 0;
+ this._complex_israd = true;
+ this._complex_ang_coef = _PI;
+ this._complex_isreal = false;
+ this._complex_err = false;
+ this._fract_err = false;
+ this._matrix_err = false;
+ this._time_fps = 30.0;
+ this._time_err = false;
+ this._value_type = 0;
+}
+function setMathEnv( env ){
+ _math_env = env;
+}
+function setComplexAngType( angType ){
+ _math_env._complex_ang_type = angType;
+ _math_env._complex_israd = (_math_env._complex_ang_type == 0);
+ _math_env._complex_ang_coef = (_math_env._complex_ang_type == 1) ? 180.0 : 200.0;
+}
+function complexAngType(){
+ return _math_env._complex_ang_type;
+}
+function complexIsRad(){
+ return _math_env._complex_israd;
+}
+function complexAngCoef(){
+ return _math_env._complex_ang_coef;
+}
+function setComplexIsReal( isReal ){
+ _math_env._complex_isreal = isReal;
+}
+function complexIsReal(){
+ return _math_env._complex_isreal;
+}
+function clearComplexError(){
+ _math_env._complex_err = false;
+}
+function setComplexError(){
+ _math_env._complex_err = true;
+}
+function complexError(){
+ return _math_env._complex_err;
+}
+function clearFractError(){
+ _math_env._fract_err = false;
+}
+function setFractError(){
+ _math_env._fract_err = true;
+}
+function fractError(){
+ return _math_env._fract_err;
+}
 function clearMatrixError(){
- _matrix_err = false;
+ _math_env._matrix_err = false;
+}
+function setMatrixError(){
+ _math_env._matrix_err = true;
 }
 function matrixError(){
- return _matrix_err;
+ return _math_env._matrix_err;
+}
+function setTimeFps( fps ){
+ _math_env._time_fps = fps;
+}
+function timeFps(){
+ return _math_env._time_fps;
+}
+function clearTimeError(){
+ _math_env._time_err = false;
+}
+function setTimeError(){
+ _math_env._time_err = true;
+}
+function timeError(){
+ return _math_env._time_err;
+}
+function setValueType( type ){
+ _math_env._value_type = type;
+}
+function valueType(){
+ return _math_env._value_type;
+}
+function clearValueError(){
+ clearComplexError();
+ clearFractError();
+ clearTimeError();
+}
+function valueError(){
+ return complexError() || fractError() || timeError();
 }
 function _Matrix( row, col ){
  this._row = (row == undefined) ? 1 : row;
@@ -2008,22 +2057,8 @@ function newMatrixArray( len ){
  }
  return a;
 }
-var _time_fps = 30.0;
-var _time_err = false;
-function setTimeFps( fps ){
- _time_fps = fps;
-}
-function timeFps(){
- return _time_fps;
-}
-function clearTimeError(){
- _time_err = false;
-}
-function timeError(){
- return _time_err;
-}
 function _Time( i, h, m, s, f ){
- this._fps = _time_fps;
+ this._fps = timeFps();
  this._minus = (i == undefined) ? false : i;
  this._hour = (h == undefined) ? 0.0 : h;
  this._min = (m == undefined) ? 0.0 : m;
@@ -2032,9 +2067,9 @@ function _Time( i, h, m, s, f ){
 }
 _Time.prototype = {
  _update : function(){
-  if( _time_fps != this._fps ){
-   this._frame = this._frame * _time_fps / this._fps;
-   this._fps = _time_fps;
+  if( timeFps() != this._fps ){
+   this._frame = this._frame * timeFps() / this._fps;
+   this._fps = timeFps();
    this.reduce();
   }
  },
@@ -2084,7 +2119,7 @@ _Time.prototype = {
   this._reduce2();
  },
  _set : function( x ){
-  this._fps = _time_fps;
+  this._fps = timeFps();
   if( x < 0.0 ){
    this._minus = true;
    x = -x;
@@ -2415,31 +2450,16 @@ function dupTime( x ){
 function floatToTime( x ){
  return (new _Time()).ass( x );
 }
-var _value_type = 0;
-function setValueType( type ){
- _value_type = type;
-}
-function valueType(){
- return _value_type;
-}
-function clearValueError(){
- clearComplexError();
- clearFractError();
- clearTimeError();
-}
-function valueError(){
- return complexError() || fractError() || timeError();
-}
 function _Value(){
- this._type = _value_type;
+ this._type = valueType();
  this._c = new _Complex();
  this._f = new _Fract();
  this._t = new _Time();
 }
 _Value.prototype = {
  type : function(){
-  if( _value_type != this._type ){
-   switch( _value_type ){
+  if( valueType() != this._type ){
+   switch( valueType() ){
    case 0:
     switch( this._type ){
     case 1: this._c.ass( this._f.toFloat() ); break;
@@ -2459,7 +2479,7 @@ _Value.prototype = {
     }
     break;
    }
-   this._type = _value_type;
+   this._type = valueType();
   }
   return this._type;
  },
@@ -2617,7 +2637,7 @@ _Value.prototype = {
    case 2 : this._t.ass( r._t ); break;
    }
   } else {
-   this._type = _value_type;
+   this._type = valueType();
    switch( this._type ){
    case 0: this._c.ass( r ); break;
    case 1 : this._f.ass( r ); break;
@@ -3130,6 +3150,7 @@ function consoleBreak(){
  return _console_break;
 }
 function _Console( id ){
+ if( window.onConsoleUpdate == undefined ) window.onConsoleUpdate = function( id ){};
  this._id = id;
  this._div = document.getElementById( this._id );
  this._html = "";
@@ -3282,6 +3303,7 @@ function printBlue( s ){
  con.setColor();
 }
 function _Error(){
+ if( window.onError == undefined ) window.onError = function( e ){};
  this._message = new String();
  this._name = new String();
  this._description = new String();
@@ -3404,6 +3426,7 @@ function endTest(){
 }
 function main( id ){
  con = new _Console( id );
+ setMathEnv( new _MathEnv() );
  con.lock();
  try {
   testMath1();
@@ -3449,12 +3472,12 @@ function testMath1(){
  test( "", floatToValue( 3.0 ).mod( 3.0 ).equal( 0.0 ) );
  test( "", floatToValue( 7.0 ).mod( 3.0 ).equal( 1.0 ) );
  printBold( "frexp" );
- test( "", _APPROX( floatToValue( -3.0 ).frexp( x ).toFloat(), -0.75 ) && (x.val() == 2) );
- test( "", _APPROX( floatToValue( -0.5 ).frexp( x ).toFloat(), -0.5 ) && (x.val() == 0) );
- test( "", floatToValue( 0.0 ).frexp( x ).equal( 0.0 ) && (x.val() == 0) );
- test( "", _APPROX( floatToValue( 0.33 ).frexp( x ).toFloat(), 0.66 ) && (x.val() == -1) );
- test( "", _APPROX( floatToValue( 0.66 ).frexp( x ).toFloat(), 0.66 ) && (x.val() == 0) );
- test( "", _APPROX( floatToValue( 96.0 ).frexp( x ).toFloat(), 0.75 ) && (x.val() == 7) );
+ test( "", _APPROX( floatToValue( -3.0 ).frexp( x ).toFloat(), -0.75 ) && (x._val == 2) );
+ test( "", _APPROX( floatToValue( -0.5 ).frexp( x ).toFloat(), -0.5 ) && (x._val == 0) );
+ test( "", floatToValue( 0.0 ).frexp( x ).equal( 0.0 ) && (x._val == 0) );
+ test( "", _APPROX( floatToValue( 0.33 ).frexp( x ).toFloat(), 0.66 ) && (x._val == -1) );
+ test( "", _APPROX( floatToValue( 0.66 ).frexp( x ).toFloat(), 0.66 ) && (x._val == 0) );
+ test( "", _APPROX( floatToValue( 96.0 ).frexp( x ).toFloat(), 0.75 ) && (x._val == 7) );
  printBold( "ldexp" );
  test( "", floatToValue( -3.0 ).ldexp( 4 ).equal( -48.0 ) );
  test( "", floatToValue( -0.5 ).ldexp( 0 ).equal( -0.5 ) );
@@ -3462,11 +3485,11 @@ function testMath1(){
  test( "", _APPROX( floatToValue( 0.66 ).ldexp( -1 ).toFloat(), 0.33 ) );
  test( "", floatToValue( 96 ).ldexp( -3 ).equal( 12.0 ) );
  printBold( "modf" );
- test( "", _APPROX( floatToValue( -11.7 ).modf( y ).toFloat(), -11.7 + 11.0 ) && (y.val() == -11.0) );
- test( "", floatToValue( -0.5 ).modf( y ).equal( -0.5 ) && (y.val() == 0.0) );
- test( "", floatToValue( 0.0 ).modf( y ).equal( 0.0 ) && (y.val() == 0.0) );
- test( "", floatToValue( 0.6 ).modf( y ).equal( 0.6 ) && (y.val() == 0.0) );
- test( "", floatToValue( 12.0 ).modf( y ).equal( 0.0 ) && (y.val() == 12.0) );
+ test( "", _APPROX( floatToValue( -11.7 ).modf( y ).toFloat(), -11.7 + 11.0 ) && (y._val == -11.0) );
+ test( "", floatToValue( -0.5 ).modf( y ).equal( -0.5 ) && (y._val == 0.0) );
+ test( "", floatToValue( 0.0 ).modf( y ).equal( 0.0 ) && (y._val == 0.0) );
+ test( "", floatToValue( 0.6 ).modf( y ).equal( 0.6 ) && (y._val == 0.0) );
+ test( "", floatToValue( 12.0 ).modf( y ).equal( 0.0 ) && (y._val == 12.0) );
  endTest();
 }
 function testMath2(){

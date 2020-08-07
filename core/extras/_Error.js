@@ -5,6 +5,8 @@
 
 // エラー
 function _Error(){
+	if( window.onError == undefined ) window.onError = function( e ){};
+
 	this._message = new String();
 	this._name    = new String();
 
@@ -76,5 +78,3 @@ function clip_onerror( message, url, line ){
 
 	return true;
 }
-
-//function onError( e ){}

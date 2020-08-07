@@ -6,37 +6,7 @@
 #include "_Math.h"
 
 var _EPS5   = 0.001;						// _DBL_EPSILONの1/5乗程度
-var _PI     = 3.14159265358979323846264;	// 円周率
 var _SQRT05 = 0.7071067811865475244008444;	// √0.5
-
-var _complex_ang_type = _ANG_TYPE_RAD;	// 角度の単位の種類
-var _complex_israd    = true;			// 角度の単位の種類がラジアンかどうかのフラグ
-var _complex_ang_coef = _PI;			// ラジアンから現在の単位への変換用係数
-var _complex_isreal   = false;			// 実数計算を行うかどうかのフラグ
-var _complex_err      = false;			// エラーが起こったかどうかのフラグ
-
-function setComplexAngType( angType ){
-	_complex_ang_type = angType;
-	_complex_israd    = (_complex_ang_type == _ANG_TYPE_RAD);
-	_complex_ang_coef = (_complex_ang_type == _ANG_TYPE_DEG) ? 180.0 : 200.0;
-}
-function complexAngType(){
-	return _complex_ang_type;
-}
-
-function setComplexIsReal( isReal ){
-	_complex_isreal = isReal;
-}
-function complexIsReal(){
-	return _complex_isreal;
-}
-
-function clearComplexError(){
-	_complex_err = false;
-}
-function complexError(){
-	return _complex_err;
-}
 
 // 複素数型
 function _Complex( re, im ){
@@ -366,7 +336,7 @@ assert( r != undefined );
 		var im2 = _angToRad( this._im ) * 2.0;
 		var d   = _COS( re2 ) + fcosh( im2 );
 		if( d == 0.0 ){
-			_complex_err = true;
+			setComplexError();
 		}
 		return new _Complex(
 			_SIN( re2 ) / d,
@@ -378,8 +348,8 @@ assert( r != undefined );
 	asin : function(){
 		if( this._im == 0.0 ){
 			if( (this._re < -1.0) || (this._re > 1.0) ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( fasin( this._re ) );
 				}
 			} else {
@@ -398,8 +368,8 @@ assert( r != undefined );
 	acos : function(){
 		if( this._im == 0.0 ){
 			if( (this._re < -1.0) || (this._re > 1.0) ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( facos( this._re ) );
 				}
 			} else {
@@ -425,7 +395,7 @@ assert( r != undefined );
 		}
 		var d = new _Complex( -this._re, 1.0 - this._im );
 		if( d.equal( 0.0 ) ){
-			_complex_err = true;
+			setComplexError();
 		}
 		// i * log( (i + this) / d ) * 0.5
 		var i = new _Complex( 0.0, 1.0 );
@@ -466,7 +436,7 @@ assert( r != undefined );
 		var im2 = this._im * 2.0;
 		var d   = fcosh( re2 ) + _COS( im2 );
 		if( d == 0.0 ){
-			_complex_err = true;
+			setComplexError();
 		}
 		return new _Complex(
 			fsinh( re2 ) / d,
@@ -487,8 +457,8 @@ assert( r != undefined );
 	acosh : function(){
 		if( this._im == 0.0 ){
 			if( this._re < 1.0 ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( facosh( this._re ) );
 				}
 			} else {
@@ -503,8 +473,8 @@ assert( r != undefined );
 	atanh : function(){
 		if( this._im == 0.0 ){
 			if( (this._re <= -1.0) || (this._re >= 1.0) ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( fatanh( this._re ) );
 				}
 			} else {
@@ -513,7 +483,7 @@ assert( r != undefined );
 		}
 		var d = new _Complex( 1.0 - this._re, -this._im );
 		if( d.equal( 0.0 ) ){
-			_complex_err = true;
+			setComplexError();
 		}
 		// log( (this + 1.0) / d ) * 0.5
 		return this.add( 1.0 ).div( d ).log().mul( 0.5 );
@@ -562,8 +532,8 @@ assert( r != undefined );
 	log : function(){
 		if( this._im == 0.0 ){
 			if( this._re <= 0.0 ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( _LOG( this._re ) );
 				}
 			} else {
@@ -578,8 +548,8 @@ assert( r != undefined );
 	log10 : function(){
 		if( this._im == 0.0 ){
 			if( this._re <= 0.0 ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( _LOG( this._re ) * _NORMALIZE );
 				}
 			} else {
@@ -628,8 +598,8 @@ assert( r != undefined );
 	sqrt : function(){
 		if( this._im == 0.0 ){
 			if( this._re < 0.0 ){
-				if( _complex_isreal ){
-					_complex_err = true;
+				if( complexIsReal() ){
+					setComplexError();
 					return floatToComplex( _SQRT( this._re ) );
 				}
 			} else {
@@ -679,12 +649,12 @@ function floatToComplex( x ){
 
 // ラジアンを現在の角度の単位に変換する
 function _radToAng( rad ){
-	return _complex_israd ? rad : rad * _complex_ang_coef / _PI;
+	return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
 
 // 現在の角度の単位をラジアンに変換する
 function _angToRad( ang ){
-	return _complex_israd ? ang : ang * _PI / _complex_ang_coef;
+	return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
 
 // 各種関数

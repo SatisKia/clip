@@ -12,6 +12,10 @@ function canUseFile(){
 
 // ファイル選択コントロール
 function _InputFile( id ){
+	if( window.onInputFileLoadImage == undefined ) window.onInputFileLoadImage = function( name, image ){};
+	if( window.onInputFileLoad == undefined ) window.onInputFileLoad = function( func, data ){};
+	if( window.onInputFileLoadEnd == undefined ) window.onInputFileLoadEnd = function( num ){};
+
 	this._input = document.getElementById( id );
 
 	this._input.addEventListener( "change", _onInputFileChange, false );
@@ -104,8 +108,3 @@ function _onInputFileChange( e ){
 		reader.readAsText( file );
 	}
 }
-
-//function onInputFileLoadImage( name, image ){}
-
-//function onInputFileLoad( func, data ){}
-//function onInputFileLoadEnd( num ){}

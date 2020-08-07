@@ -9,6 +9,8 @@ function canUseWriteFile(){
 
 // ファイル出力
 function writeFile( name, text ){
+	if( window.onWriteFileEnd == undefined ) window.onWriteFileEnd = function( fileEntry ){};
+
 	var size = encodeURI( text ).replace( new RegExp( "%..", "g" ), "*" ).length;
 	webkitRequestFileSystem( TEMPORARY, size, function( fs ){
 		fs.root.getFile( name, { create: true }, function( fileEntry ){
@@ -22,5 +24,3 @@ function writeFile( name, text ){
 		}, function( e ){} );
 	}, function( e ){} );
 }
-
-//function onWriteFileEnd( fileEntry ){}

@@ -245,7 +245,9 @@ var _TOKEN_COMMAND = [
 	"gfill",
 	"gmove",
 	"gtext",
+	"gtextr",
 	"gtextl",
+	"gtextrl",
 	"gline",
 	"gput",
 	"gput24",
@@ -256,7 +258,9 @@ var _TOKEN_COMMAND = [
 	"wfill",
 	"wmove",
 	"wtext",
+	"wtextr",
 	"wtextl",
+	"wtextrl",
 	"wline",
 	"wput",
 	"wget",
@@ -369,7 +373,7 @@ var _VALUE_DEFINE = [
 	Number.NaN
 ];
 
-function indexOf( stringArray, string ){
+function _indexOf( stringArray, string ){
 //	return stringArray.indexOf( string );
 	var len = stringArray.length;
 	for( var i = 0; i < len; i++ ){
@@ -505,20 +509,20 @@ _Token.prototype = {
 
 	// 文字列が関数名かどうかチェックする
 	checkFunc : function( string, func/*_Integer*/ ){
-		func.set( indexOf( _TOKEN_FUNC, string ) );
-		return (func.val() >= 0);
+		func.set( _indexOf( _TOKEN_FUNC, string ) );
+		return (func._val >= 0);
 	},
 
 	// 文字列が文かどうかチェックする
 	checkStat : function( string, stat/*_Integer*/ ){
-		stat.set( indexOf( _TOKEN_STAT, string ) );
-		return (stat.val() >= 0);
+		stat.set( _indexOf( _TOKEN_STAT, string ) );
+		return (stat._val >= 0);
 	},
 
 	// 文字列がコマンドかどうかチェックする
 	checkCommand : function( string, command/*_Integer*/ ){
-		command.set( indexOf( _TOKEN_COMMAND, string ) + 1 );
-		if( command.val() >= 1 ){
+		command.set( _indexOf( _TOKEN_COMMAND, string ) + 1 );
+		if( command._val >= 1 ){
 				return true;
 		}
 
@@ -534,13 +538,13 @@ _Token.prototype = {
 
 	// 文字列が単一式かどうかチェックする
 	checkSe : function( string, se/*_Integer*/ ){
-		se.set( indexOf( _TOKEN_SE, string ) + 1 );
-		if( se.val() >= 1 ){
+		se.set( _indexOf( _TOKEN_SE, string ) + 1 );
+		if( se._val >= 1 ){
 				return true;
 		}
 
 		if( this.checkFunc( string, se ) ){
-			se.set( _CLIP_SE_FUNC + se.val() );
+			se.set( _CLIP_SE_FUNC + se._val );
 			return true;
 		}
 
@@ -549,7 +553,7 @@ _Token.prototype = {
 
 	// 文字列が定義定数かどうかチェックする
 	checkDefine : function( string, value/*_Value*/ ){
-		var define = indexOf( _TOKEN_DEFINE, string );
+		var define = _indexOf( _TOKEN_DEFINE, string );
 		if( define >= 0 ){
 			value.ass( _VALUE_DEFINE[define] );
 			return true;
@@ -610,13 +614,13 @@ _Token.prototype = {
 			case 'b':
 			case 'B':
 				value.ass( stringToInt( string, top + 2, stop, 2 ) );
-				if( stop.val() < string.length ){
+				if( stop._val < string.length ){
 					return false;
 				}
 				break;
 			case '0':
 				value.ass( stringToInt( string, top + 2, stop, 8 ) );
-				if( stop.val() < string.length ){
+				if( stop._val < string.length ){
 					return false;
 				}
 				break;
@@ -630,14 +634,14 @@ _Token.prototype = {
 			case '8':
 			case '9':
 				value.ass( stringToInt( string, top + 1, stop, 10 ) );
-				if( stop.val() < string.length ){
+				if( stop._val < string.length ){
 					return false;
 				}
 				break;
 			case 'x':
 			case 'X':
 				value.ass( stringToInt( string, top + 2, stop, 16 ) );
-				if( stop.val() < string.length ){
+				if( stop._val < string.length ){
 					return false;
 				}
 				break;
@@ -648,37 +652,37 @@ _Token.prototype = {
 				value.ass( value.minus() );
 			}
 		} else {
-			if( (param.mode() & _CLIP_MODE_COMPLEX) != 0 ){
+			if( (param._mode & _CLIP_MODE_COMPLEX) != 0 ){
 				tmp[0] = stringToFloat( string, top, stop );
-				switch( string.charAt( stop.val() ) ){
+				switch( string.charAt( stop._val ) ){
 				case '\\':
 				case _CHAR_UTF8_YEN:
 				case '+':
 				case '-':
 					// 実数部
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						return false;
 					}
 					value.setReal( swi ? -tmp[0] : tmp[0] );
 
 					// 虚数部
-					if( isCharEscape( string, stop.val() ) ){
+					if( isCharEscape( string, stop._val ) ){
 						stop.add( 1 );
 					}
-					switch( string.charAt( stop.val() ) ){
+					switch( string.charAt( stop._val ) ){
 					case '+': swi = false; break;
 					case '-': swi = true ; break;
 					default : return false;
 					}
-					top = stop.val() + 1;
+					top = stop._val + 1;
 					tmp[0] = stringToFloat( string, top, stop );
-					if( (string.charAt( stop.val() ) != 'i') && (string.charAt( stop.val() ) != 'I') ){
+					if( (string.charAt( stop._val ) != 'i') && (string.charAt( stop._val ) != 'I') ){
 						return false;
 					} else {
-						if( stop.val() + 1 < string.length ){
+						if( stop._val + 1 < string.length ){
 							return false;
 						}
-						if( stop.val() == top ){
+						if( stop._val == top ){
 							value.setImag( swi ? -1.0 : 1.0 );
 						} else {
 							value.setImag( swi ? -tmp[0] : tmp[0] );
@@ -688,7 +692,7 @@ _Token.prototype = {
 					break;
 				case 'i':
 				case 'I':
-					if( stop.val() + 1 < string.length ){
+					if( stop._val + 1 < string.length ){
 						return false;
 					}
 
@@ -696,7 +700,7 @@ _Token.prototype = {
 					value.setReal( 0.0 );
 
 					// 虚数部
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						value.setImag( swi ? -1.0 : 1.0 );
 					} else {
 						value.setImag( swi ? -tmp[0] : tmp[0] );
@@ -704,12 +708,12 @@ _Token.prototype = {
 
 					break;
 				default:
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						return false;
 					}
 					value.ass( swi ? -tmp[0] : tmp[0] );
-					if( stop.val() < string.length ){
-						switch( string.charAt( stop.val() ) ){
+					if( stop._val < string.length ){
+						switch( string.charAt( stop._val ) ){
 						case 'd': case 'D': value.angToAng( _ANG_TYPE_DEG , complexAngType() ); break;
 						case 'g': case 'G': value.angToAng( _ANG_TYPE_GRAD, complexAngType() ); break;
 						case 'r': case 'R': value.angToAng( _ANG_TYPE_RAD , complexAngType() ); break;
@@ -718,34 +722,34 @@ _Token.prototype = {
 					}
 					break;
 				}
-			} else if( (param.mode() & (_CLIP_MODE_FLOAT | _CLIP_MODE_FRACT)) != 0 ){
+			} else if( (param._mode & (_CLIP_MODE_FLOAT | _CLIP_MODE_FRACT)) != 0 ){
 				tmp[0] = stringToFloat( string, top, stop );
-				switch( string.charAt( stop.val() ) ){
+				switch( string.charAt( stop._val ) ){
 				case '_':
 				case '」':
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						return false;
 					}
 					value.fractSetMinus( swi );
 					value.setNum( tmp[0] );
 
-					if( isCharEscape( string, stop.val() + 1 ) ){
-						top = stop.val() + 2;
+					if( isCharEscape( string, stop._val + 1 ) ){
+						top = stop._val + 2;
 					} else {
-						top = stop.val() + 1;
+						top = stop._val + 1;
 					}
 					tmp[0] = stringToFloat( string, top, stop );
-					switch( string.charAt( stop.val() ) ){
+					switch( string.charAt( stop._val ) ){
 					case '_':
 					case '」':
-						if( stop.val() == top ){
+						if( stop._val == top ){
 							return false;
 						}
 
-						if( isCharEscape( string, stop.val() + 1 ) ){
-							top = stop.val() + 2;
+						if( isCharEscape( string, stop._val + 1 ) ){
+							top = stop._val + 2;
 						} else {
-							top = stop.val() + 1;
+							top = stop._val + 1;
 						}
 						tmp[1] = stringToFloat( string, top, stop );
 						if( (tmp[0] < 0.0) || (tmp[1] < 0.0) ){
@@ -765,34 +769,34 @@ _Token.prototype = {
 					}
 					break;
 				default:
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						return false;
 					}
 					value.ass( swi ? -tmp[0] : tmp[0] );
 					break;
 				}
-				if( stop.val() < string.length ){
-					switch( string.charAt( stop.val() ) ){
+				if( stop._val < string.length ){
+					switch( string.charAt( stop._val ) ){
 					case 'd': case 'D': value.angToAng( _ANG_TYPE_DEG , complexAngType() ); break;
 					case 'g': case 'G': value.angToAng( _ANG_TYPE_GRAD, complexAngType() ); break;
 					case 'r': case 'R': value.angToAng( _ANG_TYPE_RAD , complexAngType() ); break;
 					default : return false;
 					}
 				}
-			} else if( (param.mode() & _CLIP_MODE_TIME) != 0 ){
+			} else if( (param._mode & _CLIP_MODE_TIME) != 0 ){
 				var _break = false;
 				for( i = 0; i < 4; i++ ){
 					if( isCharEscape( string, top ) ){
 						top++;
 					}
 					tmp[i] = stringToFloat( string, top, stop );
-					if( stop.val() == top ){
+					if( stop._val == top ){
 						return false;
 					}
-					if( stop.val() >= string.length ){
+					if( stop._val >= string.length ){
 						break;
 					}
-					switch( string.charAt( stop.val() ) ){
+					switch( string.charAt( stop._val ) ){
 					case 'h':
 					case 'H':
 					case 'm':
@@ -801,7 +805,7 @@ _Token.prototype = {
 					case 'S':
 					case 'f':
 					case 'F':
-						if( stop.val() + 1 < string.length ){
+						if( stop._val + 1 < string.length ){
 							return false;
 						}
 						_break = true;
@@ -814,13 +818,13 @@ _Token.prototype = {
 					if( _break ){
 						break;
 					}
-					top = stop.val() + 1;
+					top = stop._val + 1;
 				}
 				value.timeSetMinus( swi );
 				switch( i ){
 				case 0:
-					if( stop.val() < string.length ){
-						switch( string.charAt( stop.val() ) ){
+					if( stop._val < string.length ){
+						switch( string.charAt( stop._val ) ){
 						case 'h': case 'H': value.setHour ( tmp[0] ); value.timeReduce(); break;
 						case 'm': case 'M': value.setMin  ( tmp[0] ); value.timeReduce(); break;
 						case 's': case 'S': value.setSec  ( tmp[0] ); value.timeReduce(); break;
@@ -832,15 +836,15 @@ _Token.prototype = {
 					}
 					break;
 				case 1:
-					if( stop.val() < string.length ){
-						switch( string.charAt( stop.val() ) ){
+					if( stop._val < string.length ){
+						switch( string.charAt( stop._val ) ){
 						case 'h': case 'H': return false;
 						case 'm': case 'M': value.setHour( tmp[0] ); value.setMin  ( tmp[1] ); value.timeReduce(); break;
 						case 's': case 'S': value.setMin ( tmp[0] ); value.setSec  ( tmp[1] ); value.timeReduce(); break;
 						case 'f': case 'F': value.setSec ( tmp[0] ); value.setFrame( tmp[1] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param.mode() ){
+						switch( param._mode ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME: value.setHour( tmp[0] ); value.setMin  ( tmp[1] ); value.timeReduce(); break;
 						case _CLIP_MODE_S_TIME: value.setMin ( tmp[0] ); value.setSec  ( tmp[1] ); value.timeReduce(); break;
@@ -849,15 +853,15 @@ _Token.prototype = {
 					}
 					break;
 				case 2:
-					if( stop.val() < string.length ){
-						switch( string.charAt( stop.val() ) ){
+					if( stop._val < string.length ){
+						switch( string.charAt( stop._val ) ){
 						case 'h': case 'H':
 						case 'm': case 'M': return false;
 						case 's': case 'S': value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec  ( tmp[2] ); value.timeReduce(); break;
 						case 'f': case 'F': value.setMin ( tmp[0] ); value.setSec( tmp[1] ); value.setFrame( tmp[2] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param.mode() ){
+						switch( param._mode ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME:
 						case _CLIP_MODE_S_TIME: value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec  ( tmp[2] ); value.timeReduce(); break;
@@ -866,15 +870,15 @@ _Token.prototype = {
 					}
 					break;
 				case 3:
-					if( stop.val() < string.length ){
-						switch( string.charAt( stop.val() ) ){
+					if( stop._val < string.length ){
+						switch( string.charAt( stop._val ) ){
 						case 'h': case 'H':
 						case 'm': case 'M':
 						case 's': case 'S': return false;
 						case 'f': case 'F': value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec( tmp[2] ); value.setFrame( tmp[3] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param.mode() ){
+						switch( param._mode ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME:
 						case _CLIP_MODE_S_TIME:
@@ -883,9 +887,9 @@ _Token.prototype = {
 					}
 					break;
 				}
-			} else if( (param.mode() & _CLIP_MODE_INT) != 0 ){
-				value.ass( stringToInt( string, top, stop, param.radix() ) );
-				if( stop.val() < string.length ){
+			} else if( (param._mode & _CLIP_MODE_INT) != 0 ){
+				value.ass( stringToInt( string, top, stop, param._radix ) );
+				if( stop._val < string.length ){
 					return false;
 				}
 				if( swi ){
@@ -900,8 +904,8 @@ _Token.prototype = {
 	// 浮動小数点数値を文字列に変換する
 	_floatToString : function( param, value ){
 		var str = "";
-		var prec = param.prec();
-		switch( param.mode() ){
+		var prec = param._prec;
+		switch( param._mode ){
 		case _CLIP_MODE_E_FLOAT:
 		case _CLIP_MODE_E_COMPLEX:
 			str = floatToExponential( value, (prec == 0) ? _EPREC( value ) : prec );
@@ -919,7 +923,7 @@ _Token.prototype = {
 	},
 
 	valueToString : function( param, value, real/*_String*/, imag/*_String*/ ){
-		switch( param.mode() ){
+		switch( param._mode ){
 		case _CLIP_MODE_E_COMPLEX:
 		case _CLIP_MODE_F_COMPLEX:
 		case _CLIP_MODE_G_COMPLEX:
@@ -1036,27 +1040,27 @@ _Token.prototype = {
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_CHAR:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_8, _SMIN_8, _SMAX_8 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_8, _SMIN_8, _SMAX_8 ), param._radix ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_CHAR:
-			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_8 ), param.radix() ) );
+			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_8 ), param._radix ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_SHORT:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_16, _SMIN_16, _SMAX_16 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_16, _SMIN_16, _SMAX_16 ), param._radix ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_SHORT:
-			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_16 ), param.radix() ) );
+			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_16 ), param._radix ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_S_LONG:
-			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_32, _SMIN_32, _SMAX_32 ), param.radix() ) );
+			real.set( intToString( _SIGNED( value.toFloat(), _UMAX_32, _SMIN_32, _SMAX_32 ), param._radix ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_U_LONG:
-			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_32 ), param.radix() ) );
+			real.set( intToString( _UNSIGNED( value.toFloat(), _UMAX_32 ), param._radix ) );
 			imag.set( "" );
 			break;
 		}
@@ -1221,7 +1225,7 @@ _Token.prototype = {
 
 			if( tmp.charAt( 0 ) == '$' ){
 				if( this.checkSe( tmp.substring( 1, len ).toLowerCase(), code ) ){
-					switch( code.val() ){
+					switch( code._val ){
 					case _CLIP_SE_LOOPSTART:
 						cur._code  = _CLIP_CODE_STATEMENT;
 						cur._token = _CLIP_STAT_START;
@@ -1272,7 +1276,7 @@ _Token.prototype = {
 						break;
 					default:
 						cur._code  = _CLIP_CODE_SE;
-						cur._token = code.val();
+						cur._token = code._val;
 						break;
 					}
 				} else {
@@ -1281,11 +1285,11 @@ _Token.prototype = {
 				}
 			} else if( this.checkSqOp( tmp, code ) ){
 				cur._code  = _CLIP_CODE_OPERATOR;
-				cur._token = code.val();
+				cur._token = code._val;
 			} else if( tmp.charAt( 0 ) == ':' ){
 				cur._code = _CLIP_CODE_COMMAND;
 				if( this.checkCommand( tmp.substring( 1, len ), code ) ){
-					cur._token = code.val();
+					cur._token = code._val;
 				} else {
 					cur._token = _CLIP_COMMAND_NULL;
 				}
@@ -1319,10 +1323,10 @@ _Token.prototype = {
 				}
 			} else if( this.checkFunc( tmp, code ) ){
 				cur._code  = _CLIP_CODE_FUNCTION;
-				cur._token = code.val();
+				cur._token = code._val;
 			} else if( this.checkStat( tmp, code ) ){
 				cur._code  = _CLIP_CODE_STATEMENT;
-				cur._token = code.val();
+				cur._token = code._val;
 			} else {
 				cur._code  = _CLIP_CODE_CONSTANT;
 				cur._token = new _Value();
@@ -1702,7 +1706,7 @@ _Token.prototype = {
 						case '/': token += String.fromCharCode( _CLIP_OP_DIVANDASS ); break;
 						case '%': token += String.fromCharCode( _CLIP_OP_MODANDASS ); break;
 						case '^':
-							if( param._enableOpPow && ((param.mode() & _CLIP_MODE_INT) == 0) ){
+							if( param._enableOpPow && ((param._mode & _CLIP_MODE_INT) == 0) ){
 								token += String.fromCharCode( _CLIP_OP_POWANDASS );
 							} else {
 								token += String.fromCharCode( _CLIP_OP_XORANDASS );
@@ -1728,7 +1732,7 @@ _Token.prototype = {
 						case '/': token += String.fromCharCode( _CLIP_OP_DIV ); break;
 						case '%': token += String.fromCharCode( _CLIP_OP_MOD ); break;
 						case '^':
-							if( param._enableOpPow && ((param.mode() & _CLIP_MODE_INT) == 0) ){
+							if( param._enableOpPow && ((param._mode & _CLIP_MODE_INT) == 0) ){
 								token += String.fromCharCode( _CLIP_OP_POW );
 							} else {
 								token += String.fromCharCode( _CLIP_OP_XOR );
@@ -1818,7 +1822,7 @@ _Token.prototype = {
 					break;
 				case 'e':
 				case 'E':
-					if( ((param.mode() & _CLIP_MODE_INT) == 0) && (len > 0) ){
+					if( ((param._mode & _CLIP_MODE_INT) == 0) && (len > 0) ){
 						if( (line.charAt( cur + 1 ) == '+') || (line.charAt( cur + 1 ) == '-') ){
 							var _break = false;
 							for( var i = 0; i < len; i++ ){

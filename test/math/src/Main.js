@@ -5,6 +5,7 @@
 #include "math\_Complex.js"
 #include "math\_Fract.js"
 #include "math\_Math.js"
+#include "math\_MathEnv.js"
 #include "math\_Matrix.js"
 #include "math\_Time.js"
 #include "math\_Value.js"
@@ -100,6 +101,9 @@ function endTest(){
 function main( id ){
 	con = new _Console( id );
 
+	// グローバル環境
+	setMathEnv( new _MathEnv() );
+
 	con.lock();
 
 	try {
@@ -155,12 +159,12 @@ function testMath1(){
 	test( "", floatToValue( 7.0 ).mod( 3.0 ).equal( 1.0 ) );
 
 	printBold( "frexp" );
-	test( "", _APPROX( floatToValue( -3.0 ).frexp( x ).toFloat(), -0.75 ) && (x.val() == 2) );
-	test( "", _APPROX( floatToValue( -0.5 ).frexp( x ).toFloat(), -0.5 ) && (x.val() == 0) );
-	test( "", floatToValue( 0.0 ).frexp( x ).equal( 0.0 ) && (x.val() == 0) );
-	test( "", _APPROX( floatToValue( 0.33 ).frexp( x ).toFloat(), 0.66 ) && (x.val() == -1) );
-	test( "", _APPROX( floatToValue( 0.66 ).frexp( x ).toFloat(), 0.66 ) && (x.val() == 0) );
-	test( "", _APPROX( floatToValue( 96.0 ).frexp( x ).toFloat(), 0.75 ) && (x.val() == 7) );
+	test( "", _APPROX( floatToValue( -3.0 ).frexp( x ).toFloat(), -0.75 ) && (x._val == 2) );
+	test( "", _APPROX( floatToValue( -0.5 ).frexp( x ).toFloat(), -0.5 ) && (x._val == 0) );
+	test( "", floatToValue( 0.0 ).frexp( x ).equal( 0.0 ) && (x._val == 0) );
+	test( "", _APPROX( floatToValue( 0.33 ).frexp( x ).toFloat(), 0.66 ) && (x._val == -1) );
+	test( "", _APPROX( floatToValue( 0.66 ).frexp( x ).toFloat(), 0.66 ) && (x._val == 0) );
+	test( "", _APPROX( floatToValue( 96.0 ).frexp( x ).toFloat(), 0.75 ) && (x._val == 7) );
 
 	printBold( "ldexp" );
 	test( "", floatToValue( -3.0 ).ldexp( 4 ).equal( -48.0 ) );
@@ -170,11 +174,11 @@ function testMath1(){
 	test( "", floatToValue( 96 ).ldexp( -3 ).equal( 12.0 ) );
 
 	printBold( "modf" );
-	test( "", _APPROX( floatToValue( -11.7 ).modf( y ).toFloat(), -11.7 + 11.0 ) && (y.val() == -11.0) );
-	test( "", floatToValue( -0.5 ).modf( y ).equal( -0.5 ) && (y.val() == 0.0) );
-	test( "", floatToValue( 0.0 ).modf( y ).equal( 0.0 ) && (y.val() == 0.0) );
-	test( "", floatToValue( 0.6 ).modf( y ).equal( 0.6 ) && (y.val() == 0.0) );
-	test( "", floatToValue( 12.0 ).modf( y ).equal( 0.0 ) && (y.val() == 12.0) );
+	test( "", _APPROX( floatToValue( -11.7 ).modf( y ).toFloat(), -11.7 + 11.0 ) && (y._val == -11.0) );
+	test( "", floatToValue( -0.5 ).modf( y ).equal( -0.5 ) && (y._val == 0.0) );
+	test( "", floatToValue( 0.0 ).modf( y ).equal( 0.0 ) && (y._val == 0.0) );
+	test( "", floatToValue( 0.6 ).modf( y ).equal( 0.6 ) && (y._val == 0.0) );
+	test( "", floatToValue( 12.0 ).modf( y ).equal( 0.0 ) && (y._val == 12.0) );
 
 	endTest();
 }

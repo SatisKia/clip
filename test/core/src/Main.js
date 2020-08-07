@@ -27,9 +27,12 @@ var extFuncData = new Array();
 
 #ifndef USE_CLIP_LIB
 
+#include "_Global.h"
+
 #include "math\_Complex.js"
 #include "math\_Fract.js"
 #include "math\_Math.js"
+#include "math\_MathEnv.js"
 #include "math\_Matrix.js"
 #include "math\_Time.js"
 #include "math\_Value.js"
@@ -41,8 +44,6 @@ var extFuncData = new Array();
 #include "param\_Void.js"
 
 #include "system\_Tm.js"
-
-#include "_Global.h"
 
 #include "_Array.js"
 #include "_Func.js"
@@ -59,9 +60,9 @@ var extFuncData = new Array();
 
 #endif // USE_CLIP_LIB
 
-#include "_ColorWin.js"
-#include "_DefCharInfo.js"
-#include "_DefCharInfoLarge.js"
+//#include "_ColorWin.js"
+//#include "_DefCharInfo.js"
+//#include "_DefCharInfoLarge.js"
 
 #include "_Css.js"
 
@@ -105,15 +106,14 @@ function onError( e ){
 }
 
 // キャンバス
-#include "_Canvas.js"
+//#include "_Canvas.js"
 var canvas;
 function canvasClear(){
-	var rgbColor = gWorldBgColor();
-	canvas.setColor( (rgbColor & 0xFF0000) >> 16, (rgbColor & 0x00FF00) >> 8, rgbColor & 0x0000FF );
+	canvas.setColorRGB( gWorldBgColor() );
 	canvas.fill( 0, 0, canvas.width(), canvas.height() );
 }
 function canvasSetColor( bgrColor ){
-	canvas.setColor( bgrColor & 0x0000FF, (bgrColor & 0x00FF00) >> 8, (bgrColor & 0xFF0000) >> 16 );
+	canvas.setColorBGR( bgrColor );
 }
 function canvasPut( x, y ){
 	canvas.put( x, y );
@@ -129,8 +129,8 @@ function canvasLine( x1, y1, x2, y2 ){
 #include "_InputFile.js"
 var inputFile;
 function drawInputFileImage( image, w/*_Integer*/, h/*_Integer*/ ){
-	var width  = topProc.gWorld().width ();
-	var height = topProc.gWorld().height();
+	var width  = procGWorld()._width;
+	var height = procGWorld()._height;
 	if( (width > 0) && (height > 0) ){
 		if( (image.width <= width) && (image.height <= height) ){
 			width  = image.width;
@@ -152,8 +152,8 @@ function onInputFileLoadImage( name, image ){
 	var h = new _Integer();
 	var data = drawInputFileImage( image, w, h );
 	if( data != null ){
-		var width  = w.val();
-		var height = h.val();
+		var width  = w._val;
+		var height = h._val;
 
 		con.setBold( true );
 		con.println( "[" + name + "]" );
@@ -171,16 +171,16 @@ function onInputFileLoadImage( name, image ){
 //				g = data[i++];
 //				b = data[i++];
 //				i++;
-//				topProc.gWorld().putColor( x, y, doFuncGColor( (r << 16) + (g << 8) + b ) );
+//				procGWorld().putColor( x, y, doFuncGColor( (r << 16) + (g << 8) + b ) );
 //			}
 //		}
 
-//		gUpdate( topProc.gWorld() );
+//		gUpdate( procGWorld() );
 	}
 }
 function doCommandGGet24Begin( w/*_Integer*/, h/*_Integer*/ ){
-	var width  = topProc.gWorld().width ();
-	var height = topProc.gWorld().height();
+	var width  = procGWorld()._width;
+	var height = procGWorld()._height;
 	if( (width > 0) && (height > 0) ){
 		w.set( width  );
 		h.set( height );
@@ -189,7 +189,7 @@ function doCommandGGet24Begin( w/*_Integer*/, h/*_Integer*/ ){
 	return null;
 }
 function doCommandGGet24End(){
-//	gUpdate( topProc.gWorld() );
+//	gUpdate( procGWorld() );
 }
 
 // 計算エラー情報管理
@@ -233,6 +233,9 @@ var lastTouchEnd = 0;
 
 function main( inputId, divId, canvasId, inputFileId, editorId ){
 	var i;
+
+	defGWorldFunction();
+	defProcFunction();
 
 	var userAgent = window.navigator.userAgent;
 	if( (userAgent.indexOf( "Android" ) != -1) || (userAgent.indexOf( "iPad" ) != -1) ){
@@ -279,6 +282,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	regGWorldBgColor( 0xC0C0C0 );
 
 	// キャンバス
+	setCanvasEnv( new _CanvasEnv() );
 	canvas = new _Canvas( canvasId );
 	canvasClear();
 
@@ -289,17 +293,18 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	procError = new _ProcError();
 
 	// 計算処理メイン・クラスを生成する
+	setProcEnv( new _ProcEnv() );
 	topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
-	topProc.setAnsFlag( true );
+	topProc._printAns = true;
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( traceLevel > 0 );
 	setProcLoopMax( loopMax );
 
 	// 計算パラメータ・クラスを生成する
 	topParam = new _Param();
-	topParam.setEnableCommand( true );
-	topParam.setEnableOpPow( false );
-	topParam.setEnableStat( true );
+	topParam._enableCommand = true;
+	topParam._enableOpPow = false;
+	topParam._enableStat = true;
 	setGlobalParam( topParam );
 
 	// カスタム・コマンドの登録
@@ -413,7 +418,7 @@ _TRY
 _CATCH
 
 		if( lockGUpdate && needGUpdate ){
-			gUpdate( topProc.gWorld() );
+			gUpdate( procGWorld() );
 			needGUpdate = false;
 		}
 
@@ -436,9 +441,6 @@ _CATCH
 		}
 
 		con.unlock();
-
-		// ログを記録する
-		addLogExpr();
 	}
 
 	input.value = "";
@@ -635,7 +637,7 @@ function assertProc( num, func ){
 }
 function getErrorString( err, num, func, token ){
 	var string = new String();
-	var error  = getProcErrorDefString( err, token, topParam.isCalculator(), englishFlag );
+	var error  = getProcErrorDefString( err, token, topParam._calculator, englishFlag );
 	if( error.length > 0 ){
 		if( (func != null) && (func.length > 0) ){
 			string += func + ": ";
@@ -873,26 +875,10 @@ function printError( error, num, func ){
 }
 
 function doFuncGColor( rgb ){
-	var i, j;
-	var r = (rgb & 0xFF0000) >> 16;
-	var g = (rgb & 0x00FF00) >> 8;
-	var b =  rgb & 0x0000FF;
-	var rr, gg, bb, tmp;
-	var d = 766/*255*3+1*/;
-	for( i = 0, j = 0; i < 256; i++ ){
-		rr =  COLOR_WIN[i] & 0x0000FF;
-		gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
-		bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
-		tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
-		if( tmp < d ){
-			j = i;
-			d = tmp;
-		}
-	}
-	return j;
+	return doFuncGColorBGR( rgb, COLOR_WIN );
 }
 function doFuncGColor24( index ){
-	return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
+	return _RGB2BGR( COLOR_WIN[index] );
 }
 function doFuncEval( parentProc, childProc, childParam, string, value ){
 	var ret;
@@ -909,12 +895,12 @@ function doCommandPrint( topPrint, flag ){
 	con.setColor( "ff00ff" );
 	var cur = topPrint;
 	while( cur != null ){
-		if( cur.string() != null ){
-			var tmp = new _String( cur.string() );
+		if( cur._string != null ){
+			var tmp = new _String( cur._string );
 			tmp.escape().replaceNewLine( consoleBreak() );
 			con.print( tmp.str() );
 		}
-		cur = cur.next();
+		cur = cur._next;
 	}
 	if( flag ){
 		con.println();
@@ -927,10 +913,10 @@ function skipCommandLog(){
 function doCommandLog( topPrint ){
 	var cur = topPrint;
 	while( cur != null ){
-		if( cur.string() != null ){
-			traceString += cur.string();
+		if( cur._string != null ){
+			traceString += cur._string;
 		}
-		cur = cur.next();
+		cur = cur._next;
 	}
 	traceString += "\n";
 }
@@ -949,13 +935,12 @@ function doCommandScan( topScan, proc, param ){
 
 		cur.setNewValue( newString, proc, param );
 
-		cur = cur.next();
+		cur = cur._next;
 	}
 }
-function doCommandGWorld( gWorld, width, height ){
+function doCommandGWorld( width, height ){
 	if( (width <= 0) || (height <= 0) ){
-		canvas.element().setAttribute( "width" , "1" );
-		canvas.element().setAttribute( "height", "1" );
+		canvas.setSize( 1, 1 );
 
 		var div1 = document.getElementById( "savecanvas" );
 		div1.style.display = "none";
@@ -979,14 +964,8 @@ function doCommandGWorld( gWorld, width, height ){
 		var div3 = document.getElementById( "savecanvas" );
 		div3.style.display = "block";
 
-		canvas.element().setAttribute( "width" , "" + width  );
-		canvas.element().setAttribute( "height", "" + height );
+		canvas.setSize( width, height );
 	}
-
-	gWorld.create( width, height, true );
-}
-function doCommandWindow( gWorld, left, bottom, right, top ){
-	gWorld.setWindowIndirect( left, bottom, right, top );
 }
 function gWorldClear( gWorld, color ){
 	if( lockGUpdate ){
@@ -995,8 +974,8 @@ function gWorldClear( gWorld, color ){
 	}
 	canvasClear();
 	canvasSetColor( COLOR_WIN[color] );
-	canvasFill( 0, 0, gWorld.width(), gWorld.height() );
-	canvasSetColor( COLOR_WIN[gWorld.color()] );
+	canvasFill( 0, 0, gWorld._width, gWorld._height );
+	canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function gWorldSetColor( gWorld, color ){
 	if( lockGUpdate ){
@@ -1009,10 +988,10 @@ function gWorldPutColor( gWorld, x, y, color ){
 		needGUpdate = true;
 		return;
 	}
-	if( topProc.gUpdateFlag() ){
+	if( topProc._gUpdateFlag ){
 		canvasSetColor( COLOR_WIN[color] );
 		canvasPut( x, y );
-		canvasSetColor( COLOR_WIN[gWorld.color()] );
+		canvasSetColor( COLOR_WIN[gWorld._color] );
 	}
 }
 function gWorldPut( gWorld, x, y ){
@@ -1020,7 +999,7 @@ function gWorldPut( gWorld, x, y ){
 		needGUpdate = true;
 		return;
 	}
-	if( topProc.gUpdateFlag() ){
+	if( topProc._gUpdateFlag ){
 		canvasPut( x, y );
 	}
 }
@@ -1029,7 +1008,7 @@ function gWorldFill( gWorld, x, y, w, h ){
 		needGUpdate = true;
 		return;
 	}
-	if( topProc.gUpdateFlag() ){
+	if( topProc._gUpdateFlag ){
 		canvasFill( x, y, w, h );
 	}
 }
@@ -1038,29 +1017,35 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
 		needGUpdate = true;
 		return;
 	}
-	if( topProc.gUpdateFlag() ){
+	if( topProc._gUpdateFlag ){
 		canvasLine( x1, y1, x2, y2 );
 	}
 }
+function gWorldTextColor( gWorld, text, x, y, color, right ){
+	if( lockGUpdate ){
+		needGUpdate = true;
+		return;
+	}
+}
 function doCommandGColor( index, rgb ){
-	COLOR_WIN[index] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
+	COLOR_WIN[index] = _RGB2BGR( rgb );
 	needGUpdate = true;
 }
 function doCommandGPut24( x, y, rgb ){
-	canvas.setColor( (rgb & 0xFF0000) >> 16, (rgb & 0x00FF00) >> 8, rgb & 0x0000FF );
+	canvas.setColorRGB( rgb );
 	canvasPut( x, y );
 }
 function doCommandGPut24End(){
-	canvasSetColor( COLOR_WIN[topProc.gWorld().color()] );
+	canvasSetColor( COLOR_WIN[procGWorld()._color] );
 	needGUpdate = false;
 }
 function gUpdate( gWorld ){
 	canvasClear();
 
-	var image  = gWorld.image ();
-	var offset = gWorld.offset();
-	var width  = gWorld.width ();
-	var height = gWorld.height();
+	var image  = gWorld._image;
+	var offset = gWorld._offset;
+	var width  = gWorld._width;
+	var height = gWorld._height;
 	var x, y, yy;
 	for( y = 0; y < height; y++ ){
 		yy = y * offset;
@@ -1069,7 +1054,7 @@ function gUpdate( gWorld ){
 			canvasPut( x, y );
 		}
 	}
-	canvasSetColor( COLOR_WIN[gWorld.color()] );
+	canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function doCommandGUpdate( gWorld ){
 	if( lockGUpdate ){
@@ -1080,10 +1065,10 @@ function doCommandGUpdate( gWorld ){
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false/*グラフィック画面更新OFF*/ );
-	var childParam = new _Param( parentProc.curNum(), parentParam, true );
-	childParam.setEnableCommand( false );
-	childParam.setEnableStat( false );
+	var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+	childParam._enableCommand = false;
+	childParam._enableStat = false;
 _TRY
 	parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
 _CATCH
@@ -1092,10 +1077,10 @@ _CATCH
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false/*グラフィック画面更新OFF*/ );
-	var childParam = new _Param( parentProc.curNum(), parentParam, true );
-	childParam.setEnableCommand( false );
-	childParam.setEnableStat( false );
+	var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+	childParam._enableCommand = false;
+	childParam._enableStat = false;
 _TRY
 	parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 _CATCH
@@ -1108,14 +1093,14 @@ function doCommandUsage( topUsage ){
 	}
 	var cur = topUsage;
 	while( cur != null ){
-		if( cur.string() != null ){
-			con.print( (new _String( cur.string() )).escape().str() );
+		if( cur._string != null ){
+			con.print( (new _String( cur._string )).escape().str() );
 			if( addExtFuncList ){
 				break;
 			}
 			con.println();
 		}
-		cur = cur.next();
+		cur = cur._next;
 	}
 	if( !addExtFuncList ){
 		con.setColor();
@@ -1133,7 +1118,7 @@ function doCommandDumpVar( param, index ){
 
 	if( (label = param._var._label._label[index]) != null ){
 		string = label;
-		if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
+		if( param._var._label._flag[index] != _LABEL_MOVABLE ){
 			string += "(@" + String.fromCharCode( index ) + ")";
 		}
 	} else {
@@ -1152,7 +1137,7 @@ function doCommandDumpArray( param, index ){
 
 	if( (label = param._array._label._label[index]) != null ){
 		string = label;
-		if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
+		if( param._array._label._flag[index] != _LABEL_MOVABLE ){
 			string += "(@@" + String.fromCharCode( index ) + ")";
 		}
 	} else {
@@ -1183,11 +1168,11 @@ function doCustomCommand( _this, param, code, token ){
 	case _CLIP_COMMAND_CUSTOM_ENV:
 		con.setColor( "0000ff" );
 
-		con.println( "calculator " + (param.isCalculator() ? "TRUE" : "FALSE") );
+		con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
 
-		con.println( (param.base() == 0) ? "zero-based" : "one-based" );
+		con.println( (param._base == 0) ? "zero-based" : "one-based" );
 
-		switch( param.mode() ){
+		switch( param._mode ){
 		case _CLIP_MODE_E_FLOAT:   con.print( "efloat"   ); break;
 		case _CLIP_MODE_F_FLOAT:   con.print( "float"    ); break;
 		case _CLIP_MODE_G_FLOAT:   con.print( "gfloat"   ); break;
@@ -1207,46 +1192,46 @@ function doCustomCommand( _this, param, code, token ){
 		case _CLIP_MODE_S_LONG:    con.print( "long"     ); break;
 		case _CLIP_MODE_U_LONG:    con.print( "ulong"    ); break;
 		}
-		con.print( ", " ); con.print( "fps " + param.fps() );
-		con.print( ", " ); con.print( "prec " + param.prec() );
-		con.print( ", " ); con.print( "radix " + param.radix() );
+		con.print( ", " ); con.print( "fps " + param._fps );
+		con.print( ", " ); con.print( "prec " + param._prec );
+		con.print( ", " ); con.print( "radix " + param._radix );
 		con.print( ", " );
 		var type       = new _Integer();
 		var updateFlag = new _Boolean();
 		_this.getAngType( type, updateFlag );
-		switch( type.val() ){
+		switch( type._val ){
 		case _ANG_TYPE_RAD:  con.print( "rad"  ); break;
 		case _ANG_TYPE_DEG:  con.print( "deg"  ); break;
 		case _ANG_TYPE_GRAD: con.print( "grad" ); break;
 		}
 		con.println();
 
-		con.print( "assert " + (_this.assertFlag() ? "TRUE" : "FALSE") );
-		con.print( ", " ); con.print( "warn "    + (_this.warnFlag()    ? "TRUE" : "FALSE") );
-//		con.print( ", " ); con.print( "gupdate " + (_this.gUpdateFlag() ? "TRUE" : "FALSE") );
+		con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
+		con.print( ", " ); con.print( "warn "    + (_this._printWarn   ? "TRUE" : "FALSE") );
+//		con.print( ", " ); con.print( "gupdate " + (_this._gUpdateFlag ? "TRUE" : "FALSE") );
 		con.println();
 
-		var left   = _this.gWorld().wndPosX( 0                       );
-		var top    = _this.gWorld().wndPosY( 0                       );
-		var right  = _this.gWorld().wndPosX( _this.gWorld().width () );
-		var bottom = _this.gWorld().wndPosY( _this.gWorld().height() );
-		con.println( "gworld " + _this.gWorld().width() + " " + _this.gWorld().height() );
+		var left   = procGWorld().wndPosX( 0                    );
+		var top    = procGWorld().wndPosY( 0                    );
+		var right  = procGWorld().wndPosX( procGWorld()._width  );
+		var bottom = procGWorld().wndPosY( procGWorld()._height );
+		con.println( "gworld " + procGWorld()._width + " " + procGWorld()._height );
 		con.println( "window " + left + " " + bottom + " " + right + " " + top );
 
-		switch( _this.graph().mode() ){
+		switch( procGraph().mode() ){
 		case _GRAPH_MODE_RECT:  con.print( "rectangular" ); break;
 		case _GRAPH_MODE_PARAM: con.print( "parametric"  ); break;
 		case _GRAPH_MODE_POLAR: con.print( "polar"       ); break;
 		}
 		con.print( ", " );
-		if( _this.graph().isLogScaleX() ){
-			con.print( "logscale x " + _this.graph().logBaseX() );
+		if( procGraph().isLogScaleX() ){
+			con.print( "logscale x " + procGraph().logBaseX() );
 		} else {
 			con.print( "nologscale x" );
 		}
 		con.print( ", " );
-		if( _this.graph().isLogScaleY() ){
-			con.print( "logscale y " + _this.graph().logBaseY() );
+		if( procGraph().isLogScaleY() ){
+			con.print( "logscale y " + procGraph().logBaseY() );
 		} else {
 			con.print( "nologscale y" );
 		}
@@ -1259,7 +1244,7 @@ function doCustomCommand( _this, param, code, token ){
 	case _CLIP_COMMAND_CUSTOM_LISTD:
 		var newCode;
 		var newToken;
-		if( _this.curLine().getTokenParam( param ) ){
+		if( _this._curLine._token.getTokenParam( param ) ){
 			newCode  = getCode();
 			newToken = getToken();
 			if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
@@ -1276,7 +1261,7 @@ function doCustomCommand( _this, param, code, token ){
 
 				if( (label = param._array._label._label[index]) != null ){
 					string = label;
-					if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
+					if( param._array._label._flag[index] != _LABEL_MOVABLE ){
 						string += "(@@" + String.fromCharCode( index ) + ")";
 					} else if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
 						string += "(@@:" + index + ")";
@@ -1348,7 +1333,7 @@ function doCustomCommand( _this, param, code, token ){
 					} else {
 						if( step == 0 ){
 							if( (label = param._var._label._label[index]) != null ){
-								if( param._var._label.flag( index ) == _LABEL_MOVABLE ){
+								if( param._var._label._flag[index] == _LABEL_MOVABLE ){
 									_token.valueToString( param, param.val( index ), real, imag );
 									if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
 										tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
@@ -1361,7 +1346,7 @@ function doCustomCommand( _this, param, code, token ){
 						}
 						if( step == 2 ){
 							if( (label = param._var._label._label[index]) != null ){
-								if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
+								if( param._var._label._flag[index] != _LABEL_MOVABLE ){
 									_token.valueToString( param, param.val( index ), real, imag );
 									tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
 									i++;
@@ -1435,7 +1420,7 @@ function doCustomCommand( _this, param, code, token ){
 		break;
 	case _CLIP_COMMAND_CUSTOM_USAGE:
 		var newToken;
-		if( _this.curLine().getToken() ){
+		if( _this._curLine._token.getToken() ){
 			newToken = getToken();
 			if( getCode() == _CLIP_CODE_EXTFUNC ){
 				_this.usage( newToken, param, true/*キャッシュON*/ );
@@ -1490,7 +1475,7 @@ function onEndPlot(){
 	var token = new _String();
 	for( var i = 0; i < procError.num(); i++ ){
 		procError.get( i, err, num, func, token );
-		errorProc( err.val(), num.val(), func.str(), token.str() );
+		errorProc( err._val, num._val, func.str(), token.str() );
 	}
 	procError.delAll();
 }
@@ -1499,9 +1484,6 @@ function onStartRePlot(){
 }
 function onEndRePlot(){
 	onEndPlot();
-}
-
-function addLogExpr(){
 }
 
 function updateLanguage(){

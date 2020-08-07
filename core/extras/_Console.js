@@ -11,6 +11,8 @@ function consoleBreak(){
 
 // コンソール
 function _Console( id ){
+	if( window.onConsoleUpdate == undefined ) window.onConsoleUpdate = function( id ){};
+
 	this._id         = id;
 	this._div        = document.getElementById( this._id );
 	this._html       = "";
@@ -166,5 +168,3 @@ _Console.prototype = {
 	}
 
 };
-
-//function onConsoleUpdate( id ){}

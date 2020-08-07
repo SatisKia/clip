@@ -3,15 +3,6 @@
  * Copyright (C) SatisKia. All rights reserved.
  */
 
-var _matrix_err = false;	// エラーが起こったかどうかのフラグ
-
-function clearMatrixError(){
-	_matrix_err = false;
-}
-function matrixError(){
-	return _matrix_err;
-}
-
 // 行列
 function _Matrix( row, col ){
 	this._row = (row == undefined) ? 1 : row;	// 行数

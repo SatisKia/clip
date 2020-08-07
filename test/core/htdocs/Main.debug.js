@@ -3,1248 +3,6 @@ var traceLevel = 0;
 var traceString = new String();
 var extFuncFile = new Array();
 var extFuncData = new Array();
-var COLOR_WIN = [
- 0x000000, 0x000080, 0x008000, 0x008080, 0x800000, 0x800080, 0x808000, 0x808080,
- 0xC0DCC0, 0xF0CAA6,
-                     0xAA3F2A, 0xFF3F2A, 0x005F2A, 0x555F2A, 0xAA5F2A, 0xFF5F2A,
- 0x007F2A, 0x557F2A, 0xAA7F2A, 0xFF7F2A, 0x009F2A, 0x559F2A, 0xAA9F2A, 0xFF9F2A,
- 0x00BF2A, 0x55BF2A, 0xAABF2A, 0xFFBF2A, 0x00DF2A, 0x55DF2A, 0xAADF2A, 0xFFDF2A,
- 0x00FF2A, 0x55FF2A, 0xAAFF2A, 0xFFFF2A,
- 0x000055, 0x550055, 0xAA0055, 0xFF0055, 0x001F55, 0x551F55, 0xAA1F55, 0xFF1F55,
- 0x003F55, 0x553F55, 0xAA3F55, 0xFF3F55, 0x005F55, 0x555F55, 0xAA5F55, 0xFF5F55,
- 0x007F55, 0x557F55, 0xAA7F55, 0xFF7F55, 0x009F55, 0x559F55, 0xAA9F55, 0xFF9F55,
- 0x00BF55, 0x55BF55, 0xAABF55, 0xFFBF55, 0x00DF55, 0x55DF55, 0xAADF55, 0xFFDF55,
- 0x00FF55, 0x55FF55, 0xAAFF55, 0xFFFF55,
- 0x00007F, 0x55007F, 0xAA007F, 0xFF007F, 0x001F7F, 0x551F7F, 0xAA1F7F, 0xFF1F7F,
- 0x003F7F, 0x553F7F, 0xAA3F7F, 0xFF3F7F, 0x005F7F, 0x555F7F, 0xAA5F7F, 0xFF5F7F,
- 0x007F7F, 0x557F7F, 0xAA7F7F, 0xFF7F7F, 0x009F7F, 0x559F7F, 0xAA9F7F, 0xFF9F7F,
- 0x00BF7F, 0x55BF7F, 0xAABF7F, 0xFFBF7F, 0x00DF7F, 0x55DF7F, 0xAADF7F, 0xFFDF7F,
- 0x00FF7F, 0x55FF7F, 0xAAFF7F, 0xFFFF7F,
-
- 0x0000AA, 0x5500AA, 0xAA00AA, 0xFF00AA, 0x001FAA, 0x551FAA, 0xAA1FAA, 0xFF1FAA,
- 0x003FAA, 0x553FAA, 0xAA3FAA, 0xFF3FAA, 0x005FAA, 0x555FAA, 0xAA5FAA, 0xFF5FAA,
- 0x007FAA, 0x557FAA, 0xAA7FAA, 0xFF7FAA, 0x009FAA, 0x559FAA, 0xAA9FAA, 0xFF9FAA,
- 0x00BFAA, 0x55BFAA, 0xAABFAA, 0xFFBFAA, 0x00DFAA, 0x55DFAA, 0xAADFAA, 0xFFDFAA,
- 0x00FFAA, 0x55FFAA, 0xAAFFAA, 0xFFFFAA,
-
- 0x0000D4, 0x5500D4, 0xAA00D4, 0xFF00D4, 0x001FD4, 0x551FD4, 0xAA1FD4, 0xFF1FD4,
- 0x003FD4, 0x553FD4, 0xAA3FD4, 0xFF3FD4, 0x005FD4, 0x555FD4, 0xAA5FD4, 0xFF5FD4,
- 0x007FD4, 0x557FD4, 0xAA7FD4, 0xFF7FD4, 0x009FD4, 0x559FD4, 0xAA9FD4, 0xFF9FD4,
- 0x00BFD4, 0x55BFD4, 0xAABFD4, 0xFFBFD4, 0x00DFD4, 0x55DFD4, 0xAADFD4, 0xFFDFD4,
- 0x00FFD4, 0x55FFD4, 0xAAFFD4, 0xFFFFD4,
-
-           0x5500FF, 0xAA00FF, 0x001FFF, 0x551FFF, 0xAA1FFF, 0xFF1FFF,
- 0x003FFF, 0x553FFF, 0xAA3FFF, 0xFF3FFF, 0x005FFF, 0x555FFF, 0xAA5FFF, 0xFF5FFF,
- 0x007FFF, 0x557FFF, 0xAA7FFF, 0xFF7FFF, 0x009FFF, 0x559FFF, 0xAA9FFF, 0xFF9FFF,
- 0x00BFFF, 0x55BFFF, 0xAABFFF, 0xFFBFFF, 0x00DFFF, 0x55DFFF, 0xAADFFF, 0xFFDFFF,
-           0x55FFFF, 0xAAFFFF,
-
- 0xFFCCCC, 0xFFCCFF, 0xFFFF33, 0xFFFF66, 0xFFFF99, 0xFFFFCC,
-
- 0x007F00, 0x557F00, 0xAA7F00, 0xFF7F00, 0x009F00, 0x559F00, 0xAA9F00, 0xFF9F00,
- 0x00BF00, 0x55BF00, 0xAABF00, 0xFFBF00, 0x00DF00, 0x55DF00, 0xAADF00, 0xFFDF00,
-           0x55FF00, 0xAAFF00,
-
- 0x00002A, 0x55002A, 0xAA002A, 0xFF002A, 0x001F2A, 0x551F2A, 0xAA1F2A, 0xFF1F2A,
- 0x003F2A, 0x553F2A,
-
-                                                             0xF0FBFF, 0xA4A0A0,
- 0xC0C0C0, 0x0000FF, 0x00FF00, 0x00FFFF, 0xFF0000, 0xFF00FF, 0xFFFF00, 0xFFFFFF
-
-];
-function regGWorldDefCharInfo( i ){
- newGWorldCharInfo( i );
- regGWorldCharInfo( i, _CHAR( '0' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( '1' ), 4, 7, 1, 2, 7, "01110101010101" );
- regGWorldCharInfo( i, _CHAR( '2' ), 5, 7, 1, 4, 7, "0110100100010010010010001111" );
- regGWorldCharInfo( i, _CHAR( '3' ), 5, 7, 1, 4, 7, "011010010001001000011001011" );
- regGWorldCharInfo( i, _CHAR( '4' ), 5, 7, 1, 4, 7, "001001101010101011110010001" );
- regGWorldCharInfo( i, _CHAR( '5' ), 5, 7, 1, 4, 7, "111110001110100100011001011" );
- regGWorldCharInfo( i, _CHAR( '6' ), 5, 7, 1, 4, 7, "011010011000111010011001011" );
- regGWorldCharInfo( i, _CHAR( '7' ), 5, 7, 1, 4, 7, "11110001000100100010010001" );
- regGWorldCharInfo( i, _CHAR( '8' ), 5, 7, 1, 4, 7, "011010011001011010011001011" );
- regGWorldCharInfo( i, _CHAR( '9' ), 5, 7, 1, 4, 7, "011010011001011100011001011" );
- regGWorldCharInfo( i, _CHAR( 'A' ), 5, 7, 1, 4, 7, "0110100110011111100110011001" );
- regGWorldCharInfo( i, _CHAR( 'B' ), 5, 7, 1, 4, 7, "111010011001111010011001111" );
- regGWorldCharInfo( i, _CHAR( 'C' ), 5, 7, 1, 4, 7, "011010011000100010001001011" );
- regGWorldCharInfo( i, _CHAR( 'D' ), 5, 7, 1, 4, 7, "111010011001100110011001111" );
- regGWorldCharInfo( i, _CHAR( 'E' ), 5, 7, 1, 4, 7, "1111100010001111100010001111" );
- regGWorldCharInfo( i, _CHAR( 'F' ), 5, 7, 1, 4, 7, "1111100010001111100010001" );
- regGWorldCharInfo( i, _CHAR( 'G' ), 5, 7, 1, 4, 7, "011010011000101110011001011" );
- regGWorldCharInfo( i, _CHAR( 'H' ), 5, 7, 1, 4, 7, "1001100110011111100110011001" );
- regGWorldCharInfo( i, _CHAR( 'I' ), 4, 7, 1, 3, 7, "111010010010010010111" );
- regGWorldCharInfo( i, _CHAR( 'J' ), 5, 7, 1, 4, 7, "000100010001000100011001011" );
- regGWorldCharInfo( i, _CHAR( 'K' ), 5, 7, 1, 4, 7, "1001100110101100101010011001" );
- regGWorldCharInfo( i, _CHAR( 'L' ), 5, 7, 1, 4, 7, "1000100010001000100010001111" );
- regGWorldCharInfo( i, _CHAR( 'M' ), 6, 7, 1, 5, 7, "10001100011101111011101011010110101" );
- regGWorldCharInfo( i, _CHAR( 'N' ), 5, 7, 1, 4, 7, "1001110111011011101110011001" );
- regGWorldCharInfo( i, _CHAR( 'O' ), 5, 7, 1, 4, 7, "011010011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'P' ), 5, 7, 1, 4, 7, "1110100110011110100010001" );
- regGWorldCharInfo( i, _CHAR( 'Q' ), 5, 7, 1, 4, 7, "0110100110011101101110110111" );
- regGWorldCharInfo( i, _CHAR( 'R' ), 5, 7, 1, 4, 7, "1110100110011110100110011001" );
- regGWorldCharInfo( i, _CHAR( 'S' ), 5, 7, 1, 4, 7, "011010011000011000011001011" );
- regGWorldCharInfo( i, _CHAR( 'T' ), 5, 7, 1, 4, 7, "111100100010001000100010001" );
- regGWorldCharInfo( i, _CHAR( 'U' ), 5, 7, 1, 4, 7, "100110011001100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'V' ), 5, 7, 1, 4, 7, "100110011001010101010010001" );
- regGWorldCharInfo( i, _CHAR( 'W' ), 6, 7, 1, 5, 7, "1010110101101011010101010010100101" );
- regGWorldCharInfo( i, _CHAR( 'X' ), 5, 7, 1, 4, 7, "1001100110010110100110011001" );
- regGWorldCharInfo( i, _CHAR( 'Y' ), 5, 7, 1, 4, 7, "100110011001010100100010001" );
- regGWorldCharInfo( i, _CHAR( 'Z' ), 5, 7, 1, 4, 7, "1111000100100100100010001111" );
- regGWorldCharInfo( i, _CHAR( 'a' ), 5, 7, 1, 4, 5, "01100001011110010111" );
- regGWorldCharInfo( i, _CHAR( 'b' ), 5, 7, 1, 4, 7, "100010001110100110011001111" );
- regGWorldCharInfo( i, _CHAR( 'c' ), 5, 7, 1, 4, 5, "0110100110001001011" );
- regGWorldCharInfo( i, _CHAR( 'd' ), 5, 7, 1, 4, 7, "0001000101111001100110010111" );
- regGWorldCharInfo( i, _CHAR( 'e' ), 5, 7, 1, 4, 5, "01101001111110000111" );
- regGWorldCharInfo( i, _CHAR( 'f' ), 4, 7, 1, 3, 7, "00101011101001001001" );
- regGWorldCharInfo( i, _CHAR( 'g' ), 5, 7, 1, 4, 5, "01111001100101110001111" );
- regGWorldCharInfo( i, _CHAR( 'h' ), 5, 7, 1, 4, 7, "1000100011101001100110011001" );
- regGWorldCharInfo( i, _CHAR( 'i' ), 3, 7, 1, 1, 7, "1011111" );
- regGWorldCharInfo( i, _CHAR( 'j' ), 4, 7, 1, 2, 7, "010001010101011" );
- regGWorldCharInfo( i, _CHAR( 'k' ), 5, 7, 1, 4, 7, "1000100010011010110010101001" );
- regGWorldCharInfo( i, _CHAR( 'l' ), 3, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( i, _CHAR( 'm' ), 6, 7, 1, 5, 5, "1101010101101011010110101" );
- regGWorldCharInfo( i, _CHAR( 'n' ), 5, 7, 1, 4, 5, "11101001100110011001" );
- regGWorldCharInfo( i, _CHAR( 'o' ), 5, 7, 1, 4, 5, "0110100110011001011" );
- regGWorldCharInfo( i, _CHAR( 'p' ), 5, 7, 1, 4, 5, "111010011001111010001" );
- regGWorldCharInfo( i, _CHAR( 'q' ), 5, 7, 1, 4, 5, "011110011001011100010001" );
- regGWorldCharInfo( i, _CHAR( 'r' ), 5, 7, 1, 4, 5, "10111100100010001" );
- regGWorldCharInfo( i, _CHAR( 's' ), 5, 7, 1, 4, 5, "0111100001100001111" );
- regGWorldCharInfo( i, _CHAR( 't' ), 4, 7, 1, 3, 6, "010111010010010001" );
- regGWorldCharInfo( i, _CHAR( 'u' ), 5, 7, 1, 4, 5, "10011001100110010111" );
- regGWorldCharInfo( i, _CHAR( 'v' ), 5, 7, 1, 4, 5, "1001100101010101001" );
- regGWorldCharInfo( i, _CHAR( 'w' ), 6, 7, 1, 5, 5, "101011010110101010100101" );
- regGWorldCharInfo( i, _CHAR( 'x' ), 5, 7, 1, 4, 5, "10011001011010011001" );
- regGWorldCharInfo( i, _CHAR( 'y' ), 5, 7, 1, 4, 5, "10011001100101110001111" );
- regGWorldCharInfo( i, _CHAR( 'z' ), 5, 7, 1, 4, 5, "11110001011010001111" );
- regGWorldCharInfo( i, _CHAR( ' ' ), 5, 7, 1, 4, 7, "" );
- regGWorldCharInfo( i, _CHAR( '!' ), 2, 7, 1, 1, 7, "1111101" );
- regGWorldCharInfo( i, _CHAR( '"' ), 5, 7, 1, 4, 7, "01010101101" );
- regGWorldCharInfo( i, _CHAR( '#' ), 6, 7, 1, 5, 7, "0101011111010100101001010111110101" );
- regGWorldCharInfo( i, _CHAR( '$' ), 6, 7, 1, 5, 7, "001000111110100011100010111110001" );
- regGWorldCharInfo( i, _CHAR( '%' ), 6, 7, 1, 5, 7, "0100110110010100010001010011011001" );
- regGWorldCharInfo( i, _CHAR( '&' ), 6, 7, 1, 5, 7, "01100100100110010101101011001001101" );
- regGWorldCharInfo( i, _CHAR( '\'' ), 3, 7, 1, 2, 7, "01011" );
- regGWorldCharInfo( i, _CHAR( '(' ), 4, 7, 1, 3, 7, "001010100100100010001" );
- regGWorldCharInfo( i, _CHAR( ')' ), 4, 7, 1, 3, 7, "1000100010010010101" );
- regGWorldCharInfo( i, _CHAR( '*' ), 6, 7, 1, 5, 6, "00100101010111010101001" );
- regGWorldCharInfo( i, _CHAR( '+' ), 4, 7, 1, 3, 6, "01001011101001" );
- regGWorldCharInfo( i, _CHAR( ',' ), 3, 7, 1, 2, 2, "01011" );
- regGWorldCharInfo( i, _CHAR( '-' ), 4, 7, 1, 3, 4, "111" );
- regGWorldCharInfo( i, _CHAR( '.' ), 2, 7, 1, 1, 1, "1" );
- regGWorldCharInfo( i, _CHAR( '/' ), 6, 7, 1, 5, 7, "0000100010000100010001000010001" );
- regGWorldCharInfo( i, _CHAR( ':' ), 2, 7, 1, 1, 5, "1001" );
- regGWorldCharInfo( i, _CHAR( ';' ), 3, 7, 1, 2, 5, "010000011" );
- regGWorldCharInfo( i, _CHAR( '<' ), 5, 7, 1, 4, 7, "0001001001001000010000100001" );
- regGWorldCharInfo( i, _CHAR( '=' ), 4, 7, 1, 3, 5, "111000000111" );
- regGWorldCharInfo( i, _CHAR( '>' ), 5, 7, 1, 4, 7, "1000010000100001001001001" );
- regGWorldCharInfo( i, _CHAR( '?' ), 5, 7, 1, 4, 7, "01101001001001000100000001" );
- regGWorldCharInfo( i, _CHAR( '@' ), 6, 7, 1, 5, 7, "0111010001111011010111110100000111" );
- regGWorldCharInfo( i, _CHAR( '[' ), 4, 7, 1, 3, 7, "111100100100100100111" );
- regGWorldCharInfo( i, _CHAR( '\\' ), 6, 7, 1, 5, 7, "100010101011111001001111100100001" );
- regGWorldCharInfo( i, _CHAR( ']' ), 4, 7, 1, 3, 7, "111001001001001001111" );
- regGWorldCharInfo( i, _CHAR( '^' ), 4, 7, 1, 3, 7, "010101" );
- regGWorldCharInfo( i, _CHAR( '_' ), 5, 7, 1, 4, 1, "1111" );
- regGWorldCharInfo( i, _CHAR( '`' ), 3, 7, 1, 2, 7, "101001" );
- regGWorldCharInfo( i, _CHAR( '{' ), 4, 7, 1, 3, 7, "011010010100010010011" );
- regGWorldCharInfo( i, _CHAR( '|' ), 2, 7, 1, 1, 7, "1111111" );
- regGWorldCharInfo( i, _CHAR( '}' ), 4, 7, 1, 3, 7, "11001001000101001011" );
- regGWorldCharInfo( i, _CHAR( '~' ), 5, 7, 1, 4, 7, "0101101" );
-}
-function regGWorldDefCharInfoLarge( i ){
- newGWorldCharInfo( i );
- regGWorldCharInfo( i, _CHAR( '0' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '1' ), 11, 12, 4, 10, 11,
-  "0000110000" +
-  "0011010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0011111110"
-  );
- regGWorldCharInfo( i, _CHAR( '2' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0100000010" +
-  "0000000010" +
-  "0000000100" +
-  "0000001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000010" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '3' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0000000100" +
-  "0000000100" +
-  "0000111000" +
-  "0000000100" +
-  "0000000010" +
-  "0000000010" +
-  "0000000010" +
-  "0100000100" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( '4' ), 11, 12, 4, 10, 11,
-  "0000011000" +
-  "0000101000" +
-  "0000101000" +
-  "0001001000" +
-  "0010001000" +
-  "0010001000" +
-  "0100001000" +
-  "0111111100" +
-  "0000001000" +
-  "0000001000" +
-  "0000111100"
-  );
- regGWorldCharInfo( i, _CHAR( '5' ), 11, 12, 4, 10, 11,
-  "0011111100" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010111000" +
-  "0011000100" +
-  "0000000010" +
-  "0000000010" +
-  "0000000010" +
-  "0110000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '6' ), 11, 12, 4, 10, 11,
-  "0000011110" +
-  "0001100000" +
-  "0010000000" +
-  "0010000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0010000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '7' ), 11, 12, 4, 10, 11,
-  "0111111100" +
-  "0100000100" +
-  "0000000100" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '8' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '9' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0010001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0010001100" +
-  "0001110100" +
-  "0000000100" +
-  "0000001000" +
-  "0000110000" +
-  "0111000000"
-  );
- regGWorldCharInfo( i, _CHAR( 'A' ), 11, 12, 4, 10, 10,
-  "0111110000" +
-  "0000110000" +
-  "0001001000" +
-  "0001001000" +
-  "0010000100" +
-  "0010000100" +
-  "0011111100" +
-  "0100000010" +
-  "0100000010" +
-  "1111001111"
-  );
- regGWorldCharInfo( i, _CHAR( 'B' ), 11, 12, 4, 10, 10,
-  "1111111000" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0111111000" +
-  "0100000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "1111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'C' ), 11, 12, 4, 10, 10,
-  "0001111010" +
-  "0110000110" +
-  "0100000010" +
-  "1000000000" +
-  "1000000000" +
-  "1000000000" +
-  "1000000000" +
-  "0100000010" +
-  "0110000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'D' ), 11, 12, 4, 10, 10,
-  "1111110000" +
-  "0100001100" +
-  "0100000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000100" +
-  "0100001100" +
-  "1111110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'E' ), 11, 12, 4, 10, 10,
-  "1111111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100010000" +
-  "0111110000" +
-  "0100010000" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "1111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'F' ), 11, 12, 4, 10, 10,
-  "1111111110" +
-  "0100000010" +
-  "0100000010" +
-  "0100010000" +
-  "0111110000" +
-  "0100010000" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "1111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'G' ), 11, 12, 4, 10, 10,
-  "0001111010" +
-  "0110000110" +
-  "0100000010" +
-  "1000000000" +
-  "1000000000" +
-  "1000011111" +
-  "1000000010" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'H' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0111111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1110001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'I' ), 11, 12, 4, 10, 10,
-  "0111111100" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'J' ), 11, 12, 4, 10, 10,
-  "0001111110" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "1000001000" +
-  "1000001000" +
-  "1000001000" +
-  "0100011000" +
-  "0011110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'K' ), 11, 12, 4, 10, 10,
-  "1111001110" +
-  "0100000100" +
-  "0100001000" +
-  "0100010000" +
-  "0101100000" +
-  "0110010000" +
-  "0100001000" +
-  "0100001000" +
-  "0100000100" +
-  "1111000111"
-  );
- regGWorldCharInfo( i, _CHAR( 'L' ), 11, 12, 4, 10, 10,
-  "1111100000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000010" +
-  "0010000010" +
-  "0010000010" +
-  "1111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'M' ), 11, 12, 4, 10, 10,
-  "1100000011" +
-  "0110000110" +
-  "0101000110" +
-  "0101001010" +
-  "0100101010" +
-  "0100110010" +
-  "0100010010" +
-  "0100000010" +
-  "0100000010" +
-  "1110000111"
-  );
- regGWorldCharInfo( i, _CHAR( 'N' ), 11, 12, 4, 10, 10,
-  "1100001110" +
-  "0110000100" +
-  "0101000100" +
-  "0101000100" +
-  "0100100100" +
-  "0100100100" +
-  "0100010100" +
-  "0100010100" +
-  "0100001100" +
-  "1110000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'O' ), 11, 12, 4, 10, 10,
-  "0001111000" +
-  "0110000110" +
-  "0100000010" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'P' ), 11, 12, 4, 10, 10,
-  "1111111000" +
-  "0010000100" +
-  "0010000010" +
-  "0010000010" +
-  "0010000100" +
-  "0011111000" +
-  "0010000000" +
-  "0010000000" +
-  "0010000000" +
-  "1111110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'Q' ), 11, 12, 4, 10, 10,
-  "0001111000" +
-  "0110000110" +
-  "0100000010" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "1000000001" +
-  "0100000010" +
-  "0110000110" +
-  "0001111000" +
-  "0000100000" +
-  "0001111001" +
-  "0010000110"
-  );
- regGWorldCharInfo( i, _CHAR( 'R' ), 11, 12, 4, 10, 10,
-  "1111110000" +
-  "0100001000" +
-  "0100000100" +
-  "0100000100" +
-  "0100001000" +
-  "0111110000" +
-  "0100001000" +
-  "0100001000" +
-  "0100000100" +
-  "1111000110"
-  );
- regGWorldCharInfo( i, _CHAR( 'S' ), 11, 12, 4, 10, 10,
-  "0011110100" +
-  "0100001100" +
-  "1000000100" +
-  "1100000000" +
-  "0011110000" +
-  "0000001100" +
-  "0000000010" +
-  "1000000010" +
-  "1100000100" +
-  "1011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'T' ), 11, 12, 4, 10, 10,
-  "1111111110" +
-  "1000100010" +
-  "1000100010" +
-  "1000100010" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'U' ), 11, 12, 4, 10, 10,
-  "1111001111" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'V' ), 11, 12, 4, 10, 10,
-  "1111001111" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0001001000" +
-  "0001001000" +
-  "0000110000" +
-  "0000110000"
-  );
- regGWorldCharInfo( i, _CHAR( 'W' ), 11, 12, 4, 10, 10,
-  "1111000111" +
-  "0100000001" +
-  "0100010001" +
-  "0100010001" +
-  "0100110010" +
-  "0010101010" +
-  "0010101010" +
-  "0011000110" +
-  "0011000110" +
-  "0001000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'X' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0010001000" +
-  "0001010000" +
-  "0000100000" +
-  "0000100000" +
-  "0001010000" +
-  "0010001000" +
-  "0100000100" +
-  "1110001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'Y' ), 11, 12, 4, 10, 10,
-  "1110001110" +
-  "0100000100" +
-  "0010001000" +
-  "0001010000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'Z' ), 11, 12, 4, 10, 10,
-  "0111111110" +
-  "0100000010" +
-  "0100000100" +
-  "0100001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000010" +
-  "0010000010" +
-  "0100000010" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'a' ), 11, 12, 4, 10, 8,
-  "0001111000" +
-  "0110000100" +
-  "0000000100" +
-  "0011111100" +
-  "0100000100" +
-  "0100000100" +
-  "0100001100" +
-  "0011110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'b' ), 11, 12, 4, 10, 11,
-  "1100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0110000100" +
-  "1101111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'c' ), 11, 12, 4, 10, 8,
-  "0001111010" +
-  "0010000110" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0010000110" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'd' ), 11, 12, 4, 10, 11,
-  "0000011100" +
-  "0000000100" +
-  "0000000100" +
-  "0011110100" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'e' ), 11, 12, 4, 10, 8,
-  "0011111000" +
-  "0100000100" +
-  "1000000010" +
-  "1111111110" +
-  "1000000000" +
-  "1000000000" +
-  "0100000110" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'f' ), 11, 12, 4, 10, 11,
-  "0000111000" +
-  "0001000110" +
-  "0001000000" +
-  "0111111100" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'g' ), 11, 12, 4, 10, 8,
-  "0011110110" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110100" +
-  "0000000100" +
-  "0000000100" +
-  "0011111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'h' ), 11, 12, 4, 10, 11,
-  "1100000000" +
-  "0100000000" +
-  "0100000000" +
-  "0101111000" +
-  "0110000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1111011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'i' ), 11, 12, 4, 10, 12,
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0000000000" +
-  "0011100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'j' ), 11, 12, 4, 10, 12,
-  "0000010000" +
-  "0000010000" +
-  "0000000000" +
-  "0000000000" +
-  "0111111000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000010000" +
-  "0111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'k' ), 11, 12, 4, 10, 11,
-  "1110000000" +
-  "0010000000" +
-  "0010000000" +
-  "0010011100" +
-  "0010001000" +
-  "0010010000" +
-  "0010100000" +
-  "0011100000" +
-  "0010010000" +
-  "0010001000" +
-  "1110011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'l' ), 11, 12, 4, 10, 11,
-  "0011110000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( 'm' ), 11, 12, 4, 10, 8,
-  "1101101100" +
-  "0110010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "0100010010" +
-  "1111011011"
-  );
- regGWorldCharInfo( i, _CHAR( 'n' ), 11, 12, 4, 10, 8,
-  "1101111000" +
-  "0110000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "0100000100" +
-  "1111001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'o' ), 11, 12, 4, 10, 8,
-  "0001111000" +
-  "0010000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0010000100" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( 'p' ), 11, 12, 4, 10, 8,
-  "1101111000" +
-  "0110000100" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0100000010" +
-  "0110000100" +
-  "0101111000" +
-  "0100000000" +
-  "0100000000" +
-  "1111000000"
-  );
- regGWorldCharInfo( i, _CHAR( 'q' ), 11, 12, 4, 10, 8,
-  "0011110110" +
-  "0100001100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "1000000100" +
-  "0100001100" +
-  "0011110100" +
-  "0000000100" +
-  "0000000100" +
-  "0000011110"
-  );
- regGWorldCharInfo( i, _CHAR( 'r' ), 11, 12, 4, 10, 8,
-  "0111011100" +
-  "0001100010" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( 's' ), 11, 12, 4, 10, 8,
-  "0011110100" +
-  "0100001100" +
-  "0100000000" +
-  "0011111000" +
-  "0000000100" +
-  "0000000010" +
-  "0110000100" +
-  "0101111000"
-  );
- regGWorldCharInfo( i, _CHAR( 't' ), 11, 12, 4, 10, 10,
-  "0001000000" +
-  "0001000000" +
-  "0111111100" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000010" +
-  "0000111100"
-  );
- regGWorldCharInfo( i, _CHAR( 'u' ), 11, 12, 4, 10, 8,
-  "0110011100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010000100" +
-  "0010001100" +
-  "0001110110"
-  );
- regGWorldCharInfo( i, _CHAR( 'v' ), 11, 12, 4, 10, 8,
-  "1110001110" +
-  "0100000100" +
-  "0100000100" +
-  "0010001000" +
-  "0010001000" +
-  "0001010000" +
-  "0001110000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'w' ), 11, 12, 4, 10, 8,
-  "1110000111" +
-  "0100000001" +
-  "0100010001" +
-  "0010110010" +
-  "0010111010" +
-  "0010101010" +
-  "0001101100" +
-  "0001000100"
-  );
- regGWorldCharInfo( i, _CHAR( 'x' ), 11, 12, 4, 10, 8,
-  "0111001110" +
-  "0010000100" +
-  "0001001000" +
-  "0000110000" +
-  "0000110000" +
-  "0001001000" +
-  "0010000100" +
-  "0111001110"
-  );
- regGWorldCharInfo( i, _CHAR( 'y' ), 11, 12, 4, 10, 8,
-  "1110000111" +
-  "0100000010" +
-  "0010000100" +
-  "0010000100" +
-  "0001001000" +
-  "0001010000" +
-  "0000110000" +
-  "0000100000" +
-  "0000100000" +
-  "0001000000" +
-  "0111100000"
-  );
- regGWorldCharInfo( i, _CHAR( 'z' ), 11, 12, 4, 10, 8,
-  "0111111100" +
-  "0100001000" +
-  "0000010000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000000" +
-  "0100000100" +
-  "0111111100"
-  );
- regGWorldCharInfo( i, _CHAR( ' ' ), 11, 12, 4, 10, 12,
-  ""
-  );
- regGWorldCharInfo( i, _CHAR( '!' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0001110000" +
-  "0001110000" +
-  "0001110000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '"' ), 11, 12, 4, 10, 11,
-  "0111011100" +
-  "0111011100" +
-  "0010001000" +
-  "0010001000" +
-  "0010001000"
-  );
- regGWorldCharInfo( i, _CHAR( '#' ), 11, 12, 4, 10, 11,
-  "0000101000" +
-  "0000101000" +
-  "0000101000" +
-  "0111111100" +
-  "0001010000" +
-  "0001010000" +
-  "0111111100" +
-  "0010100000" +
-  "0010100000" +
-  "0010100000" +
-  "0010100000"
-  );
- regGWorldCharInfo( i, _CHAR( '$' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0001110100" +
-  "0010001100" +
-  "0010000000" +
-  "0011000000" +
-  "0000111000" +
-  "0000000100" +
-  "0000000100" +
-  "0110000100" +
-  "0101111000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '%' ), 11, 12, 4, 10, 11,
-  "0011100000" +
-  "0100010000" +
-  "0100010000" +
-  "0011100000" +
-  "0000001110" +
-  "0001111000" +
-  "0111000000" +
-  "0000011100" +
-  "0000100010" +
-  "0000100010" +
-  "0000011100"
-  );
- regGWorldCharInfo( i, _CHAR( '&' ), 11, 12, 4, 10, 9,
-  "0001110000" +
-  "0010001000" +
-  "0010000000" +
-  "0001000000" +
-  "0011100000" +
-  "0100100100" +
-  "0100011000" +
-  "0100010000" +
-  "0011101100"
-  );
- regGWorldCharInfo( i, _CHAR( '\'' ), 11, 12, 4, 10, 11,
-  "0001110000" +
-  "0001110000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '(' ), 11, 12, 4, 10, 11,
-  "0000000100" +
-  "0000001000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000001000" +
-  "0000000100"
-  );
- regGWorldCharInfo( i, _CHAR( ')' ), 11, 12, 4, 10, 11,
-  "0010000000" +
-  "0001000000" +
-  "0000100000" +
-  "0000100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000100000" +
-  "0000100000" +
-  "0001000000" +
-  "0010000000"
-  );
- regGWorldCharInfo( i, _CHAR( '*' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0000100000" +
-  "0110101100" +
-  "0001110000" +
-  "0000100000" +
-  "0001010000" +
-  "0010001000"
-  );
- regGWorldCharInfo( i, _CHAR( '+' ), 11, 12, 4, 10, 10,
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "1111111110" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( ',' ), 11, 12, 4, 10, 3,
-  "0000111000" +
-  "0000110000" +
-  "0000110000" +
-  "0001100000" +
-  "0001000000"
-  );
- regGWorldCharInfo( i, _CHAR( '-' ), 11, 12, 4, 10, 5,
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '.' ), 11, 12, 4, 10, 2,
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '/' ), 11, 12, 4, 10, 12,
-  "0000000110" +
-  "0000000100" +
-  "0000001100" +
-  "0000001000" +
-  "0000011000" +
-  "0000010000" +
-  "0000110000" +
-  "0000100000" +
-  "0001100000" +
-  "0001000000" +
-  "0011000000" +
-  "0010000000" +
-  "0110000000"
-  );
- regGWorldCharInfo( i, _CHAR( ':' ), 11, 12, 4, 10, 8,
-  "0001110000" +
-  "0001110000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( ';' ), 11, 12, 4, 10, 8,
-  "0001110000" +
-  "0001110000" +
-  "0000000000" +
-  "0000000000" +
-  "0000000000" +
-  "0001110000" +
-  "0001100000" +
-  "0011000000" +
-  "0010000000"
-  );
- regGWorldCharInfo( i, _CHAR( '<' ), 11, 12, 4, 10, 9,
-  "0000000110" +
-  "0000011000" +
-  "0001100000" +
-  "0110000000" +
-  "0110000000" +
-  "0001100000" +
-  "0000011000" +
-  "0000000110"
-  );
- regGWorldCharInfo( i, _CHAR( '=' ), 11, 12, 4, 10, 7,
-  "0111111110" +
-  "0000000000" +
-  "0000000000" +
-  "0111111110"
-  );
- regGWorldCharInfo( i, _CHAR( '>' ), 11, 12, 4, 10, 9,
-  "0110000000" +
-  "0001100000" +
-  "0000011000" +
-  "0000000110" +
-  "0000000110" +
-  "0000011000" +
-  "0001100000" +
-  "0110000000"
-  );
- regGWorldCharInfo( i, _CHAR( '?' ), 11, 12, 4, 10, 10,
-  "0011111000" +
-  "0100000100" +
-  "0100000100" +
-  "0000000100" +
-  "0000011000" +
-  "0000100000" +
-  "0000100000" +
-  "0000000000" +
-  "0001110000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '@' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0010000100" +
-  "0100000100" +
-  "0100111100" +
-  "0101000100" +
-  "0101000100" +
-  "0101000100" +
-  "0100111100" +
-  "0100000000" +
-  "0100000000" +
-  "0010001000" +
-  "0001110000"
-  );
- regGWorldCharInfo( i, _CHAR( '[' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001000000" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '\\' ), 11, 12, 4, 10, 12,
-  "0110000000" +
-  "0010000000" +
-  "0011000000" +
-  "0001000000" +
-  "0001100000" +
-  "0000100000" +
-  "0000110000" +
-  "0000010000" +
-  "0000011000" +
-  "0000001000" +
-  "0000001100" +
-  "0000000100" +
-  "0000000110"
-  );
- regGWorldCharInfo( i, _CHAR( ']' ), 11, 12, 4, 10, 11,
-  "0001111000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0000001000" +
-  "0001111000"
-  );
- regGWorldCharInfo( i, _CHAR( '^' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0001110000" +
-  "0011011000" +
-  "0110001100" +
-  "0100000100"
-  );
- regGWorldCharInfo( i, _CHAR( '_' ), 11, 12, 4, 11, -3,
-  "11111111111"
-  );
- regGWorldCharInfo( i, _CHAR( '`' ), 11, 12, 4, 10, 11,
-  "0011000000" +
-  "0001100000" +
-  "0000110000"
-  );
- regGWorldCharInfo( i, _CHAR( '{' ), 11, 12, 4, 10, 11,
-  "0000011000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0011000000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000011000"
-  );
- regGWorldCharInfo( i, _CHAR( '|' ), 11, 12, 4, 10, 11,
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000" +
-  "0000100000"
-  );
- regGWorldCharInfo( i, _CHAR( '}' ), 11, 12, 4, 10, 11,
-  "0001100000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000001100" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0000010000" +
-  "0001100000"
-  );
- regGWorldCharInfo( i, _CHAR( '~' ), 11, 12, 4, 10, 6,
-  "0011000000" +
-  "0100100100" +
-  "0000011000"
-  );
-}
 function cssGetPropertyValue( selector, property ){
  var i, j;
  var value = new String();
@@ -1259,11 +17,13 @@ function cssGetPropertyValue( selector, property ){
    rule = rules[j];
    if( rule.selectorText == selector ){
     value = rule.style.getPropertyValue( property );
+
    }
   }
  }
  return value;
 }
+
 function cssSetPropertyValue( selector, property, value ){
  var i, j;
  var styleSheets = document.styleSheets;
@@ -1277,16 +37,20 @@ function cssSetPropertyValue( selector, property, value ){
    rule = rules[j];
    if( rule.selectorText == selector ){
     rule.style.setProperty( property, value );
+
    }
   }
  }
 }
+
 var _css_display_none = null;
 var _css_display_block = null;
+
 function cssLockStyleDisplay(){
  _css_display_none = new Array();
  _css_display_block = new Array();
 }
+
 function cssSetStyleDisplay( element, flag ){
  if( _css_display_none == null ){
   element.style.display = flag ? "block" : "none";
@@ -1299,6 +63,7 @@ function cssSetStyleDisplay( element, flag ){
 function cssSetStyleDisplayById( id, flag ){
  cssSetStyleDisplay( document.getElementById( id ), flag );
 }
+
 function cssUnlockStyleDisplay(){
  var i;
  for( i = 0; i < _css_display_none.length; i++ ){
@@ -1581,6 +346,7 @@ function consoleBreak(){
  return _console_break;
 }
 function _Console( id ){
+ if( window.onConsoleUpdate == undefined ) window.onConsoleUpdate = function( id ){};
  this._id = id;
  this._div = document.getElementById( this._id );
  this._html = "";
@@ -1724,6 +490,7 @@ function onConsoleUpdate( id ){
  con.scrollBottom();
 }
 function _Error(){
+ if( window.onError == undefined ) window.onError = function( e ){};
  this._message = new String();
  this._name = new String();
  this._description = new String();
@@ -1794,112 +561,13 @@ function onError( e ){
  con.println( "<b>stack:</b> " + tmp.str() );
  con.setColor();
 }
-function _Canvas( id ){
- this._canvas = document.getElementById( id );
- this._context = this._canvas.getContext( "2d" );
- this._r = 0;
- this._g = 0;
- this._b = 0;
- this._a = 255;
- this._setColor();
-}
-_Canvas.prototype = {
- element : function(){
-  return this._canvas;
- },
- left : function(){
-  var e = this._canvas;
-  var left = 0;
-  while( e ){
-   left += e.offsetLeft;
-   e = e.offsetParent;
-  }
-  return left;
- },
- top : function(){
-  var e = this._canvas;
-  var top = 0;
-  while( e ){
-   top += e.offsetTop;
-   e = e.offsetParent;
-  }
-  return top;
- },
- width : function(){
-  return parseInt( this._canvas.width );
- },
- height : function(){
-  return parseInt( this._canvas.height );
- },
- _setColor : function(){
-  if( this._r >= 0 ){
-   var color;
-   if( this._a == 255 ){
-    color = "rgb(" + this._r + "," + this._g + "," + this._b + ")";
-   } else {
-    color = "rgba(" + this._r + "," + this._g + "," + this._b + "," + (this._a / 255.0) + ")";
-   }
-   this._context.fillStyle = color;
-   this._context.strokeStyle = color;
-  }
- },
- setColor : function( r, g, b, a ){
-  if( r == undefined ){
-   this._r = -1;
-  } else {
-   if( a == undefined ){
-    a = 255;
-   }
-   if( (r != this._r) || (g != this._g) || (b != this._b) || (a != this._a) ){
-    this._r = r;
-    this._g = g;
-    this._b = b;
-    this._a = a;
-    this._setColor();
-   }
-  }
- },
- clear : function( x, y, w, h ){
-  if( (x == undefined) && (y == undefined) && (w == undefined) && (h == undefined) ){
-   this._canvas.width = this._canvas.width;
-  } else if( (w == undefined) && (h == undefined) ){
-   this._context.clearRect( x, y, 1, 1 );
-  } else {
-   this._context.clearRect( x, y, w, h );
-  }
- },
- put : function( x, y ){
-  this._context.fillRect( x, y, 1, 1 );
- },
- fill : function( x, y, w, h ){
-  this._context.fillRect( x, y, w, h );
- },
- line : function( x1, y1, x2, y2 ){
-  this._context.beginPath();
-  this._context.moveTo( x1 + 0.5, y1 + 0.5 );
-  this._context.lineTo( x2 + 0.5, y2 + 0.5 );
-  this._context.stroke();
-  this._context.closePath();
- },
- drawImage : function( image, w, h ){
-  if( (w == image.width) && (h == image.height) ){
-   this._context.drawImage( image, 0, 0 );
-  } else {
-   this._context.drawImage( image, 0, 0, image.width, image.height, 0, 0, w, h );
-  }
- },
- imageData : function( w, h ){
-  return this._context.getImageData( 0, 0, w, h );
- }
-};
 var canvas;
 function canvasClear(){
- var rgbColor = gWorldBgColor();
- canvas.setColor( (rgbColor & 0xFF0000) >> 16, (rgbColor & 0x00FF00) >> 8, rgbColor & 0x0000FF );
+ canvas.setColorRGB( gWorldBgColor() );
  canvas.fill( 0, 0, canvas.width(), canvas.height() );
 }
 function canvasSetColor( bgrColor ){
- canvas.setColor( bgrColor & 0x0000FF, (bgrColor & 0x00FF00) >> 8, (bgrColor & 0xFF0000) >> 16 );
+ canvas.setColorBGR( bgrColor );
 }
 function canvasPut( x, y ){
  canvas.put( x, y );
@@ -1916,6 +584,9 @@ function canUseFile(){
  return (window.FileReader && window.FileList && window.File);
 }
 function _InputFile( id ){
+ if( window.onInputFileLoadImage == undefined ) window.onInputFileLoadImage = function( name, image ){};
+ if( window.onInputFileLoad == undefined ) window.onInputFileLoad = function( func, data ){};
+ if( window.onInputFileLoadEnd == undefined ) window.onInputFileLoadEnd = function( num ){};
  this._input = document.getElementById( id );
  this._input.addEventListener( "change", _onInputFileChange, false );
 }
@@ -1998,8 +669,8 @@ function _onInputFileChange( e ){
 }
 var inputFile;
 function drawInputFileImage( image, w , h ){
- var width = topProc.gWorld().width ();
- var height = topProc.gWorld().height();
+ var width = procGWorld()._width;
+ var height = procGWorld()._height;
  if( (width > 0) && (height > 0) ){
   if( (image.width <= width) && (image.height <= height) ){
    width = image.width;
@@ -2021,8 +692,8 @@ function onInputFileLoadImage( name, image ){
  var h = new _Integer();
  var data = drawInputFileImage( image, w, h );
  if( data != null ){
-  var width = w.val();
-  var height = h.val();
+  var width = w._val;
+  var height = h._val;
   con.setBold( true );
   con.println( "[" + name + "]" );
   if( (width != image.width) || (height != image.height) ){
@@ -2033,8 +704,8 @@ function onInputFileLoadImage( name, image ){
  }
 }
 function doCommandGGet24Begin( w , h ){
- var width = topProc.gWorld().width ();
- var height = topProc.gWorld().height();
+ var width = procGWorld()._width;
+ var height = procGWorld()._height;
  if( (width > 0) && (height > 0) ){
   w.set( width );
   h.set( height );
@@ -2404,6 +1075,7 @@ function editorSmartFlag(){
  return _editor_smart;
 }
 function _Editor( id ){
+ if( window.onEditorUpdateText == undefined ) window.onEditorUpdateText = function( len ){};
  this._textarea = document.getElementById( id );
  this._textarea.addEventListener( "input", _onEditorInput, false );
  this._textarea.addEventListener( "keydown", _onEditorKeyDown, false );
@@ -2512,6 +1184,7 @@ function canUseWriteFile(){
  return (window.navigator.userAgent.toLowerCase().indexOf( "chrome" ) != -1);
 }
 function writeFile( name, text ){
+ if( window.onWriteFileEnd == undefined ) window.onWriteFileEnd = function( fileEntry ){};
  var size = encodeURI( text ).replace( new RegExp( "%..", "g" ), "*" ).length;
  webkitRequestFileSystem( TEMPORARY, size, function( fs ){
   fs.root.getFile( name, { create: true }, function( fileEntry ){
@@ -2533,6 +1206,8 @@ var englishFlag = false;
 var lastTouchEnd = 0;
 function main( inputId, divId, canvasId, inputFileId, editorId ){
  var i;
+ defGWorldFunction();
+ defProcFunction();
  var userAgent = window.navigator.userAgent;
  if( (userAgent.indexOf( "Android" ) != -1) || (userAgent.indexOf( "iPad" ) != -1) ){
   document.getElementById( "clip_loadextfunc" ).style.display = "none";
@@ -2561,19 +1236,21 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  regGWorldDefCharInfo( 0 );
  regGWorldDefCharInfoLarge( 1 );
  regGWorldBgColor( 0xC0C0C0 );
+ setCanvasEnv( new _CanvasEnv() );
  canvas = new _Canvas( canvasId );
  canvasClear();
  inputFile = new _InputFile( inputFileId );
  procError = new _ProcError();
+ setProcEnv( new _ProcEnv() );
  topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
- topProc.setAnsFlag( true );
+ topProc._printAns = true;
  setProcWarnFlowFlag( true );
  setProcTraceFlag( traceLevel > 0 );
  setProcLoopMax( loopMax );
  topParam = new _Param();
- topParam.setEnableCommand( true );
- topParam.setEnableOpPow( false );
- topParam.setEnableStat( true );
+ topParam._enableCommand = true;
+ topParam._enableOpPow = false;
+ topParam._enableStat = true;
  setGlobalParam( topParam );
  regCustomCommand( "env" , _CLIP_COMMAND_CUSTOM );
  regCustomCommand( "list" , (_CLIP_COMMAND_CUSTOM + 1) );
@@ -2660,7 +1337,7 @@ try {
   topProc.processLoop( line, topParam );
 } catch( e ){ catchError( e ); }
   if( lockGUpdate && needGUpdate ){
-   gUpdate( topProc.gWorld() );
+   gUpdate( procGWorld() );
    needGUpdate = false;
   }
   if( (dispLoopCount > 0) && ((procLoopCount() > 0) || (procLoopTotal() > 0)) ){
@@ -2681,7 +1358,6 @@ try {
    con.setColor();
   }
   con.unlock();
-  addLogExpr();
  }
  input.value = "";
 }
@@ -2855,7 +1531,7 @@ function assertProc( num, func ){
 }
 function getErrorString( err, num, func, token ){
  var string = new String();
- var error = getProcErrorDefString( err, token, topParam.isCalculator(), englishFlag );
+ var error = getProcErrorDefString( err, token, topParam._calculator, englishFlag );
  if( error.length > 0 ){
   if( (func != null) && (func.length > 0) ){
    string += func + ": ";
@@ -3078,26 +1754,10 @@ function printError( error, num, func ){
  else con.println( "エラー: " + error );
 }
 function doFuncGColor( rgb ){
- var i, j;
- var r = (rgb & 0xFF0000) >> 16;
- var g = (rgb & 0x00FF00) >> 8;
- var b = rgb & 0x0000FF;
- var rr, gg, bb, tmp;
- var d = 766 ;
- for( i = 0, j = 0; i < 256; i++ ){
-  rr = COLOR_WIN[i] & 0x0000FF;
-  gg = (COLOR_WIN[i] & 0x00FF00) >> 8;
-  bb = (COLOR_WIN[i] & 0xFF0000) >> 16;
-  tmp = _ABS( rr - r ) + _ABS( gg - g ) + _ABS( bb - b );
-  if( tmp < d ){
-   j = i;
-   d = tmp;
-  }
- }
- return j;
+ return doFuncGColorBGR( rgb, COLOR_WIN );
 }
 function doFuncGColor24( index ){
- return ((COLOR_WIN[index] & 0x0000FF) << 16) + (COLOR_WIN[index] & 0x00FF00) + ((COLOR_WIN[index] & 0xFF0000) >> 16);
+ return _RGB2BGR( COLOR_WIN[index] );
 }
 function doFuncEval( parentProc, childProc, childParam, string, value ){
  var ret;
@@ -3113,12 +1773,12 @@ function doCommandPrint( topPrint, flag ){
  con.setColor( "ff00ff" );
  var cur = topPrint;
  while( cur != null ){
-  if( cur.string() != null ){
-   var tmp = new _String( cur.string() );
+  if( cur._string != null ){
+   var tmp = new _String( cur._string );
    tmp.escape().replaceNewLine( consoleBreak() );
    con.print( tmp.str() );
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  if( flag ){
   con.println();
@@ -3131,10 +1791,10 @@ function skipCommandLog(){
 function doCommandLog( topPrint ){
  var cur = topPrint;
  while( cur != null ){
-  if( cur.string() != null ){
-   traceString += cur.string();
+  if( cur._string != null ){
+   traceString += cur._string;
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  traceString += "\n";
 }
@@ -3149,13 +1809,12 @@ function doCommandScan( topScan, proc, param ){
    newString = defString;
   }
   cur.setNewValue( newString, proc, param );
-  cur = cur.next();
+  cur = cur._next;
  }
 }
-function doCommandGWorld( gWorld, width, height ){
+function doCommandGWorld( width, height ){
  if( (width <= 0) || (height <= 0) ){
-  canvas.element().setAttribute( "width" , "1" );
-  canvas.element().setAttribute( "height", "1" );
+  canvas.setSize( 1, 1 );
   var div1 = document.getElementById( "savecanvas" );
   div1.style.display = "none";
   var div2 = document.getElementById( "gworld" );
@@ -3173,13 +1832,8 @@ function doCommandGWorld( gWorld, width, height ){
   div2.style.display = "block";
   var div3 = document.getElementById( "savecanvas" );
   div3.style.display = "block";
-  canvas.element().setAttribute( "width" , "" + width );
-  canvas.element().setAttribute( "height", "" + height );
+  canvas.setSize( width, height );
  }
- gWorld.create( width, height, true );
-}
-function doCommandWindow( gWorld, left, bottom, right, top ){
- gWorld.setWindowIndirect( left, bottom, right, top );
 }
 function gWorldClear( gWorld, color ){
  if( lockGUpdate ){
@@ -3188,8 +1842,8 @@ function gWorldClear( gWorld, color ){
  }
  canvasClear();
  canvasSetColor( COLOR_WIN[color] );
- canvasFill( 0, 0, gWorld.width(), gWorld.height() );
- canvasSetColor( COLOR_WIN[gWorld.color()] );
+ canvasFill( 0, 0, gWorld._width, gWorld._height );
+ canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function gWorldSetColor( gWorld, color ){
  if( lockGUpdate ){
@@ -3202,10 +1856,10 @@ function gWorldPutColor( gWorld, x, y, color ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasSetColor( COLOR_WIN[color] );
   canvasPut( x, y );
-  canvasSetColor( COLOR_WIN[gWorld.color()] );
+  canvasSetColor( COLOR_WIN[gWorld._color] );
  }
 }
 function gWorldPut( gWorld, x, y ){
@@ -3213,7 +1867,7 @@ function gWorldPut( gWorld, x, y ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasPut( x, y );
  }
 }
@@ -3222,7 +1876,7 @@ function gWorldFill( gWorld, x, y, w, h ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasFill( x, y, w, h );
  }
 }
@@ -3231,28 +1885,34 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
   needGUpdate = true;
   return;
  }
- if( topProc.gUpdateFlag() ){
+ if( topProc._gUpdateFlag ){
   canvasLine( x1, y1, x2, y2 );
  }
 }
+function gWorldTextColor( gWorld, text, x, y, color, right ){
+ if( lockGUpdate ){
+  needGUpdate = true;
+  return;
+ }
+}
 function doCommandGColor( index, rgb ){
- COLOR_WIN[index] = ((rgb & 0x0000FF) << 16) + (rgb & 0x00FF00) + ((rgb & 0xFF0000) >> 16);
+ COLOR_WIN[index] = _RGB2BGR( rgb );
  needGUpdate = true;
 }
 function doCommandGPut24( x, y, rgb ){
- canvas.setColor( (rgb & 0xFF0000) >> 16, (rgb & 0x00FF00) >> 8, rgb & 0x0000FF );
+ canvas.setColorRGB( rgb );
  canvasPut( x, y );
 }
 function doCommandGPut24End(){
- canvasSetColor( COLOR_WIN[topProc.gWorld().color()] );
+ canvasSetColor( COLOR_WIN[procGWorld()._color] );
  needGUpdate = false;
 }
 function gUpdate( gWorld ){
  canvasClear();
- var image = gWorld.image ();
- var offset = gWorld.offset();
- var width = gWorld.width ();
- var height = gWorld.height();
+ var image = gWorld._image;
+ var offset = gWorld._offset;
+ var width = gWorld._width;
+ var height = gWorld._height;
  var x, y, yy;
  for( y = 0; y < height; y++ ){
   yy = y * offset;
@@ -3261,7 +1921,7 @@ function gUpdate( gWorld ){
    canvasPut( x, y );
   }
  }
- canvasSetColor( COLOR_WIN[gWorld.color()] );
+ canvasSetColor( COLOR_WIN[gWorld._color] );
 }
 function doCommandGUpdate( gWorld ){
  if( lockGUpdate ){
@@ -3271,10 +1931,10 @@ function doCommandGUpdate( gWorld ){
  gUpdate( gWorld );
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentProc.curNum(), parentParam, true );
- childParam.setEnableCommand( false );
- childParam.setEnableStat( false );
+ var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false );
+ var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+ childParam._enableCommand = false;
+ childParam._enableStat = false;
 try {
  parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
@@ -3282,10 +1942,10 @@ try {
  childProc.end();
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam.mode(), parentProc.assertFlag(), parentProc.warnFlag(), false );
- var childParam = new _Param( parentProc.curNum(), parentParam, true );
- childParam.setEnableCommand( false );
- childParam.setEnableStat( false );
+ var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false );
+ var childParam = new _Param( parentProc._curLine._num, parentParam, true );
+ childParam._enableCommand = false;
+ childParam._enableStat = false;
 try {
  parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
@@ -3298,14 +1958,14 @@ function doCommandUsage( topUsage ){
  }
  var cur = topUsage;
  while( cur != null ){
-  if( cur.string() != null ){
-   con.print( (new _String( cur.string() )).escape().str() );
+  if( cur._string != null ){
+   con.print( (new _String( cur._string )).escape().str() );
    if( addExtFuncList ){
     break;
    }
    con.println();
   }
-  cur = cur.next();
+  cur = cur._next;
  }
  if( !addExtFuncList ){
   con.setColor();
@@ -3320,7 +1980,7 @@ function doCommandDumpVar( param, index ){
  _token.valueToString( param, param.val( index ), real, imag );
  if( (label = param._var._label._label[index]) != null ){
   string = label;
-  if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
+  if( param._var._label._flag[index] != _LABEL_MOVABLE ){
    string += "(@" + String.fromCharCode( index ) + ")";
   }
  } else {
@@ -3336,7 +1996,7 @@ function doCommandDumpArray( param, index ){
  param._array.makeToken( array, index );
  if( (label = param._array._label._label[index]) != null ){
   string = label;
-  if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
+  if( param._array._label._flag[index] != _LABEL_MOVABLE ){
    string += "(@@" + String.fromCharCode( index ) + ")";
   }
  } else {
@@ -3361,9 +2021,9 @@ function doCustomCommand( _this, param, code, token ){
   break;
  case _CLIP_COMMAND_CUSTOM:
   con.setColor( "0000ff" );
-  con.println( "calculator " + (param.isCalculator() ? "TRUE" : "FALSE") );
-  con.println( (param.base() == 0) ? "zero-based" : "one-based" );
-  switch( param.mode() ){
+  con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
+  con.println( (param._base == 0) ? "zero-based" : "one-based" );
+  switch( param._mode ){
   case _CLIP_MODE_E_FLOAT: con.print( "efloat" ); break;
   case _CLIP_MODE_F_FLOAT: con.print( "float" ); break;
   case _CLIP_MODE_G_FLOAT: con.print( "gfloat" ); break;
@@ -3383,42 +2043,42 @@ function doCustomCommand( _this, param, code, token ){
   case _CLIP_MODE_S_LONG: con.print( "long" ); break;
   case _CLIP_MODE_U_LONG: con.print( "ulong" ); break;
   }
-  con.print( ", " ); con.print( "fps " + param.fps() );
-  con.print( ", " ); con.print( "prec " + param.prec() );
-  con.print( ", " ); con.print( "radix " + param.radix() );
+  con.print( ", " ); con.print( "fps " + param._fps );
+  con.print( ", " ); con.print( "prec " + param._prec );
+  con.print( ", " ); con.print( "radix " + param._radix );
   con.print( ", " );
   var type = new _Integer();
   var updateFlag = new _Boolean();
   _this.getAngType( type, updateFlag );
-  switch( type.val() ){
+  switch( type._val ){
   case _ANG_TYPE_RAD: con.print( "rad" ); break;
   case _ANG_TYPE_DEG: con.print( "deg" ); break;
   case _ANG_TYPE_GRAD: con.print( "grad" ); break;
   }
   con.println();
-  con.print( "assert " + (_this.assertFlag() ? "TRUE" : "FALSE") );
-  con.print( ", " ); con.print( "warn " + (_this.warnFlag() ? "TRUE" : "FALSE") );
+  con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
+  con.print( ", " ); con.print( "warn " + (_this._printWarn ? "TRUE" : "FALSE") );
   con.println();
-  var left = _this.gWorld().wndPosX( 0 );
-  var top = _this.gWorld().wndPosY( 0 );
-  var right = _this.gWorld().wndPosX( _this.gWorld().width () );
-  var bottom = _this.gWorld().wndPosY( _this.gWorld().height() );
-  con.println( "gworld " + _this.gWorld().width() + " " + _this.gWorld().height() );
+  var left = procGWorld().wndPosX( 0 );
+  var top = procGWorld().wndPosY( 0 );
+  var right = procGWorld().wndPosX( procGWorld()._width );
+  var bottom = procGWorld().wndPosY( procGWorld()._height );
+  con.println( "gworld " + procGWorld()._width + " " + procGWorld()._height );
   con.println( "window " + left + " " + bottom + " " + right + " " + top );
-  switch( _this.graph().mode() ){
+  switch( procGraph().mode() ){
   case _GRAPH_MODE_RECT: con.print( "rectangular" ); break;
   case _GRAPH_MODE_PARAM: con.print( "parametric" ); break;
   case _GRAPH_MODE_POLAR: con.print( "polar" ); break;
   }
   con.print( ", " );
-  if( _this.graph().isLogScaleX() ){
-   con.print( "logscale x " + _this.graph().logBaseX() );
+  if( procGraph().isLogScaleX() ){
+   con.print( "logscale x " + procGraph().logBaseX() );
   } else {
    con.print( "nologscale x" );
   }
   con.print( ", " );
-  if( _this.graph().isLogScaleY() ){
-   con.print( "logscale y " + _this.graph().logBaseY() );
+  if( procGraph().isLogScaleY() ){
+   con.print( "logscale y " + procGraph().logBaseY() );
   } else {
    con.print( "nologscale y" );
   }
@@ -3429,7 +2089,7 @@ function doCustomCommand( _this, param, code, token ){
  case (_CLIP_COMMAND_CUSTOM + 2):
   var newCode;
   var newToken;
-  if( _this.curLine().getTokenParam( param ) ){
+  if( _this._curLine._token.getTokenParam( param ) ){
    newCode = getCode();
    newToken = getToken();
    if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
@@ -3443,7 +2103,7 @@ function doCustomCommand( _this, param, code, token ){
     param._array.makeToken( array, index );
     if( (label = param._array._label._label[index]) != null ){
      string = label;
-     if( param._array._label.flag( index ) != _LABEL_MOVABLE ){
+     if( param._array._label._flag[index] != _LABEL_MOVABLE ){
       string += "(@@" + String.fromCharCode( index ) + ")";
      } else if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
       string += "(@@:" + index + ")";
@@ -3510,7 +2170,7 @@ function doCustomCommand( _this, param, code, token ){
      } else {
       if( step == 0 ){
        if( (label = param._var._label._label[index]) != null ){
-        if( param._var._label.flag( index ) == _LABEL_MOVABLE ){
+        if( param._var._label._flag[index] == _LABEL_MOVABLE ){
          _token.valueToString( param, param.val( index ), real, imag );
          if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
           tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
@@ -3523,7 +2183,7 @@ function doCustomCommand( _this, param, code, token ){
       }
       if( step == 2 ){
        if( (label = param._var._label._label[index]) != null ){
-        if( param._var._label.flag( index ) != _LABEL_MOVABLE ){
+        if( param._var._label._flag[index] != _LABEL_MOVABLE ){
          _token.valueToString( param, param.val( index ), real, imag );
          tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
          i++;
@@ -3590,7 +2250,7 @@ function doCustomCommand( _this, param, code, token ){
   break;
  case (_CLIP_COMMAND_CUSTOM + 4):
   var newToken;
-  if( _this.curLine().getToken() ){
+  if( _this._curLine._token.getToken() ){
    newToken = getToken();
    if( getCode() == _CLIP_CODE_EXTFUNC ){
     _this.usage( newToken, param, true );
@@ -3640,7 +2300,7 @@ function onEndPlot(){
  var token = new _String();
  for( var i = 0; i < procError.num(); i++ ){
   procError.get( i, err, num, func, token );
-  errorProc( err.val(), num.val(), func.str(), token.str() );
+  errorProc( err._val, num._val, func.str(), token.str() );
  }
  procError.delAll();
 }
@@ -3649,8 +2309,6 @@ function onStartRePlot(){
 }
 function onEndRePlot(){
  onEndPlot();
-}
-function addLogExpr(){
 }
 function updateLanguage(){
  document.getElementById( "button_cache_clear" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Clear cache" : "外部関数ｷｬｯｼｭのｸﾘｱ") + "&nbsp;&nbsp;";

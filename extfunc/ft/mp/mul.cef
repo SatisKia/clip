@@ -26,7 +26,6 @@ $ADD_A @n,@a,@b
 !ft:conv @@r @n @@a @a @@b @b
 
 $SET_Z ret @n # 配列の確保
-$SET_Z ret 0
 #SET_Z @c
 $SET   @i,1
 if @i < @n

@@ -5,15 +5,6 @@
 
 var _FRACT_MAX = Number.MAX_SAFE_INTEGER/*4294967295*/;
 
-var _fract_err = false;	// エラーが起こったかどうかのフラグ
-
-function clearFractError(){
-	_fract_err = false;
-}
-function fractError(){
-	return _fract_err;
-}
-
 // 分数
 function _Fract( mi, nu, de ){
 	this._mi = (mi == undefined) ? false : mi;			// 負かどうかのフラグ

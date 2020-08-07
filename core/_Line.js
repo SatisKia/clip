@@ -7,7 +7,7 @@
 
 // 行データ
 function __Line(){
-	this._line    = null;	// トークン・リスト
+	this._token   = null;	// トークン・リスト
 	this._num     = 0;		// 行番号
 	this._comment = null;	// コメント
 	this._next    = null;	// 次の行データ
@@ -83,7 +83,7 @@ _Line.prototype = {
 		var curLine = "";
 
 		var tmp = this._newLine();
-		tmp._line = new _Token();
+		tmp._token = new _Token();
 
 		var top = 0;
 		var cur = 0;
@@ -93,12 +93,12 @@ _Line.prototype = {
 				if( !this._checkEscape( line, top, cur ) ){
 					curLine = line.substr( top, cur );
 
-					if( (ret = tmp._line.regString( param, curLine, strToVal )) != _CLIP_NO_ERR ){
+					if( (ret = tmp._token.regString( param, curLine, strToVal )) != _CLIP_NO_ERR ){
 						return ret;
 					}
 
-					tmp       = this._newLine();
-					tmp._line = new _Token;
+					tmp        = this._newLine();
+					tmp._token = new _Token;
 
 					top = top + cur + 1;
 					cur = 0;
@@ -129,15 +129,15 @@ _Line.prototype = {
 
 		this._nextNum++;
 
-		return tmp._line.regString( param, curLine, strToVal );
+		return tmp._token.regString( param, curLine, strToVal );
 	},
 	regLine : function( line ){
 		var ret;
 
 		var tmp = this._newLine();
 
-		tmp._line = new _Token();
-		if( (ret = line._line.dup( tmp._line )) != _CLIP_NO_ERR ){
+		tmp._token = new _Token();
+		if( (ret = line._token.dup( tmp._token )) != _CLIP_NO_ERR ){
 			return ret;
 		}
 

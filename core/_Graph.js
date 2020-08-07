@@ -78,13 +78,13 @@ function _Graph(){
 
 _Graph.prototype = {
 
-	gWorld : function(){
-		return this._gWorld;
-	},
+//	gWorld : function(){
+//		return this._gWorld;
+//	},
 
-	graphIndex : function(){
-		return this._curIndex;
-	},
+//	graphIndex : function(){
+//		return this._curIndex;
+//	},
 
 	addGraph : function(){
 		this._curIndex = this._infoNum;
@@ -285,8 +285,8 @@ _Graph.prototype = {
 	// グラフイメージを確保する
 	create : function( width, height ){
 		this._gWorld.scroll(
-			(width  - this._gWorld.width ()) / 2.0,
-			(height - this._gWorld.height()) / 2.0
+			(width  - this._gWorld._width ) / 2.0,
+			(height - this._gWorld._height) / 2.0
 			);
 		return this._gWorld.create( width, height, false );
 	},
@@ -294,8 +294,8 @@ _Graph.prototype = {
 	// グラフイメージを登録する
 	open : function( image/*Array*/, offset, width, height ){
 		this._gWorld.scroll(
-			(width  - this._gWorld.width ()) / 2.0,
-			(height - this._gWorld.height()) / 2.0
+			(width  - this._gWorld._width ) / 2.0,
+			(height - this._gWorld._height) / 2.0
 			);
 		return this._gWorld.open( image, offset, width, height, false );
 	},
@@ -303,18 +303,18 @@ _Graph.prototype = {
 	// グラフイメージをクリアする
 	_drawHLine : function( y ){
 		var yy = this._gWorld.imgPosY( y );
-		gWorldLine( this._gWorld, 0, yy, this._gWorld.width() - 1, yy );
+		gWorldLine( this._gWorld, 0, yy, this._gWorld._width - 1, yy );
 		this._gWorld._gWorldLine = true;
-		for( var i = 0; i < this._gWorld.width(); i++ ){
+		for( var i = 0; i < this._gWorld._width; i++ ){
 			this._gWorld.put( i, yy );
 		}
 		this._gWorld._gWorldLine = false;
 	},
 	_drawVLine : function( x ){
 		var xx = this._gWorld.imgPosX( x );
-		gWorldLine( this._gWorld, xx, 0, xx, this._gWorld.height() - 1 );
+		gWorldLine( this._gWorld, xx, 0, xx, this._gWorld._height - 1 );
 		this._gWorld._gWorldLine = true;
-		for( var i = 0; i < this._gWorld.height(); i++ ){
+		for( var i = 0; i < this._gWorld._height; i++ ){
 			this._gWorld.put( xx, i );
 		}
 		this._gWorld._gWorldLine = false;
@@ -331,15 +331,16 @@ _Graph.prototype = {
 
 		if( this._gWorld.imgPosY( y ) < 0 ){
 			yy = ascent + 1;
-		} else if( (this._gWorld.imgPosY( y ) + (ascent + descent + 1)) >= this._gWorld.height() ){
-			yy = this._gWorld.height() - descent;
+		} else if( (this._gWorld.imgPosY( y ) + (ascent + descent + 1)) >= this._gWorld._height ){
+			yy = this._gWorld._height - descent;
 		} else {
 			yy = this._gWorld.imgPosY( y ) + ascent + 2;
 		}
 		this._gWorld.drawText(
 			text,
 			this._gWorld.imgPosX( x ) + 2,
-			yy
+			yy,
+			false
 			);
 	},
 	_drawYText : function( x, y ){
@@ -354,15 +355,16 @@ _Graph.prototype = {
 
 		if( (this._gWorld.imgPosX( x ) - (width + 1)) < 0 ){
 			xx = 1;
-		} else if( this._gWorld.imgPosX( x ) >= this._gWorld.width() ){
-			xx = this._gWorld.width() - width;
+		} else if( this._gWorld.imgPosX( x ) >= this._gWorld._width ){
+			xx = this._gWorld._width - width;
 		} else {
 			xx = this._gWorld.imgPosX( x ) - width;
 		}
 		this._gWorld.drawText(
 			text,
 			xx,
-			this._gWorld.imgPosY( y ) - descent
+			this._gWorld.imgPosY( y ) - descent,
+			false
 			);
 	},
 	clear : function( backColor, scaleColor, unitColor, unitX, unitY, textColor, textX, textY ){
@@ -392,13 +394,13 @@ _Graph.prototype = {
 		// グラフ画面の背景塗りつぶし
 		this._gWorld.clear( backColor );
 
-		var saveColor = this._gWorld.color();
+		var saveColor = this._gWorld._color;
 		this._gWorld.setColor( unitColor );
 
 		// 水平方向目盛り線の描画
 		if( unitX > 0.0 ){
 			pos = this._gWorld.wndPosX( 0 );
-			end = this._gWorld.wndPosX( this._gWorld.width() - 1 );
+			end = this._gWorld.wndPosX( this._gWorld._width - 1 );
 			i = _DIV( pos, unitX );
 			if( (this._gWorld.wndPosX( 1 ) - pos) > 0.0 ){
 				while( (pos = i * unitX) <= end ){
@@ -416,7 +418,7 @@ _Graph.prototype = {
 		// 垂直方向目盛り線の描画
 		if( unitY > 0.0 ){
 			pos = this._gWorld.wndPosY( 0 );
-			end = this._gWorld.wndPosY( this._gWorld.height() - 1 );
+			end = this._gWorld.wndPosY( this._gWorld._height - 1 );
 			i = _DIV( pos, unitY );
 			if( (this._gWorld.wndPosY( 1 ) - pos) > 0.0 ){
 				while( (pos = i * unitY) <= end ){
@@ -445,7 +447,7 @@ _Graph.prototype = {
 		unitX *= textX;
 		if( unitX > 0.0 ){
 			pos = this._gWorld.wndPosX( 0 );
-			end = this._gWorld.wndPosX( this._gWorld.width() - 1 );
+			end = this._gWorld.wndPosX( this._gWorld._width - 1 );
 			i = _DIV( pos, unitX );
 			if( (this._gWorld.wndPosX( 1 ) - pos) > 0.0 ){
 				while( (pos = i * unitX) <= end ){
@@ -464,7 +466,7 @@ _Graph.prototype = {
 		unitY *= textY;
 		if( unitY > 0.0 ){
 			pos = this._gWorld.wndPosY( 0 );
-			end = this._gWorld.wndPosY( this._gWorld.height() - 1 );
+			end = this._gWorld.wndPosY( this._gWorld._height - 1 );
 			i = _DIV( pos, unitY );
 			if( (this._gWorld.wndPosY( 1 ) - pos) > 0.0 ){
 				while( (pos = i * unitY) <= end ){
@@ -490,8 +492,8 @@ _Graph.prototype = {
 		param._var.set( this._info[this._curIndex]._index, x, false );
 
 		// Y座標を計算する
-		var saveAnsFlag = proc.ansFlag();
-		proc.setAnsFlag( false );
+		var saveAnsFlag = proc._printAns;
+		proc._printAns = false;
 		if( proc.processLoop( expr, param ) == _CLIP_PROC_END ){
 			// Y座標をセット
 			if( param.val( 0 ).imag() == 0.0 ){
@@ -501,7 +503,7 @@ _Graph.prototype = {
 			}
 			ret = true;
 		}
-		proc.setAnsFlag( saveAnsFlag );
+		proc._printAns = saveAnsFlag;
 
 		return ret;
 	},
@@ -511,7 +513,7 @@ _Graph.prototype = {
 		var xx2 = new _Integer( x2 );
 		var yy2 = new _Integer( y2 );
 		if( this._gWorld.clipLine( xx1, yy1, xx2, yy2 ) == 1 ){
-			this._gWorld.drawLine( xx1.val(), yy1.val(), xx2.val(), yy2.val() );
+			this._gWorld.drawLine( xx1._val, yy1._val, xx2._val, yy2._val );
 			return true;
 		}
 		return false;
@@ -527,14 +529,14 @@ _Graph.prototype = {
 			var tmp = start; start = end; end = tmp;
 		}
 		ansNum.set( end - start + 1 );
-		if( ansNum.val() <= 0 ){
+		if( ansNum._val <= 0 ){
 			ansNum.set( 0 );
 		} else {
 			var saveFlag = param._fileFlag;
 			param._fileFlag = false;
 
 			// 計算結果保持バッファを確保
-			for( i = 0; i < ansNum.val(); i++ ){
+			for( i = 0; i < ansNum._val; i++ ){
 				ans[i] = new _GraphAns();
 			}
 
@@ -545,10 +547,10 @@ _Graph.prototype = {
 				posX = this._gWorld.imgPosX( this.logX( startAns[startIndex]._x  ) );
 				posY = this._gWorld.imgPosY( this.logY( startAns[startIndex]._y1 ) );
 			}
-			for( i = 0; i < ansNum.val(); i++ ){
+			for( i = 0; i < ansNum._val; i++ ){
 				ans[i]._x = this.expX( this._gWorld.wndPosX( start + i ) );
 				if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-					ans[i]._y1 = yy.val();
+					ans[i]._y1 = yy._val;
 					var tmp = this.logY( ans[i]._y1 );
 					if( _ISINF( tmp ) || _ISNAN( tmp ) ){
 						drawFlag = false;
@@ -602,14 +604,14 @@ _Graph.prototype = {
 		} else {
 			ansNum.set( _INT( (end - start) / step ) + 1 );
 		}
-		if( ansNum.val() <= 0 ){
+		if( ansNum._val <= 0 ){
 			ansNum.set( 0 );
 		} else {
 			var saveFlag = param._fileFlag;
 			param._fileFlag = false;
 
 			// 計算結果保持バッファを確保
-			for( i = 0; i < ansNum.val(); i++ ){
+			for( i = 0; i < ansNum._val; i++ ){
 				ans[i] = new _GraphAns();
 			}
 
@@ -622,12 +624,12 @@ _Graph.prototype = {
 					posX = this._gWorld.imgPosX( startAns[startIndex]._y1 );
 					posY = this._gWorld.imgPosY( startAns[startIndex]._y2 );
 				}
-				for( i = 0; i < ansNum.val(); i++ ){
+				for( i = 0; i < ansNum._val; i++ ){
 					ans[i]._x = start + step * i;
 					if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-						ans[i]._y1 = yy.val();
+						ans[i]._y1 = yy._val;
 						if( this._process( proc, param, this._info[this._curIndex]._expr2, ans[i]._x, yy ) ){
-							ans[i]._y2 = yy.val();
+							ans[i]._y2 = yy._val;
 							// 計算結果をプロット
 							if( drawFlag ){
 								oldX = posX;
@@ -665,10 +667,10 @@ _Graph.prototype = {
 					posX = this._gWorld.imgPosX( startAns[startIndex]._y1 * fcos( startAns[startIndex]._x ) );
 					posY = this._gWorld.imgPosY( startAns[startIndex]._y1 * fsin( startAns[startIndex]._x ) );
 				}
-				for( i = 0; i < ansNum.val(); i++ ){
+				for( i = 0; i < ansNum._val; i++ ){
 					ans[i]._x = start + step * i;
 					if( this._process( proc, param, this._info[this._curIndex]._expr1, ans[i]._x, yy ) ){
-						ans[i]._y1 = yy.val();
+						ans[i]._y1 = yy._val;
 						var tmp = ans[i]._y1;
 						if( _ISINF( tmp ) || _ISNAN( tmp ) ){
 							drawFlag = false;
@@ -733,7 +735,7 @@ _Graph.prototype = {
 			break;
 		}
 
-		return (this._info[this._curIndex]._ansNum.val() != 0);
+		return (this._info[this._curIndex]._ansNum._val != 0);
 	},
 	_plotPos : function( proc, param, pos ){
 		var i;
@@ -742,20 +744,20 @@ _Graph.prototype = {
 		var tmpAns = new Array();
 		var tmpAnsNum = new _Integer();
 
-		if( this._info[this._curIndex]._ansNum.val() <= 0 ){
+		if( this._info[this._curIndex]._ansNum._val <= 0 ){
 			return false;
 		}
 
 		switch( this._info[this._curIndex]._mode ){
 		case _GRAPH_MODE_RECT:
 			// 既存データの前・後どちらに追加するのかを調べる
-			if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
+			if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
 				if( pos < this.logX( this._info[this._curIndex]._ans[0]._x ) ){
 					start = this._gWorld.imgPosX( pos );
 					end   = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[0]._x ) ) - 1;
 					beforeFlag = true;
-				} else if( pos > this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ){
-					start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ) + 1;
+				} else if( pos > this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ){
+					start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ) + 1;
 					end   = this._gWorld.imgPosX( pos );
 					beforeFlag = false;
 				} else {
@@ -766,8 +768,8 @@ _Graph.prototype = {
 					start = this._gWorld.imgPosX( pos );
 					end   = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[0]._x ) ) - 1;
 					beforeFlag = true;
-				} else if( pos < this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ){
-					start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ) ) + 1;
+				} else if( pos < this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ){
+					start = this._gWorld.imgPosX( this.logX( this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ) ) + 1;
 					end   = this._gWorld.imgPosX( pos );
 					beforeFlag = false;
 				} else {
@@ -779,7 +781,7 @@ _Graph.prototype = {
 				proc, param,
 				start, end,
 				tmpAns, tmpAnsNum,
-				this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum.val() - 1
+				this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum._val - 1
 				);
 
 			break;
@@ -791,13 +793,13 @@ _Graph.prototype = {
 			if( step < 0.0 ){
 				step = -step;
 			}
-			if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
+			if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
 				if( pos < this._info[this._curIndex]._ans[0]._x ){
 					start = pos;
 					end   = this._info[this._curIndex]._ans[0]._x - step;
 					beforeFlag = true;
-				} else if( pos > this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
-					start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x + step;
+				} else if( pos > this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
+					start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x + step;
 					end   = pos;
 					beforeFlag = false;
 				} else {
@@ -808,8 +810,8 @@ _Graph.prototype = {
 					start = pos;
 					end   = this._info[this._curIndex]._ans[0]._x - step;
 					beforeFlag = true;
-				} else if( pos < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x ){
-					start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum.val() - 1]._x + step;
+				} else if( pos < this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x ){
+					start = this._info[this._curIndex]._ans[this._info[this._curIndex]._ansNum._val - 1]._x + step;
 					end   = pos;
 					beforeFlag = false;
 				} else {
@@ -821,33 +823,33 @@ _Graph.prototype = {
 				proc, param,
 				start, end, step,
 				tmpAns, tmpAnsNum,
-				this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum.val() - 1
+				this._info[this._curIndex]._ans, beforeFlag ? 0 : this._info[this._curIndex]._ansNum._val - 1
 				);
 
 			break;
 		}
 
-		if( tmpAnsNum == 0 ){
+		if( tmpAnsNum._val == 0 ){
 			return false;
 		}
 
-		var newAnsNum = this._info[this._curIndex]._ansNum.val() + tmpAnsNum.val();
+		var newAnsNum = this._info[this._curIndex]._ansNum._val + tmpAnsNum._val;
 		var newAns    = newGraphAnsArray( newAnsNum );
 		if( beforeFlag ){
 			// 既存データの前に追加
-			for( i = 0; i < tmpAnsNum.val(); i++ ){
+			for( i = 0; i < tmpAnsNum._val; i++ ){
 				newAns[i].set( tmpAns[i] );
 			}
 			for( ; i < newAnsNum; i++ ){
-				newAns[i].set( this._info[this._curIndex]._ans[i - tmpAnsNum.val()] );
+				newAns[i].set( this._info[this._curIndex]._ans[i - tmpAnsNum._val] );
 			}
 		} else {
 			// 既存データの後ろに追加
-			for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				newAns[i].set( this._info[this._curIndex]._ans[i] );
 			}
 			for( ; i < newAnsNum; i++ ){
-				newAns[i].set( tmpAns[i - this._info[this._curIndex]._ansNum.val()] );
+				newAns[i].set( tmpAns[i - this._info[this._curIndex]._ansNum._val] );
 			}
 		}
 
@@ -864,10 +866,10 @@ _Graph.prototype = {
 
 		this._gWorld.setColor( this._info[this._curIndex]._color );
 
-		if( this._info[this._curIndex]._ansNum.val() > 0 ){
+		if( this._info[this._curIndex]._ansNum._val > 0 ){
 			switch( this._info[this._curIndex]._mode ){
 			case _GRAPH_MODE_RECT:
-				for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+				for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 					var tmp = this.logY( this._info[this._curIndex]._ans[i]._y1 );
 					if( _ISINF( tmp ) || _ISNAN( tmp ) ){
 						drawFlag = false;
@@ -888,7 +890,7 @@ _Graph.prototype = {
 				}
 				break;
 			case _GRAPH_MODE_PARAM:
-				for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+				for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 					// 計算結果をプロット
 					if( drawFlag ){
 						oldX = posX;
@@ -904,7 +906,7 @@ _Graph.prototype = {
 				}
 				break;
 			case _GRAPH_MODE_POLAR:
-				for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+				for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 					var tmp = this._info[this._curIndex]._ans[i]._y1;
 					if( _ISINF( tmp ) || _ISNAN( tmp ) ){
 						drawFlag = false;
@@ -932,7 +934,7 @@ _Graph.prototype = {
 	rePlot : function( proc, param ){
 		if( proc == undefined ){
 			return this._rePlot();
-		} else if( this._info[this._curIndex]._ansNum.val() <= 0 ){
+		} else if( this._info[this._curIndex]._ansNum._val <= 0 ){
 			return this.plot( proc, param );
 		} else {
 			var ret = new Array( 3 );
@@ -952,13 +954,13 @@ _Graph.prototype = {
 		case _GRAPH_MODE_RECT:
 			// 垂直方向の線の描画
 			posX = this._gWorld.imgPosX( this.logX( x ) );
-			for( i = 0; i < this._gWorld.height(); i++ ){
+			for( i = 0; i < this._gWorld._height; i++ ){
 				this._gWorld.putXOR( posX, i );
 			}
 
 			// 水平方向の線の描画
 			posY = this._gWorld.imgPosY( this.logY( y1 ) );
-			for( i = 0; i < this._gWorld.width(); i++ ){
+			for( i = 0; i < this._gWorld._width; i++ ){
 				this._gWorld.putXOR( i, posY );
 			}
 
@@ -966,13 +968,13 @@ _Graph.prototype = {
 		case _GRAPH_MODE_PARAM:
 			// 垂直方向の線の描画
 			posX = this._gWorld.imgPosX( y1 );
-			for( i = 0; i < this._gWorld.height(); i++ ){
+			for( i = 0; i < this._gWorld._height; i++ ){
 				this._gWorld.putXOR( posX, i );
 			}
 
 			// 水平方向の線の描画
 			posY = this._gWorld.imgPosY( y2 );
-			for( i = 0; i < this._gWorld.width(); i++ ){
+			for( i = 0; i < this._gWorld._width; i++ ){
 				this._gWorld.putXOR( i, posY );
 			}
 
@@ -980,13 +982,13 @@ _Graph.prototype = {
 		case _GRAPH_MODE_POLAR:
 			// 垂直方向の線の描画
 			posX = this._gWorld.imgPosX( y1 * fcos( x ) );
-			for( i = 0; i < this._gWorld.height(); i++ ){
+			for( i = 0; i < this._gWorld._height; i++ ){
 				this._gWorld.putXOR( posX, i );
 			}
 
 			// 水平方向の線の描画
 			posY = this._gWorld.imgPosY( y1 * fsin( x ) );
-			for( i = 0; i < this._gWorld.width(); i++ ){
+			for( i = 0; i < this._gWorld._width; i++ ){
 				this._gWorld.putXOR( i, posY );
 			}
 
@@ -1022,13 +1024,13 @@ _Graph.prototype = {
 	_search : function( x, ratio/*_Float*/ ){
 		var i;
 
-		if( this._info[this._curIndex]._ansNum.val() > 0 ){
-			var num = this._info[this._curIndex]._ansNum.val() - 1;
+		if( this._info[this._curIndex]._ansNum._val > 0 ){
+			var num = this._info[this._curIndex]._ansNum._val - 1;
 			if( this._info[this._curIndex]._ans[0]._x < this._info[this._curIndex]._ans[1]._x ){
 				if( x < this._info[this._curIndex]._ans[0]._x ){
 					return -1;
 				} else if( x > this._info[this._curIndex]._ans[num]._x ){
-					return this._info[this._curIndex]._ansNum.val();
+					return this._info[this._curIndex]._ansNum._val;
 				} else if( x == this._info[this._curIndex]._ans[num]._x ){
 					ratio.set( 0.0 );
 					return num;
@@ -1043,7 +1045,7 @@ _Graph.prototype = {
 				if( x > this._info[this._curIndex]._ans[0]._x ){
 					return -1;
 				} else if( x < this._info[this._curIndex]._ans[num]._x ){
-					return this._info[this._curIndex]._ansNum.val();
+					return this._info[this._curIndex]._ansNum._val;
 				} else if( x == this._info[this._curIndex]._ans[num]._x ){
 					ratio.set( 0.0 );
 					return num;
@@ -1068,11 +1070,11 @@ _Graph.prototype = {
 		var i;
 		var tmp;
 
-		if( this._info[this._curIndex]._ansNum.val() > 0 ){
+		if( this._info[this._curIndex]._ansNum._val > 0 ){
 			// 最も距離の短いデータを検索する
 			var num  = 0;
 			var dist = this._dist( x, y, this._info[this._curIndex]._ans[0]._y1, this._info[this._curIndex]._ans[0]._y2 );
-			for( i = 1; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			for( i = 1; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				tmp = this._dist( x, y, this._info[this._curIndex]._ans[i]._y1, this._info[this._curIndex]._ans[i]._y2 );
 				if( (tmp >= 0.0) && ((dist < 0.0) || (tmp < dist)) ){
 					num  = i;
@@ -1087,7 +1089,7 @@ _Graph.prototype = {
 	_searchPolar : function( x, y, ratio/*_Float*/ ){
 		var tmp;
 
-		if( this._info[this._curIndex]._ansNum.val() > 0 ){
+		if( this._info[this._curIndex]._ansNum._val > 0 ){
 			// 最も距離の短いデータを検索する
 			var num  = 0;
 			var dist = this._dist(
@@ -1095,7 +1097,7 @@ _Graph.prototype = {
 				this._info[this._curIndex]._ans[0]._y1 * fcos( this._info[this._curIndex]._ans[0]._x ),
 				this._info[this._curIndex]._ans[0]._y1 * fsin( this._info[this._curIndex]._ans[0]._x )
 				);
-			for( var i = 1; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			for( var i = 1; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				tmp = this._dist(
 					x, y,
 					this._info[this._curIndex]._ans[i]._y1 * fcos( this._info[this._curIndex]._ans[i]._x ),
@@ -1131,14 +1133,14 @@ _Graph.prototype = {
 			}
 			if( num == -1 ){
 				return false;
-			} else if( num == this._info[this._curIndex]._ansNum.val() ){
+			} else if( num == this._info[this._curIndex]._ansNum._val ){
 				return false;
-			} else if( ratio.val() == 0.0 ){
+			} else if( ratio._val == 0.0 ){
 				ans._y1 = this._info[this._curIndex]._ans[num]._y1;
 				ans._y2 = this._info[this._curIndex]._ans[num]._y2;
 			} else {
-				ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio.val();
-				ans._y2 = this._info[this._curIndex]._ans[num]._y2 + (this._info[this._curIndex]._ans[num + 1]._y2 - this._info[this._curIndex]._ans[num]._y2) * ratio.val();
+				ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio._val;
+				ans._y2 = this._info[this._curIndex]._ans[num]._y2 + (this._info[this._curIndex]._ans[num + 1]._y2 - this._info[this._curIndex]._ans[num]._y2) * ratio._val;
 			}
 			break;
 		case _GRAPH_MODE_PARAM:
@@ -1147,7 +1149,7 @@ _Graph.prototype = {
 			}
 			if( num == -1 ){
 				return false;
-			} else if( num == this._info[this._curIndex]._ansNum.val() ){
+			} else if( num == this._info[this._curIndex]._ansNum._val ){
 				return false;
 			} else {
 				ans._x  = this._info[this._curIndex]._ans[num]._x ;
@@ -1161,14 +1163,14 @@ _Graph.prototype = {
 			}
 			if( num == -1 ){
 				return false;
-			} else if( num == this._info[this._curIndex]._ansNum.val() ){
+			} else if( num == this._info[this._curIndex]._ansNum._val ){
 				return false;
-			} else if( ratio.val() == 0.0 ){
+			} else if( ratio._val == 0.0 ){
 				ans._x  = this._info[this._curIndex]._ans[num]._x ;
 				ans._y1 = this._info[this._curIndex]._ans[num]._y1;
 			} else {
-				ans._x  = this._info[this._curIndex]._ans[num]._x  + (this._info[this._curIndex]._ans[num + 1]._x  - this._info[this._curIndex]._ans[num]._x ) * ratio.val();
-				ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio.val();
+				ans._x  = this._info[this._curIndex]._ans[num]._x  + (this._info[this._curIndex]._ans[num + 1]._x  - this._info[this._curIndex]._ans[num]._x ) * ratio._val;
+				ans._y1 = this._info[this._curIndex]._ans[num]._y1 + (this._info[this._curIndex]._ans[num + 1]._y1 - this._info[this._curIndex]._ans[num]._y1) * ratio._val;
 			}
 			break;
 		}
@@ -1195,13 +1197,13 @@ _Graph.prototype = {
 			}
 
 			// 既存のデータをコピー
-			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
-			for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
+			for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
 			}
 
 			num = 0;
-		} else if( num == this._info[this._curIndex]._ansNum.val() ){
+		} else if( num == this._info[this._curIndex]._ansNum._val ){
 			if( !this._process( proc, param, this._info[this._curIndex]._expr1, x, y1 ) ){
 				return false;
 			}
@@ -1212,13 +1214,13 @@ _Graph.prototype = {
 			}
 
 			// 既存のデータをコピー
-			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
-			for( i = 0; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
+			for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				tmp[i].set( this._info[this._curIndex]._ans[i] );
 			}
 
-			num = this._info[this._curIndex]._ansNum.val();
-		} else if( ratio.val() == 0.0 ){
+			num = this._info[this._curIndex]._ansNum._val;
+		} else if( ratio._val == 0.0 ){
 			y1.set( this._info[this._curIndex]._ans[num]._y1 );
 			y2.set( this._info[this._curIndex]._ans[num]._y2 );
 			return true;
@@ -1233,11 +1235,11 @@ _Graph.prototype = {
 			}
 
 			// 既存のデータをコピー
-			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum.val() + 1 );
+			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
 			for( i = 0; i <= num; i++ ){
 				tmp[i].set( this._info[this._curIndex]._ans[i] );
 			}
-			for( ; i < this._info[this._curIndex]._ansNum.val(); i++ ){
+			for( ; i < this._info[this._curIndex]._ansNum._val; i++ ){
 				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
 			}
 
@@ -1246,9 +1248,9 @@ _Graph.prototype = {
 
 		// 新規データをセット
 		tmp[num]._x  = x;
-		tmp[num]._y1 = y1.val();
-		tmp[num]._y2 = y2.val();
-		this._info[this._curIndex]._ansNum.set( this._info[this._curIndex]._ansNum.val() + 1 );
+		tmp[num]._y1 = y1._val;
+		tmp[num]._y2 = y2._val;
+		this._info[this._curIndex]._ansNum.set( this._info[this._curIndex]._ansNum._val + 1 );
 		this._info[this._curIndex]._ans = tmp;
 
 		return true;

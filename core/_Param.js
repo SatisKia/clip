@@ -92,29 +92,29 @@ _Param.prototype = {
 
 //	fileFlag : function(){ return this._fileFlag; },
 
-	setEnableCommand : function( flag ){
-		this._enableCommand = flag;
-	},
-	setEnableOpPow : function( flag ){
-		this._enableOpPow = flag;
-	},
-	setEnableStat : function( flag ){
-		this._enableStat = flag;
-	},
+//	setEnableCommand : function( flag ){
+//		this._enableCommand = flag;
+//	},
+//	setEnableOpPow : function( flag ){
+//		this._enableOpPow = flag;
+//	},
+//	setEnableStat : function( flag ){
+//		this._enableStat = flag;
+//	},
 
-	setCalculator : function( flag ){
-		this._calculator = flag;
-	},
-	isCalculator : function(){
-		return this._calculator;
-	},
+//	setCalculator : function( flag ){
+//		this._calculator = flag;
+//	},
+//	isCalculator : function(){
+//		return this._calculator;
+//	},
 
-	setBase : function( base ){
-		this._base = base;
-	},
-	base : function(){
-		return this._base;
-	},
+//	setBase : function( base ){
+//		this._base = base;
+//	},
+//	base : function(){
+//		return this._base;
+//	},
 
 	updateMode : function(){
 		setComplexIsReal( (this._mode & _CLIP_MODE_COMPLEX) == 0 );
@@ -130,9 +130,9 @@ _Param.prototype = {
 		this._mode = mode;
 		this.updateMode();
 	},
-	mode : function(){
-		return this._mode;
-	},
+//	mode : function(){
+//		return this._mode;
+//	},
 
 	updateFps : function(){
 		setTimeFps( this._fps );
@@ -145,9 +145,9 @@ _Param.prototype = {
 		}
 		this.updateFps();
 	},
-	fps : function(){
-		return this._fps;
-	},
+//	fps : function(){
+//		return this._fps;
+//	},
 
 	setPrec : function( prec ){
 		if( prec < _CLIP_MINPREC ){
@@ -156,9 +156,9 @@ _Param.prototype = {
 			this._prec = prec;
 		}
 	},
-	prec : function(){
-		return this._prec;
-	},
+//	prec : function(){
+//		return this._prec;
+//	},
 
 	setRadix : function( radix ){
 		if( radix < _CLIP_MINRADIX ){
@@ -169,16 +169,16 @@ _Param.prototype = {
 			this._radix = radix;
 		}
 	},
-	radix : function(){
-		return this._radix;
-	},
+//	radix : function(){
+//		return this._radix;
+//	},
 
-	setAnsFlag : function( flag ){
-		this._printAns = (flag != 0);
-	},
-	ansFlag : function(){
-		return this._printAns;
-	},
+//	setAnsFlag : function( flag ){
+//		this._printAns = (flag != 0);
+//	},
+//	ansFlag : function(){
+//		return this._printAns;
+//	},
 
 	setVal : function( index, value, moveFlag ){
 		if( index == 0 ){
@@ -328,15 +328,15 @@ _Param.prototype = {
 		this._defNameSpace = defNameSpace;
 		this._nameSpace = this._defNameSpace;
 	},
-	defNameSpace : function(){
-		return this._defNameSpace;
-	},
-	setNameSpace : function( nameSpace ){
-		this._nameSpace = nameSpace;
-	},
-	nameSpace : function(){
-		return this._nameSpace;
-	},
+//	defNameSpace : function(){
+//		return this._defNameSpace;
+//	},
+//	setNameSpace : function( nameSpace ){
+//		this._nameSpace = nameSpace;
+//	},
+//	nameSpace : function(){
+//		return this._nameSpace;
+//	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
 	}

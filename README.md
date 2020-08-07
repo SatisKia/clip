@@ -1,6 +1,12 @@
 # clip.js
 
-CLIPインタープリタ用の計算処理エンジンです。
+CLIP言語による計算処理のエンジンです。
+
+CLIP言語については、test/core/htdocs/language.htmlを参照してください。
+
+## core/clip.js、core/clip.debug.js
+
+core/extrasフォルダを除く全てのソース内容が含まれています。
 
 ## ビルド方法
 
@@ -41,8 +47,12 @@ _EasyClipオブジェクトの使用サンプルとして、core/extras/test.htm
 
 window.loopMax = 65536; // ループ回数上限
 
-window.canvasPut = function( x, y, index ){
-    // キャンバスの指定座標にインデックスのRGBカラーを描画する処理を記述する
+// getArrayTokenString関数用
+window.arrayTokenStringSpace = "&nbsp;";
+window.arrayTokenStringBreak = "<br>";
+
+window.canvasSetColor = function( canvas/*_Canvas*/, index ){
+    // キャンバスの現在色をインデックスのカラーに設定する処理を記述する
 };
 
 /*
@@ -89,15 +99,6 @@ window.printError = function( error, num, func ){
     str += error;
 };
 
-window.doFuncGColor = function( rgb ){
-    // RGBカラーからインデックスを求めて返す
-    return 0;
-};
-window.doFuncGColor24 = function( index ){
-    // インデックスのRGBカラー値を返す
-    return 0x000000;
-};
-
 window.doCommandClear = function(){
     // コマンド:clear実行時に呼ばれる関数
 };
@@ -108,18 +109,21 @@ window.doCommandPrint = function( topPrint, flag ){
 window.doCommandScan = function( topScan, proc, param ){
     // コマンド:scan実行時に呼ばれる関数
 };
-window.doCommandGWorld = function( gWorld, width, height ){
+window.doCommandGWorld = function( width, height ){
     // コマンド:gworld実行時に呼ばれる関数
-    // 独自処理に加え、以下も実行する必要がある
-    gWorld.create( width, height, true );
 };
-window.doCommandGColor = function( index, rgb ){
-    // コマンド:gcolorでRGBカラーが指定された時に呼ばれる関数
-    // インデックスにおけるRGBカラー値を設定する処理を記述する
-};
-window.doCommandGPut24End = function(){
-    // コマンド:gput24実行の後に呼ばれる関数
-};
+```
+
+上書き関数の内部で_EasyClipオブジェクト操作する場合、次のように_EasyClipオブジェクトを取得します。
+
+```javascript
+var clip = curClip();
+```
+
+上書き関数の内部で_Canvasオブジェクト操作する場合、次のように_Canvasオブジェクトを取得します。
+
+```javascript
+var canvas = curClip()._canvas;
 ```
 
 ### オブジェクトの構築
@@ -226,25 +230,25 @@ clip.setMode( mode );
 | _CLIP_MODE_S_LONG | 符号付き32ビット整数型 |
 | _CLIP_MODE_U_LONG | 符号なし32ビット整数型 |
 
-_EasyClipオブジェクト構築直後 _CLIP_MODE_G_FLOAT
+_EasyClipオブジェクト構築直後：_CLIP_MODE_G_FLOAT
 
 ```javascript
 clip.setPrec( prec );
 ```
 
-_EasyClipオブジェクト構築直後 6
+_EasyClipオブジェクト構築直後：6
 
 ```javascript
 clip.setFps( fps );
 ```
 
-_EasyClipオブジェクト構築直後 30.0
+_EasyClipオブジェクト構築直後：30.0
 
 ```javascript
 clip.setRadix( radix );
 ```
 
-_EasyClipオブジェクト構築直後 10
+_EasyClipオブジェクト構築直後：10
 
 ```javascript
 clip.setAngType( type );
@@ -256,13 +260,13 @@ clip.setAngType( type );
 | _ANG_TYPE_DEG | 度 |
 | _ANG_TYPE_GRAD | グラジアン |
 
-_EasyClipオブジェクト構築直後 _ANG_TYPE_RAD
+_EasyClipオブジェクト構築直後：_ANG_TYPE_RAD
 
 ```javascript
 clip.setCalculator( flag );
 ```
 
-_EasyClipオブジェクト構築直後 false
+_EasyClipオブジェクト構築直後：false
 
 ```javascript
 clip.setBase( base );
@@ -273,25 +277,25 @@ clip.setBase( base );
 | 0 | 0オリジン |
 | 1 | 1オリジン |
 
-_EasyClipオブジェクト構築直後 0
+_EasyClipオブジェクト構築直後：0
 
 ```javascript
 clip.setAnsFlag( flag );
 ```
 
-_EasyClipオブジェクト構築直後 false
+_EasyClipオブジェクト構築直後：false
 
 ```javascript
 clip.setAssertFlag( flag );
 ```
 
-_EasyClipオブジェクト構築直後 false
+_EasyClipオブジェクト構築直後：false
 
 ```javascript
 clip.setWarnFlag( flag );
 ```
 
-_EasyClipオブジェクト構築直後 true
+_EasyClipオブジェクト構築直後：true
 
 ### コマンド
 
@@ -339,14 +343,34 @@ var ret = clip.procLine( line/*String*/ ); // 正常終了時、_CLIP_PROC_END�
 var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_ENDが返ってくる
 ```
 
+### カラー・パレット
+
+```javascript
+clip.setPalette( bgrColorArray );
+```
+
+_EasyClipオブジェクト内の配列_paletteを参照・操作できます。
+
 ### キャンバス
 
 ```javascript
-clip.setCanvas( id );
+var canvas = clip.setCanvas( id ); // _Canvasオブジェクト
 ```
 
 ```javascript
-clip.updateCanvas();
+var canvas = clip.createCanvas( width, height ); // _Canvasオブジェクト
+```
+
+```javascript
+var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクト
+```
+
+```javascript
+var canvas = clip.updateCanvas(); // _Canvasオブジェクト
+```
+
+```javascript
+var canvas = clip.canvas(); // _Canvasオブジェクト
 ```
 
 ### その他
@@ -356,3 +380,21 @@ var string = clip.getArrayTokenString( param, array/*_Token*/, indent );
 ```
 
 _Procオブジェクトから呼び出されるprintAnsMatrix関数の実装で使う場合、関数のパラメータのparam、arrayをそのまま渡すことができます。
+
+```javascript
+var proc = clip.proc();
+```
+
+_EasyClipオブジェクト内に唯一存在する計算処理メイン・クラスである_Procオブジェクト。
+
+```javascript
+var param = clip.param();
+```
+
+_EasyClipオブジェクト内に唯一存在する計算パラメータ・クラスである_Paramオブジェクト。
+
+```javascript
+var gWorld = clip.gWorld();
+```
+
+_EasyClipオブジェクト内に唯一存在する_GWorldオブジェクト。

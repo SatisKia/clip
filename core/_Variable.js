@@ -44,14 +44,14 @@ _Variable.prototype = {
 	},
 
 	move : function( index ){
-		if( this._label.flag( index ) == _LABEL_MOVABLE ){
+		if( this._label._flag[index] == _LABEL_MOVABLE ){
 			// 動的変数の実体を移す
 			this.define( this._label._label[index], this.val( index ), this.isLocked( index ) );
 			this.unlock( index );
 
 			this._label.setLabel( index, null, false );
 		}
-		this._label.setFlag( index, _LABEL_USED );
+		this._label._flag[index] = _LABEL_USED;
 	},
 
 	// 値を代入する
