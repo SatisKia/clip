@@ -521,8 +521,12 @@ _EasyClip.prototype = {
 		this._canvas.setSize( width, height );
 		return this._canvas;
 	},
-	updateCanvas : function(){
+	updateCanvas : function( scale ){
 		this._setEnv();
+
+		if( scale == undefined ){
+			scale = 1;
+		}
 
 		this._canvas.setColorRGB( gWorldBgColor() );
 		this._canvas.fill( 0, 0, this._canvas.width(), this._canvas.height() );
@@ -532,12 +536,13 @@ _EasyClip.prototype = {
 		var offset = gWorld._offset;
 		var width  = gWorld._width;
 		var height = gWorld._height;
-		var x, y, yy;
+		var x, y, yy, sy;
 		for( y = 0; y < height; y++ ){
 			yy = y * offset;
+			sy = y * scale;
 			for( x = 0; x < width; x++ ){
 				this._canvas.setColorBGR( this._palette[image[yy + x]] );
-				this._canvas.put( x, y );
+				this._canvas.fill( x * scale, sy, scale, scale );
 			}
 		}
 

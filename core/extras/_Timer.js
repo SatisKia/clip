@@ -4,24 +4,26 @@
  */
 
 var _timer_busy = new Array();
-var _timer_id = 0;
+var _timer_index = 0;
 
 // タイマー
 function _Timer(){
-	this._id = _timer_id++;
-	_timer_busy[this._id] = false;
+	this._index = _timer_index++;
+	_timer_busy[this._index] = false;
 	this._frame = 1000 / 60;
 	this._stop = true;
+	this._last = 0;
 }
 
 _Timer.prototype = {
 
-	id : function(){
-		return this._id;
+	index : function(){
+		return this._index;
 	},
 
 	setFrameTime : function( frameTime ){
 		this._frame = frameTime;
+		return this;
 	},
 
 	start : function(){
@@ -47,16 +49,18 @@ _Timer.prototype = {
 				}
 			}
 		} while( i < _timer_busy.length );
-		_timer_busy[_this._id] = true;
-		onTimer( _this._id );
-		_timer_busy[_this._id] = false;
-		var sleepTime = _this._frame - ((new Date()).getTime() - startTime);
-		if( (sleepTime < 0) || (sleepTime > _this._frame) ){
-			sleepTime = 0;
+		_timer_busy[_this._index] = true;
+		if( onTimer( _this._index, _this._last ) ){
+			_this._last = (new Date()).getTime() - startTime;
+			var sleepTime = _this._frame - _this._last;
+			if( (sleepTime < 0) || (sleepTime > _this._frame) ){
+				sleepTime = 0;
+			}
+			window.setTimeout( _this._loop, sleepTime, _this );
 		}
-		window.setTimeout( _this._loop, sleepTime, _this );
+		_timer_busy[_this._index] = false;
 	}
 
 };
 
-//function onTimer( id ){}
+//function onTimer( index, lastTime ){ return true; }

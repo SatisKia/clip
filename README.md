@@ -367,6 +367,7 @@ var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクト
 
 ```javascript
 var canvas = clip.updateCanvas(); // _Canvasオブジェクト
+clip.updateCanvas( scale ); // _GWorldオブジェクト内のイメージ・メモリを拡大描画
 ```
 
 ```javascript
