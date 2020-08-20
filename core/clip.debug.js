@@ -14388,17 +14388,18 @@ var _TOKEN_DEFINE = [
 	"INFINITY",
 	"NAN"
 ];
-var _VALUE_DEFINE = [
-	_DBL_EPSILON,
-	Number.MAX_VALUE,
-	_RAND_MAX,
-	0,
-	1,
-	gWorldBgColor(),
-	(new Date()).getTimezoneOffset() * -60,
-	Number.POSITIVE_INFINITY,
-	Number.NaN
-];
+var _VALUE_DEFINE = new Array( _TOKEN_DEFINE.length );
+function setDefineValue(){
+	_VALUE_DEFINE[0] = _DBL_EPSILON;
+	_VALUE_DEFINE[1] = Number.MAX_VALUE;
+	_VALUE_DEFINE[2] = _RAND_MAX;
+	_VALUE_DEFINE[3] = 0;
+	_VALUE_DEFINE[4] = 1;
+	_VALUE_DEFINE[5] = gWorldBgColor();
+	_VALUE_DEFINE[6] = (new Date()).getTimezoneOffset() * -60;
+	_VALUE_DEFINE[7] = Number.POSITIVE_INFINITY;
+	_VALUE_DEFINE[8] = Number.NaN;
+}
 function _indexOf( stringArray, string ){
 	var len = stringArray.length;
 	for( var i = 0; i < len; i++ ){
@@ -16631,6 +16632,7 @@ window._TOKEN_COMMAND = _TOKEN_COMMAND;
 window._TOKEN_SE = _TOKEN_SE;
 window._TOKEN_DEFINE = _TOKEN_DEFINE;
 window._VALUE_DEFINE = _VALUE_DEFINE;
+window.setDefineValue = setDefineValue;
 window.getCode = getCode;
 window.getToken = getToken;
 window.regCustomCommand = regCustomCommand;

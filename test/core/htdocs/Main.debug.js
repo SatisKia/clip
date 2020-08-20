@@ -1241,6 +1241,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  canvasClear();
  inputFile = new _InputFile( inputFileId );
  procError = new _ProcError();
+ setDefineValue();
  setProcEnv( new _ProcEnv() );
  topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
  topProc._printAns = true;

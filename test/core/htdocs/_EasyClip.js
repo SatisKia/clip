@@ -93,6 +93,9 @@ function _EasyClip(){
 	defGWorldFunction();
 	defProcFunction();
 
+	// 定義定数の値
+	setDefineValue();
+
 	// 計算処理メイン・クラスを生成する
 	this._procEnv = new _ProcEnv();
 	setProcEnv( this._procEnv );
@@ -495,10 +498,13 @@ _EasyClip.prototype = {
 	},
 
 	// カラー・パレット
-	setPalette : function( bgrColorArray ){
+	newPalette : function(){
 		if( this._palette == null ){
 			this._palette = new Array( 256 );
 		}
+	},
+	setPalette : function( bgrColorArray ){
+		this.newPalette();
 		for( var i = 0; i < 256; i++ ){
 			this._palette[i] = bgrColorArray[i];
 		}
