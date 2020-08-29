@@ -12,15 +12,15 @@
 
 <!--リリース用-->
 <script type="text/javascript" src="clip.js?v=200820"></script>
-<script type="text/javascript" src="Main.js?v=200820"></script>
+<script type="text/javascript" src="Main.js?v=200827"></script>
 
 <!--デバッグ用
 <script type="text/javascript" src="clip.debug.js?v=200820"></script>
-<script type="text/javascript" src="Main.debug.js?v=200820"></script>
+<script type="text/javascript" src="Main.debug.js?v=200827"></script>
 -->
 
 <!--ライブラリ未使用版デバッグ用
-<script type="text/javascript" src="All.debug.js?v=200820"></script>
+<script type="text/javascript" src="All.debug.js?v=200827"></script>
 -->
 
 <script type="text/javascript">
@@ -361,11 +361,25 @@ input[type="checkbox"]:checked + label::after {
 			<td width="5"></td>
 			<td valign="top">
 				<hr style="border:0; margin:0; height:5px">
-				<div id="gworld" class="div_gworld" style="width:1px; height:1px; display:none">
+				<div id="gworld_canvasarea" class="div_gworld" style="width:1px; height:1px; display:none">
 					<canvas id="canvas0" width="1" height="1"></canvas>
 				</div>
-				<hr style="border:0; margin:0; height:5px">
-				<div id="savecanvas" style="display:none">
+				<div id="gworld_buttonarea" style="display:none">
+					<table>
+						<tr>
+							<td>
+								<form action="javascript:canvasZoomOut()">
+									<button type="submit" style="width:30px">－</button>
+								</form>
+							</td>
+							<td>
+								<form action="javascript:canvasZoomIn()">
+									<button type="submit" style="width:30px">＋</button>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<hr style="border:0; margin:0; height:5px">
 					<form action="javascript:saveCanvas()">
 						<button type="submit" id="button_savecanvas">&nbsp;&nbsp;ダウンロード&nbsp;&nbsp;</button>
 					</form>

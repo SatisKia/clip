@@ -347,6 +347,7 @@ var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_EN
 
 ```javascript
 clip.newPalette();
+// 以下はグレースケール・パレットを設定する例
 for( var i = 0; i < 256; i++ ){
     clip._palette[i] = (i << 16) + (i << 8) + i;
 }

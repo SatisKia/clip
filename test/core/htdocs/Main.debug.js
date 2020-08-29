@@ -562,6 +562,48 @@ function onError( e ){
  con.setColor();
 }
 var canvas;
+var canvasScale = 1;
+var canvasMinScale = 1;
+var canvasMinSize = 128;
+function canvasSetSize( width, height ){
+ if( (width <= 0) || (height <= 0) ){
+  canvas.setSize( 1, 1 );
+  var div1 = document.getElementById( "gworld_buttonarea" );
+  div1.style.display = "none";
+  var div2 = document.getElementById( "gworld_canvasarea" );
+  div2.style.width = "1px";
+  div2.style.height = "1px";
+  div2.style.display = "none";
+  var div3 = document.getElementById( "body" );
+  div3.style.width = "640px";
+ } else {
+  var div1 = document.getElementById( "body" );
+  div1.style.width = "" + (640 + width + 2 + 5) + "px";
+  var div2 = document.getElementById( "gworld_canvasarea" );
+  div2.style.width = "" + width + "px";
+  div2.style.height = "" + height + "px";
+  div2.style.display = "block";
+  var div3 = document.getElementById( "gworld_buttonarea" );
+  div3.style.display = "block";
+  canvas.setSize( width, height );
+ }
+}
+function canvasZoomIn(){
+ if( canvasScale < canvasMinScale + 2 ){
+  canvasScale++;
+  canvas.setStrokeWidth( canvasScale );
+  canvasSetSize( procGWorld()._width * canvasScale, procGWorld()._height * canvasScale );
+  gUpdate( procGWorld() );
+ }
+}
+function canvasZoomOut(){
+ if( canvasScale > canvasMinScale ){
+  canvasScale--;
+  canvas.setStrokeWidth( canvasScale );
+  canvasSetSize( procGWorld()._width * canvasScale, procGWorld()._height * canvasScale );
+  gUpdate( procGWorld() );
+ }
+}
 function canvasClear(){
  canvas.setColorRGB( gWorldBgColor() );
  canvas.fill( 0, 0, canvas.width(), canvas.height() );
@@ -570,13 +612,13 @@ function canvasSetColor( bgrColor ){
  canvas.setColorBGR( bgrColor );
 }
 function canvasPut( x, y ){
- canvas.put( x, y );
+ canvas.fill( x * canvasScale, y * canvasScale, canvasScale, canvasScale );
 }
 function canvasFill( x, y, w, h ){
- canvas.fill( x, y, w, h );
+ canvas.fill( x * canvasScale, y * canvasScale, w * canvasScale, h * canvasScale );
 }
 function canvasLine( x1, y1, x2, y2 ){
- canvas.line( x1, y1, x2, y2 );
+ canvas.line( x1, y1, x2, y2, canvasScale );
 }
 var _input_file_cnt;
 var _input_file_num;
@@ -1814,27 +1856,14 @@ function doCommandScan( topScan, proc, param ){
  }
 }
 function doCommandGWorld( width, height ){
- if( (width <= 0) || (height <= 0) ){
-  canvas.setSize( 1, 1 );
-  var div1 = document.getElementById( "savecanvas" );
-  div1.style.display = "none";
-  var div2 = document.getElementById( "gworld" );
-  div2.style.width = "1px";
-  div2.style.height = "1px";
-  div2.style.display = "none";
-  var div3 = document.getElementById( "body" );
-  div3.style.width = "640px";
+ if( (width < canvasMinSize) || (height < canvasMinSize) ){
+  canvasScale = _CEIL( canvasMinSize / ((width < height) ? width : height) );
  } else {
-  var div1 = document.getElementById( "body" );
-  div1.style.width = "" + (640 + width + 2 + 5) + "px";
-  var div2 = document.getElementById( "gworld" );
-  div2.style.width = "" + width + "px";
-  div2.style.height = "" + height + "px";
-  div2.style.display = "block";
-  var div3 = document.getElementById( "savecanvas" );
-  div3.style.display = "block";
-  canvas.setSize( width, height );
+  canvasScale = 1;
  }
+ canvasMinScale = canvasScale;
+ canvas.setStrokeWidth( canvasScale );
+ canvasSetSize( width * canvasScale, height * canvasScale );
 }
 function gWorldClear( gWorld, color ){
  if( lockGUpdate ){
@@ -1914,12 +1943,13 @@ function gUpdate( gWorld ){
  var offset = gWorld._offset;
  var width = gWorld._width;
  var height = gWorld._height;
- var x, y, yy;
+ var x, y, yy, sy;
  for( y = 0; y < height; y++ ){
   yy = y * offset;
+  sy = y * canvasScale;
   for( x = 0; x < width; x++ ){
    canvasSetColor( COLOR_WIN[image[yy + x]] );
-   canvasPut( x, y );
+   canvas.fill( x * canvasScale, sy, canvasScale, canvasScale );
   }
  }
  canvasSetColor( COLOR_WIN[gWorld._color] );

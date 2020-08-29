@@ -179,15 +179,24 @@ _Canvas.prototype = {
 	fill : function( x, y, w, h ){
 		this._context.fillRect( x, y, w, h );
 	},
-	line : function( x1, y1, x2, y2 ){
+	line : function( x1, y1, x2, y2, scale ){
 		this._context.beginPath();
-		this._context.moveTo( x1 + 0.5, y1 + 0.5 );
-		this._context.lineTo( x2 + 0.5, y2 + 0.5 );
+		if( scale == undefined ){
+			this._context.moveTo( x1 + 0.5, y1 + 0.5 );
+			this._context.lineTo( x2 + 0.5, y2 + 0.5 );
+		} else {
+			this._context.moveTo( (x1 + 0.5) * scale, (y1 + 0.5) * scale );
+			this._context.lineTo( (x2 + 0.5) * scale, (y2 + 0.5) * scale );
+		}
 		this._context.stroke();
 		this._context.closePath();
 	},
-	rect : function( x, y, w, h ){
-		this._context.strokeRect( x + 0.5, y + 0.5, w, h );
+	rect : function( x, y, w, h, scale ){
+		if( scale == undefined ){
+			this._context.strokeRect( x + 0.5, y + 0.5, w, h );
+		} else {
+			this._context.strokeRect( (x + 0.5) * scale, (y + 0.5) * scale, w * scale, h * scale );
+		}
 	},
 	circle : function( cx, cy, r ){
 		this._context.beginPath();
