@@ -3965,7 +3965,6 @@ _Graph.prototype = {
 			);
 	},
 	_drawYText : function( x, y ){
-		var xx;
 		var text = floatToString( y, 15 );
 		var tmp = new __TextInfo();
 		this._gWorld.getTextInfo( text, tmp );
@@ -3973,18 +3972,27 @@ _Graph.prototype = {
 		var ascent = tmp._ascent;
 		var descent = tmp._descent;
 		if( (this._gWorld.imgPosX( x ) - (width + 1)) < 0 ){
-			xx = 1;
+			this._gWorld.drawText(
+				text,
+				1,
+				this._gWorld.imgPosY( y ) - descent,
+				false
+				);
 		} else if( this._gWorld.imgPosX( x ) >= this._gWorld._width ){
-			xx = this._gWorld._width - width;
+			this._gWorld.drawText(
+				text,
+				this._gWorld._width,
+				this._gWorld.imgPosY( y ) - descent,
+				true
+				);
 		} else {
-			xx = this._gWorld.imgPosX( x ) - width;
+			this._gWorld.drawText(
+				text,
+				this._gWorld.imgPosX( x ),
+				this._gWorld.imgPosY( y ) - descent,
+				true
+				);
 		}
-		this._gWorld.drawText(
-			text,
-			xx,
-			this._gWorld.imgPosY( y ) - descent,
-			false
-			);
 	},
 	clear : function( backColor, scaleColor, unitColor, unitX, unitY, textColor, textX, textY ){
 		var i;

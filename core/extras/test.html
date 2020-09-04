@@ -19,8 +19,8 @@ function main(){
 
 	window.doCommandGWorld = function( width, height ){
 		var canvas = curClip().createCanvas( width, height );
-		canvas.setFont( 8, "Helvetica" );
-		su.setFont( 8, "Helvetica" );
+		canvas.setFont( 10, "Helvetica" );
+		su.setFont( 10, "Helvetica" );
 	};
 
 	window.gWorldClear = function( gWorld, color ){
@@ -61,7 +61,7 @@ function main(){
 		}
 		var canvas = curClip()._canvas;
 		canvas.setColorBGR( curClip()._palette[color] );
-		canvas.drawString( text, x, y );
+		canvas.drawString( text, x, y + 2 );
 		canvas.setColorBGR( curClip()._palette[gWorld._color] );
 	};
 
