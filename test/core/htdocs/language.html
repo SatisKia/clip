@@ -568,15 +568,15 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dd><span class="pink">\-i</span><br>
 </dl>
 </dl>
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><br><dl><dd>現在の基数での整数表記<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>現在の基数での整数表記<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><br><dl><dd>2進数<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>2進数<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><br><dl><dd>8進数<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>8進数<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><br><dl><dd>10進数<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>10進数<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><br><dl><dd>16進数<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>16進数<br></dl>
 <hr class="hr">
 <span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">&apos;</span><i>cccc</i><br><dl><dd>文字コード。例えば次の通り。<br>
 <dl>
@@ -1130,6 +1130,8 @@ CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が�
 <span class="pink">frexp </span><i>x</i><span class="pink"> </span><i>var_exp</i><br><dl><dd><i>x</i>の仮数を返し、<i>var_exp</i>に指数が格納される<br></dl>
 <hr class="hr">
 <span class="pink">modf </span><i>x</i><span class="pink"> </span><i>var_int</i><br><dl><dd><i>x</i>の小数部を返し、<i>var_int</i>に整数部が格納される<br></dl>
+<hr class="hr">
+<span class="pink">fact </span><i>val</i><br><dl><dd>階乗<br></dl>
 <hr class="hr_border">
 <span class="pink">real </span><i>val</i><br><dl><dd>複素数の実数部<br></dl>
 <hr class="hr">

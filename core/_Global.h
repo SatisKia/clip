@@ -215,43 +215,44 @@
 #define _CLIP_FUNC_LDEXP	53
 #define _CLIP_FUNC_FREXP	54
 #define _CLIP_FUNC_MODF		55
+#define _CLIP_FUNC_FACT		56
 
-#define _CLIP_FUNC_INT		56
-#define _CLIP_FUNC_REAL		57
-#define _CLIP_FUNC_IMAG		58
-#define _CLIP_FUNC_ARG		59
-#define _CLIP_FUNC_NORM		60
-#define _CLIP_FUNC_CONJG	61
-#define _CLIP_FUNC_POLAR	62
+#define _CLIP_FUNC_INT		57
+#define _CLIP_FUNC_REAL		58
+#define _CLIP_FUNC_IMAG		59
+#define _CLIP_FUNC_ARG		60
+#define _CLIP_FUNC_NORM		61
+#define _CLIP_FUNC_CONJG	62
+#define _CLIP_FUNC_POLAR	63
 
-#define _CLIP_FUNC_NUM		63
-#define _CLIP_FUNC_DENOM	64
+#define _CLIP_FUNC_NUM		64
+#define _CLIP_FUNC_DENOM	65
 
-#define _CLIP_FUNC_ROW		65
-#define _CLIP_FUNC_COL		66
-#define _CLIP_FUNC_TRANS	67
+#define _CLIP_FUNC_ROW		66
+#define _CLIP_FUNC_COL		67
+#define _CLIP_FUNC_TRANS	68
 
-#define _CLIP_FUNC_STRCMP	68
-#define _CLIP_FUNC_STRICMP	69
-#define _CLIP_FUNC_STRLEN	70
+#define _CLIP_FUNC_STRCMP	69
+#define _CLIP_FUNC_STRICMP	70
+#define _CLIP_FUNC_STRLEN	71
 
-#define _CLIP_FUNC_GWIDTH	71
-#define _CLIP_FUNC_GHEIGHT	72
-#define _CLIP_FUNC_GCOLOR	73
-#define _CLIP_FUNC_GCOLOR24	74
-#define _CLIP_FUNC_GCX		75
-#define _CLIP_FUNC_GCY		76
-#define _CLIP_FUNC_WCX		77
-#define _CLIP_FUNC_WCY		78
-#define _CLIP_FUNC_GGET		79
-#define _CLIP_FUNC_WGET		80
-#define _CLIP_FUNC_GX		81
-#define _CLIP_FUNC_GY		82
-#define _CLIP_FUNC_WX		83
-#define _CLIP_FUNC_WY		84
+#define _CLIP_FUNC_GWIDTH	72
+#define _CLIP_FUNC_GHEIGHT	73
+#define _CLIP_FUNC_GCOLOR	74
+#define _CLIP_FUNC_GCOLOR24	75
+#define _CLIP_FUNC_GCX		76
+#define _CLIP_FUNC_GCY		77
+#define _CLIP_FUNC_WCX		78
+#define _CLIP_FUNC_WCY		79
+#define _CLIP_FUNC_GGET		80
+#define _CLIP_FUNC_WGET		81
+#define _CLIP_FUNC_GX		82
+#define _CLIP_FUNC_GY		83
+#define _CLIP_FUNC_WX		84
+#define _CLIP_FUNC_WY		85
 
-#define _CLIP_FUNC_CALL		85
-#define _CLIP_FUNC_EVAL		86
+#define _CLIP_FUNC_CALL		86
+#define _CLIP_FUNC_EVAL		87
 
 /*
  * 文の種類
@@ -579,6 +580,7 @@
 #define _CLIP_PROC_ERR_FRACT			0x210D//(_CLIP_PROC_ERR | 0x0D)		// 分数表現が間違っています
 #define _CLIP_PROC_ERR_ASS				0x210E//(_CLIP_PROC_ERR | 0x0E)		// 定数への代入は無効です
 #define _CLIP_PROC_ERR_CALL				0x210F//(_CLIP_PROC_ERR | 0x0F)		// 関数呼び出しに失敗しました
+#define _CLIP_PROC_ERR_EVAL				0x2110//(_CLIP_PROC_ERR | 0x10)		// evalの実行が中断されました
 
 #define _CLIP_PROC_ERR_STAT_IF			0x2120//(_CLIP_PROC_ERR | 0x20)		// ifのネスト数が多すぎます
 #define _CLIP_PROC_ERR_STAT_ENDIF		0x2121//(_CLIP_PROC_ERR | 0x21)		// endifに対応するifがありません

@@ -246,6 +246,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
 		if( isEnglish ) error = "Function call failed.";
 		else            error = "関数呼び出しに失敗しました";
 		break;
+	case _CLIP_PROC_ERR_EVAL:
+		if( isEnglish ) error = "Execution of evaluation was interrupted.";
+		else            error = "evalの実行が中断されました";
+		break;
 	case _CLIP_PROC_ERR_STAT_IF:
 		if( isEnglish ) error = "\"" + token + "\" too many nests.";
 		else            error = token + "のネスト数が多すぎます";

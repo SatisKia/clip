@@ -181,7 +181,7 @@ __ArrayNode.prototype = {
 			this._vector[i].ass( value[i] );
 		}
 	},
-	setVector2 : function( real, imag, num ){
+	setComplexVector : function( real, imag, num ){
 		if( num > this._vectorNum ){
 			this._newVector( num - 1 );
 		} else {
@@ -191,6 +191,26 @@ __ArrayNode.prototype = {
 		for( var i = 0; i < num; i++ ){
 			this._vector[i].setReal( real[i] );
 			this._vector[i].setImag( imag[i] );
+		}
+	},
+	setFractVector : function( value, denom, num ){
+		if( num > this._vectorNum ){
+			this._newVector( num - 1 );
+		} else {
+			this._resizeVector( num - 1 );
+		}
+
+		var nu;
+		for( var i = 0; i < num; i++ ){
+			nu = value[i];
+			if( nu < 0 ){
+				this._vector[i].fractSetMinus( true );
+				nu = -nu;
+			} else {
+				this._vector[i].fractSetMinus( false );
+			}
+			this._vector[i].setNum( nu );
+			this._vector[i].setDenom( denom[i] );
 		}
 	},
 
@@ -285,11 +305,17 @@ _Array.prototype = {
 		}
 		this._node[index].setVector( value, num );
 	},
-	setVector2 : function( index, real, imag, num, moveFlag ){
+	setComplexVector : function( index, real, imag, num, moveFlag ){
 		if( moveFlag ){
 			this.move( index );
 		}
-		this._node[index].setVector2( real, imag, num );
+		this._node[index].setComplexVector( real, imag, num );
+	},
+	setFractVector : function( index, value, denom, num, moveFlag ){
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._node[index].setFractVector( value, denom, num );
 	},
 	setMatrix : function( index, src, moveFlag ){
 		if( moveFlag ){
@@ -297,11 +323,33 @@ _Array.prototype = {
 		}
 		this._mat[index].ass( src );
 	},
-	setMatrix2 : function( index, real, imag, moveFlag ){
+	setComplexMatrix : function( index, real, imag, moveFlag ){
 		if( real._len == imag._len ){
-			var src = dupMatrix( real );
+			var src = new _Matrix( real._row, real._col );
 			for( var i = 0; i < real._len; i++ ){
-				src._mat[i].setImag( imag._mat[i].real() );
+				src._mat[i].setReal( real._mat[i].toFloat() );
+				src._mat[i].setImag( imag._mat[i].toFloat() );
+			}
+			if( moveFlag ){
+				this.move( index );
+			}
+			this._mat[index].ass( src );
+		}
+	},
+	setFractMatrix : function( index, value, denom, moveFlag ){
+		if( value._len == denom._len ){
+			var src = new _Matrix( value._row, value._col );
+			var nu;
+			for( var i = 0; i < value._len; i++ ){
+				nu = value._mat[i].toFloat();
+				if( nu < 0 ){
+					src._mat[i].fractSetMinus( true );
+					nu = -nu;
+				} else {
+					src._mat[i].fractSetMinus( false );
+				}
+				src._mat[i].setNum( nu );
+				src._mat[i].setDenom( denom._mat[i].toFloat() );
 			}
 			if( moveFlag ){
 				this.move( index );

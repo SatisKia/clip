@@ -25,20 +25,21 @@ _Time.prototype = {
 
 	_reduce1 : function(){
 		var _m, _s, _f;
+		var _int = new _Float();
 
 		// 時の小数部を取り除く
-		_m = this._hour - _INT( this._hour );
-		this._hour = _INT( this._hour );
+		_m = _MODF( this._hour, _int );
+		this._hour = _int.val();
 		this._min += _m * 60.0;
 
 		// 分の小数部を取り除く
-		_s = this._min - _INT( this._min );
-		this._min = _INT( this._min );
+		_s = _MODF( this._min, _int );
+		this._min = _int.val();
 		this._sec += _s * 60.0;
 
 		// 秒の小数部を取り除く
-		_f = this._sec - _INT( this._sec );
-		this._sec = _INT( this._sec );
+		_f = _MODF( this._sec, _int );
+		this._sec = _int.val();
 		this._frame += _f * this._fps;
 	},
 	_reduce2 : function(){

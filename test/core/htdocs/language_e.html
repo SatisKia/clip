@@ -562,15 +562,15 @@ Constant expression<br>
 <dd><span class="pink">\-i</span><br>
 </dl>
 </dl>
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><br><dl><dd>Integer representation in the current radix<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>Integer representation in the current radix<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><br><dl><dd>Binary number<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\b</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>Binary number<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><br><dl><dd>Octal number<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\0</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>Octal number<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><br><dl><dd>Decimal number<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>Decimal number<br></dl>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><br><dl><dd>Hexadecimal<br></dl>
+<span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">\x</span><i>nnnn</i><span class="blue">[</span><span class="pink">!</span><span class="blue">]</span><br><dl><dd>Hexadecimal<br></dl>
 <hr class="hr">
 <span class="pink">&nbsp;&nbsp;</span><span class="blue">[</span><span class="pink">\-</span><span class="blue">]</span><span class="pink">&apos;</span><i>cccc</i><br><dl><dd>Character code. For example:<br>
 <dl>
@@ -1124,6 +1124,8 @@ Substitution<br>
 <span class="pink">frexp </span><i>x</i><span class="pink"> </span><i>var_exp</i><br><dl><dd>Returns the mantissa of <i>x</i> and the exponent is stored in <i>var_exp</i><br></dl>
 <hr class="hr">
 <span class="pink">modf </span><i>x</i><span class="pink"> </span><i>var_int</i><br><dl><dd>The decimal part of <i>x</i> is returned, and the integer part is stored in <i>var_int</i>.<br></dl>
+<hr class="hr">
+<span class="pink">fact </span><i>val</i><br><dl><dd>Factorial<br></dl>
 <hr class="hr_border">
 <span class="pink">real </span><i>val</i><br><dl><dd>Real part of complex number<br></dl>
 <hr class="hr">

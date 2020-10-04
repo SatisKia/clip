@@ -51,10 +51,6 @@ window.loopMax = 65536; // ループ回数上限
 window.arrayTokenStringSpace = "&nbsp;";
 window.arrayTokenStringBreak = "<br>";
 
-window.canvasSetColor = function( canvas/*_Canvas*/, index ){
-    // キャンバスの現在色をインデックスのカラーに設定する処理を記述する
-};
-
 /*
  * _Proc用
  */
@@ -70,7 +66,7 @@ window.errorProc = function( err, num, func, token ){
 
 window.printAnsMatrix = function( param, array/*_Token*/ ){
     // 以下は文字列を生成する例
-    var str = _clip.getArrayTokenString( param, array, 0 );
+    var str = curClip().getArrayTokenString( param, array, 0 );
 };
 window.printAnsComplex = function( real, imag ){
     // 以下は文字列を生成する例
@@ -105,9 +101,36 @@ window.doCommandClear = function(){
 window.doCommandPrint = function( topPrint, flag ){
     // コマンド:print、:println実行時に呼ばれる関数
     // コマンド:print時はflagにfalseが、コマンド:println時はflagにtrueが渡される
+    // 以下は文字列を生成する例
+    var str = "";
+    var cur = topPrint;
+    while( cur != null ){
+        if( cur._string != null ){
+            var tmp = new _String( cur._string );
+            tmp.escape().replaceNewLine( "<br>" );
+            str += tmp.str();
+        }
+        cur = cur._next;
+    }
+    if( flag ){
+        str += "<br>";
+    }
 };
 window.doCommandScan = function( topScan, proc, param ){
     // コマンド:scan実行時に呼ばれる関数
+    // 以下は文字入力ダイアログを表示する例
+    var defString = new String();
+    var newString = new String();
+    var cur = topScan;
+    while( cur != null ){
+        defString = cur.getDefString( proc, param );
+        newString = prompt( cur.title(), defString );
+        if( (newString == null) || (newString.length == 0) ){
+            newString = defString;
+        }
+        cur.setNewValue( newString, proc, param );
+        cur = cur._next;
+    }
 };
 window.doCommandGWorld = function( width, height ){
     // コマンド:gworld実行時に呼ばれる関数
@@ -137,68 +160,82 @@ var clip = new _EasyClip();
 ```javascript
 clip.setValue( 'a', 12.345 ); // CLIPでの@a
 clip.setComplex( 'b', 12.3, 4.5 ); // CLIPでの@b
-clip.setFract( 'c', 1, 3 ); // CLIPでの@c
+clip.setFract( 'c', -1, 3 ); // CLIPでの@c
 ```
 
 ### 配列に値を設定する
 
 ```javascript
-clip.setMatrix( 'a', [[1,2,3],[4,5,6],[7,8,9]] ); // CLIPでの@@a
-clip.setArrayValue( 'b', [0, 0], 12 ); // CLIPでの@@b 0 0
-clip.setArrayValue( 'b', [0, 1], 34 ); // CLIPでの@@b 0 1
-clip.setArrayValue( 'b', [1, 0], 56 ); // CLIPでの@@b 1 0
-clip.setArrayValue( 'b', [1, 1], 78 ); // CLIPでの@@b 1 1
-clip.setArrayComplex( 'c', [0], 12.3, 4.5 ); // CLIPでの@@c 0
-clip.setArrayFract( 'd', [2], 3, 7 ); // CLIPでの@@d 2
-clip.setString( 's', "Hello World!!" ); // CLIPでの@@s
-```
-
-### 計算結果の値を確認する
-
-```javascript
-var value = clip.getAnsValue().toFloat();
-var real = clip.getAnsValue().real();
-var imag = clip.getAnsValue().imag();
-var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
-```
-
-getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
-
-```javascript
-var string = "Ans = " + clip.getAnsMatrixString( 6 );
+clip.setVector( 'a', [1,2,3,4,5,6] ); // @@a{1 2 3 4 5 6}
+clip.setComplexVector( 'b', [1,0,2], [0,1,1] ); // @@b{1 i 2\+i}
+clip.setFractVector( 'c', [1,-1], [3,3] );
+clip.setMatrix( 'd', [[1,2,3],[4,5,6],[7,8,9]] ); // @@d{{1 2 3}{4 5 6}{7 8 9}}
+clip.setComplexMatrix( 'e', [[3,2],[2,5]], [[0,1],[-1,0]] ); // @@e{{3 2\+i}{2\-i 5}}
+clip.setFractMatrix( 'f', [[1,-1],[-2,2]], [[3,3],[3,3]] );
+clip.setMatrix( 'g', matrix/*_Matrix*/ );
+clip.setArrayValue( 'h', [0, 0], 12 ); // @@h 0 0
+clip.setArrayValue( 'h', [0, 1], 34 ); // @@h 0 1
+clip.setArrayValue( 'h', [1, 0], 56 ); // @@h 1 0
+clip.setArrayValue( 'h', [1, 1], 78 ); // @@h 1 1
+clip.setArrayComplex( 'i', [0], 12.3, 4.5 ); // @@i 0
+clip.setArrayFract( 'j', [2], 3, 7 ); // @@j 2
+clip.setString( 's', "Hello World!!" );
 ```
 
 ### 変数の値を確認する
 
 ```javascript
 var value = clip.getValue( 'a' ).toFloat();
-var real = clip.getValue( 'b' ).real();
-var imag = clip.getValue( 'b' ).imag();
+var value = clip.getValue( 'b' ).real();
+var value = clip.getValue( 'b' ).imag();
+var isMinus = clip.getValue( 'c' ).fractMinus();
+var value = clip.getValue( 'c' ).num();
+var value = clip.getValue( 'c' ).denom();
 ```
 
-getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag関数以外の関数も使えます。
+getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
 
 ```javascript
 var string = clip.getComplexString( 'b' );
+var string = clip.getFractString( 'c', false ); // Improper
+var string = clip.getFractString( 'c', true ); // Mixed
 ```
 
 ### 配列の値を確認する
 
 ```javascript
-var array = clip.getArray( 'a' );
-var array2 = clip.getArray( 'a', 1 ); // 一次元要素のみを取り出す
-var array3 = clip.getArray( 'a', 2 ); // 二次元要素のみを取り出す
-var array4 = clip.getArray( 'a', n ); // n次元要素のみを取り出す
+var array = clip.getArray( 'a' ); // Forcibly convert to JavaScript Array
+var array = clip.getArray( 'a', 1 ); // One-dimensional element
+var array = clip.getArray( 'a', 2 ); // Two-dimensional element
+var array = clip.getArray( 'a', N ); // N-dimensional element
 ```
 
 ```javascript
-var string = "@@b = " + clip.getArrayString( 'b', 6 );
+var string = "@@d = " + clip.getArrayString( 'd', 6 );
 ```
 
 getArray関数で取得したArrayオブジェクトをJSON.stringifyに渡すことでも文字列に変換できます。
 
 ```javascript
 var string = clip.getString( 's' );
+```
+
+### 計算結果の値を確認する
+
+```javascript
+var value = clip.getAnsValue().toFloat();
+var value = clip.getAnsValue().real();
+var value = clip.getAnsValue().imag();
+var isMinus = clip.getAnsValue().fractMinus();
+var value = clip.getAnsValue().num();
+var value = clip.getAnsValue().denom();
+var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
+```
+
+getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
+
+```javascript
+var string = "Ans = " + clip.getAnsMatrixString( 6 );
 ```
 
 ### 各種設定
@@ -375,11 +412,23 @@ var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクト
 
 ```javascript
 var canvas = clip.updateCanvas(); // _Canvasオブジェクト
-clip.updateCanvas( scale ); // _GWorldオブジェクト内のイメージ・メモリを拡大描画
+var canvas = clip.updateCanvas( scale ); // scaleを指定すると、_GWorldオブジェクト内のイメージ・メモリが拡大描画される
 ```
 
 ```javascript
 var canvas = clip.canvas(); // _Canvasオブジェクト
+```
+
+### _EasyCanvasオブジェクトを使用する
+ 
+_EasyCanvasオブジェクトを構築すると、以降、CLIPのグラフィックス命令が直接キャンバスに描画されるようになり、updateCanvas関数を呼ぶ必要がなくなります。
+ 
+```javascript
+var easyCanvas = new _EasyCanvas();
+```
+
+```javascript
+easyCanvas.setFont( canvas/*_Canvas*/, size, family );
 ```
 
 ### その他

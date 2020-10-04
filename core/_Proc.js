@@ -3744,6 +3744,17 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_funcFact : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = new _Matrix();
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		value.ass( tmpValue._mat[0].factorial() );
+		return _CLIP_NO_ERR;
+	},
 	_funcInt : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		var tmpValue = new _Matrix();
@@ -4139,7 +4150,7 @@ _Proc.prototype = {
 		childProc.end();
 		childParam.end();
 
-		return ret;
+		return (ret == _CLIP_NO_ERR) ? _CLIP_NO_ERR : _this._retError( _CLIP_PROC_ERR_EVAL, code, token );
 	},
 	doFuncEval : function( childProc, childParam, string, value ){
 		var ret;
@@ -8752,6 +8763,7 @@ var _procSubFunc = [
 	_Proc.prototype._funcLdexp,
 	_Proc.prototype._funcFrexp,
 	_Proc.prototype._funcModf,
+	_Proc.prototype._funcFact,
 
 	_Proc.prototype._funcInt,
 	_Proc.prototype._funcReal,

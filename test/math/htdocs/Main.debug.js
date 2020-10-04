@@ -1275,6 +1275,34 @@ function _UNSIGNED( x, umax ){
  if( x < 0 ) return x + umax;
  return x;
 }
+function _MODF( x, _int ){
+ var tmp = x.toString().split( "." );
+ var k;
+ if( tmp[1] ){
+  if( (tmp[1].indexOf( "e" ) >= 0) || (tmp[1].indexOf( "E" ) >= 0) ){
+   k = 1;
+  } else {
+   k = _POW( 10, tmp[1].length );
+  }
+ } else {
+  k = 1;
+ }
+ var i = _INT( x );
+ _int.set( i );
+ return (x * k - i * k) / k;
+}
+function _FACTORIAL( x ){
+ var m = false;
+ if( x < 0 ){
+  m = true;
+  x = 0 - x;
+ }
+ var f = 1;
+ for( var i = 2; i <= x; i++ ){
+  f *= i;
+ }
+ return m ? -f : f;
+}
 function _CHAR( chr ){
  return chr.charCodeAt( 0 );
 }
@@ -2075,14 +2103,15 @@ _Time.prototype = {
  },
  _reduce1 : function(){
   var _m, _s, _f;
-  _m = this._hour - _INT( this._hour );
-  this._hour = _INT( this._hour );
+  var _int = new _Float();
+  _m = _MODF( this._hour, _int );
+  this._hour = _int.val();
   this._min += _m * 60.0;
-  _s = this._min - _INT( this._min );
-  this._min = _INT( this._min );
+  _s = _MODF( this._min, _int );
+  this._min = _int.val();
   this._sec += _s * 60.0;
-  _f = this._sec - _INT( this._sec );
-  this._sec = _INT( this._sec );
+  _f = _MODF( this._sec, _int );
+  this._sec = _int.val();
   this._frame += _f * this._fps;
  },
  _reduce2 : function(){
@@ -3024,10 +3053,10 @@ _Value.prototype = {
   return floatToValue( x );
  },
  modf : function( _int ){
-  var x = this.toFloat();
-  var i = _INT( x );
-  _int.set( i );
-  return floatToValue( x - i );
+  return floatToValue( _MODF( this.toFloat(), _int ) );
+ },
+ factorial : function(){
+  return floatToValue( _FACTORIAL( this.toFloat() ) );
  },
  farg : function(){
   return this._complex().farg();

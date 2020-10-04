@@ -106,6 +106,7 @@ var _TOKEN_FUNC = [
 	"ldexp",
 	"frexp",
 	"modf",
+	"fact",
 	"int",
 	"real",
 	"imag",
@@ -577,7 +578,51 @@ _Token.prototype = {
 		default : top = 0; swi = false; break;
 		}
 
-		if( string.charAt( top ) == '\'' ){
+		if( string.charAt( string.length - 1 ) == '!' ){
+			var tmpString = string.substring( top, string.length - 1 );
+			if( isCharEscape( tmpString, top ) ){
+				switch( tmpString.charAt( top + 1 ) ){
+				case 'b':
+				case 'B':
+					value.ass( stringToInt( tmpString, top + 2, stop, 2 ) );
+					break;
+				case '0':
+					value.ass( stringToInt( tmpString, top + 2, stop, 8 ) );
+					break;
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					value.ass( stringToInt( tmpString, top + 1, stop, 10 ) );
+					break;
+				case 'x':
+				case 'X':
+					value.ass( stringToInt( tmpString, top + 2, stop, 16 ) );
+					break;
+				default:
+					return false;
+				}
+			} else {
+				if( (param._mode & _CLIP_MODE_INT) != 0 ){
+					value.ass( stringToInt( tmpString, 0, stop, param._radix ) );
+				} else {
+					value.ass( stringToInt( tmpString, 0, stop, 10 ) );
+				}
+			}
+			if( stop._val < tmpString.length ){
+				return false;
+			}
+			if( swi ){
+				value.ass( value.factorial().minus() );
+			} else {
+				value.ass( value.factorial() );
+			}
+		} else if( string.charAt( top ) == '\'' ){
 			value.ass( 0.0 );
 			j = 0;
 			for( i = 1; ; i++ ){
@@ -615,15 +660,9 @@ _Token.prototype = {
 			case 'b':
 			case 'B':
 				value.ass( stringToInt( string, top + 2, stop, 2 ) );
-				if( stop._val < string.length ){
-					return false;
-				}
 				break;
 			case '0':
 				value.ass( stringToInt( string, top + 2, stop, 8 ) );
-				if( stop._val < string.length ){
-					return false;
-				}
 				break;
 			case '1':
 			case '2':
@@ -635,18 +674,15 @@ _Token.prototype = {
 			case '8':
 			case '9':
 				value.ass( stringToInt( string, top + 1, stop, 10 ) );
-				if( stop._val < string.length ){
-					return false;
-				}
 				break;
 			case 'x':
 			case 'X':
 				value.ass( stringToInt( string, top + 2, stop, 16 ) );
-				if( stop._val < string.length ){
-					return false;
-				}
 				break;
 			default:
+				return false;
+			}
+			if( stop._val < string.length ){
 				return false;
 			}
 			if( swi ){

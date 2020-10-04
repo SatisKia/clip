@@ -120,7 +120,7 @@ function _EasyClip(){
 	this._palette = null;
 
 	// キャンバス
-	this._canvasEnv = new _CanvasEnv();
+	this._canvasEnv = null;
 	this._canvas = null;
 }
 
@@ -129,7 +129,9 @@ _EasyClip.prototype = {
 	_setEnv : function(){
 		setClip( this );
 		setProcEnv( this._procEnv );
-		setCanvasEnv( this._canvasEnv );
+		if( this._canvasEnv != null ){
+			setCanvasEnv( this._canvasEnv );
+		}
 	},
 
 	proc : function(){
@@ -169,9 +171,32 @@ _EasyClip.prototype = {
 		this._param.setDenom     ( index, _ABS( denom ), false );
 		this._param.fractReduce  ( index, false );
 	},
-	setMatrix : function( chr, array/*Array*/ ){
+	setVector : function( chr, value/*Array*/ ){
 		this._setEnv();
-		this._param._array.setMatrix( _CHAR( chr ), arrayToMatrix( array ), false );
+		this._param._array.setVector( _CHAR( chr ), value, value.length );
+	},
+	setComplexVector : function( chr, real/*Array*/, imag/*Array*/ ){
+		this._setEnv();
+		this._param._array.setComplexVector( _CHAR( chr ), real, imag, (real.length < imag.length) ? real.length : imag.length );
+	},
+	setFractVector : function( chr, value/*Array*/, denom/*Array*/ ){
+		this._setEnv();
+		this._param._array.setFractVector( _CHAR( chr ), value, denom, (value.length < denom.length) ? value.length : denom.length );
+	},
+	setMatrix : function( chr, value/*Array or _Matrix*/ ){
+		this._setEnv();
+		if( !(value instanceof _Matrix) ){
+			value = arrayToMatrix( value );
+		}
+		this._param._array.setMatrix( _CHAR( chr ), value, false );
+	},
+	setComplexMatrix : function( chr, real/*Array*/, imag/*Array*/ ){
+		this._setEnv();
+		this._param._array.setComplexMatrix( _CHAR( chr ), arrayToMatrix( real ), arrayToMatrix( imag ), false );
+	},
+	setFractMatrix : function( chr, value/*Array*/, denom/*Array*/ ){
+		this._setEnv();
+		this._param._array.setFractMatrix( _CHAR( chr ), arrayToMatrix( value ), arrayToMatrix( denom ), false );
 	},
 	setArrayValue : function( chr, subIndex/*Array*/, value ){
 		this._setEnv();
@@ -232,6 +257,32 @@ _EasyClip.prototype = {
 			string = "" + value.real() + "+" + value.imag() + "i";
 		} else {
 			string = "" + value.real() + value.imag() + "i";
+		}
+		return string;
+	},
+	getFractString : function( chr, mixed ){
+		var string = new String();
+		var value = this.getValue( chr );
+		if( mixed && (value.denom() != 0) && (_DIV( value.num(), value.denom() ) != 0) ){
+			if( _MOD( value.num(), value.denom() ) != 0 ){
+				string = value.fractMinus() ? "-" : "";
+				string += "" + _DIV( value.num(), value.denom() );
+				string += "」" + _MOD( value.num(), value.denom() );
+				string += "」" + value.denom();
+			} else {
+				string = value.fractMinus() ? "-" : "";
+				string += "" + _DIV( value.num(), value.denom() );
+			}
+		} else {
+			if( value.denom() == 0 ){
+				string = "" + value.toFloat();
+			} else if( value.denom() == 1 ){
+				string = value.fractMinus() ? "-" : "";
+				string += "" + value.num();
+			} else {
+				string = value.fractMinus() ? "-" : "";
+				string += "" + value.num() + "」" + value.denom();
+			}
 		}
 		return string;
 	},
@@ -511,13 +562,19 @@ _EasyClip.prototype = {
 	},
 
 	// キャンバス
-	setCanvas : function( id ){
+	_useCanvas : function(){
+		if( this._canvasEnv == null ){
+			this._canvasEnv = new _CanvasEnv();
+		}
 		setCanvasEnv( this._canvasEnv );
+	},
+	setCanvas : function( id ){
+		this._useCanvas();
 		this._canvas = new _Canvas( id );
 		return this._canvas;
 	},
 	createCanvas : function( width, height ){
-		setCanvasEnv( this._canvasEnv );
+		this._useCanvas();
 		this._canvas = new _Canvas();
 		this._canvas.setSize( width, height );
 		return this._canvas;

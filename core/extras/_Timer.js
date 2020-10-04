@@ -4,23 +4,23 @@
  */
 
 var _timer_busy = new Array();
-var _timer_index = 0;
 
 // タイマー
 function _Timer(){
-	this._index = _timer_index++;
+	this._index = _timer_busy.length;
 	_timer_busy[this._index] = false;
-	this._frame = 1000 / 60;
-	this._stop = true;
-	this._last = 0;
+	this._obj   = null;	// 紐付けられたオブジェクト
+	this._frame = 0;	// 1フレームの時間（ミリ秒）
+	this._last  = 0;	// 前のフレーム処理にかかった時間
+	this._stop  = true;
 }
 
 _Timer.prototype = {
 
-	index : function(){
-		return this._index;
+	setObj : function( obj ){
+		this._obj = obj;
+		return this;
 	},
-
 	setFrameTime : function( frameTime ){
 		this._frame = frameTime;
 		return this;
@@ -50,7 +50,7 @@ _Timer.prototype = {
 			}
 		} while( i < _timer_busy.length );
 		_timer_busy[_this._index] = true;
-		if( onTimer( _this._index, _this._last ) ){
+		if( onTimer( _this ) ){
 			_this._last = (new Date()).getTime() - startTime;
 			var sleepTime = _this._frame - _this._last;
 			if( (sleepTime < 0) || (sleepTime > _this._frame) ){
@@ -63,4 +63,4 @@ _Timer.prototype = {
 
 };
 
-//function onTimer( index, lastTime ){ return true; }
+//function onTimer( timer ){ return true; }

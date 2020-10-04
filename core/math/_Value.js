@@ -609,10 +609,10 @@ _Value.prototype = {
 		return floatToValue( x );
 	},
 	modf : function( _int/*_Float*/ ){
-		var x = this.toFloat();
-		var i = _INT( x );
-		_int.set( i );
-		return floatToValue( x - i );
+		return floatToValue( _MODF( this.toFloat(), _int ) );
+	},
+	factorial : function(){
+		return floatToValue( _FACTORIAL( this.toFloat() ) );
 	},
 	farg : function(){
 		return this._complex().farg();

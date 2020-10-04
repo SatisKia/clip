@@ -96,6 +96,38 @@ function _UNSIGNED( x, umax ){
 	return x;
 }
 
+// 浮動小数点数値を小数部と整数部に分割する
+function _MODF( x, _int/*_Float*/ ){
+	var tmp = x.toString().split( "." );
+	var k;
+	if( tmp[1] ){
+		if( (tmp[1].indexOf( "e" ) >= 0) || (tmp[1].indexOf( "E" ) >= 0) ){
+			k = 1;
+		} else {
+			k = _POW( 10, tmp[1].length );
+		}
+	} else {
+		k = 1;
+	}
+	var i = _INT( x );
+	_int.set( i );
+	return (x * k - i * k) / k;
+}
+
+// 階乗
+function _FACTORIAL( x ){
+	var m = false;
+	if( x < 0 ){
+		m = true;
+		x = 0 - x;
+	}
+	var f = 1;
+	for( var i = 2; i <= x; i++ ){
+		f *= i;
+	}
+	return m ? -f : f;
+}
+
 // 文字コード
 function _CHAR( chr ){
 	return chr.charCodeAt( 0 );

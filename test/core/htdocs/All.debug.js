@@ -1278,6 +1278,34 @@ function _UNSIGNED( x, umax ){
  if( x < 0 ) return x + umax;
  return x;
 }
+function _MODF( x, _int ){
+ var tmp = x.toString().split( "." );
+ var k;
+ if( tmp[1] ){
+  if( (tmp[1].indexOf( "e" ) >= 0) || (tmp[1].indexOf( "E" ) >= 0) ){
+   k = 1;
+  } else {
+   k = _POW( 10, tmp[1].length );
+  }
+ } else {
+  k = 1;
+ }
+ var i = _INT( x );
+ _int.set( i );
+ return (x * k - i * k) / k;
+}
+function _FACTORIAL( x ){
+ var m = false;
+ if( x < 0 ){
+  m = true;
+  x = 0 - x;
+ }
+ var f = 1;
+ for( var i = 2; i <= x; i++ ){
+  f *= i;
+ }
+ return m ? -f : f;
+}
 function _CHAR( chr ){
  return chr.charCodeAt( 0 );
 }
@@ -2081,14 +2109,15 @@ _Time.prototype = {
  },
  _reduce1 : function(){
   var _m, _s, _f;
-  _m = this._hour - _INT( this._hour );
-  this._hour = _INT( this._hour );
+  var _int = new _Float();
+  _m = _MODF( this._hour, _int );
+  this._hour = _int.val();
   this._min += _m * 60.0;
-  _s = this._min - _INT( this._min );
-  this._min = _INT( this._min );
+  _s = _MODF( this._min, _int );
+  this._min = _int.val();
   this._sec += _s * 60.0;
-  _f = this._sec - _INT( this._sec );
-  this._sec = _INT( this._sec );
+  _f = _MODF( this._sec, _int );
+  this._sec = _int.val();
   this._frame += _f * this._fps;
  },
  _reduce2 : function(){
@@ -3030,10 +3059,10 @@ _Value.prototype = {
   return floatToValue( x );
  },
  modf : function( _int ){
-  var x = this.toFloat();
-  var i = _INT( x );
-  _int.set( i );
-  return floatToValue( x - i );
+  return floatToValue( _MODF( this.toFloat(), _int ) );
+ },
+ factorial : function(){
+  return floatToValue( _FACTORIAL( this.toFloat() ) );
  },
  farg : function(){
   return this._complex().farg();
@@ -3491,7 +3520,7 @@ __ArrayNode.prototype = {
    this._vector[i].ass( value[i] );
   }
  },
- setVector2 : function( real, imag, num ){
+ setComplexVector : function( real, imag, num ){
   if( num > this._vectorNum ){
    this._newVector( num - 1 );
   } else {
@@ -3500,6 +3529,25 @@ __ArrayNode.prototype = {
   for( var i = 0; i < num; i++ ){
    this._vector[i].setReal( real[i] );
    this._vector[i].setImag( imag[i] );
+  }
+ },
+ setFractVector : function( value, denom, num ){
+  if( num > this._vectorNum ){
+   this._newVector( num - 1 );
+  } else {
+   this._resizeVector( num - 1 );
+  }
+  var nu;
+  for( var i = 0; i < num; i++ ){
+   nu = value[i];
+   if( nu < 0 ){
+    this._vector[i].fractSetMinus( true );
+    nu = -nu;
+   } else {
+    this._vector[i].fractSetMinus( false );
+   }
+   this._vector[i].setNum( nu );
+   this._vector[i].setDenom( denom[i] );
   }
  },
  val : function( index ){
@@ -3573,11 +3621,17 @@ _Array.prototype = {
   }
   this._node[index].setVector( value, num );
  },
- setVector2 : function( index, real, imag, num, moveFlag ){
+ setComplexVector : function( index, real, imag, num, moveFlag ){
   if( moveFlag ){
    this.move( index );
   }
-  this._node[index].setVector2( real, imag, num );
+  this._node[index].setComplexVector( real, imag, num );
+ },
+ setFractVector : function( index, value, denom, num, moveFlag ){
+  if( moveFlag ){
+   this.move( index );
+  }
+  this._node[index].setFractVector( value, denom, num );
  },
  setMatrix : function( index, src, moveFlag ){
   if( moveFlag ){
@@ -3585,11 +3639,33 @@ _Array.prototype = {
   }
   this._mat[index].ass( src );
  },
- setMatrix2 : function( index, real, imag, moveFlag ){
+ setComplexMatrix : function( index, real, imag, moveFlag ){
   if( real._len == imag._len ){
-   var src = dupMatrix( real );
+   var src = new _Matrix( real._row, real._col );
    for( var i = 0; i < real._len; i++ ){
-    src._mat[i].setImag( imag._mat[i].real() );
+    src._mat[i].setReal( real._mat[i].toFloat() );
+    src._mat[i].setImag( imag._mat[i].toFloat() );
+   }
+   if( moveFlag ){
+    this.move( index );
+   }
+   this._mat[index].ass( src );
+  }
+ },
+ setFractMatrix : function( index, value, denom, moveFlag ){
+  if( value._len == denom._len ){
+   var src = new _Matrix( value._row, value._col );
+   var nu;
+   for( var i = 0; i < value._len; i++ ){
+    nu = value._mat[i].toFloat();
+    if( nu < 0 ){
+     src._mat[i].fractSetMinus( true );
+     nu = -nu;
+    } else {
+     src._mat[i].fractSetMinus( false );
+    }
+    src._mat[i].setNum( nu );
+    src._mat[i].setDenom( denom._mat[i].toFloat() );
    }
    if( moveFlag ){
     this.move( index );
@@ -4089,7 +4165,6 @@ _Graph.prototype = {
    );
  },
  _drawYText : function( x, y ){
-  var xx;
   var text = floatToString( y, 15 );
   var tmp = new __TextInfo();
   this._gWorld.getTextInfo( text, tmp );
@@ -4097,18 +4172,27 @@ _Graph.prototype = {
   var ascent = tmp._ascent;
   var descent = tmp._descent;
   if( (this._gWorld.imgPosX( x ) - (width + 1)) < 0 ){
-   xx = 1;
+   this._gWorld.drawText(
+    text,
+    1,
+    this._gWorld.imgPosY( y ) - descent,
+    false
+    );
   } else if( this._gWorld.imgPosX( x ) >= this._gWorld._width ){
-   xx = this._gWorld._width - width;
+   this._gWorld.drawText(
+    text,
+    this._gWorld._width,
+    this._gWorld.imgPosY( y ) - descent,
+    true
+    );
   } else {
-   xx = this._gWorld.imgPosX( x ) - width;
+   this._gWorld.drawText(
+    text,
+    this._gWorld.imgPosX( x ),
+    this._gWorld.imgPosY( y ) - descent,
+    true
+    );
   }
-  this._gWorld.drawText(
-   text,
-   xx,
-   this._gWorld.imgPosY( y ) - descent,
-   false
-   );
  },
  clear : function( backColor, scaleColor, unitColor, unitX, unitY, textColor, textX, textY ){
   var i;
@@ -9359,6 +9443,15 @@ _Proc.prototype = {
   }
   return 0x00;
  },
+ _funcFact : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = new _Matrix();
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
+   return ret;
+  }
+  value.ass( tmpValue._mat[0].factorial() );
+  return 0x00;
+ },
  _funcInt : function( _this, param, code, token, value, seFlag ){
   var ret;
   var tmpValue = new _Matrix();
@@ -9514,7 +9607,7 @@ _Proc.prototype = {
     if( val == 0 ){
      var i;
      switch( token ){
-     case 68:
+     case 69:
       for( i = 0; i < str1.length; i++ ){
        val = str1.charCodeAt( i ) - str2.charCodeAt( i );
        if( val != 0 ){
@@ -9522,7 +9615,7 @@ _Proc.prototype = {
        }
       }
       break;
-     case 69:
+     case 70:
       var chr1, chr2;
       for( i = 0; i < str1.length; i++ ){
        chr1 = str1.charCodeAt( i );
@@ -9577,7 +9670,7 @@ _Proc.prototype = {
   } else {
    _this._curLine._token.unlock( lock );
   }
-  value.ass( (token == 73) ? procGWorld()._color : doFuncGColor24( procGWorld()._color ) );
+  value.ass( (token == 74) ? procGWorld()._color : doFuncGColor24( procGWorld()._color ) );
   return 0x00;
  },
  _funcGCX : function( _this, param, code, token, value, seFlag ){
@@ -9699,7 +9792,7 @@ _Proc.prototype = {
   ret = doFuncEval( _this, childProc, childParam, string.str(), value );
   childProc.end();
   childParam.end();
-  return ret;
+  return (ret == 0x00) ? 0x00 : _this._retError( 0x2110, code, token );
  },
  doFuncEval : function( childProc, childParam, string, value ){
   var ret;
@@ -13759,6 +13852,7 @@ var _procSubFunc = [
  _Proc.prototype._funcLdexp,
  _Proc.prototype._funcFrexp,
  _Proc.prototype._funcModf,
+ _Proc.prototype._funcFact,
  _Proc.prototype._funcInt,
  _Proc.prototype._funcReal,
  _Proc.prototype._funcImag,
@@ -14261,6 +14355,7 @@ var _TOKEN_FUNC = [
  "ldexp",
  "frexp",
  "modf",
+ "fact",
  "int",
  "real",
  "imag",
@@ -14696,7 +14791,51 @@ _Token.prototype = {
   case '-': top++ ; swi = true ; break;
   default : top = 0; swi = false; break;
   }
-  if( string.charAt( top ) == '\'' ){
+  if( string.charAt( string.length - 1 ) == '!' ){
+   var tmpString = string.substring( top, string.length - 1 );
+   if( isCharEscape( tmpString, top ) ){
+    switch( tmpString.charAt( top + 1 ) ){
+    case 'b':
+    case 'B':
+     value.ass( stringToInt( tmpString, top + 2, stop, 2 ) );
+     break;
+    case '0':
+     value.ass( stringToInt( tmpString, top + 2, stop, 8 ) );
+     break;
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+     value.ass( stringToInt( tmpString, top + 1, stop, 10 ) );
+     break;
+    case 'x':
+    case 'X':
+     value.ass( stringToInt( tmpString, top + 2, stop, 16 ) );
+     break;
+    default:
+     return false;
+    }
+   } else {
+    if( (param._mode & 0x0100) != 0 ){
+     value.ass( stringToInt( tmpString, 0, stop, param._radix ) );
+    } else {
+     value.ass( stringToInt( tmpString, 0, stop, 10 ) );
+    }
+   }
+   if( stop._val < tmpString.length ){
+    return false;
+   }
+   if( swi ){
+    value.ass( value.factorial().minus() );
+   } else {
+    value.ass( value.factorial() );
+   }
+  } else if( string.charAt( top ) == '\'' ){
    value.ass( 0.0 );
    j = 0;
    for( i = 1; ; i++ ){
@@ -14734,15 +14873,9 @@ _Token.prototype = {
    case 'b':
    case 'B':
     value.ass( stringToInt( string, top + 2, stop, 2 ) );
-    if( stop._val < string.length ){
-     return false;
-    }
     break;
    case '0':
     value.ass( stringToInt( string, top + 2, stop, 8 ) );
-    if( stop._val < string.length ){
-     return false;
-    }
     break;
    case '1':
    case '2':
@@ -14754,18 +14887,15 @@ _Token.prototype = {
    case '8':
    case '9':
     value.ass( stringToInt( string, top + 1, stop, 10 ) );
-    if( stop._val < string.length ){
-     return false;
-    }
     break;
    case 'x':
    case 'X':
     value.ass( stringToInt( string, top + 2, stop, 16 ) );
-    if( stop._val < string.length ){
-     return false;
-    }
     break;
    default:
+    return false;
+   }
+   if( stop._val < string.length ){
     return false;
    }
    if( swi ){
@@ -17526,6 +17656,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
  case 0x210F:
   if( isEnglish ) error = "Function call failed.";
   else error = "関数呼び出しに失敗しました";
+  break;
+ case 0x2110:
+  if( isEnglish ) error = "Execution of evaluation was interrupted.";
+  else error = "evalの実行が中断されました";
   break;
  case 0x2120:
   if( isEnglish ) error = "\"" + token + "\" too many nests.";
