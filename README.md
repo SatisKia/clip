@@ -10,7 +10,7 @@ core/extrasフォルダを除く全てのソース内容が含まれています
 
 ## ビルド方法
 
-build.batを実行しますと、coreフォルダ下にclip.jsとclip.debug.jsが生成されます。
+build_clip.batを実行しますと、coreフォルダ下にclip.jsとclip.debug.jsが生成されます。
 
 ビルドには別途、次のツールが必要です。
 
@@ -32,11 +32,15 @@ JavaScriptコードの圧縮・難読化ツールです。
 
 CLIPインタープリタです。
 
-## core/extras/_EasyClip.js
+## core/extras/easyclip.js、core/extras/easyclip.debug.js
 
-CLIPエンジンをJavaScriptから簡単に実行する機能を提供するオブジェクトです。
+core/extras/_Canvas.js
+core/extras/_EasyCanvas.js
+core/extras/_EasyClip.js
+core/extras/_StringUtil.js
+をまとめたものです。_EasyClipオブジェクトは、CLIPエンジンをJavaScriptから簡単に実行する機能を提供するオブジェクトです。
 
-_EasyClipオブジェクトの使用サンプルとして、core/extras/test.htmlを置いています。
+_EasyClipオブジェクトの使用サンプルとして、core/extras/test.html、core/extras/test2.html、core/extras/test3.htmlを置いています。
 
 ### 変数・関数の上書き
 

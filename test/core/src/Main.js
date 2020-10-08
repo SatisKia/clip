@@ -106,7 +106,7 @@ function onError( e ){
 }
 
 // キャンバス
-//#include "_Canvas.js"
+#include "_Canvas.js"
 var canvas;
 var canvasScale = 1;
 var canvasMinScale = 1;
