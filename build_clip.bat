@@ -1,7 +1,8 @@
 @echo off
 
 set CPP=C:\MinGW\bin\gcc -E -P -x c
-set TMP=tmp_clip
+set TMP=tmp\clip
+set TMPROOT=..\..
 
 md %TMP%
 
@@ -17,9 +18,9 @@ define core\_Global.h    %TMP%\global.js
 define core\math\_Math.h %TMP%\math.js
 
 cd %TMP%
-..\string core.tmp.js string.js strrep.bat ..\strrep 1 1
+%TMPROOT%\string core.tmp.js string.js strrep.bat %TMPROOT%\strrep 1 1
 call strrep.bat > core.js
-cd ..
+cd %TMPROOT%
 
 %CPP% clip.js | format > %TMP%\clip.debug.js
 %CPP% -DMINIFIED clip.js | format > %TMP%\clip.tmp.js
@@ -28,7 +29,7 @@ call "C:\HTML5\Microsoft Ajax Minifier\AjaxMinCommandPromptVars"
 cd %TMP%
 del clip.js
 AjaxMin -enc:in UTF-8 clip.tmp.js -out clip.js
-cd ..
+cd %TMPROOT%
 
 copy /B head.txt+%TMP%\clip.debug.js core\clip.debug.js
 copy /B head.txt+%TMP%\clip.js       core\clip.js

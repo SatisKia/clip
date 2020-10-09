@@ -3,15 +3,15 @@
 var document = window.document;
 
 #ifdef MINIFIED
-#include "tmp_clip\string.js"
-#include "tmp_clip\core.js"	// 重要：function.jsの前に行うこと！
-#include "tmp_clip\function.js"
+#include "tmp\clip\string.js"
+#include "tmp\clip\core.js"	// 重要：function.jsの前に行うこと！
+#include "tmp\clip\function.js"
 #else
-#include "tmp_clip\core.debug.js"	// 重要：function.debug.jsの前に行うこと！
-#include "tmp_clip\function.debug.js"
+#include "tmp\clip\core.debug.js"	// 重要：function.debug.jsの前に行うこと！
+#include "tmp\clip\function.debug.js"
 #endif // MINIFIED
 
-#include "tmp_clip\global.js"
-#include "tmp_clip\math.js"
+#include "tmp\clip\global.js"
+#include "tmp\clip\math.js"
 
 })( window );

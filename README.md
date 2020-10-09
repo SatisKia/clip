@@ -34,11 +34,13 @@ CLIPインタープリタです。
 
 ## core/extras/easyclip.js、core/extras/easyclip.debug.js
 
-core/extras/_Canvas.js
-core/extras/_EasyCanvas.js
-core/extras/_EasyClip.js
-core/extras/_StringUtil.js
-をまとめたものです。_EasyClipオブジェクトは、CLIPエンジンをJavaScriptから簡単に実行する機能を提供するオブジェクトです。
+CLIPエンジンをJavaScriptから簡単に実行する機能を提供します。
+
+以下のオブジェクトが含まれます。
+- _Canvas（core/extras/_Canvas.js）
+- _EasyCanvas（core/extras/_EasyCanvas.js）
+- _EasyClip（core/extras/_EasyClip.js）
+- _StringUtil（core/extras/_StringUtil.js）
 
 _EasyClipオブジェクトの使用サンプルとして、core/extras/test.html、core/extras/test2.html、core/extras/test3.htmlを置いています。
 
