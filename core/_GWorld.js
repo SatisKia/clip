@@ -288,9 +288,9 @@ _GWorld.prototype = {
 	},
 
 	// カレントカラーを確認する
-//	color : function(){
-//		return this._color;
-//	},
+	color : function(){
+		return this._color;
+	},
 
 	// ドットを描画する
 	putColor : function( x, y, color ){

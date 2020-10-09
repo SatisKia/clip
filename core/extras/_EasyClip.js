@@ -10,6 +10,9 @@ function setClip( clip ){
 function curClip(){
 	return _cur_clip;
 }
+function curCanvas(){
+	return _cur_clip._canvas;
+}
 
 function _EasyClip(){
 	if( window.loopMax == undefined ) window.loopMax = 65536;
@@ -559,6 +562,12 @@ _EasyClip.prototype = {
 		for( var i = 0; i < 256; i++ ){
 			this._palette[i] = bgrColorArray[i];
 		}
+	},
+	setPaletteColor : function( index, bgrColor ){
+		this._palette[index] = bgrColor;
+	},
+	paletteColor : function( index ){
+		return this._palette[index];
 	},
 
 	// キャンバス

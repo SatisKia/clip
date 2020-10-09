@@ -107,6 +107,14 @@ function __ProcPrint(){
 	this._string = null;
 	this._next   = null;
 }
+__ProcPrint.prototype = {
+	string : function(){
+		return this._string;
+	},
+	next : function(){
+		return this._next;
+	}
+};
 
 function __ProcScan(){
 	this._title  = null;
@@ -121,6 +129,9 @@ __ProcScan.prototype = {
 			return "";
 		}
 		return this._title;
+	},
+	next : function(){
+		return this._next;
 	},
 	getDefString : function( proc, param ){
 		var defString = new String();

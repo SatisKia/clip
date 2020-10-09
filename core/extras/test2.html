@@ -14,8 +14,8 @@ function main(){
 	regGWorldDefCharInfo( 0 );
 
 	window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){
-		var canvas = curClip()._canvas;
-		if( gWorld._color == 252 ){
+		var canvas = curCanvas();
+		if( gWorld.color() == 252 ){
 			canvas.setStrokeWidth( 0.5 );
 		} else {
 			canvas.setStrokeWidth( 1.0 );

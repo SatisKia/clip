@@ -111,12 +111,12 @@ window.doCommandPrint = function( topPrint, flag ){
     var str = "";
     var cur = topPrint;
     while( cur != null ){
-        if( cur._string != null ){
-            var tmp = new _String( cur._string );
+        if( cur.string() != null ){
+            var tmp = new _String( cur.string() );
             tmp.escape().replaceNewLine( "<br>" );
             str += tmp.str();
         }
-        cur = cur._next;
+        cur = cur.next();
     }
     if( flag ){
         str += "<br>";
@@ -135,7 +135,7 @@ window.doCommandScan = function( topScan, proc, param ){
             newString = defString;
         }
         cur.setNewValue( newString, proc, param );
-        cur = cur._next;
+        cur = cur.next();
     }
 };
 window.doCommandGWorld = function( width, height ){
@@ -152,7 +152,7 @@ var clip = curClip();
 上書き関数の内部で_Canvasオブジェクト操作する場合、次のように_Canvasオブジェクトを取得します。
 
 ```javascript
-var canvas = curClip()._canvas;
+var canvas = curCanvas();
 ```
 
 ### オブジェクトの構築
@@ -390,17 +390,24 @@ var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_EN
 
 ```javascript
 clip.newPalette();
-// 以下はグレースケール・パレットを設定する例
-for( var i = 0; i < 256; i++ ){
-    clip._palette[i] = (i << 16) + (i << 8) + i;
-}
 ```
 
 ```javascript
 clip.setPalette( bgrColorArray );
 ```
 
-_EasyClipオブジェクト内の配列_paletteを参照・操作できます。
+```javascript
+// 以下はグレースケール・パレットを設定する例
+var bgrColor;
+for( var i = 0; i < 256; i++ ){
+    bgrColor = (i << 16) + (i << 8) + i;
+    clip.setPaletteColor( i, bgrColor );
+}
+```
+
+```javascript
+var bgrColor = clip.paletteColor( index );
+```
 
 ### キャンバス
 

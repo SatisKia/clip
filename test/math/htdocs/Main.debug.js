@@ -3514,7 +3514,7 @@ function testMath1(){
  test( "", _APPROX( floatToValue( 0.66 ).ldexp( -1 ).toFloat(), 0.33 ) );
  test( "", floatToValue( 96 ).ldexp( -3 ).equal( 12.0 ) );
  printBold( "modf" );
- test( "", _APPROX( floatToValue( -11.7 ).modf( y ).toFloat(), -11.7 + 11.0 ) && (y._val == -11.0) );
+ test( "", floatToValue( -11.7 ).modf( y ).equal( -0.7 ) && (y._val == -11.0) );
  test( "", floatToValue( -0.5 ).modf( y ).equal( -0.5 ) && (y._val == 0.0) );
  test( "", floatToValue( 0.0 ).modf( y ).equal( 0.0 ) && (y._val == 0.0) );
  test( "", floatToValue( 0.6 ).modf( y ).equal( 0.6 ) && (y._val == 0.0) );

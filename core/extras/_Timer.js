@@ -9,21 +9,28 @@ var _timer_busy = new Array();
 function _Timer(){
 	this._index = _timer_busy.length;
 	_timer_busy[this._index] = false;
-	this._obj   = null;	// 紐付けられたオブジェクト
-	this._frame = 0;	// 1フレームの時間（ミリ秒）
-	this._last  = 0;	// 前のフレーム処理にかかった時間
-	this._stop  = true;
+	this._object = null;	// 紐付けられたオブジェクト
+	this._frame  = 0;	// 1フレームの時間（ミリ秒）
+	this._last   = 0;	// 前のフレーム処理にかかった時間
+	this._stop   = true;
 }
 
 _Timer.prototype = {
 
-	setObj : function( obj ){
-		this._obj = obj;
+	setObject : function( object ){
+		this._object = object;
 		return this;
 	},
 	setFrameTime : function( frameTime ){
 		this._frame = frameTime;
 		return this;
+	},
+
+	object : function(){
+		return this._object;
+	},
+	lastTime : function(){
+		return this._last;
 	},
 
 	start : function(){

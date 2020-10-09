@@ -267,6 +267,9 @@ function setClip( clip ){
 function curClip(){
 	return _cur_clip;
 }
+function curCanvas(){
+	return _cur_clip._canvas;
+}
 function _EasyClip(){
 	if( window.loopMax == undefined ) window.loopMax = 65536;
 	if( window.arrayTokenStringSpace == undefined ) window.arrayTokenStringSpace = "&nbsp;";
@@ -778,6 +781,12 @@ _EasyClip.prototype = {
 			this._palette[i] = bgrColorArray[i];
 		}
 	},
+	setPaletteColor : function( index, bgrColor ){
+		this._palette[index] = bgrColor;
+	},
+	paletteColor : function( index ){
+		return this._palette[index];
+	},
 	_useCanvas : function(){
 		if( this._canvasEnv == null ){
 			this._canvasEnv = new _CanvasEnv();
@@ -951,6 +960,7 @@ window._Canvas = _Canvas;
 window._EasyCanvas = _EasyCanvas;
 window.setClip = setClip;
 window.curClip = curClip;
+window.curCanvas = curCanvas;
 window._EasyClip = _EasyClip;
 window._StringUtil = _StringUtil;
 })( window );

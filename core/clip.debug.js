@@ -5034,6 +5034,9 @@ _GWorld.prototype = {
 		this._color = color;
 		gWorldSetColor( this, this._color );
 	},
+	color : function(){
+		return this._color;
+	},
 	putColor : function( x, y, color ){
 		if( (x < 0) || (x >= _INT( this._width )) || (y < 0) || (y >= _INT( this._height )) ){
 			return false;
@@ -6242,6 +6245,14 @@ function __ProcPrint(){
 	this._string = null;
 	this._next = null;
 }
+__ProcPrint.prototype = {
+	string : function(){
+		return this._string;
+	},
+	next : function(){
+		return this._next;
+	}
+};
 function __ProcScan(){
 	this._title = null;
 	this._code = 0;
@@ -6255,6 +6266,9 @@ __ProcScan.prototype = {
 			return "";
 		}
 		return this._title;
+	},
+	next : function(){
+		return this._next;
 	},
 	getDefString : function( proc, param ){
 		var defString = new String();

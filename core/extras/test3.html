@@ -205,7 +205,7 @@ function main(){
 	regGWorldDefCharInfo( 0 );
 
 	window.doCommandGWorld = function( width, height ){
-		curClip()._canvas.setSize( width * 3, height * 3 );
+		curCanvas().setSize( width * 3, height * 3 );
 	};
 
 	var i;
@@ -213,65 +213,65 @@ function main(){
 
 	clip = new _EasyClip();
 	clip.newPalette();
-	clip._palette[0] = 0xE0E0E0;
+	clip.setPaletteColor( 0, 0xE0E0E0 );
 	for( i = 1; i < 255; i += 3 ){
-		clip._palette[i] = 0xFFE0FF;
+		clip.setPaletteColor( i, 0xFFE0FF );
 	}
 	for( i = 2; i < 255; i += 3 ){
-		clip._palette[i] = 0xFF70FF;
+		clip.setPaletteColor( i, 0xFF70FF );
 	}
 	for( i = 3; i < 255; i += 3 ){
-		clip._palette[i] = 0xFF00FF;
+		clip.setPaletteColor( i, 0xFF00FF );
 	}
-	clip._palette[255] = 0x000000;
+	clip.setPaletteColor( 255, 0x000000 );
 	clip.setCanvas( "canvas0" );
 	clip.setVector( '0', [7,3,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,1,1,1] ); // 初期形状：どんぐり
 	clip.setValue( 'M', 79 ); // 盤の幅
 	clip.setValue( 'N', 79 ); // 盤の高さ
 	clip.procScript( script[0][0] ); // 初期化
-	(new _Timer()).setObj( [clip, script[0][1], 0] ).setFrameTime( 500 ).start();
+	(new _Timer()).setObject( [clip, script[0][1], 0] ).setFrameTime( 500 ).start();
 
 	clip = new _EasyClip();
 	clip.newPalette();
-	clip._palette[0] = 0xE0E0E0;
+	clip.setPaletteColor( 0, 0xE0E0E0 );
 	for( i = 1; i < 255; i += 3 ){
-		clip._palette[i] = 0xE0FFFF;
+		clip.setPaletteColor( i, 0xE0FFFF );
 	}
 	for( i = 2; i < 255; i += 3 ){
-		clip._palette[i] = 0x70FFFF;
+		clip.setPaletteColor( i, 0x70FFFF );
 	}
 	for( i = 3; i < 255; i += 3 ){
-		clip._palette[i] = 0x00FFFF;
+		clip.setPaletteColor( i, 0x00FFFF );
 	}
-	clip._palette[255] = 0x000000;
+	clip.setPaletteColor( 255, 0x000000 );
 	clip.setCanvas( "canvas1" );
 	clip.setVector( '0', [3,3,0,1,1,1,1,0,0,1,0] ); // 初期形状：rペントミノ
 	clip.setValue( 'M', 81 ); // 盤の幅
 	clip.setValue( 'N', 81 ); // 盤の高さ
 	clip.procScript( script[1][0] ); // 初期化
-	(new _Timer()).setObj( [clip, script[1][1], 1] ).setFrameTime( 500 ).start();
+	(new _Timer()).setObject( [clip, script[1][1], 1] ).setFrameTime( 500 ).start();
 
 	clip = new _EasyClip();
 	clip.newPalette();
-	clip._palette[0] = 0x000000;
-	clip._palette[1] = 0xFFFFFF;
+	clip.setPaletteColor( 0, 0x000000 );
+	clip.setPaletteColor( 1, 0xFFFFFF );
 	clip.setCanvas( "canvas2" );
 	clip.setValue( '0', 80 ); // 迷路の横の大きさ
 	clip.setValue( '1', 80 ); // 迷路の縦の大きさ
 	clip.setValue( '2', 0 ); // 前景色
 	clip.setValue( '3', 1 ); // 背景色
 	clip.procScript( script[2][0] ); // 初期化
-	(new _Timer()).setObj( [clip, script[2][1], 2] ).setFrameTime( 0 ).start();
+	(new _Timer()).setObject( [clip, script[2][1], 2] ).setFrameTime( 0 ).start();
 }
 function onTimer( timer ){
-	var clip = timer._obj[0];
-	clip.procScript( timer._obj[1] ); // メイン
-	if( timer._obj[2] != 2 ){
-		clip.procLine( ":gtext [\"Draw Time " + timer._last + "] 2 (gheight - 2) 255" );
+	var clip = timer.object()[0];
+	clip.procScript( timer.object()[1] ); // メイン
+	if( timer.object()[2] != 2 ){
+		clip.procLine( ":gtext [\"Draw Time " + timer.lastTime() + "] 2 (gheight - 2) 255" );
 	}
-	if( timer._obj[2] == 2 ){
+	if( timer.object()[2] == 2 ){
 		if( clip.getValue( 'S' ).toFloat() != 0 && clip.getValue( 's' ).toFloat() == 0 ){
-			clip._palette[0] = 0xFF0000;
+			clip.setPaletteColor( 0, 0xFF0000 );
 			clip.updateCanvas( 3 );
 			return false;
 		}
