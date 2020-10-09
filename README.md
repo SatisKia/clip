@@ -4,7 +4,7 @@ CLIP言語による計算処理のエンジンです。
 
 CLIP言語については、test/core/htdocs/language.htmlを参照してください。
 
-## core/clip.js、core/clip.debug.js
+## core/clip.js, core/clip.debug.js
 
 core/extrasフォルダを除く全てのソース内容が含まれています。
 
@@ -32,7 +32,11 @@ JavaScriptコードの圧縮・難読化ツールです。
 
 CLIPインタープリタです。
 
-## core/extras/easyclip.js、core/extras/easyclip.debug.js
+## core/extras
+
+HTMLにscriptタグで埋め込むことができるユーティリティ・ファイル群です。
+
+## core/extras/easyclip.js, core/extras/easyclip.debug.js
 
 CLIPエンジンをJavaScriptから簡単に実行する機能を提供します。
 
@@ -248,6 +252,8 @@ var string = "Ans = " + clip.getAnsMatrixString( 6 );
 
 CLIPの設定系コマンドをJavaScriptから直接実行する関数群です。
 
+**型の指定**
+
 ```javascript
 clip.setMode( mode );
 ```
@@ -275,11 +281,15 @@ clip.setMode( mode );
 
 _EasyClipオブジェクト構築直後：_CLIP_MODE_G_FLOAT
 
+**浮動小数点数の表示精度**（CLIPでの:precコマンド）
+
 ```javascript
 clip.setPrec( prec );
 ```
 
 _EasyClipオブジェクト構築直後：6
+
+**秒間フレーム数**（CLIPでの:fpsコマンド）
 
 ```javascript
 clip.setFps( fps );
@@ -287,11 +297,15 @@ clip.setFps( fps );
 
 _EasyClipオブジェクト構築直後：30.0
 
+**整数における基数**（CLIPでの:radixコマンド）
+
 ```javascript
 clip.setRadix( radix );
 ```
 
 _EasyClipオブジェクト構築直後：10
+
+**角度の単位指定**
 
 ```javascript
 clip.setAngType( type );
@@ -305,11 +319,15 @@ clip.setAngType( type );
 
 _EasyClipオブジェクト構築直後：_ANG_TYPE_RAD
 
+**電卓モード指定**（CLIPでの:calculatorコマンド）
+
 ```javascript
 clip.setCalculator( flag );
 ```
 
 _EasyClipオブジェクト構築直後：false
+
+**配列の添字の下限指定**（CLIPでの:baseコマンド）
 
 ```javascript
 clip.setBase( base );
@@ -322,17 +340,23 @@ clip.setBase( base );
 
 _EasyClipオブジェクト構築直後：0
 
+**計算結果を返すかどうかを指定**（CLIPでの:ansコマンド）
+
 ```javascript
 clip.setAnsFlag( flag );
 ```
 
 _EasyClipオブジェクト構築直後：false
 
+**診断メッセージ有効かどうかを指定**（CLIPでの:assertコマンド）
+
 ```javascript
 clip.setAssertFlag( flag );
 ```
 
 _EasyClipオブジェクト構築直後：false
+
+**警告メッセージ有効かどうかを指定**（CLIPでの:warnコマンド）
 
 ```javascript
 clip.setWarnFlag( flag );
@@ -379,11 +403,11 @@ var array = clip.commandGGet24(); // 取得できなかった場合null
 ### 計算
 
 ```javascript
-var ret = clip.procLine( line/*String*/ ); // 正常終了時、_CLIP_PROC_ENDが返ってくる
+var ret = clip.procLine( line/*String*/ ); // 正常終了時、_CLIP_PROC_ENDが返る
 ```
 
 ```javascript
-var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_ENDが返ってくる
+var ret = clip.procScript( script/*Array*/ ); // 正常終了時、_CLIP_PROC_ENDが返る
 ```
 
 ### カラー・パレット
