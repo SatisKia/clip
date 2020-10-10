@@ -201,15 +201,12 @@ var value = clip.getValue( 'b' ).imag();
 var isMinus = clip.getValue( 'c' ).fractMinus();
 var value = clip.getValue( 'c' ).num();
 var value = clip.getValue( 'c' ).denom();
-```
-
-getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
-
-```javascript
 var string = clip.getComplexString( 'b' );
 var string = clip.getFractString( 'c', false ); // Improper
 var string = clip.getFractString( 'c', true ); // Mixed
 ```
+
+getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
 
 ### 配列の値を確認する
 
@@ -218,17 +215,11 @@ var array = clip.getArray( 'a' ); // Forcibly convert to JavaScript Array
 var array = clip.getArray( 'a', 1 ); // One-dimensional element
 var array = clip.getArray( 'a', 2 ); // Two-dimensional element
 var array = clip.getArray( 'a', N ); // N-dimensional element
-```
-
-```javascript
 var string = "@@d = " + clip.getArrayString( 'd', 6 );
+var string = clip.getString( 's' );
 ```
 
 getArray関数で取得したArrayオブジェクトをJSON.stringifyに渡すことでも文字列に変換できます。
-
-```javascript
-var string = clip.getString( 's' );
-```
 
 ### 計算結果の値を確認する
 
@@ -240,13 +231,10 @@ var isMinus = clip.getAnsValue().fractMinus();
 var value = clip.getAnsValue().num();
 var value = clip.getAnsValue().denom();
 var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
+var string = "Ans = " + clip.getAnsMatrixString( 6 );
 ```
 
 getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
-
-```javascript
-var string = "Ans = " + clip.getAnsMatrixString( 6 );
-```
 
 ### 各種設定
 
@@ -436,24 +424,24 @@ var bgrColor = clip.paletteColor( index );
 ### キャンバス
 
 ```javascript
-var canvas = clip.setCanvas( id ); // _Canvasオブジェクト
+var canvas = clip.setCanvas( id ); // _Canvasオブジェクトが返る
 ```
 
 ```javascript
-var canvas = clip.createCanvas( width, height ); // _Canvasオブジェクト
+var canvas = clip.createCanvas( width, height ); // _Canvasオブジェクトが返る
 ```
 
 ```javascript
-var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクト
+var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクトが返る
 ```
 
 ```javascript
-var canvas = clip.updateCanvas(); // _Canvasオブジェクト
+var canvas = clip.updateCanvas(); // _Canvasオブジェクトが返る
 var canvas = clip.updateCanvas( scale ); // scaleを指定すると、_GWorldオブジェクト内のイメージ・メモリが拡大描画される
 ```
 
 ```javascript
-var canvas = clip.canvas(); // _Canvasオブジェクト
+var canvas = clip.canvas();
 ```
 
 ### _EasyCanvasオブジェクトを使用する
@@ -470,26 +458,28 @@ easyCanvas.setFont( canvas/*_Canvas*/, size, family );
 
 ### その他
 
+- _Procオブジェクトから呼び出されるprintAnsMatrix関数の実装に使う関数
+
 ```javascript
 var string = clip.getArrayTokenString( param, array/*_Token*/, indent );
 ```
 
-_Procオブジェクトから呼び出されるprintAnsMatrix関数の実装で使う場合、関数のパラメータのparam、arrayをそのまま渡すことができます。
+printAnsMatrix関数のパラメータのparam、arrayをそのまま渡すことができます。
+
+- _EasyClipオブジェクト内に唯一存在する計算処理メイン・クラスである_Procオブジェクトを取得する
 
 ```javascript
 var proc = clip.proc();
 ```
 
-_EasyClipオブジェクト内に唯一存在する計算処理メイン・クラスである_Procオブジェクト。
+- _EasyClipオブジェクト内に唯一存在する計算パラメータ・クラスである_Paramオブジェクトを取得する
 
 ```javascript
 var param = clip.param();
 ```
 
-_EasyClipオブジェクト内に唯一存在する計算パラメータ・クラスである_Paramオブジェクト。
+- _EasyClipオブジェクト内に唯一存在する_GWorldオブジェクトを取得する
 
 ```javascript
 var gWorld = clip.gWorld();
 ```
-
-_EasyClipオブジェクト内に唯一存在する_GWorldオブジェクト。
