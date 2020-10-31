@@ -155,6 +155,21 @@ assert( index != 0 );
 		return this._var[index];
 	},
 
+	// 置き換え
+	rep : function( index, value/*_Value*/, moveFlag ){
+#ifdef DEBUG
+assert( index != 0 );
+#endif // DEBUG
+		if( this.isLocked( index ) ){
+			return false;
+		}
+		if( moveFlag ){
+			this.move( index );
+		}
+		this._var[index] = value;
+		return true;
+	},
+
 	// ロックする
 	lock : function( index ){
 		this._lock[index] = true;

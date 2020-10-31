@@ -88,7 +88,8 @@ __ArrayNode.prototype = {
 
 			// 既存の配列をコピーする
 			for( var i = 0; i < this._vectorNum; i++ ){
-				copyValue( tmp[i], this._vector[i] );
+//				copyValue( tmp[i], this._vector[i] );
+				tmp[i] = this._vector[i];
 			}
 
 			this._vector = tmp;
@@ -102,25 +103,32 @@ __ArrayNode.prototype = {
 	},
 	_resizeVector : function( index ){
 		// 番人
-		copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
+//		copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
+		this._vector[index + 1] = new _Value();
 
 		this._vectorNum = index + 1;
 	},
 	_newNode : function( index ){
 		if( this._nodeNum == 0 ){
-			this._nodeNum = index + 1;
-			this._node    = _newArrayNodeArray( this._nodeNum );
+			this._node = _newArrayNodeArray( index + 1 );
 		} else {
+#if 0
 			var tmp = _newArrayNodeArray( index + 1 );
 
 			// 既存の配列をコピーする
 			for( var i = 0; i < this._nodeNum; i++ ){
-				this._node[i].dup( tmp[i] );
+//				this._node[i].dup( tmp[i] );
+				tmp[i] = this._node[i];
 			}
 
-			this._node    = tmp;
-			this._nodeNum = index + 1;
+			this._node = tmp;
+#endif
+			for( var i = index; i >= this._nodeNum; i-- ){
+				this._node[i] = new __ArrayNode();
+			}
 		}
+
+		this._nodeNum = index + 1;
 	},
 	_resizeNode : function( index ){
 		this._nodeNum = index + 1;
@@ -399,6 +407,15 @@ _Array.prototype = {
 		}
 		this._node[srcIndex].dup( dst._node[dstIndex] );
 		dst._mat[dstIndex].ass( this._mat[srcIndex] );
+	},
+
+	// 配列を置き換える
+	rep : function( dst/*_Array*/, srcIndex, dstIndex, moveFlag ){
+		if( moveFlag ){
+			dst.move( dstIndex );
+		}
+		dst._node[dstIndex] = this._node[srcIndex];
+		dst._mat[dstIndex] = this._mat[srcIndex];
 	},
 
 	// 配列からトークンを構築する

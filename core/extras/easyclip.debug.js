@@ -394,12 +394,14 @@ _EasyClip.prototype = {
 	setValue : function( chr, value ){
 		this._setEnv();
 		this._param.setVal( _CHAR( chr ), value, false );
+		return this;
 	},
 	setComplex : function( chr, real, imag ){
 		this._setEnv();
 		var index = _CHAR( chr );
 		this._param.setReal( index, real, false );
 		this._param.setImag( index, imag, false );
+		return this;
 	},
 	setFract : function( chr, num, denom ){
 		this._setEnv();
@@ -409,18 +411,22 @@ _EasyClip.prototype = {
 		this._param.setNum ( index, _ABS( num ), false );
 		this._param.setDenom ( index, _ABS( denom ), false );
 		this._param.fractReduce ( index, false );
+		return this;
 	},
 	setVector : function( chr, value ){
 		this._setEnv();
 		this._param._array.setVector( _CHAR( chr ), value, value.length );
+		return this;
 	},
 	setComplexVector : function( chr, real , imag ){
 		this._setEnv();
 		this._param._array.setComplexVector( _CHAR( chr ), real, imag, (real.length < imag.length) ? real.length : imag.length );
+		return this;
 	},
 	setFractVector : function( chr, value , denom ){
 		this._setEnv();
 		this._param._array.setFractVector( _CHAR( chr ), value, denom, (value.length < denom.length) ? value.length : denom.length );
+		return this;
 	},
 	setMatrix : function( chr, value ){
 		this._setEnv();
@@ -428,14 +434,17 @@ _EasyClip.prototype = {
 			value = arrayToMatrix( value );
 		}
 		this._param._array.setMatrix( _CHAR( chr ), value, false );
+		return this;
 	},
 	setComplexMatrix : function( chr, real , imag ){
 		this._setEnv();
 		this._param._array.setComplexMatrix( _CHAR( chr ), arrayToMatrix( real ), arrayToMatrix( imag ), false );
+		return this;
 	},
 	setFractMatrix : function( chr, value , denom ){
 		this._setEnv();
 		this._param._array.setFractMatrix( _CHAR( chr ), arrayToMatrix( value ), arrayToMatrix( denom ), false );
+		return this;
 	},
 	setArrayValue : function( chr, subIndex , value ){
 		this._setEnv();
@@ -444,6 +453,7 @@ _EasyClip.prototype = {
 		}
 		subIndex[subIndex.length] = -1;
 		this._param._array.set( _CHAR( chr ), subIndex, subIndex.length - 1, value, false );
+		return this;
 	},
 	setArrayComplex : function( chr, subIndex , real, imag ){
 		this._setEnv();
@@ -451,6 +461,7 @@ _EasyClip.prototype = {
 		value.setReal( real );
 		value.setImag( imag );
 		this.setArrayValue( chr, subIndex, value );
+		return this;
 	},
 	setArrayFract : function( chr, subIndex , num, denom ){
 		this._setEnv();
@@ -462,10 +473,12 @@ _EasyClip.prototype = {
 		value.fractReduce ();
 		this._param.fractReduce ( _CHAR( chr ), false );
 		this.setArrayValue( chr, subIndex, value );
+		return this;
 	},
 	setString : function( chr, string ){
 		this._setEnv();
 		this._proc.strSet( this._param._array, _CHAR( chr ), string );
+		return this;
 	},
 	getAnsValue : function(){
 		this._setEnv();
@@ -628,60 +641,74 @@ _EasyClip.prototype = {
 	setMode : function( mode ){
 		this._setEnv();
 		this._param.setMode( mode );
+		return this;
 	},
 	setPrec : function( prec ){
 		this._setEnv();
 		this._param.setPrec( prec );
+		return this;
 	},
 	setFps : function( fps ){
 		this._setEnv();
 		this._param.setFps( fps );
+		return this;
 	},
 	setRadix : function( radix ){
 		this._setEnv();
 		this._param.setRadix( radix );
+		return this;
 	},
 	setAngType : function( type ){
 		this._setEnv();
 		this._proc.setAngType( type, false );
+		return this;
 	},
 	setCalculator : function( flag ){
 		this._setEnv();
 		this._param._calculator = flag;
+		return this;
 	},
 	setBase : function( base ){
 		this._setEnv();
 		this._param._base = (base != 0) ? 1 : 0;
+		return this;
 	},
 	setAnsFlag : function( flag ){
 		this._setEnv();
 		this._proc._printAns = flag;
+		return this;
 	},
 	setAssertFlag : function( flag ){
 		this._setEnv();
 		this._proc.setAssertFlag( flag );
+		return this;
 	},
 	setWarnFlag : function( flag ){
 		this._setEnv();
 		this._proc.setWarnFlag( flag );
+		return this;
 	},
 	commandGWorld : function( width, height ){
 		this._setEnv();
 		doCommandGWorld( width, height );
 		procGWorld().create( width, height, true );
+		return this;
 	},
 	commandWindow : function( left, bottom, right, top ){
 		this._setEnv();
 		doCommandWindow( left, bottom, right, top );
 		procGWorld().setWindowIndirect( left, bottom, right, top );
+		return this;
 	},
 	commandGClear : function( index ){
 		this._setEnv();
 		procGWorld().clear( index );
+		return this;
 	},
 	commandGColor : function( index ){
 		this._setEnv();
 		procGWorld().setColor( index );
+		return this;
 	},
 	commandGPut : function( array ){
 		this._setEnv();
@@ -695,6 +722,7 @@ _EasyClip.prototype = {
 					);
 			}
 		}
+		return this;
 	},
 	commandGPut24 : function( array ){
 		this._setEnv();
@@ -710,6 +738,7 @@ _EasyClip.prototype = {
 			}
 		}
 		doCommandGPut24End();
+		return this;
 	},
 	commandGGet : function(){
 		this._setEnv();
@@ -764,25 +793,31 @@ _EasyClip.prototype = {
 	},
 	procScript : function( script ){
 		this._setEnv();
+		var saveFunc = window.getExtFuncDataDirect;
 		window.getExtFuncDataDirect = function( func ){
 			return script;
 		};
 		initProcLoopCount();
-		return this._proc.mainLoop( "", this._param, null, null );
+		var ret = this._proc.mainLoop( "", this._param, null, null );
+		window.getExtFuncDataDirect = saveFunc;
+		return ret;
 	},
 	newPalette : function(){
 		if( this._palette == null ){
 			this._palette = new Array( 256 );
 		}
+		return this;
 	},
 	setPalette : function( bgrColorArray ){
 		this.newPalette();
 		for( var i = 0; i < 256; i++ ){
 			this._palette[i] = bgrColorArray[i];
 		}
+		return this;
 	},
 	setPaletteColor : function( index, bgrColor ){
 		this._palette[index] = bgrColor;
+		return this;
 	},
 	paletteColor : function( index ){
 		return this._palette[index];
@@ -831,6 +866,26 @@ _EasyClip.prototype = {
 			}
 		}
 		return this._canvas;
+	},
+	createImage : function( script , id, type, encoderOptions ){
+		var saveFunc = window.doCommandGWorld;
+		window.doCommandGWorld = function( width, height ){
+			curClip().createCanvas( width, height );
+		};
+		var ret = this.procScript( script );
+		window.doCommandGWorld = saveFunc;
+		if( ret == _CLIP_PROC_END ){
+			var canvas = this.updateCanvas();
+			var img = document.getElementById( id );
+			if( type == undefined ){
+				img.src = canvas.element().toDataURL();
+			} else if( encoderOptions == undefined ){
+				img.src = canvas.element().toDataURL( type );
+			} else {
+				img.src = canvas.element().toDataURL( type, encoderOptions );
+			}
+		}
+		return ret;
 	}
 };
 function _StringUtil(){
@@ -912,7 +967,7 @@ _StringUtil.prototype = {
 		ret[j] = "";
 		for( var i = 0; i < str.length; i++ ){
 			ret[j] += str.charAt( i );
-			if( stringWidth( ret[j] ) > width ){
+			if( this.stringWidth( ret[j] ) > width ){
 				if( ret[j].length > 1 ){
 					ret[j] = ret[j].substring( 0, ret[j].length - 1 );
 					i--;

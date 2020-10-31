@@ -472,8 +472,8 @@ _GWorld.prototype = {
 				ret = 2;
 			}
 			if(
-				((x1._val <= 0           ) && (x2._val <= 0           )) ||
-				((y1._val <= 0           ) && (y2._val <= 0           )) ||
+				((x1._val <  0           ) && (x2._val <  0           )) ||
+				((y1._val <  0           ) && (y2._val <  0           )) ||
 				((x1._val >= this._width ) && (x2._val >= this._width )) ||
 				((y1._val >= this._height) && (y2._val >= this._height))
 			){

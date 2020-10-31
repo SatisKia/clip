@@ -98,16 +98,17 @@ function _UNSIGNED( x, umax ){
 
 // 浮動小数点数値を小数部と整数部に分割する
 function _MODF( x, _int/*_Float*/ ){
-	var tmp = x.toString().split( "." );
+	var str = x.toString();
 	var k;
-	if( tmp[1] ){
-		if( (tmp[1].indexOf( "e" ) >= 0) || (tmp[1].indexOf( "E" ) >= 0) ){
-			k = 1;
-		} else {
-			k = _POW( 10, tmp[1].length );
-		}
-	} else {
+	if( (str.indexOf( "e" ) >= 0) || (str.indexOf( "E" ) >= 0) ){
 		k = 1;
+	} else {
+		var tmp = str.split( "." );
+		if( tmp[1] ){
+			k = _POW( 10, tmp[1].length );
+		} else {
+			k = 1;
+		}
 	}
 	var i = _INT( x );
 	_int.set( i );

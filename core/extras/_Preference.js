@@ -3,12 +3,12 @@
  * Copyright (C) SatisKia. All rights reserved.
  */
 
+// プリファレンス
 function _Preference( useStorage ){
 	this.s = (useStorage && canUseStorage());
 	this.c = canUseCookie();
 }
 
-// プリファレンス
 _Preference.prototype = {
 	num : function(){
 		if( this.s ){

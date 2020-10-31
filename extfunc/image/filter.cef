@@ -56,3 +56,6 @@ $LOOPSTART	# @x
 $SET		@@2 @y @x,filter (@y - @Y) (@x - @X) @H @W
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h
+
+:undef filter_src
+:undef filter_mat

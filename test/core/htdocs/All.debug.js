@@ -1279,16 +1279,17 @@ function _UNSIGNED( x, umax ){
  return x;
 }
 function _MODF( x, _int ){
- var tmp = x.toString().split( "." );
+ var str = x.toString();
  var k;
- if( tmp[1] ){
-  if( (tmp[1].indexOf( "e" ) >= 0) || (tmp[1].indexOf( "E" ) >= 0) ){
-   k = 1;
-  } else {
-   k = _POW( 10, tmp[1].length );
-  }
- } else {
+ if( (str.indexOf( "e" ) >= 0) || (str.indexOf( "E" ) >= 0) ){
   k = 1;
+ } else {
+  var tmp = str.split( "." );
+  if( tmp[1] ){
+   k = _POW( 10, tmp[1].length );
+  } else {
+   k = 1;
+  }
  }
  var i = _INT( x );
  _int.set( i );
@@ -1714,7 +1715,7 @@ _Matrix.prototype = {
    var n = (col < this._col) ? col : this._col;
    for( i = 0; i < m; i++ ){
     for( j = 0; j < n; j++ ){
-     copyValue( mat[i * col + j], this._val( i, j ) );
+     mat[i * col + j] = this._val( i, j );
     }
    }
    this._mat = mat;
@@ -3446,21 +3447,18 @@ __ArrayNode.prototype = {
   this._vectorNum = index + 1;
  },
  _resizeVector : function( index ){
-  copyValue( this._vector[index + 1], this._vector[this._vectorNum] );
+  this._vector[index + 1] = new _Value();
   this._vectorNum = index + 1;
  },
  _newNode : function( index ){
   if( this._nodeNum == 0 ){
-   this._nodeNum = index + 1;
-   this._node = _newArrayNodeArray( this._nodeNum );
+   this._node = _newArrayNodeArray( index + 1 );
   } else {
-   var tmp = _newArrayNodeArray( index + 1 );
-   for( var i = 0; i < this._nodeNum; i++ ){
-    this._node[i].dup( tmp[i] );
+   for( var i = index; i >= this._nodeNum; i-- ){
+    this._node[i] = new __ArrayNode();
    }
-   this._node = tmp;
-   this._nodeNum = index + 1;
   }
+  this._nodeNum = index + 1;
  },
  _resizeNode : function( index ){
   this._nodeNum = index + 1;
@@ -3711,6 +3709,13 @@ _Array.prototype = {
   }
   this._node[srcIndex].dup( dst._node[dstIndex] );
   dst._mat[dstIndex].ass( this._mat[srcIndex] );
+ },
+ rep : function( dst , srcIndex, dstIndex, moveFlag ){
+  if( moveFlag ){
+   dst.move( dstIndex );
+  }
+  dst._node[dstIndex] = this._node[srcIndex];
+  dst._mat[dstIndex] = this._mat[srcIndex];
  },
  makeToken : function( dst , srcIndex ){
   var row, col;
@@ -4923,7 +4928,7 @@ _Graph.prototype = {
    }
    tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
    for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
-    tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+    tmp[i + 1] = this._info[this._curIndex]._ans[i];
    }
    num = 0;
   } else if( num == this._info[this._curIndex]._ansNum._val ){
@@ -4937,7 +4942,7 @@ _Graph.prototype = {
    }
    tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
    for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
-    tmp[i].set( this._info[this._curIndex]._ans[i] );
+    tmp[i] = this._info[this._curIndex]._ans[i];
    }
    num = this._info[this._curIndex]._ansNum._val;
   } else if( ratio._val == 0.0 ){
@@ -4955,10 +4960,10 @@ _Graph.prototype = {
    }
    tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
    for( i = 0; i <= num; i++ ){
-    tmp[i].set( this._info[this._curIndex]._ans[i] );
+    tmp[i] = this._info[this._curIndex]._ans[i];
    }
    for( ; i < this._info[this._curIndex]._ansNum._val; i++ ){
-    tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+    tmp[i + 1] = this._info[this._curIndex]._ans[i];
    }
    num++;
   }
@@ -5158,6 +5163,9 @@ _GWorld.prototype = {
   this._color = color;
   gWorldSetColor( this, this._color );
  },
+ color : function(){
+  return this._color;
+ },
  putColor : function( x, y, color ){
   if( (x < 0) || (x >= _INT( this._width )) || (y < 0) || (y >= _INT( this._height )) ){
    return false;
@@ -5316,8 +5324,8 @@ _GWorld.prototype = {
     ret = 2;
    }
    if(
-    ((x1._val <= 0 ) && (x2._val <= 0 )) ||
-    ((y1._val <= 0 ) && (y2._val <= 0 )) ||
+    ((x1._val < 0 ) && (x2._val < 0 )) ||
+    ((y1._val < 0 ) && (y2._val < 0 )) ||
     ((x1._val >= this._width ) && (x2._val >= this._width )) ||
     ((y1._val >= this._height) && (y2._val >= this._height))
    ){
@@ -6205,6 +6213,14 @@ _Param.prototype = {
  isZero : function( index ){
   return _ISZERO( this.val( index ).real() ) && _ISZERO( this.val( index ).imag() );
  },
+ repVal : function( index, value , moveFlag ){
+  if( index == 0 ){
+   this._array._mat[index]._mat[0] = value;
+   return true;
+  } else {
+   return this._var.rep( index, value, moveFlag );
+  }
+ },
  setFunc : function( funcName, topNum ){
   if( this._funcName != null ){
    this._funcName = null;
@@ -6366,6 +6382,14 @@ function __ProcPrint(){
  this._string = null;
  this._next = null;
 }
+__ProcPrint.prototype = {
+ string : function(){
+  return this._string;
+ },
+ next : function(){
+  return this._next;
+ }
+};
 function __ProcScan(){
  this._title = null;
  this._code = 0;
@@ -6379,6 +6403,9 @@ __ProcScan.prototype = {
    return "";
   }
   return this._title;
+ },
+ next : function(){
+  return this._next;
  },
  getDefString : function( proc, param ){
   var defString = new String();
@@ -7695,7 +7722,7 @@ _Proc.prototype = {
     switch( childParam._updateParamCode[i] ){
     case 0x21:
      index = childParam._updateParamIndex[i];
-     if( parentParam.setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), true ) ){
+     if( parentParam.repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), true ) ){
       if( index == 0 ){
        this._updateMatrix( childParam, parentParam._array._mat[index] );
       } else {
@@ -7705,7 +7732,7 @@ _Proc.prototype = {
      break;
     case 0x22:
      index = childParam._updateParamIndex[i];
-     if( parentParam.setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
+     if( parentParam.repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
       if( index == 0 ){
        this._updateMatrix( childParam, parentParam._array._mat[index] );
       } else {
@@ -7715,7 +7742,7 @@ _Proc.prototype = {
      break;
     case 0x23:
      index = childParam._updateParamIndex[i];
-     if( globalParam().setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
+     if( globalParam().repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
       if( index == 0 ){
        this._updateMatrix( childParam, globalParam()._array._mat[index] );
       } else {
@@ -7724,13 +7751,13 @@ _Proc.prototype = {
      }
      break;
     case 0x44:
-     childParam._array.dup( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], true );
+     childParam._array.rep( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], true );
      break;
     case 0x45:
-     childParam._array.dup( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
+     childParam._array.rep( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
      break;
     case 0x46:
-     childParam._array.dup( globalParam()._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
+     childParam._array.rep( globalParam()._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
      break;
     }
    }
@@ -7743,7 +7770,7 @@ _Proc.prototype = {
   j = childParam._updateParentVar.length;
   for( i = 0; i < j; i++ ){
    index = childParam._updateParentVar[i];
-   parentParam.setVal( index, childParam._var.val( index ), true );
+   parentParam.repVal( index, childParam._var.val( index ), true );
    if( index == 0 ){
     this._updateMatrix( childParam, parentParam._array._mat[index] );
    } else {
@@ -7753,7 +7780,7 @@ _Proc.prototype = {
   j = childParam._updateParentArray.length;
   for( i = 0; i < j; i++ ){
    index = childParam._updateParentArray[i];
-   childParam._array.dup( parentParam._array, index, index, true );
+   childParam._array.rep( parentParam._array, index, index, true );
   }
  },
  updateAns : function( childParam ){
@@ -16678,6 +16705,17 @@ assert( index != 0 );
  val : function( index ){
 assert( index != 0 );
   return this._var[index];
+ },
+ rep : function( index, value , moveFlag ){
+assert( index != 0 );
+  if( this.isLocked( index ) ){
+   return false;
+  }
+  if( moveFlag ){
+   this.move( index );
+  }
+  this._var[index] = value;
+  return true;
  },
  lock : function( index ){
   this._lock[index] = true;

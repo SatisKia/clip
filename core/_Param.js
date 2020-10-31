@@ -245,6 +245,16 @@ _Param.prototype = {
 		return _ISZERO( this.val( index ).real() ) && _ISZERO( this.val( index ).imag() );
 	},
 
+	// 置き換え
+	repVal : function( index, value/*_Value*/, moveFlag ){
+		if( index == 0 ){
+			this._array._mat[index]._mat[0] = value;
+			return true;
+		} else {
+			return this._var.rep( index, value, moveFlag );
+		}
+	},
+
 	// 外部関数情報を登録する
 	setFunc : function( funcName, topNum ){
 		if( this._funcName != null ){

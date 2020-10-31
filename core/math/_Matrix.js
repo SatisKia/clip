@@ -30,7 +30,8 @@ _Matrix.prototype = {
 			var n = (col < this._col) ? col : this._col;
 			for( i = 0; i < m; i++ ){
 				for( j = 0; j < n; j++ ){
-					copyValue( mat[i * col + j], this._val( i, j ) );
+//					copyValue( mat[i * col + j], this._val( i, j ) );
+					mat[i * col + j] = this._val( i, j );
 				}
 			}
 

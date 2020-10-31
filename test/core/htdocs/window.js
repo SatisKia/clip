@@ -1,13 +1,6 @@
 function setWindowImg( imgId ){
 	regGWorldDefCharInfoLarge( 0 );
-
-	window.doCommandGWorld = function( width, height ){
-		curClip().createCanvas( width, height );
-	};
-
-	var clip = new _EasyClip();
-	clip.setPalette( COLOR_WIN );
-	clip.procScript( [
+	(new _EasyClip()).setPalette( COLOR_WIN ).createImage( [
 		"@w = 22 * 17",
 		"@h = 22 * 12",
 		":gworld @w @h",
@@ -41,9 +34,5 @@ function setWindowImg( imgId ){
 
 		":gtextr [\"8] (@x - 2) (@t - 2)",
 		":gtextr [\"-2] (@x - 2) (@b + 14)"
-	] );
-	clip.updateCanvas();
-
-	var img = document.getElementById( imgId );
-	img.src = clip.canvas().element().toDataURL( "image/png" );
+	], imgId, "image/png" );
 }

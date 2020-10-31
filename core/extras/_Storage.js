@@ -1,8 +1,3 @@
-/*
- * CLIP
- * Copyright (C) SatisKia. All rights reserved.
- */
-
 function canUseStorage(){
 	try {
 		return window.localStorage != null;

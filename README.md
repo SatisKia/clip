@@ -432,17 +432,29 @@ var canvas = clip.createCanvas( width, height ); // _Canvasオブジェクトが
 ```
 
 ```javascript
-var canvas = clip.resizeCanvas( width, height ); // _Canvasオブジェクトが返る
+clip.resizeCanvas( width, height );
 ```
 
 ```javascript
-var canvas = clip.updateCanvas(); // _Canvasオブジェクトが返る
-var canvas = clip.updateCanvas( scale ); // scaleを指定すると、_GWorldオブジェクト内のイメージ・メモリが拡大描画される
+clip.updateCanvas();
+clip.updateCanvas( scale ); // scaleを指定すると、_GWorldオブジェクト内のイメージ・メモリが拡大描画される
 ```
 
 ```javascript
-var canvas = clip.canvas();
+var canvas = clip.canvas(); // _Canvasオブジェクト
 ```
+
+### イメージを構築して表示する
+
+```javascript
+var ret = clip.createImage( script/*Array*/, id, type, encoderOptions ); // 正常終了時、_CLIP_PROC_ENDが返る
+```
+
+`id`はimg要素のid
+
+`type`は画像フォーマットを示すDOMString。指定しなかった場合、デフォルトのフォーマット形式は"image/png"
+
+`encoderOptions`は0から1の間のNumberで示す、"image/jpeg"や"image/webp"のような非可逆圧縮を使う画像フォーマットの画質。デフォルト値は0.92
 
 ### _EasyCanvasオブジェクトを使用する
  

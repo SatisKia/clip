@@ -1206,7 +1206,8 @@ _Graph.prototype = {
 			// 既存のデータをコピー
 			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
 			for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
-				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+//				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+				tmp[i + 1] = this._info[this._curIndex]._ans[i];
 			}
 
 			num = 0;
@@ -1223,7 +1224,8 @@ _Graph.prototype = {
 			// 既存のデータをコピー
 			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
 			for( i = 0; i < this._info[this._curIndex]._ansNum._val; i++ ){
-				tmp[i].set( this._info[this._curIndex]._ans[i] );
+//				tmp[i].set( this._info[this._curIndex]._ans[i] );
+				tmp[i] = this._info[this._curIndex]._ans[i];
 			}
 
 			num = this._info[this._curIndex]._ansNum._val;
@@ -1244,10 +1246,12 @@ _Graph.prototype = {
 			// 既存のデータをコピー
 			tmp = newGraphAnsArray( this._info[this._curIndex]._ansNum._val + 1 );
 			for( i = 0; i <= num; i++ ){
-				tmp[i].set( this._info[this._curIndex]._ans[i] );
+//				tmp[i].set( this._info[this._curIndex]._ans[i] );
+				tmp[i] = this._info[this._curIndex]._ans[i];
 			}
 			for( ; i < this._info[this._curIndex]._ansNum._val; i++ ){
-				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+//				tmp[i + 1].set( this._info[this._curIndex]._ans[i] );
+				tmp[i + 1] = this._info[this._curIndex]._ans[i];
 			}
 
 			num++;

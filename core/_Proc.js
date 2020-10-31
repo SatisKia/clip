@@ -1673,7 +1673,7 @@ _Proc.prototype = {
 				switch( childParam._updateParamCode[i] ){
 				case _CLIP_CODE_VARIABLE:
 					index = childParam._updateParamIndex[i];
-					if( parentParam.setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), true ) ){
+					if( parentParam.repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), true ) ){
 						if( index == 0 ){
 							this._updateMatrix( childParam, parentParam._array._mat[index] );
 						} else {
@@ -1683,7 +1683,7 @@ _Proc.prototype = {
 					break;
 				case _CLIP_CODE_AUTO_VAR:
 					index = childParam._updateParamIndex[i];
-					if( parentParam.setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
+					if( parentParam.repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
 						if( index == 0 ){
 							this._updateMatrix( childParam, parentParam._array._mat[index] );
 						} else {
@@ -1693,7 +1693,7 @@ _Proc.prototype = {
 					break;
 				case _CLIP_CODE_GLOBAL_VAR:
 					index = childParam._updateParamIndex[i];
-					if( globalParam().setVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
+					if( globalParam().repVal( index, childParam._var.val( i + _CHAR_CODE_0 ), false ) ){
 						if( index == 0 ){
 							this._updateMatrix( childParam, globalParam()._array._mat[index] );
 						} else {
@@ -1702,13 +1702,13 @@ _Proc.prototype = {
 					}
 					break;
 				case _CLIP_CODE_ARRAY:
-					childParam._array.dup( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], true );
+					childParam._array.rep( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], true );
 					break;
 				case _CLIP_CODE_AUTO_ARRAY:
-					childParam._array.dup( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
+					childParam._array.rep( parentParam._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
 					break;
 				case _CLIP_CODE_GLOBAL_ARRAY:
-					childParam._array.dup( globalParam()._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
+					childParam._array.rep( globalParam()._array, i + _CHAR_CODE_0, childParam._updateParamIndex[i], false );
 					break;
 				}
 			}
@@ -1726,7 +1726,7 @@ _Proc.prototype = {
 		j = childParam._updateParentVar.length;
 		for( i = 0; i < j; i++ ){
 			index = childParam._updateParentVar[i];
-			parentParam.setVal( index, childParam._var.val( index ), true );
+			parentParam.repVal( index, childParam._var.val( index ), true );
 			if( index == 0 ){
 				this._updateMatrix( childParam, parentParam._array._mat[index] );
 			} else {
@@ -1738,7 +1738,7 @@ _Proc.prototype = {
 		j = childParam._updateParentArray.length;
 		for( i = 0; i < j; i++ ){
 			index = childParam._updateParentArray[i];
-			childParam._array.dup( parentParam._array, index, index, true );
+			childParam._array.rep( parentParam._array, index, index, true );
 		}
 	},
 
