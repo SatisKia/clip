@@ -1,13 +1,14 @@
 @echo off
 
 set CPP=C:\MinGW\bin\gcc -E -P -x c
+set COMMON_PATH=C:\HTML5\common
 
 md tmp
 
 cd src
-%CPP% -I..\..\..\core\extras -I..\..\..\core -DDEBUG Main.js > ..\htdocs\All.debug.js
-%CPP% -I..\..\..\core\extras -DUSE_CLIP_LIB  -DDEBUG Main.js > ..\htdocs\Main.debug.js
-%CPP% -I..\..\..\core\extras -DUSE_CLIP_LIB          Main.js > ..\tmp\Main.js
+%CPP% -I%COMMON_PATH% -I..\..\..\core\extras -I..\..\..\core -DDEBUG Main.js > ..\htdocs\All.debug.js
+%CPP% -I%COMMON_PATH% -I..\..\..\core\extras -DUSE_CLIP_LIB  -DDEBUG Main.js > ..\htdocs\Main.debug.js
+%CPP% -I%COMMON_PATH% -I..\..\..\core\extras -DUSE_CLIP_LIB          Main.js > ..\tmp\Main.js
 cd ..
 
 call "C:\HTML5\Microsoft Ajax Minifier\AjaxMinCommandPromptVars"

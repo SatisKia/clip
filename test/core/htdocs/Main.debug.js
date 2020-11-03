@@ -17,13 +17,11 @@ function cssGetPropertyValue( selector, property ){
    rule = rules[j];
    if( rule.selectorText == selector ){
     value = rule.style.getPropertyValue( property );
-
    }
   }
  }
  return value;
 }
-
 function cssSetPropertyValue( selector, property, value ){
  var i, j;
  var styleSheets = document.styleSheets;
@@ -37,15 +35,12 @@ function cssSetPropertyValue( selector, property, value ){
    rule = rules[j];
    if( rule.selectorText == selector ){
     rule.style.setProperty( property, value );
-
    }
   }
  }
 }
-
 var _css_display_none = null;
 var _css_display_block = null;
-
 function cssLockStyleDisplay(){
  _css_display_none = new Array();
  _css_display_block = new Array();
