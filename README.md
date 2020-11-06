@@ -10,6 +10,8 @@ core/extrasフォルダを除く全てのソース内容が含まれています
 
 ## ビルド方法
 
+事前に環境変数"AJAXMINPATH"の設定を行ってください。
+
 build_clip.batを実行しますと、coreフォルダ下にclip.jsとclip.debug.jsが生成されます。
 
 ビルドには別途、次のツールが必要です。
@@ -30,7 +32,7 @@ JavaScriptコードの圧縮・難読化ツールです。
 
 ### test/core
 
-CLIPインタープリタです。
+CLIPインタープリタです。ビルドするには事前に環境変数"SKCOMMONPATH"の設定を行ってください。
 
 ## core/extras
 
