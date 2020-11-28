@@ -1,5 +1,7 @@
 # clip.js
 
+[English version is here](./README_E.md)
+
 CLIP言語による計算処理のエンジンです。
 
 CLIP言語については、test/core/htdocs/language.htmlを参照してください。
