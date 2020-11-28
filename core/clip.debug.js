@@ -3765,9 +3765,10 @@ _Func.prototype = {
 		this._num = 0;
 	},
 	search : function( name, updateCnt, nameSpace ){
-		if( name.startsWith( ":" ) ){
+		var tmp = name.indexOf( ":" );
+		if( tmp == 0 ){
 			name = name.slice( 1 );
-		} else if( (nameSpace != null) && (name.indexOf( ":" ) < 0) ){
+		} else if( (nameSpace != null) && (tmp < 0) ){
 			name = nameSpace + ":" + name;
 		}
 		var cur = this._top;
@@ -7673,9 +7674,10 @@ _Proc.prototype = {
 		if( data != null ){
 			return data;
 		}
-		if( saveFunc.startsWith( ":" ) ){
+		var tmp = saveFunc.indexOf( ":" );
+		if( tmp == 0 ){
 			func.set( saveFunc.slice( 1 ) );
-		} else if( (nameSpace != null) && (saveFunc.indexOf( ":" ) < 0) ){
+		} else if( (nameSpace != null) && (tmp < 0) ){
 			func.set( nameSpace + ":" + saveFunc );
 		}
 		return getExtFuncDataNameSpace( func.str() );

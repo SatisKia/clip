@@ -213,9 +213,10 @@ _Func.prototype = {
 
 	// 関数を検索する
 	search : function( name, updateCnt, nameSpace ){
-		if( name.startsWith( ":" ) ){
+		var tmp = name.indexOf( ":" );
+		if( tmp == 0 ){
 			name = name.slice( 1 );
-		} else if( (nameSpace != null) && (name.indexOf( ":" ) < 0) ){
+		} else if( (nameSpace != null) && (tmp < 0) ){
 			name = nameSpace + ":" + name;
 		}
 		var cur = this._top;

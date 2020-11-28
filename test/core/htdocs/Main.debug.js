@@ -834,7 +834,7 @@ function _onInputFileChange( e ){
  if( files.length == 0 ){
   return;
  }
- if( files[0].type.startsWith( "image/" ) ){
+ if( files[0].type.indexOf( "image/" ) == 0 ){
   var name = files[0].name;
   var reader = new FileReader();
   reader.onload = function(){

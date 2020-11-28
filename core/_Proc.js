@@ -1759,9 +1759,10 @@ _Proc.prototype = {
 		if( data != null ){
 			return data;
 		}
-		if( saveFunc.startsWith( ":" ) ){
+		var tmp = saveFunc.indexOf( ":" );
+		if( tmp == 0 ){
 			func.set( saveFunc.slice( 1 ) );
-		} else if( (nameSpace != null) && (saveFunc.indexOf( ":" ) < 0) ){
+		} else if( (nameSpace != null) && (tmp < 0) ){
 			func.set( nameSpace + ":" + saveFunc );
 		}
 		return getExtFuncDataNameSpace( func.str() );
