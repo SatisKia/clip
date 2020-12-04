@@ -12,7 +12,7 @@ for @i = 0; @i < @0; @i++
 	@@t @i = @@s @i + (rand / RAND_MAX - 0.5) * 5.0
 next
 
-!ft:dft @@u @0 @@t @0
+!ft:dft @@u @0 @@t 0 @0
 @d = ft_cut @@u @0 @1 @2
 
 !ft:idft @@v @0 @@u @0

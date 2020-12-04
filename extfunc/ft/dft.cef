@@ -1,7 +1,7 @@
 #!NAMESPACE ft
 #離散フーリエ変換
-#\!- <ret_array> <ret_num> <src_array> <src_num>
-:params &ret[] ret_num src[] src_num
+#\!- <ret_array> <ret_num> <src_array> <src_pos> <src_num>
+:params &ret[] ret_num src[] src_pos src_num
 :ans FALSE
 :complex
 $DIV_A		@T,\-6.28318530717958647692i,ret_num
@@ -11,6 +11,6 @@ $MUL_A		@U,@T,@t
 $SET_Z		ret @t
 $SET_Z		@x
 $LOOPSTART	# @x
-ret @t += src @x * exp (@U * @x)
+ret @t += src (src_pos + @x) * exp (@U * @x)
 $LOOPEND_I	@x,src_num
 $LOOPENDE_D	@t,0

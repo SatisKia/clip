@@ -13,17 +13,13 @@ $CND @k,(a 0 < 0 && (b 0 >= 0) || (b 0 < 0 && (a 0 >= 0))),\-1,1
 
 $SET @a,mp_get_len a
 $SET @b,mp_get_len b
-
 if @a == 0 || @b == 0
 	$SET_Z ret 0
 	return
 endif
-
 $ADD_A @n,@a,@b
-:arraycopy a 1 @@a 0 @a
-:arraycopy b 1 @@b 0 @b
 
-!ft:conv @@r @n @@a @a @@b @b
+!ft:conv @@r @n a 1 @a b 1 @b
 
 $SET_Z ret @n # 配列の確保
 #SET_Z @c
