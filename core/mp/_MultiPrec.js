@@ -17,27 +17,27 @@ var _MP_FROUND_HALF_DOWN = 5;	// 五捨六入する
 var _MP_FROUND_HALF_EVEN = 6;	// 最も近い値の方に丸める
 
 function _MultiPrec(){
-	this._CONST  = new Array();
-	this._FCONST = new Array();
+	this._I = new Array();
+	this._F = new Array();
 
 	this.fabs = this.abs;
 	this.fneg = this.neg;
 	this.fset = this.set;
 }
 
-_MultiPrec.prototype.CONST = function( str ){
-	if( this._CONST["_" + str] == undefined ){
-		this._CONST["_" + str] = new Array();
-		this.str2num( this._CONST["_" + str], str );
+_MultiPrec.prototype.I = function( str ){
+	if( this._I["_" + str] == undefined ){
+		this._I["_" + str] = new Array();
+		this.str2num( this._I["_" + str], str );
 	}
-	return this._CONST["_" + str];
+	return this._I["_" + str];
 };
-_MultiPrec.prototype.FCONST = function( str ){
-	if( this._FCONST["_" + str] == undefined ){
-		this._FCONST["_" + str] = new Array();
-		this.fstr2num( this._FCONST["_" + str], str );
+_MultiPrec.prototype.F = function( str ){
+	if( this._F["_" + str] == undefined ){
+		this._F["_" + str] = new Array();
+		this.fstr2num( this._F["_" + str], str );
 	}
-	return this._FCONST["_" + str];
+	return this._F["_" + str];
 };
 
 _MultiPrec.prototype._getLen = function( a/*Array*/ ){

@@ -435,25 +435,25 @@ var _MP_FROUND_HALF_UP = 4;
 var _MP_FROUND_HALF_DOWN = 5;
 var _MP_FROUND_HALF_EVEN = 6;
 function _MultiPrec(){
-	this._CONST = new Array();
-	this._FCONST = new Array();
+	this._I = new Array();
+	this._F = new Array();
 	this.fabs = this.abs;
 	this.fneg = this.neg;
 	this.fset = this.set;
 }
-_MultiPrec.prototype.CONST = function( str ){
-	if( this._CONST["_" + str] == undefined ){
-		this._CONST["_" + str] = new Array();
-		this.str2num( this._CONST["_" + str], str );
+_MultiPrec.prototype.I = function( str ){
+	if( this._I["_" + str] == undefined ){
+		this._I["_" + str] = new Array();
+		this.str2num( this._I["_" + str], str );
 	}
-	return this._CONST["_" + str];
+	return this._I["_" + str];
 };
-_MultiPrec.prototype.FCONST = function( str ){
-	if( this._FCONST["_" + str] == undefined ){
-		this._FCONST["_" + str] = new Array();
-		this.fstr2num( this._FCONST["_" + str], str );
+_MultiPrec.prototype.F = function( str ){
+	if( this._F["_" + str] == undefined ){
+		this._F["_" + str] = new Array();
+		this.fstr2num( this._F["_" + str], str );
 	}
-	return this._FCONST["_" + str];
+	return this._F["_" + str];
 };
 _MultiPrec.prototype._getLen = function( a ){
 	return _INT( _ABS( a[0] / _MP_LEN_COEF ) );
@@ -1059,31 +1059,31 @@ _MultiPrec.prototype.fround2 = function( a , prec, even_flag ){
 };
 _MultiPrec.prototype.fsqrt = function( ret , a , prec ){
 	a = this._clone( a );
-	if( this.fcmp( a, this.FCONST( "0" ) ) > 0 ){
+	if( this.fcmp( a, this.F( "0" ) ) > 0 ){
 		var l = new Array();
 		var s = new Array();
 		var t = new Array();
-		if( this.fcmp( a, this.FCONST( "1" ) ) > 0 ){
+		if( this.fcmp( a, this.F( "1" ) ) > 0 ){
 			this.set( s, a );
 		} else {
-			this.set( s, this.FCONST( "1" ) );
+			this.set( s, this.F( "1" ) );
 		}
 		do {
 			this.set( l, s );
 			this.fdiv2( t, a, s, prec );
 			this.fadd( t, t, s );
-			this.fmul( t, t, this.FCONST( "0.5" ), prec );
+			this.fmul( t, t, this.F( "0.5" ), prec );
 			this.set( s, t );
 		} while( this.fcmp( s, l ) < 0 );
 		this.set( ret, l );
 		return false;
 	}
-	this.set( ret, this.FCONST( "0" ) );
-	return (this.fcmp( a, this.FCONST( "0" ) ) != 0);
+	this.set( ret, this.F( "0" ) );
+	return (this.fcmp( a, this.F( "0" ) ) != 0);
 };
 _MultiPrec.prototype.fsqrt2 = function( ret , a , prec, order ){
 	a = this._clone( a );
-	if( this.fcmp( a, this.FCONST( "0" ) ) > 0 ){
+	if( this.fcmp( a, this.F( "0" ) ) > 0 ){
 		var g = new Array();
 		var h = new Array();
 		var m = new Array();
@@ -1095,21 +1095,21 @@ _MultiPrec.prototype.fsqrt2 = function( ret , a , prec, order ){
 		var s = new Array();
 		var t = new Array();
 		var x = new Array();
-		if( this.fcmp( a, this.FCONST( "1" ) ) > 0 ){
-			this.fdiv( t, this.FCONST( "1" ), a, prec );
+		if( this.fcmp( a, this.F( "1" ) ) > 0 ){
+			this.fdiv( t, this.F( "1" ), a, prec );
 			this.set( x, t );
 		} else {
-			this.set( x, this.FCONST( "1" ) );
+			this.set( x, this.F( "1" ) );
 		}
 		this.fmul( t, x, x, prec );
 		this.fmul( t, a, t, prec );
-		this.fsub( h, this.FCONST( "1" ), t );
-		this.set( g, this.FCONST( "1" ) );
-		this.fdiv( m, this.FCONST( "1" ), this.FCONST( "2" ), prec );
-		if( order >= 3 ){ this.fdiv( n, this.FCONST( "3" ), this.FCONST( "8" ), prec ); }
-		if( order >= 4 ){ this.fdiv( o, this.FCONST( "5" ), this.FCONST( "16" ), prec ); }
-		if( order >= 5 ){ this.fdiv( p, this.FCONST( "35" ), this.FCONST( "128" ), prec ); }
-		if( order == 6 ){ this.fdiv( q, this.FCONST( "63" ), this.FCONST( "256" ), prec ); }
+		this.fsub( h, this.F( "1" ), t );
+		this.set( g, this.F( "1" ) );
+		this.fdiv( m, this.F( "1" ), this.F( "2" ), prec );
+		if( order >= 3 ){ this.fdiv( n, this.F( "3" ), this.F( "8" ), prec ); }
+		if( order >= 4 ){ this.fdiv( o, this.F( "5" ), this.F( "16" ), prec ); }
+		if( order >= 5 ){ this.fdiv( p, this.F( "35" ), this.F( "128" ), prec ); }
+		if( order == 6 ){ this.fdiv( q, this.F( "63" ), this.F( "256" ), prec ); }
 		do {
 			switch( order ){
 			case 6 : this.set( t, q ); break;
@@ -1138,15 +1138,15 @@ _MultiPrec.prototype.fsqrt2 = function( ret , a , prec, order ){
 			this.set( g, h );
 			this.fmul( t, x, x, prec );
 			this.fmul( t, a, t, prec );
-			this.fsub( h, this.FCONST( "1" ), t );
+			this.fsub( h, this.F( "1" ), t );
 			this.abs( r, h );
 			this.abs( s, g );
 		} while( this.fcmp( r, s ) < 0 );
 		this.fmul( ret, a, x, prec );
 		return false;
 	}
-	this.set( ret, this.FCONST( "0" ) );
-	return (this.fcmp( a, this.FCONST( "0" ) ) != 0);
+	this.set( ret, this.F( "0" ) );
+	return (this.fcmp( a, this.F( "0" ) ) != 0);
 };
 _MultiPrec.prototype.fsqrt3 = function( ret , a , prec ){
 	a = this._clone( a );

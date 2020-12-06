@@ -322,19 +322,19 @@ var start;
 function pi_out5( prec, count, order ){
  var N = _DIV( _LOG( prec ), _LOG( 2 ) );
  if( start == 0 ){
-  mp.set( a, mp.FCONST( "1" ) );
+  mp.set( a, mp.F( "1" ) );
   switch( order ){
-  case 0 : mp.fsqrt3( tt, mp.FCONST( "2" ), prec ); break;
-  case 1 : mp.fsqrt ( tt, mp.FCONST( "2" ), prec ); break;
-  default: mp.fsqrt2( tt, mp.FCONST( "2" ), prec, order ); break;
+  case 0 : mp.fsqrt3( tt, mp.F( "2" ), prec ); break;
+  case 1 : mp.fsqrt ( tt, mp.F( "2" ), prec ); break;
+  default: mp.fsqrt2( tt, mp.F( "2" ), prec, order ); break;
   }
-  mp.fdiv( b, mp.FCONST( "1" ), tt, prec );
-  mp.fdiv( t, mp.FCONST( "1" ), mp.FCONST( "4" ), prec );
-  mp.set( p, mp.FCONST( "1" ) );
+  mp.fdiv( b, mp.F( "1" ), tt, prec );
+  mp.fdiv( t, mp.F( "1" ), mp.F( "4" ), prec );
+  mp.set( p, mp.F( "1" ) );
  }
  for( var i = 0; i < count; i++ ){
   mp.fadd( tt, a, b );
-  mp.fmul( n, tt, mp.FCONST( "0.5" ), prec );
+  mp.fmul( n, tt, mp.F( "0.5" ), prec );
   mp.fmul( tt, a, b, prec );
   switch( order ){
   case 0 : mp.fsqrt3( b, tt, prec ); break;
@@ -345,13 +345,13 @@ function pi_out5( prec, count, order ){
   mp.fmul( tt, tt, tt, prec );
   mp.fmul( tt, p, tt, prec );
   mp.fsub( t, t, tt );
-  mp.fmul( p, mp.FCONST( "2" ), p, prec );
+  mp.fmul( p, mp.F( "2" ), p, prec );
   mp.set( a, n );
   start++;
  }
  mp.fadd( tt, a, b );
  mp.fmul( tt, tt, tt, prec );
- mp.fmul( u, mp.FCONST( "4" ), t, prec );
+ mp.fmul( u, mp.F( "4" ), t, prec );
  mp.fdiv2( pi, tt, u, prec );
  return (start < N);
 }
