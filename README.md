@@ -499,3 +499,242 @@ var param = clip.param();
 ```javascript
 var gWorld = clip.gWorld();
 ```
+
+## core/mp/mp.js, core/mp/mp.debug.js
+
+多倍長演算用オブジェクト_MultiPrec
+
+### _MultiPrecオブジェクトのコンストラクタ
+
+```javascript
+_MultiPrec()
+```
+
+### _MultiPrecオブジェクトのメソッド
+
+#### 定数の定義
+
+**多倍長整数**
+
+```javascript
+I( str )
+```
+
+Arrayオブジェクトを返します。
+
+定数が未定義の場合には定義が追加され、定義済みの場合は定義されているものを返します。
+
+**多倍長浮動小数点数**
+
+```javascript
+F( str )
+```
+
+Arrayオブジェクトを返します。
+
+定数が未定義の場合には定義が追加され、定義済みの場合は定義されているものを返します。
+
+#### 多倍長整数
+
+**文字列を多倍長整数に変換する**
+
+```javascript
+str2num( n/*Array*/, s )
+```
+
+**多倍長整数を文字列に変換する**
+
+```javascript
+num2str( n/*Array*/ )
+```
+
+Stringオブジェクトを返します。
+
+**代入**
+
+```javascript
+set( rop/*Array*/, op/*Array*/ )
+```
+
+**大小比較**
+
+```javascript
+cmp( a/*Array*/, b/*Array*/ )
+```
+
+aがbよりも大きい場合は正の値、小さい場合は負の値、等しい場合はゼロの値を返します。
+
+**加算**
+
+```javascript
+add( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**減算**
+
+```javascript
+sub( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**乗算**
+
+```javascript
+mul( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**除算**
+
+```javascript
+div( q/*Array*/, a/*Array*/, b/*Array*/, r/*Array*/ )
+```
+
+商qと余りrを得ます。
+除数bが0のときはtrueを返します。
+
+rは省略できます。
+
+**符号反転**
+
+```javascript
+neg( rop/*Array*/, op/*Array*/ )
+```
+
+opは省略できます。
+
+**絶対値**
+
+```javascript
+abs( rop/*Array*/, op/*Array*/ )
+```
+
+opは省略できます。
+
+**平方根**
+
+```javascript
+sqrt( x/*Array*/, a/*Array*/ )
+```
+
+aが負の値の場合trueを返します。
+
+#### 多倍長浮動小数点数
+
+**文字列を多倍長浮動小数点数に変換する**
+
+```javascript
+fstr2num( n/*Array*/, s )
+```
+
+**多倍長浮動小数点数を文字列に変換する**
+
+```javascript
+fnum2str( n/*Array*/ )
+```
+
+Stringオブジェクトを返します。
+
+**代入**
+
+```javascript
+fset( rop/*Array*/, op/*Array*/ )
+```
+
+**大小比較**
+
+```javascript
+fcmp( a/*Array*/, b/*Array*/ )
+```
+
+aがbよりも大きい場合は正の値、小さい場合は負の値、等しい場合はゼロの値を返します。
+
+**加算**
+
+```javascript
+fadd( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**減算**
+
+```javascript
+fsub( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**乗算**
+
+```javascript
+fmul( ret/*Array*/, a/*Array*/, b/*Array*/, prec )
+```
+
+**除算**
+
+```javascript
+fdiv( ret/*Array*/, a/*Array*/, b/*Array*/, prec )
+fdiv2( ret/*Array*/, a/*Array*/, b/*Array*/, prec, digit/*_Integer*/ )
+```
+
+除数bが0のときはtrueを返します。
+digitには、被除数aの整数部の桁数が格納されます。
+
+digitは省略できます。
+
+**符号反転**
+
+```javascript
+fneg( rop/*Array*/, op/*Array*/ )
+```
+
+opは省略できます。
+
+**絶対値**
+
+```javascript
+fabs( rop/*Array*/, op/*Array*/ )
+```
+
+opは省略できます。
+
+**小数点以下の切り捨て**
+
+```javascript
+ftrunc( rop/*Array*/, op/*Array*/ )
+```
+
+**平方根**
+
+```javascript
+fsqrt( ret/*Array*/, a/*Array*/, prec )
+fsqrt2( ret/*Array*/, a/*Array*/, prec, order )
+fsqrt3( ret/*Array*/, a/*Array*/, prec )
+```
+
+aが負の値の場合trueを返します。
+
+**整数部の桁数**
+
+```javascript
+fdigit( a/*Array*/ )
+```
+
+**丸め演算**
+
+```javascript
+fround( a/*Array*/, prec, mode )
+```
+
+| mode | 意味 |
+| --- | --- |
+| _MP_FROUND_UP | ゼロから離れるように丸める |
+| _MP_FROUND_DOWN | ゼロに近づくように丸める |
+| _MP_FROUND_CEILING | 正の無限大に近づくように丸める |
+| _MP_FROUND_FLOOR | 負の無限大に近づくように丸める |
+| _MP_FROUND_HALF_UP | 四捨五入する |
+| _MP_FROUND_HALF_DOWN | 五捨六入する |
+| _MP_FROUND_HALF_EVEN | 最も近い値の方に丸める |
+
+modeを省略すると、_MP_FROUND_HALF_EVENの動作になります。
+
+```javascript
+fround2( a/*Array*/, prec, even_flag ) // _MP_FROUND_HALF_DOWNを五捨五超入にする
+```
+
+even_flagにtrueを指定すると、最大有効桁数n桁で丸める場合のn+1桁目の数値をa、n桁目の数値をbとした時、bが奇数の場合はaを四捨五入、偶数の場合はaを五捨五超入します。

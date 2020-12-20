@@ -5,6 +5,7 @@
 
 // 多倍長浮動小数点数同士の除算
 // 除数bが0のときはtrueを返す。
+// digitには、被除数aの整数部の桁数が格納される。
 _MultiPrec.prototype.fdiv2 = function( ret/*Array*/, a/*Array*/, b/*Array*/, prec, digit/*_Integer*/ ){
 	a = this._clone( a );
 	b = this._clone( b );
