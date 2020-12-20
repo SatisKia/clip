@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長整数同士の大小比較
 // aがbよりも大きい場合は正の値、小さい場合は負の値、等しい場合はゼロの値
 _MultiPrec.prototype.cmp = function( a/*Array*/, b/*Array*/ ){

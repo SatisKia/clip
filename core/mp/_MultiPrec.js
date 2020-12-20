@@ -8,14 +8,6 @@ var _MP_ELEMENT   = _POW( 10, _MP_DIGIT );
 var _MP_PREC_MASK = 0xFFFFFFFF;
 var _MP_LEN_COEF  = _MP_PREC_MASK + 1;
 
-var _MP_FROUND_UP        = 0;	// ゼロから離れるように丸める
-var _MP_FROUND_DOWN      = 1;	// ゼロに近づくように丸める
-var _MP_FROUND_CEILING   = 2;	// 正の無限大に近づくように丸める
-var _MP_FROUND_FLOOR     = 3;	// 負の無限大に近づくように丸める
-var _MP_FROUND_HALF_UP   = 4;	// 四捨五入する
-var _MP_FROUND_HALF_DOWN = 5;	// 五捨六入する
-var _MP_FROUND_HALF_EVEN = 6;	// 最も近い値の方に丸める
-
 function _MultiPrec(){
 	this._I = new Array();
 	this._F = new Array();

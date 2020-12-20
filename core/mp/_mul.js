@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長整数同士の乗算
 
 _MultiPrec.prototype._mul1n = function( ret/*Array*/, a/*Array*/, b, n ){

@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長浮動小数点数同士の減算
 _MultiPrec.prototype.fsub = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	a = this._clone( a );

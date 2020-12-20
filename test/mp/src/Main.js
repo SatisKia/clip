@@ -1,4 +1,84 @@
-#include "param\_String.js"
+var mp;
+
+#include "math\_Complex.js"
+#include "math\_MathEnv.js"
+
+// 離散フーリエ変換
+function dft( ret/*Array*/, ret_num, src/*Array*/, src_num ){
+	var T = 6.28318530717958647692 / ret_num;
+	var t, x, U, V;
+	for( t = ret_num - 1; t >= 0; t-- ){
+		U = T * t;
+		ret[t] = new _Complex();
+		for( x = 0; x < src_num; x++ ){
+			V = U * x;
+			ret[t]._re += src[x] * _COS( V );
+			ret[t]._im -= src[x] * _SIN( V );
+		}
+	}
+}
+
+// 逆離散フーリエ変換
+function idft( ret/*Array*/, ret_num, src/*Array*/, src_num ){
+	var T = 6.28318530717958647692 / ret_num;
+	var x, t, U, V;
+	for( x = ret_num - 1; x >= 0; x-- ){
+		U = T * x;
+		ret[x] = 0;
+		for( t = 0; t < src_num; t++ ){
+			V = U * t;
+			ret[x] += src[t]._re * _COS( V ) - src[t]._im * _SIN( V );
+		}
+		ret[x] /= ret_num;
+	}
+}
+
+// 畳み込み
+function conv( ret/*Array*/, ret_num, x/*Array*/, x_num, y/*Array*/, y_num ){
+	var X = new Array();
+	var Y = new Array();
+	dft( X, ret_num, x, x_num );
+	dft( Y, ret_num, y, y_num );
+
+	for( var i = ret_num - 1; i >= 0; i-- ){
+		X[i].mulAndAss( Y[i] );
+	}
+
+	idft( ret, ret_num, X, ret_num );
+}
+
+// 多倍長整数同士の乗算
+function mul( ret/*Array*/, a/*Array*/, b/*Array*/ ){
+//	a = mp._clone( a );
+//	b = mp._clone( b );
+
+	var k = 1;
+	if( a[0] < 0 && b[0] >= 0 ){ k = -1; }
+	if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
+
+	var la = mp._getLen( a );
+	var lb = mp._getLen( b );
+	if( la == 0 || lb == 0 ){
+		ret[0] = 0;
+		return;
+	}
+	var n = la + lb;
+
+	var r = new Array();
+	conv( r, n, a.slice( 1 ), la, b.slice( 1 ), lb );
+
+	ret[n] = 0;	// 配列の確保
+	var c = 0;
+	var i, rr;
+	for( i = 1; i < n; i++ ){
+		rr = _INT( r[i - 1] + 0.5 ) + c;
+		ret[i] = _MOD( rr, _MP_ELEMENT );
+		c = _DIV( rr, _MP_ELEMENT );
+	}
+	ret[i] = c;
+
+	mp._setLen( ret, (c != 0 ? n : n - 1) * k );
+};
 
 #include "extras\_Console.js"
 var con;
@@ -16,6 +96,7 @@ function printBlue( s ){
 }
 
 #include "extras\_Error.js"
+#include "param\_String.js"
 function onError( e ){
 	con.setColor( "ff0000" );
 
@@ -34,81 +115,173 @@ function onError( e ){
 	con.setColor();
 }
 
-var mp;
-
 var pi = new Array();
 var a  = new Array();
 var b  = new Array();
-var n  = new Array();
-var p  = new Array();
 var t  = new Array();
-var tt = new Array();
-var u  = new Array();
+var p  = new Array();
 var start;
 function pi_out5( prec, count, order ){
 	var N = _DIV( _LOG( prec ), _LOG( 2 ) );	// 繰り返し回数。log2(prec)程度の反復でよい。
+	var T = new Array();
 	if( start == 0 ){
 		mp.set( a, mp.F( "1" ) );
 		switch( order ){
-		case 0 : mp.fsqrt3( tt, mp.F( "2" ), prec ); break;
-		case 1 : mp.fsqrt ( tt, mp.F( "2" ), prec ); break;
-		default: mp.fsqrt2( tt, mp.F( "2" ), prec, order ); break;
+		case 0 : mp.fsqrt3( T, mp.F( "2" ), prec ); break;
+		case 1 : mp.fsqrt ( T, mp.F( "2" ), prec ); break;
+		default: mp.fsqrt2( T, mp.F( "2" ), prec, order ); break;
 		}
-		mp.fdiv( b, mp.F( "1" ), tt, prec );
+		mp.fdiv( b, mp.F( "1" ), T, prec );
 		mp.fdiv( t, mp.F( "1" ), mp.F( "4" ), prec );
 		mp.set( p, mp.F( "1" ) );
 	}
+	var U = new Array();
 	for( var i = 0; i < count; i++ ){
-		mp.fadd( tt, a, b );
-		mp.fmul( n, tt, mp.F( "0.5" ), prec );
-		mp.fmul( tt, a, b, prec );
+		mp.fadd( T, a, b );
+		mp.fmul( U, T, mp.F( "0.5" ), prec );
+		mp.fmul( T, a, b, prec );
 		switch( order ){
-		case 0 : mp.fsqrt3( b, tt, prec ); break;
-		case 1 : mp.fsqrt ( b, tt, prec ); break;
-		default: mp.fsqrt2( b, tt, prec, order ); break;
+		case 0 : mp.fsqrt3( b, T, prec ); break;
+		case 1 : mp.fsqrt ( b, T, prec ); break;
+		default: mp.fsqrt2( b, T, prec, order ); break;
 		}
-		mp.fsub( tt, a, n );
-		mp.fmul( tt, tt, tt, prec );
-		mp.fmul( tt, p, tt, prec );
-		mp.fsub( t, t, tt );
+		mp.fsub( T, a, U );
+		mp.fmul( T, T, T, prec );
+		mp.fmul( T, p, T, prec );
+		mp.fsub( t, t, T );
 		mp.fmul( p, mp.F( "2" ), p, prec );
-		mp.set( a, n );
+		mp.set( a, U );
 		start++;
 	}
-	mp.fadd( tt, a, b );
-	mp.fmul( tt, tt, tt, prec );
-	mp.fmul( u, mp.F( "4" ), t, prec );
-	mp.fdiv2( pi, tt, u, prec );
+	mp.fadd( T, a, b );
+	mp.fmul( T, T, T, prec );
+	mp.fmul( U, mp.F( "4" ), t, prec );
+	mp.fdiv2( pi, T, U, prec );
 	return (start < N);
 }
 
+function round( str, prec ){
+	for( var i = 0; i <= 6; i++ ){
+		con.print( "<td>" );
+		var a = new Array();
+		mp.fset( a, mp.F( str ) );
+		mp.fround( a, prec, i );
+		var tmp = mp.fnum2str( a );
+		if( tmp.charAt( 0 ) != '-' ){
+			con.print( "&nbsp;" );
+		}
+		con.print( tmp + "</td>" );
+	}
+}
+
 function main( id ){
+	var i;
+
 	con = new _Console( id );
+
+	// グローバル環境
+	setMathEnv( new _MathEnv() );
 
 	mp = new _MultiPrec();
 
-	for( var order = 0; order <= 6; order++ ){
+	for( var order = 0; order <= 7; order++ ){
 		if( order != 0 ){
 			con.println();
 		}
 		switch( order ){
 		case 0 : con.print( "fsqrt3: " ); break;
 		case 1 : con.print( "fsqrt: " ); break;
+		case 7 : con.print( "fsqrt2 order=4 dft: " ); break;
 		default: con.print( "fsqrt2 order=" + order + ": " ); break;
 		}
 
 		var time = (new Date()).getTime();
 		start = 0;
-		while( pi_out5( 1000, 1, order ) ){}
+		if( order == 7 ){
+			mp.mul = mul;
+			while( pi_out5( 1000, 1, 4 ) ){}
+		} else {
+			while( pi_out5( 1000, 1, order ) ){}
+		}
 		con.println( "" + ((new Date()).getTime() - time) + " ms" );
 		var str = mp.fnum2str( pi );
 
 		var tmp = str.split( "." );
 		con.println( tmp[0] + "." );
 		if( tmp[1] ){
-			for( var i = 0; i < tmp[1].length; i += 100 ){
+			for( i = 0; i < tmp[1].length; i += 100 ){
 				con.println( tmp[1].substring( i, i + 100 ) );
 			}
 		}
+	}
+
+	con.println();
+
+	con.println( "fround" );
+	con.print( "<table border='1' cellspacing='1' cellpadding='4'>" );
+	con.print( "<tr>" );
+	con.print( "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>" );
+	con.print( "<td>UP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>" );
+	con.print( "<td>DOWN&nbsp;&nbsp;&nbsp;</td>" );
+	con.print( "<td>CEILING</td>" );
+	con.print( "<td>FLOOR&nbsp;&nbsp;</td>" );
+	con.print( "<td>H_UP&nbsp;&nbsp;&nbsp;</td>" );
+	con.print( "<td>H_DOWN&nbsp;</td>" );
+	con.print( "<td>H_EVEN&nbsp;</td>" );
+	con.print( "</tr>" );
+	con.print( "<tr><td>&nbsp;5.5</td>" ); round( "5.5", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>&nbsp;2.5</td>" ); round( "2.5", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>&nbsp;1.6</td>" ); round( "1.6", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>&nbsp;1.1</td>" ); round( "1.1", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>&nbsp;1.0</td>" ); round( "1.0", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>-1.0</td>" ); round( "-1.0", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>-1.1</td>" ); round( "-1.1", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>-1.6</td>" ); round( "-1.6", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>-2.5</td>" ); round( "-2.5", 0 ); con.print( "</tr>" );
+	con.print( "<tr><td>-5.5</td>" ); round( "-5.5", 0 ); con.print( "</tr>" );
+	con.print( "</table>" );
+
+	con.println();
+
+	var a = new Array();
+	mp.fsqrt( a, mp.F( "2" ), 45 );
+
+	var b = new Array();
+	var s;
+	for( i = 0; i <= 45; i++ ){
+		con.println( mp.fnum2str( a ).substring( 0, i + 3 ) );
+
+		for( var mode = 0; mode <= 6; mode++ ){
+			mp.fset( b, a );
+			mp.fround( b, i, mode );
+			s = mp.fnum2str( b );
+			con.print( "fround&nbsp;&nbsp;" );
+			switch( mode ){
+			case _MP_FROUND_UP       : con.print( "UP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" ); break;
+			case _MP_FROUND_DOWN     : con.print( "DOWN&nbsp;&nbsp;&nbsp;" ); break;
+			case _MP_FROUND_CEILING  : con.print( "CEILING" ); break;
+			case _MP_FROUND_FLOOR    : con.print( "FLOOR&nbsp;&nbsp;" ); break;
+			case _MP_FROUND_HALF_UP  : con.print( "H_UP&nbsp;&nbsp;&nbsp;" ); break;
+			case _MP_FROUND_HALF_DOWN: con.print( "H_DOWN&nbsp;" ); break;
+			case _MP_FROUND_HALF_EVEN: con.print( "H_EVEN&nbsp;" ); break;
+			}
+			con.println( "&nbsp;" + s );
+		}
+
+		mp.fset( b, a );
+		mp.fround( b, i, _MP_FROUND_HALF_DOWN );
+		con.println( "fround&nbsp;&nbsp;even:0&nbsp;&nbsp;" + mp.fnum2str( b ) );
+
+		mp.fset( b, a );
+		mp.fround2( b, i, false );
+		con.println( "fround2&nbsp;even:0&nbsp;&nbsp;" + mp.fnum2str( b ) );
+
+		mp.fset( b, a );
+		mp.fround( b, i, _MP_FROUND_HALF_EVEN );
+		con.println( "fround&nbsp;&nbsp;even:1&nbsp;&nbsp;" + mp.fnum2str( b ) );
+
+		mp.fset( b, a );
+		mp.fround2( b, i, true );
+		con.println( "fround2&nbsp;even:1&nbsp;&nbsp;" + mp.fnum2str( b ) );
 	}
 }

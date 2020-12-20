@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長浮動小数点数同士の除算
 // 除数bが0のときはtrueを返す。
 _MultiPrec.prototype.fdiv2 = function( ret/*Array*/, a/*Array*/, b/*Array*/, prec, digit/*_Integer*/ ){

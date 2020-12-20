@@ -6,10 +6,11 @@ func mp_fround_get a[] n
 	:long
 	@n = 1 + n / MP_DIGIT
 	$RETURN_A (@n > @l),0
-	(a @n / pow 10 (n % MP_DIGIT)) % 10
+	return (a @n / pow 10 (n % MP_DIGIT)) % 10
 endfunc
 
 func mp_fround_set &a[] n val
+	:ans FALSE
 	:long
 	@n = 1 + n / MP_DIGIT
 	$SET		@a,a @n
@@ -30,10 +31,12 @@ func mp_fround_set &a[] n val
 endfunc
 
 func mp_fround_zero &a[] n
+	:ans FALSE
 	:arrayfill 0 a 1 (int (n / MP_DIGIT))
 endfunc
 
 func mp_fround_up &a[] n
+	:ans FALSE
 	$SET		@l,mp_get_len a
 	$LOOPSTART
 	$ADD_A		@a,mp_fround_get a n,1

@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長整数同士の除算。商qと余りrを得る。
 // 除数bが0のときはtrueを返す。
 

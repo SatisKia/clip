@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長整数同士の減算
 
 _MultiPrec.prototype._sub = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){

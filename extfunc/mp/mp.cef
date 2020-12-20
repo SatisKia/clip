@@ -56,6 +56,7 @@ func isParenthesis token[] index
 endfunc
 
 func insToken &token[] &tokenNum pos
+	:ans FALSE
 	$SET @i,tokenNum
 	if @i > pos
 		$LOOPSTART	# @i
@@ -66,6 +67,8 @@ func insToken &token[] &tokenNum pos
 endfunc
 
 func makeToken expr[] &token[] &tokenNum
+	:ans FALSE
+
 	# 空白を取り除く
 	:var exprLen
 #	$SET_Z exprLen
@@ -257,16 +260,19 @@ func makeToken expr[] &token[] &tokenNum
 endfunc
 
 func tokenStr token[] index &str[]
+	:ans FALSE
 	:arraycopy token index 1 str 0 (token index 0)
 	$SET_Z str (token index 0) # 文字列終端
 endfunc
 
 func mp_abs &rop[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:abs  rop
 	else;           !mp:fabs rop
 	endif
 endfunc
 func mp_add &ret[] a[] b[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:add  ret a b
 	else;           !mp:fadd ret a b
 	endif
@@ -278,26 +284,31 @@ func mp_div &q[] a[] b[]
 	return @r
 endfunc
 func mp_mul &ret[] a[] b[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:mul  ret a b
 	else;           !mp:fmul ret a b MP_PREC
 	endif
 endfunc
 func mp_neg &rop[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:neg  rop
 	else;           !mp:fneg rop
 	endif
 endfunc
 func mp_num2str &s[] n[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:num2str  s n
 	else;           !mp:fnum2str s n
 	endif
 endfunc
 func mp_set &rop[] op[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:set  rop op
 	else;           !mp:fset rop op
 	endif
 endfunc
 func mp_sub &ret[] a[] b[]
+	:ans FALSE
 	if MP_PROC_INT; !mp:sub  ret a b
 	else;           !mp:fsub ret a b
 	endif

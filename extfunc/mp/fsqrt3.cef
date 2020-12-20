@@ -7,19 +7,20 @@
 func mp_sqrt &x[] a[]
 	mp_set_len x 0
 	$RETURN_A (a 0 < 0),TRUE
-	$RETURN_A (mp_get_len a == 0),FALSE
-	if mp_get_len a == 1
+	$SET @L,mp_get_len a
+	$RETURN_A (@L == 0),FALSE
+	if @L == 1
 		mp_set_len x 1
 		x 1 = int sqrt (a 1)
 		return FALSE
 	endif
-	if mp_get_len a == 2
+	if @L == 2
 		mp_set_len x 1
 		x 1 = int sqrt (a 2 * MP_ELEMENT + a 1)
 		return FALSE
 	endif
 
-	$INT   @l,(mp_get_len a + 1 / 2) # (mp_get_len a + 1) / 2
+	$INT   @l,(@L + 1 / 2) # (@L + 1) / 2
 	$SET_Z @@b (@l + 1) # 配列の確保
 	:arrayfill 0 x 1 @l
 	:arrayfill 0 @@b 1 @l

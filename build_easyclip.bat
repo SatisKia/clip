@@ -3,6 +3,7 @@
 set CPP=gcc -E -P -x c
 set TMP=tmp\easyclip
 rem set AJAXMINPATH=C:\Microsoft Ajax Minifier
+if "%AJAXMINPATH%"=="" goto error
 
 md %TMP%
 
@@ -25,4 +26,10 @@ AjaxMin -enc:in UTF-8 %TMP%\easyclip.tmp.js -out %TMP%\easyclip.js
 copy /B head.txt+%TMP%\easyclip.debug.js core\extras\easyclip.debug.js
 copy /B head.txt+%TMP%\easyclip.js       core\extras\easyclip.js
 
+goto end
+
+:error
+echo ŠÂ‹«•Ï”"AJAXMINPATH"‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ
+
+:end
 pause

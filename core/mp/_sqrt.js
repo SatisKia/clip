@@ -1,4 +1,9 @@
-// 平方根 square root
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// 多倍長整数の平方根
 // aが負の値の場合trueを返す。
 _MultiPrec.prototype.sqrt = function( x/*Array*/, a/*Array*/ ){
 	a = this._clone( a );

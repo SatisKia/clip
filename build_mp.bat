@@ -3,6 +3,7 @@
 set CPP=gcc -E -P -x c
 set TMP=tmp\mp
 rem set AJAXMINPATH=C:\Microsoft Ajax Minifier
+if "%AJAXMINPATH%"=="" goto error
 
 md %TMP%
 
@@ -11,6 +12,8 @@ cd core\mp
 cd ..\..
 
 function %TMP%\core.debug.js %TMP%\function.js
+
+define core\mp\_fround.h %TMP%\fround.js
 
 string %TMP%\core.debug.js %TMP%\string.js %TMP%\strrep.bat strrep 1 1
 call %TMP%\strrep.bat > %TMP%\core.js
@@ -25,4 +28,10 @@ AjaxMin -enc:in UTF-8 %TMP%\mp.tmp.js -out %TMP%\mp.js
 copy /B head.txt+%TMP%\mp.debug.js core\mp\mp.debug.js
 copy /B head.txt+%TMP%\mp.js       core\mp\mp.js
 
+goto end
+
+:error
+echo ŠÂ‹«•Ï”"AJAXMINPATH"‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ
+
+:end
 pause

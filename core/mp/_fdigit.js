@@ -1,3 +1,9 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// 整数部の桁数
 _MultiPrec.prototype.fdigit = function( a/*Array*/ ){
 	var l = this._getLen( a );
 	if( l == 0 ){

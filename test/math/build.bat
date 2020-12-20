@@ -2,6 +2,7 @@
 
 set CPP=gcc -E -P -x c -I..\..\..\core
 rem set AJAXMINPATH=C:\Microsoft Ajax Minifier
+if "%AJAXMINPATH%"=="" goto error
 
 cd src
 %CPP% Main.js > ..\htdocs\Main.debug.js
@@ -13,4 +14,10 @@ del Main.js
 AjaxMin -enc:in UTF-8 Main.debug.js -out Main.js
 cd ..
 
+goto end
+
+:error
+echo ŠÂ‹«•Ï”"AJAXMINPATH"‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ
+
+:end
 pause

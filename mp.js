@@ -8,4 +8,6 @@
 #endif // MINIFIED
 #include "tmp\mp\function.js"
 
+#include "tmp\mp\fround.js"
+
 })( window );

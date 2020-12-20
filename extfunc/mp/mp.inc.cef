@@ -9,7 +9,7 @@ func mp_param &a[]
 endfunc
 
 func mp_get_len a[]
-	int abs (a 0 / MP_LEN_COEF)
+	return int abs (a 0 / MP_LEN_COEF)
 endfunc
 
 func mp_set_len &a[] len

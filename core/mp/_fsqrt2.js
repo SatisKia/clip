@@ -1,4 +1,9 @@
-// 平方根 square root
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// 多倍長浮動小数点数の平方根
 // aが負の値の場合trueを返す。
 _MultiPrec.prototype.fsqrt2 = function( ret/*Array*/, a/*Array*/, prec, order ){
 	a = this._clone( a );

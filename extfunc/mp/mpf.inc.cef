@@ -9,7 +9,7 @@ func mpf_param &a[]
 endfunc
 
 func mpf_get_prec a[]
-	abs a 0 & MP_PREC_MASK
+	return abs a 0 & MP_PREC_MASK
 endfunc
 
 func mpf_set_prec &a[] prec

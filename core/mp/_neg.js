@@ -1,3 +1,9 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// 符号反転
 _MultiPrec.prototype.neg = function( rop/*Array*/, op/*Array*/ ){
 	if( op == undefined ){	// パラメータが1つの場合
 		rop[0] = -rop[0];

@@ -1,3 +1,8 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長浮動小数点数同士の乗算
 _MultiPrec.prototype.fmul = function( ret/*Array*/, a/*Array*/, b/*Array*/, prec ){
 	a = this._clone( a );

@@ -1,10 +1,20 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+#include "_fround.h"
+
+// 丸め演算
+// modeを省略すると、_MP_FROUND_HALF_EVENの動作になる。
+
 _MultiPrec.prototype._froundGet = function( a/*Array*/, n ){
 	var l = this._getLen( a );
 	var nn = 1 + _DIV( n, _MP_DIGIT );
 	if( nn > l ){
 		return 0;
 	}
-	return _MOD( _DIV( a[nn], pow( 10, _MOD( n, _MP_DIGIT ) ) ), 10 );
+	return _MOD( _DIV( a[nn], _POW( 10, _MOD( n, _MP_DIGIT ) ) ), 10 );
 };
 
 _MultiPrec.prototype._froundSet = function( a/*Array*/, n, val ){

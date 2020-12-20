@@ -1,10 +1,12 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 文字列を多倍長整数に変換する
-_MultiPrec.prototype.str2num = function( n/*Array*/, s ){
-	if( s instanceof Array ){
-		s = this._clone( s );
-	} else {
-		s = this._j2cstr( s );
-	}
+
+_MultiPrec.prototype._str2num = function( n/*Array*/, s/*Array*/ ){
+	s = this._clone( s );
 
 	var m = (s[0] == _CHAR( '-' )) ? 1 : 0;
 	var ss = m;
@@ -29,3 +31,7 @@ _MultiPrec.prototype.str2num = function( n/*Array*/, s ){
 
 	this._setLen( n, (m == 1) ? -nn : nn );
 };
+
+_MultiPrec.prototype.str2num = function( n/*Array*/, s ){
+	this._str2num( n, this._j2cstr( s ) );
+}

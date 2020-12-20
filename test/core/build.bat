@@ -1,8 +1,10 @@
 @echo off
 
 rem set SKCOMMONPATH=C:\git\SatisKia\common
+if "%SKCOMMONPATH%"=="" goto error
 set CPP=gcc -E -P -x c -I%SKCOMMONPATH% -I..\..\..\core\extras
 rem set AJAXMINPATH=C:\Microsoft Ajax Minifier
+if "%AJAXMINPATH%"=="" goto error
 
 md tmp
 
@@ -22,3 +24,11 @@ copy ..\..\core\clip.debug.js htdocs
 copy ..\..\core\clip.js       htdocs
 
 call extras
+
+goto end
+
+:error
+echo ä¬ã´ïœêî"SKCOMMONPATH"Ç‹ÇΩÇÕ"AJAXMINPATH"Ç™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ
+pause
+
+:end

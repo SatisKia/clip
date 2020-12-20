@@ -1,12 +1,12 @@
 #!NAMESPACE ft
 #畳み込み
-#\!- <ret_array> <ret_num> <src1_array> <src1_pos> <src1_num> <src2_array> <src2_pos> <src2_num>
-:params &ret[] ret_num x[] x_pos x_num y[] y_pos y_num
+#\!- <ret_array> <ret_num> <src1_array> <src1_num> <src2_array> <src2_num>
+:params &ret[] ret_num x[] x_num y[] y_num
 :ans FALSE
 :complex
 
-!dft @@x ret_num x x_pos x_num
-!dft @@y ret_num y y_pos y_num
+!dft @@x ret_num x x_num
+!dft @@y ret_num y y_num
 
 $SUB_A		@i,ret_num,1
 $LOOPSTART	# @i

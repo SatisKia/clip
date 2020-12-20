@@ -1,10 +1,11 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 文字列を多倍長浮動小数点数に変換する
 _MultiPrec.prototype.fstr2num = function( n/*Array*/, s ){
-	if( s instanceof Array ){
-		s = this._clone( s );
-	} else {
-		s = this._j2cstr( s );
-	}
+	s = this._j2cstr( s );
 
 	var l = this._strlen( s );
 	var i, j = 0;
@@ -34,7 +35,7 @@ _MultiPrec.prototype.fstr2num = function( n/*Array*/, s ){
 		}
 	}
 	ss[j] = 0;	// 文字列終端を書き込む
-	this.str2num( n, ss );
+	this._str2num( n, ss );
 
 	var e = 0;
 	for( ; i < l; i++ ){

@@ -1,3 +1,10 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// _MP_FROUND_HALF_DOWNを五捨五超入にする。
+// even_flagにtrueを指定すると、最大有効桁数n桁で丸める場合のn+1桁目の数値をa、n桁目の数値をbとした時、bが奇数の場合はaを四捨五入、偶数の場合はaを五捨五超入する。
 _MultiPrec.prototype.fround2 = function( a/*Array*/, prec, even_flag ){
 	var n = this._getPrec( a ) - prec;
 	if( n < 1 ){

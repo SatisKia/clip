@@ -5,6 +5,7 @@
 :include !mp:mp
 
 func mp_mul1 &q[] a[] b
+	:ans FALSE
 	:long
 	$SET_Z q (a 0 + 1) # 配列の確保
 #	$SET_Z @c
@@ -46,6 +47,7 @@ func mp_div1 &q[] a[] b
 endfunc
 
 func mp_sub &a[] b[] aa bb
+	:ans FALSE
 	:long
 #	$SET_Z @c
 	$ADD_A @t,bb,1

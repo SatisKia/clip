@@ -1,3 +1,9 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
+// 小数点以下の切り捨て
 _MultiPrec.prototype.ftrunc = function( rop/*Array*/, op/*Array*/ ){
 	op = this._clone( op );
 	var p = this._getPrec( op );

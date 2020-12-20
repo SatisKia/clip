@@ -1,14 +1,20 @@
+/*
+ * CLIP
+ * Copyright (C) SatisKia. All rights reserved.
+ */
+
 // 多倍長整数を文字列に変換する
 
 _MultiPrec.prototype._num2str = function( s/*Array*/, n/*Array*/ ){
-	n = this._clone( n );
-
 	var m = (n[0] < 0);
 
+	var n0 = n[0];
 	n[0] = this._getLen( n );
 	if( n[0] == 0 ){
 		s[0] = _CHAR_CODE_0;
 		s[1] = 0;	// 文字列終端
+
+		n[0] = n0;
 		return
 	}
 
@@ -33,15 +39,12 @@ _MultiPrec.prototype._num2str = function( s/*Array*/, n/*Array*/ ){
 	while( t < ss ){
 		x = s[t]; s[t++] = s[ss]; s[ss--] = x;
 	}
+
+	n[0] = n0;
 };
 
-_MultiPrec.prototype.num2str = function( a/*Array*/, b/*Array*/ ){
-	if( b == undefined ){
-		var array = new Array();
-		this._num2str( array, a );
-		return this._c2jstr( array );
-	}
-
-	this._num2str( a, b );
-	return a;
+_MultiPrec.prototype.num2str = function( n/*Array*/ ){
+	var array = new Array();
+	this._num2str( array, n );
+	return this._c2jstr( array );
 };
