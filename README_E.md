@@ -497,3 +497,241 @@ var param = clip.param();
 ```javascript
 var gWorld = clip.gWorld();
 ```
+
+## core/mp/mp.js, core/mp/mp.debug.js
+
+_MultiPrec object for multi-precision computation
+
+### _MultiPrec object constructor
+
+```javascript
+_MultiPrec()
+```
+
+### Constant definition method
+
+**Multi-precision integer**
+
+```javascript
+I( str )
+```
+
+Returns an Array object.
+
+If the constant is undefined, the definition is added, and if it is defined, the defined one is returned.
+
+**Multi-precision floating point number**
+
+```javascript
+F( str )
+```
+
+Returns an Array object.
+
+If the constant is undefined, the definition is added, and if it is defined, the defined one is returned.
+
+### Multi-precision integer arithmetic method
+
+**Convert a string to a multi-precision integer**
+
+```javascript
+str2num( n/*Array*/, s )
+```
+
+**Convert multi-precision integer to strings**
+
+```javascript
+num2str( n/*Array*/ )
+```
+
+Returns a String object.
+
+**Substitution**
+
+```javascript
+set( rop/*Array*/, op/*Array*/ )
+```
+
+**Large and small comparison**
+
+```javascript
+cmp( a/*Array*/, b/*Array*/ )
+```
+
+Returns a positive value if `a` is greater than `b`, a negative value if it is less than b, and a zero value if equal.
+
+**Addition**
+
+```javascript
+add( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**Subtraction**
+
+```javascript
+sub( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**Multiply**
+
+```javascript
+mul( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**Division**
+
+```javascript
+div( q/*Array*/, a/*Array*/, b/*Array*/, r/*Array*/ )
+```
+
+Get the quotient `q` and the remainder `r`.
+Returns true if the divisor `b` is 0.
+
+`r` can be omitted.
+
+**Sign inversion**
+
+```javascript
+neg( rop/*Array*/, op/*Array*/ )
+```
+
+`op` can be omitted.
+
+**Absolute value**
+
+```javascript
+abs( rop/*Array*/, op/*Array*/ )
+```
+
+`op` can be omitted.
+
+**Square root**
+
+```javascript
+sqrt( x/*Array*/, a/*Array*/ )
+```
+
+Returns true if `a` is negative.
+
+### Multi-precision floating point arithmetic method
+
+**Convert strings to multi-precision floating point numbers**
+
+```javascript
+fstr2num( n/*Array*/, s )
+```
+
+**Convert multi-precision floating point numbers to strings**
+
+```javascript
+fnum2str( n/*Array*/ )
+```
+
+Returns a String object.
+
+**Substitution**
+
+```javascript
+fset( rop/*Array*/, op/*Array*/ )
+```
+
+**Large and small comparison**
+
+```javascript
+fcmp( a/*Array*/, b/*Array*/ )
+```
+
+Returns positive value if `a` is greater than `b`, negative value if it is less than `b`, and zero value if equal.
+
+**Addition**
+
+```javascript
+fadd( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**Subtraction**
+
+```javascript
+fsub( ret/*Array*/, a/*Array*/, b/*Array*/ )
+```
+
+**Multiply**
+
+```javascript
+fmul( ret/*Array*/, a/*Array*/, b/*Array*/, prec )
+```
+
+**Division**
+
+```javascript
+fdiv( ret/*Array*/, a/*Array*/, b/*Array*/, prec )
+fdiv2( ret/*Array*/, a/*Array*/, b/*Array*/, prec, digit/*_Integer*/ )
+```
+
+Returns true if the divisor `b` is 0.
+`digit` stores the number of digits in the integer part of the divisor `a`.
+
+`digit` can be omitted.
+
+**Sign inversion**
+
+```javascript
+fneg( rop/*Array*/, op/*Array*/ )
+```
+
+`op` can be omitted.
+
+**Absolute value**
+
+```javascript
+fabs( rop/*Array*/, op/*Array*/ )
+```
+
+`op` can be omitted.
+
+**Truncate after the decimal point**
+
+```javascript
+ftrunc( rop/*Array*/, op/*Array*/ )
+```
+
+**Square root**
+
+```javascript
+fsqrt( ret/*Array*/, a/*Array*/, prec )
+fsqrt2( ret/*Array*/, a/*Array*/, prec, order )
+fsqrt3( ret/*Array*/, a/*Array*/, prec )
+```
+
+Returns true if `a` is negative.
+
+**Number of digits in the integer part**
+
+```javascript
+fdigit( a/*Array*/ )
+```
+
+**Rounding operation**
+
+```javascript
+fround( a/*Array*/, prec, mode )
+```
+
+| mode | meaning |
+| --- | --- |
+| _MP_FROUND_UP | Round away from zero |
+| _MP_FROUND_DOWN | Round to near zero |
+| _MP_FROUND_CEILING | Round to approach positive infinity |
+| _MP_FROUND_FLOOR | Round to approach negative infinity |
+| _MP_FROUND_HALF_UP | round up on 5 and round down on 4 |
+| _MP_FROUND_HALF_DOWN | round up on 6 and round down on 5 |
+| _MP_FROUND_HALF_EVEN | Round to the closest value |
+
+If `mode` is omitted, the operation will be _MP_FROUND_HALF_EVEN.
+
+```javascript
+fround2( a/*Array*/, prec, even_flag ) // Bankers' rounding
+```
+
+The behavior when true is specified for `even_flag` is as follows:
+Suppose you want to round to `prec` digits. Let a be the number in the `prec+1` digit and b be the number in the `prec` digit. If b is odd, round off a. If b is even, bankers' rounding is done for a.
