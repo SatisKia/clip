@@ -4,7 +4,15 @@ It is an engine for calculation processing in the CLIP language.
 
 For the CLIP language, see test/core/htdocs/language_e.html.
 
-## core/clip.js, core/clip.debug.js
+----------
+
+- [clip.js](#clip)
+- [easyclip.js](#easyclip)
+- [mp.js](#mp)
+
+----------
+
+## <a id="clip"> core/clip.js, core/clip.debug.js
 
 Contains all source content except the core/extras folder.
 
@@ -38,7 +46,9 @@ CLIP interpreter. Please set the environment variable "SKCOMMONPATH" in advance 
 
 A group of utility files that can be embedded in HTML with script tags.
 
-## core/extras/easyclip.js, core/extras/easyclip.debug.js
+----------
+
+## <a id="easyclip"> core/extras/easyclip.js, core/extras/easyclip.debug.js
 
 It provides the ability to easily run the CLIP engine from JavaScript.
 
@@ -498,7 +508,9 @@ var param = clip.param();
 var gWorld = clip.gWorld();
 ```
 
-## core/mp/mp.js, core/mp/mp.debug.js
+----------
+
+## <a id="mp"> core/mp/mp.js, core/mp/mp.debug.js
 
 _MultiPrec object for multi-precision computation
 
