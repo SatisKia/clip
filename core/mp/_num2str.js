@@ -6,10 +6,12 @@
 // 多倍長整数を文字列に変換する
 
 _MultiPrec.prototype._num2str = function( s/*Array*/, n/*Array*/ ){
+	n = this.clone( n );
+
 	var m = (n[0] < 0);
 
 	var n0 = n[0];
-	n[0] = this._getLen( n );
+	n[0] = this.getLen( n );
 	if( n[0] == 0 ){
 		s[0] = _CHAR_CODE_0;
 		s[1] = 0;	// 文字列終端

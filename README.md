@@ -96,6 +96,8 @@ window.printAnsComplex = function( real, imag ){
     // 以下は文字列を生成する例
     var str = real + imag;
 };
+window.printAnsMultiPrec = function( str ){
+};
 window.printWarn = function( warn, num, func ){
     // 以下は文字列を生成する例
     var str = "warning: ";
@@ -204,6 +206,7 @@ clip.setArrayValue( 'h', [1, 1], 78 ); // @@h 1 1
 clip.setArrayComplex( 'i', [0], 12.3, 4.5 ); // @@i 0
 clip.setArrayFract( 'j', [2], 3, 7 ); // @@j 2
 clip.setString( 's', "Hello World!!" );
+clip.setMultiPrec( 'a', array/*Array*/ );
 ```
 
 ### 変数の値を確認する
@@ -231,6 +234,7 @@ var array = clip.getArray( 'a', 2 ); // Two-dimensional element
 var array = clip.getArray( 'a', N ); // N-dimensional element
 var string = "@@d = " + clip.getArrayString( 'd', 6 );
 var string = clip.getString( 's' );
+var array = clip.getMultiPrec( 'a' );
 ```
 
 getArray関数で取得したArrayオブジェクトをJSON.stringifyに渡すことでも文字列に変換できます。
@@ -246,6 +250,7 @@ var value = clip.getAnsValue().num();
 var value = clip.getAnsValue().denom();
 var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
+var array = clip.getAnsMultiPrec();
 ```
 
 getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
@@ -257,29 +262,45 @@ CLIPの設定系コマンドをJavaScriptから直接実行する関数群です
 **型の指定**
 
 ```javascript
-clip.setMode( mode );
+clip.setMode( mode, param1, param2 );
 ```
 
-| mode | 意味 |
+| `mode` | 意味 | `param1` | `param2` |
+| --- | --- | --- | --- |
+| _CLIP_MODE_E_FLOAT | 倍精度浮動小数点型(指数表記) | 表示精度 | - |
+| _CLIP_MODE_F_FLOAT | 倍精度浮動小数点型(小数点表記) | 表示精度 | - |
+| _CLIP_MODE_G_FLOAT | 倍精度浮動小数点型 | 表示精度 | - |
+| _CLIP_MODE_E_COMPLEX | 複素数型(指数表記) | 表示精度 | - |
+| _CLIP_MODE_F_COMPLEX | 複素数型(小数点表記) | 表示精度 | - |
+| _CLIP_MODE_G_COMPLEX | 複素数型 | 表示精度 | - |
+| _CLIP_MODE_I_FRACT | 分数型 | - | - |
+| _CLIP_MODE_M_FRACT | 帯分数型 | - | - |
+| _CLIP_MODE_H_TIME | 時間型(時) | 秒間フレーム数 | - |
+| _CLIP_MODE_M_TIME | 時間型(分) | 秒間フレーム数 | - |
+| _CLIP_MODE_S_TIME | 時間型(秒) | 秒間フレーム数 | - |
+| _CLIP_MODE_F_TIME | 時間型(フレーム) | 秒間フレーム数 | - |
+| _CLIP_MODE_S_CHAR | 符号付き8ビット整数型 | 基数 | - |
+| _CLIP_MODE_U_CHAR | 符号なし8ビット整数型 | 基数 | - |
+| _CLIP_MODE_S_SHORT | 符号付き16ビット整数型 | 基数 | - |
+| _CLIP_MODE_U_SHORT | 符号なし16ビット整数型 | 基数 | - |
+| _CLIP_MODE_S_LONG | 符号付き32ビット整数型 | 基数 | - |
+| _CLIP_MODE_U_LONG | 符号なし32ビット整数型 | 基数 | - |
+| _CLIP_MODE_F_MULTIPREC | 多倍長浮動小数点数型 | 精度 | 丸めモード |
+| _CLIP_MODE_I_MULTIPREC | 多倍長整数型 | 精度 | 丸めモード |
+
+| 丸めモード | 意味 |
 | --- | --- |
-| _CLIP_MODE_E_FLOAT | 倍精度浮動小数点型(指数表記) |
-| _CLIP_MODE_F_FLOAT | 倍精度浮動小数点型(小数点表記) |
-| _CLIP_MODE_G_FLOAT | 倍精度浮動小数点型 |
-| _CLIP_MODE_E_COMPLEX | 複素数型(指数表記) |
-| _CLIP_MODE_F_COMPLEX | 複素数型(小数点表記) |
-| _CLIP_MODE_G_COMPLEX | 複素数型 |
-| _CLIP_MODE_I_FRACT | 分数型 |
-| _CLIP_MODE_M_FRACT | 帯分数型 |
-| _CLIP_MODE_H_TIME | 時間型(時) |
-| _CLIP_MODE_M_TIME | 時間型(分) |
-| _CLIP_MODE_S_TIME | 時間型(秒) |
-| _CLIP_MODE_F_TIME | 時間型(フレーム) |
-| _CLIP_MODE_S_CHAR | 符号付き8ビット整数型 |
-| _CLIP_MODE_U_CHAR | 符号なし8ビット整数型 |
-| _CLIP_MODE_S_SHORT | 符号付き16ビット整数型 |
-| _CLIP_MODE_U_SHORT | 符号なし16ビット整数型 |
-| _CLIP_MODE_S_LONG | 符号付き32ビット整数型 |
-| _CLIP_MODE_U_LONG | 符号なし32ビット整数型 |
+| up | ゼロから離れるように丸める |
+| down | ゼロに近づくように丸める |
+| ceiling | 正の無限大に近づくように丸める |
+| floor | 負の無限大に近づくように丸める |
+| h_up | 四捨五入する |
+| h_down | 五捨六入する |
+| h_even | n桁で丸める場合のn桁目の数値が奇数の場合はh_up、偶数の場合はh_down |
+| h_down2 | 五捨五超入する |
+| h_even2 | n桁で丸める場合のn桁目の数値が奇数の場合はh_up、偶数の場合はh_down2 |
+
+`param1`、`param2`は省略できます。
 
 _EasyClipオブジェクト構築直後：_CLIP_MODE_G_FLOAT
 
@@ -313,7 +334,7 @@ _EasyClipオブジェクト構築直後：10
 clip.setAngType( type );
 ```
 
-| type | 意味 |
+| `type` | 意味 |
 | --- | --- |
 | _ANG_TYPE_RAD | ラジアン |
 | _ANG_TYPE_DEG | 度 |
@@ -335,7 +356,7 @@ _EasyClipオブジェクト構築直後：false
 clip.setBase( base );
 ```
 
-| base | 意味 |
+| `base` | 意味 |
 | --- | --- |
 | 0 | 0オリジン |
 | 1 | 1オリジン |
@@ -508,6 +529,12 @@ var param = clip.param();
 
 ```javascript
 var gWorld = clip.gWorld();
+```
+
+- CLIPエンジン内に唯一存在する_MultiPrecオブジェクトを取得する
+
+```javascript
+var mp = procMultiPrec();
 ```
 
 ----------
@@ -731,7 +758,7 @@ fdigit( a/*Array*/ )
 fround( a/*Array*/, prec, mode )
 ```
 
-| mode | 意味 |
+| `mode` | 意味 |
 | --- | --- |
 | _MP_FROUND_UP | ゼロから離れるように丸める |
 | _MP_FROUND_DOWN | ゼロに近づくように丸める |
@@ -739,12 +766,8 @@ fround( a/*Array*/, prec, mode )
 | _MP_FROUND_FLOOR | 負の無限大に近づくように丸める |
 | _MP_FROUND_HALF_UP | 四捨五入する |
 | _MP_FROUND_HALF_DOWN | 五捨六入する |
-| _MP_FROUND_HALF_EVEN | 最も近い値の方に丸める |
+| _MP_FROUND_HALF_EVEN | n桁で丸める場合のn桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN |
+| _MP_FROUND_HALF_DOWN2 | 五捨五超入する |
+| _MP_FROUND_HALF_EVEN2 | n桁で丸める場合のn桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN2 |
 
 `mode`を省略すると、_MP_FROUND_HALF_EVENの動作になります。
-
-```javascript
-fround2( a/*Array*/, prec, even_flag ) // 五捨五超入する
-```
-
-`even_flag`にtrueを指定すると、最大有効桁数`prec`桁で丸める場合の`prec+1`桁目の数値をa、`prec`桁目の数値をbとした時、bが奇数の場合はaを四捨五入、偶数の場合はaを五捨五超入します。

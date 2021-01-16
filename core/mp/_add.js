@@ -5,8 +5,8 @@
 
 // 多倍長整数同士の加算
 _MultiPrec.prototype.add = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 
 	if( a[0] < 0 && b[0] >= 0 ){
 		a[0] = -a[0];
@@ -19,8 +19,8 @@ _MultiPrec.prototype.add = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	}
 	var k = (a[0] < 0 && b[0] < 0) ? -1 : 1;
 
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	var lr = (la >= lb) ? la : lb;
 	ret[lr + 1] = 0;	// 配列の確保
 

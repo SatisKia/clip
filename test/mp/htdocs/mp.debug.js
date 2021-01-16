@@ -100,6 +100,9 @@ function _FACTORIAL( x ){
 	var f = 1;
 	for( var i = 2; i <= x; i++ ){
 		f *= i;
+		if( _ISINF( f ) ){
+			break;
+		}
 	}
 	return m ? -f : f;
 }
@@ -448,7 +451,7 @@ _MultiPrec.prototype.F = function( str ){
 	}
 	return this._F["_" + str];
 };
-_MultiPrec.prototype._getLen = function( a ){
+_MultiPrec.prototype.getLen = function( a ){
 	return _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 };
 _MultiPrec.prototype._setLen = function( a , len ){
@@ -459,7 +462,7 @@ _MultiPrec.prototype._setLen = function( a , len ){
 		a[0] = (_ABS( len ) * _MP_LEN_COEF + p) * (len < 0 ? -1 : 1);
 	}
 };
-_MultiPrec.prototype._getPrec = function( a ){
+_MultiPrec.prototype.getPrec = function( a ){
 	return _AND( _ABS( a[0] ), _MP_PREC_MASK );
 };
 _MultiPrec.prototype._setPrec = function( a , prec ){
@@ -499,8 +502,8 @@ _MultiPrec.prototype._fcoef = function( k , prec ){
 	k[0] = n * _MP_LEN_COEF;
 };
 _MultiPrec.prototype._matchPrec = function( a , b ){
-	var aa = this._getPrec( a );
-	var bb = this._getPrec( b );
+	var aa = this.getPrec( a );
+	var bb = this.getPrec( b );
 	var p = aa, t;
 	if( aa < bb ){
 		if( (t = this._fmul( a, bb - aa )) > 0 ){
@@ -518,15 +521,14 @@ _MultiPrec.prototype._matchPrec = function( a , b ){
 	}
 	return p;
 };
-_MultiPrec.prototype._clone = function( array ){
-	var clone = new Array();
-	for( var i = 0; i < array.length; i++ ){
-		clone[i] = array[i];
+_MultiPrec.prototype.clone = function( a ){
+	if( a.length == 0 ){
+		return [ _MP_LEN_COEF, 0 ];
 	}
-	return clone;
+	return Array.from( a );
 };
 _MultiPrec.prototype._copy = function( src, src_pos, dst, dst_pos, len ){
-	src = this._clone( src );
+	src = this.clone( src );
 	for( var i = 0; i < len; i++ ){
 		dst[dst_pos + i] = src[src_pos + i];
 	}
@@ -569,12 +571,12 @@ _MultiPrec.prototype.abs = function( rop , op ){
 		rop[0] = _ABS( rop[0] );
 		return;
 	}
-	this._copy( op, 1, rop, 1, this._getLen( op ) );
+	this._copy( op, 1, rop, 1, this.getLen( op ) );
 	rop[0] = _ABS( op[0] );
 };
 _MultiPrec.prototype.add = function( ret , a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	if( a[0] < 0 && b[0] >= 0 ){
 		a[0] = -a[0];
 		this.sub( ret, b, a );
@@ -585,8 +587,8 @@ _MultiPrec.prototype.add = function( ret , a , b ){
 		return;
 	}
 	var k = (a[0] < 0 && b[0] < 0) ? -1 : 1;
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	var lr = (la >= lb) ? la : lb;
 	ret[lr + 1] = 0;
 	var r = 0, aa = 0, bb = 0, x = 0;
@@ -611,8 +613,8 @@ _MultiPrec.prototype.cmp = function( a , b ){
 	if( a[0] < 0 && b[0] >= 0 ){ return -1; }
 	if( b[0] < 0 && a[0] >= 0 ){ return 1; }
 	var k = (a[0] < 0 && b[0] < 0) ? -1 : 1;
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	var aa, bb;
 	for( var i = (la > lb) ? la : lb; i > 0; i-- ){
 		aa = (i <= la) ? a[i] : 0;
@@ -652,8 +654,8 @@ _MultiPrec.prototype._sub1 = function( a , b , aa, bb ){
 	a[0] = aa;
 };
 _MultiPrec.prototype.div = function( q , a , b , r ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	if( r == undefined ){
 		r = new Array();
 	}
@@ -661,8 +663,8 @@ _MultiPrec.prototype.div = function( q , a , b , r ){
 	if( a[0] < 0 && b[0] >= 0 ){ k = -1; }
 	if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
 	var l = (a[0] < 0) ? -1 : 1;
-	a[0] = this._getLen( a );
-	b[0] = this._getLen( b );
+	a[0] = this.getLen( a );
+	b[0] = this.getLen( b );
 	q[0] = 0; r[0] = 0;
 	var lq, lr;
 	var K;
@@ -688,8 +690,8 @@ _MultiPrec.prototype.div = function( q , a , b , r ){
 		return false;
 	}
 	if( (K = _DIV( _MP_ELEMENT, b[b[0]] + 1 )) > 1 ){
-		this._mul1( a, this._clone( a ), K );
-		this._mul1( b, this._clone( b ), K );
+		this._mul1( a, this.clone( a ), K );
+		this._mul1( b, this.clone( b ), K );
 	}
 	q[0] = a[0] - b[0] + 1;
 	for( var i = q[0]; i > 0; i-- ){ q[i] = 0; }
@@ -748,20 +750,20 @@ _MultiPrec.prototype.div = function( q , a , b , r ){
 	return false;
 };
 _MultiPrec.prototype.fadd = function( ret , a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	var p = this._matchPrec( a, b );
 	this.add( ret, a, b );
 	this._setPrec( ret, p );
 };
 _MultiPrec.prototype.fcmp = function( a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	this._matchPrec( a, b );
 	return this.cmp( a, b );
 };
 _MultiPrec.prototype.fdigit = function( a ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	if( l == 0 ){
 		return 0;
 	}
@@ -772,14 +774,14 @@ _MultiPrec.prototype.fdigit = function( a ){
 		k *= 10;
 	}
 	var d = (l - 1) * _MP_DIGIT + i;
-	return d - this._getPrec( a );
+	return d - this.getPrec( a );
 };
 _MultiPrec.prototype.fdiv = function( ret , a , b , prec ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	var p = this._matchPrec( a, b );
 	var k = b[0] < 0 ? -1 : 1;
-	var l = this._getLen( b );
+	var l = this.getLen( b );
 	var i;
 	for( i = l; i > 0; i-- ){
 		if( b[i] != 0 ){ break; }
@@ -808,13 +810,13 @@ _MultiPrec.prototype.fdiv = function( ret , a , b , prec ){
 	return false;
 };
 _MultiPrec.prototype.fdiv2 = function( ret , a , b , prec, digit ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	if( digit == undefined ){
 		digit = new _Integer();
 	}
-	var P = this._getPrec( a );
-	var l = this._getLen( a );
+	var P = this.getPrec( a );
+	var l = this.getLen( a );
 	var k = 10;
 	var i;
 	for( i = 1; i <= _MP_DIGIT; i++ ){
@@ -830,7 +832,7 @@ _MultiPrec.prototype.fdiv2 = function( ret , a , b , prec, digit ){
 	this._setLen( aa, 1 ); aa[1] = 1;
 	var p = this._matchPrec( aa, b );
 	var k = b[0] < 0 ? -1 : 1;
-	var l = this._getLen( b );
+	var l = this.getLen( b );
 	var i;
 	for( i = l; i > 0; i-- ){
 		if( b[i] != 0 ){ break; }
@@ -855,7 +857,7 @@ _MultiPrec.prototype.fdiv2 = function( ret , a , b , prec, digit ){
 		this.mul( r, r, k );
 	}
 	this.div( r, r, b );
-	if( this._getLen( a ) == 1 && a[1] == 1 ){
+	if( this.getLen( a ) == 1 && a[1] == 1 ){
 		this.add( ret, q, r );
 		if( a[0] < 0 ){ ret[0] = -ret[0]; }
 		this._setPrec( ret, p );
@@ -875,10 +877,10 @@ _MultiPrec.prototype.fdiv2 = function( ret , a , b , prec, digit ){
 	return false;
 };
 _MultiPrec.prototype.fmul = function( ret , a , b , prec ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	this.mul( ret, a, b );
-	var p = this._getPrec( a ) + this._getPrec( b );
+	var p = this.getPrec( a ) + this.getPrec( b );
 	var n = _INT( (p - (prec + _MP_DIGIT)) / _MP_DIGIT );
 	if( n > 0 ){
 		p -= n * _MP_DIGIT;
@@ -887,7 +889,8 @@ _MultiPrec.prototype.fmul = function( ret , a , b , prec ){
 	this._setPrec( ret, p );
 };
 _MultiPrec.prototype._fnum2str = function( s , n ){
-	var p = this._getPrec( n );
+	n = this.clone( n );
+	var p = this.getPrec( n );
 	var ss = new Array();
 	this._num2str( ss, n );
 	var l = this._strlen( ss );
@@ -930,7 +933,7 @@ _MultiPrec.prototype.fnum2str = function( n ){
 	return this._c2jstr( array );
 };
 _MultiPrec.prototype._froundGet = function( a , n ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	var nn = 1 + _DIV( n, _MP_DIGIT );
 	if( nn > l ){
 		return 0;
@@ -955,7 +958,7 @@ _MultiPrec.prototype._froundZero = function( a , n ){
 	this._fill( 0, a, 1, _DIV( n, _MP_DIGIT ) );
 };
 _MultiPrec.prototype._froundUp = function( a , n ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	var aa;
 	while( true ){
 		aa = this._froundGet( a, n ) + 1;
@@ -972,7 +975,7 @@ _MultiPrec.prototype._froundUp = function( a , n ){
 	}
 };
 _MultiPrec.prototype.fround = function( a , prec, mode ){
-	var n = this._getPrec( a ) - prec;
+	var n = this.getPrec( a ) - prec;
 	if( n < 1 ){
 		return;
 	}
@@ -1006,35 +1009,25 @@ _MultiPrec.prototype.fround = function( a , prec, mode ){
 			if( aa > 5 ){ u = true; }
 		}
 		break;
-	}
-	if( u ){
-		this._froundZero( a, n );
-		this._froundUp( a, n );
-	} else {
-		this._froundZero( a, n - 1 );
-		this._froundSet( a, n - 1, 0 );
-	}
-};
-_MultiPrec.prototype.fround2 = function( a , prec, even_flag ){
-	var n = this._getPrec( a ) - prec;
-	if( n < 1 ){
-		return;
-	}
-	var aa = this._froundGet( a, n - 1 );
-	var u = false;
-	if( even_flag && _MOD( this._froundGet( a, n ), 2 ) == 1 && aa > 4 ){
-		u = true;
-	} else if( aa > 5 ){
-		u = true;
-	} else if( aa == 5 && n > 1 ){
-		var i = 1 + _DIV( n - 1, _MP_DIGIT );
-		if( _MOD( a[i], _POW( 10, _MOD( n - 1, _MP_DIGIT ) ) ) != 0 ){
+	case 8:
+		if( mode == 8 && _MOD( this._froundGet( a, n ), 2 ) == 1 && aa > 4 ){
 			u = true;
-		} else {
-			for( i--; i > 0; i-- ){
-				if( a[i] != 0 ){ u = true; break; }
+			break;
+		}
+	case 7:
+		if( aa > 5 ){
+			u = true;
+		} else if( aa == 5 && n > 1 ){
+			var i = 1 + _DIV( n - 1, _MP_DIGIT );
+			if( _MOD( a[i], _POW( 10, _MOD( n - 1, _MP_DIGIT ) ) ) != 0 ){
+				u = true;
+			} else {
+				for( i--; i > 0; i-- ){
+					if( a[i] != 0 ){ u = true; break; }
+				}
 			}
 		}
+		break;
 	}
 	if( u ){
 		this._froundZero( a, n );
@@ -1045,7 +1038,7 @@ _MultiPrec.prototype.fround2 = function( a , prec, even_flag ){
 	}
 };
 _MultiPrec.prototype.fsqrt = function( ret , a , prec ){
-	a = this._clone( a );
+	a = this.clone( a );
 	if( this.fcmp( a, this.F( "0" ) ) > 0 ){
 		var l = new Array();
 		var s = new Array();
@@ -1069,7 +1062,7 @@ _MultiPrec.prototype.fsqrt = function( ret , a , prec ){
 	return (this.fcmp( a, this.F( "0" ) ) != 0);
 };
 _MultiPrec.prototype.fsqrt2 = function( ret , a , prec, order ){
-	a = this._clone( a );
+	a = this.clone( a );
 	if( this.fcmp( a, this.F( "0" ) ) > 0 ){
 		var g = new Array();
 		var h = new Array();
@@ -1136,8 +1129,8 @@ _MultiPrec.prototype.fsqrt2 = function( ret , a , prec, order ){
 	return (this.fcmp( a, this.F( "0" ) ) != 0);
 };
 _MultiPrec.prototype.fsqrt3 = function( ret , a , prec ){
-	a = this._clone( a );
-	var t = prec * 2 - this._getPrec( a );
+	a = this.clone( a );
+	var t = prec * 2 - this.getPrec( a );
 	var u;
 	if( t > 0 ){
 		if( (u = this._fmul( a, t )) > 0 ){
@@ -1154,8 +1147,8 @@ _MultiPrec.prototype.fsqrt3 = function( ret , a , prec ){
 		var k = new Array();
 		this._fcoef( k, u ); this.div( a, a, k );
 	}
-	if( a[this._getLen( a )] == 0 ){
-		this._setLen( a, this._getLen( a ) - 1 );
+	if( a[this.getLen( a )] == 0 ){
+		this._setLen( a, this.getLen( a ) - 1 );
 	}
 	var r = this.sqrt( ret, a );
 	this._setPrec( ret, prec );
@@ -1211,15 +1204,15 @@ _MultiPrec.prototype.fstr2num = function( n , s ){
 	}
 };
 _MultiPrec.prototype.fsub = function( ret , a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	var p = this._matchPrec( a, b );
 	this.sub( ret, a, b );
 	this._setPrec( ret, p );
 };
 _MultiPrec.prototype.ftrunc = function( rop , op ){
-	op = this._clone( op );
-	var p = this._getPrec( op );
+	op = this.clone( op );
+	var p = this.getPrec( op );
 	var n = _INT( p / _MP_DIGIT );
 	if( n > 0 ){
 		p -= n * _MP_DIGIT;
@@ -1240,13 +1233,13 @@ _MultiPrec.prototype._mul1n = function( ret , a , b, n ){
 	return c;
 };
 _MultiPrec.prototype.mul = function( ret , a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	var k = 1;
 	if( a[0] < 0 && b[0] >= 0 ){ k = -1; }
 	if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	if( la == 0 || lb == 0 ){
 		ret[0] = 0;
 		return;
@@ -1278,13 +1271,14 @@ _MultiPrec.prototype.neg = function( rop , op ){
 		rop[0] = -rop[0];
 		return;
 	}
-	this._copy( op, 1, rop, 1, this._getLen( op ) );
+	this._copy( op, 1, rop, 1, this.getLen( op ) );
 	rop[0] = -op[0];
 };
 _MultiPrec.prototype._num2str = function( s , n ){
+	n = this.clone( n );
 	var m = (n[0] < 0);
 	var n0 = n[0];
-	n[0] = this._getLen( n );
+	n[0] = this.getLen( n );
 	if( n[0] == 0 ){
 		s[0] = _CHAR_CODE_0;
 		s[1] = 0;
@@ -1319,13 +1313,13 @@ _MultiPrec.prototype.num2str = function( n ){
 	return this._c2jstr( array );
 };
 _MultiPrec.prototype.set = function( rop , op ){
-	this._copy( op, 0, rop, 0, this._getLen( op ) + 1 );
+	this._copy( op, 0, rop, 0, this.getLen( op ) + 1 );
 };
 _MultiPrec.prototype.sqrt = function( x , a ){
-	a = this._clone( a );
+	a = this.clone( a );
 	this._setLen( x, 0 );
 	if( a[0] < 0 ){ return true; }
-	var la = this._getLen( a );
+	var la = this.getLen( a );
 	if( la == 0 ){ return false; }
 	if( la == 1 ){
 		this._setLen( x, 1 );
@@ -1367,7 +1361,7 @@ _MultiPrec.prototype.sqrt = function( x , a ){
 		if( l > 1 ){
 			this._fill( 0, q, 1, l - 1 );
 		}
-		if( this._getLen( q ) > l ){
+		if( this.getLen( q ) > l ){
 			q[l] = _MP_ELEMENT - 1;
 			this._setLen( q, l );
 		}
@@ -1390,7 +1384,6 @@ _MultiPrec.prototype.sqrt = function( x , a ){
 	return false;
 };
 _MultiPrec.prototype._str2num = function( n , s ){
-	s = this._clone( s );
 	var m = (s[0] == _CHAR( '-' )) ? 1 : 0;
 	var ss = m;
 	while( s[ss] >= _CHAR_CODE_0 && s[ss] <= _CHAR_CODE_9 ){ ss++; }
@@ -1416,8 +1409,8 @@ _MultiPrec.prototype.str2num = function( n , s ){
 	this._str2num( n, this._j2cstr( s ) );
 }
 _MultiPrec.prototype._sub = function( ret , a , b ){
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	ret[la] = 0;
 	var r = 0, aa = 0, bb = 0, x = 0;
 	var i;
@@ -1442,8 +1435,8 @@ _MultiPrec.prototype._sub = function( ret , a , b ){
 	this._setLen( ret, i );
 };
 _MultiPrec.prototype.sub = function( ret , a , b ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 	if( a[0] < 0 && b[0] >= 0 ){
 		b[0] = -b[0];
 		this.add( ret, a, b );
@@ -1535,4 +1528,6 @@ window._MP_FROUND_FLOOR = 3;
 window._MP_FROUND_HALF_UP = 4;
 window._MP_FROUND_HALF_DOWN = 5;
 window._MP_FROUND_HALF_EVEN = 6;
+window._MP_FROUND_HALF_DOWN2 = 7;
+window._MP_FROUND_HALF_EVEN2 = 8;
 })( window );

@@ -11,6 +11,7 @@ var document = window.document;
 #include "tmp\clip\function.debug.js"
 #endif // MINIFIED
 
+#include "tmp\clip\fround.js"	// 重要：global.jsの前に行うこと！
 #include "tmp\clip\global.js"
 #include "tmp\clip\math.js"
 

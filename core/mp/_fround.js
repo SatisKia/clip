@@ -9,7 +9,7 @@
 // modeを省略すると、_MP_FROUND_HALF_EVENの動作になる。
 
 _MultiPrec.prototype._froundGet = function( a/*Array*/, n ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	var nn = 1 + _DIV( n, _MP_DIGIT );
 	if( nn > l ){
 		return 0;
@@ -37,7 +37,7 @@ _MultiPrec.prototype._froundZero = function( a/*Array*/, n ){
 };
 
 _MultiPrec.prototype._froundUp = function( a/*Array*/, n ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	var aa;
 	while( true ){
 		aa = this._froundGet( a, n ) + 1;
@@ -55,7 +55,7 @@ _MultiPrec.prototype._froundUp = function( a/*Array*/, n ){
 };
 
 _MultiPrec.prototype.fround = function( a/*Array*/, prec, mode ){
-	var n = this._getPrec( a ) - prec;
+	var n = this.getPrec( a ) - prec;
 	if( n < 1 ){
 		return;
 	}
@@ -88,6 +88,26 @@ _MultiPrec.prototype.fround = function( a/*Array*/, prec, mode ){
 			if( aa > 4 ){ u = true; }
 		} else {
 			if( aa > 5 ){ u = true; }
+		}
+		break;
+	case _MP_FROUND_HALF_EVEN2:
+		if( mode == _MP_FROUND_HALF_EVEN2 && _MOD( this._froundGet( a, n ), 2 ) == 1 && aa > 4 ){
+			u = true;
+			break;
+		}
+		// そのまま下に流す
+	case _MP_FROUND_HALF_DOWN2:
+		if( aa > 5 ){
+			u = true;
+		} else if( aa == 5 && n > 1 ){
+			var i = 1 + _DIV( n - 1, _MP_DIGIT );
+			if( _MOD( a[i], _POW( 10, _MOD( n - 1, _MP_DIGIT ) ) ) != 0 ){
+				u = true;
+			} else {
+				for( i--; i > 0; i-- ){
+					if( a[i] != 0 ){ u = true; break; }
+				}
+			}
 		}
 		break;
 	}

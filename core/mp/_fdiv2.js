@@ -7,19 +7,19 @@
 // 除数bが0のときはtrueを返す。
 // digitには、被除数aの整数部の桁数が格納される。
 _MultiPrec.prototype.fdiv2 = function( ret/*Array*/, a/*Array*/, b/*Array*/, prec, digit/*_Integer*/ ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 
 	if( digit == undefined ){
 		digit = new _Integer();
 	}
 
-	var P = this._getPrec( a );
+	var P = this.getPrec( a );
 
 	/*
 	 * 被除数の整数部の桁数を求める
 	 */
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	var k = 10;
 	var i;
 	for( i = 1; i <= _MP_DIGIT; i++ ){
@@ -40,7 +40,7 @@ _MultiPrec.prototype.fdiv2 = function( ret/*Array*/, a/*Array*/, b/*Array*/, pre
 	this._setLen( aa, 1 ); aa[1] = 1;
 	var p = this._matchPrec( aa, b );
 	var k = b[0] < 0 ? -1 : 1;
-	var l = this._getLen( b );
+	var l = this.getLen( b );
 	var i;
 	for( i = l; i > 0; i-- ){
 		if( b[i] != 0 ){ break; }
@@ -65,7 +65,7 @@ _MultiPrec.prototype.fdiv2 = function( ret/*Array*/, a/*Array*/, b/*Array*/, pre
 		this.mul( r, r, k );
 	}
 	this.div( r, r, b );
-	if( this._getLen( a ) == 1 && a[1] == 1 ){
+	if( this.getLen( a ) == 1 && a[1] == 1 ){
 		this.add( ret, q, r );
 		if( a[0] < 0 ){ ret[0] = -ret[0]; }
 		this._setPrec( ret, p );

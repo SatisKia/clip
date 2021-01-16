@@ -10,8 +10,8 @@ _MultiPrec.prototype.cmp = function( a/*Array*/, b/*Array*/ ){
 	if( b[0] < 0 && a[0] >= 0 ){ return  1; }
 	var k = (a[0] < 0 && b[0] < 0) ? -1 : 1;
 
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 
 	var aa, bb;
 	for( var i = (la > lb) ? la : lb; i > 0; i-- ){

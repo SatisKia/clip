@@ -1,17 +1,17 @@
 #Gauss\-Legendre(ガウス=ルジャンドル)のアルゴリズム
 #\!- <prec>
-:fract
-:var a b t p an
-@N = 2 * int (log @0 / log 2) # 繰り返し回数。log2(prec)程度の反復でよいが、念の為その2倍。
+:mfloat @0
+:array a b t p an
+@N = int (log @0 / log 2) # 繰り返し回数。log2(prec)程度の反復でよい。
 a = 1
-b = (1 (sqrt 2))
-t = (1 4)
+b = 1 / sqrt 2
+t = 1 / 4
 p = 1
 for @i = 0; @i < @N; @i++
-	an = ((a + b) 2)
+	an = (a + b) / 2
 	b = sqrt (a * b)
 	t -= p * (a - an) ** 2
 	p *= 2
 	a = an
 next
-((a + b) ** 2) (4 * t)
+((a + b) ** 2) / (4 * t)

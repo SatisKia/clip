@@ -847,11 +847,13 @@ function conv( ret , ret_num, x , x_num, y , y_num ){
  idft( ret, ret_num, X, ret_num );
 }
 function mul( ret , a , b ){
+ a = mp.clone( a );
+ b = mp.clone( b );
  var k = 1;
  if( a[0] < 0 && b[0] >= 0 ){ k = -1; }
  if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
- var la = mp._getLen( a );
- var lb = mp._getLen( b );
+ var la = mp.getLen( a );
+ var lb = mp.getLen( b );
  if( la == 0 || lb == 0 ){
   ret[0] = 0;
   return;
@@ -1218,7 +1220,7 @@ function pi_out5( prec, count, order ){
  return (start < N);
 }
 function round( str, prec ){
- for( var i = 0; i <= 6; i++ ){
+ for( var i = 0; i <= 8; i++ ){
   con.print( "<td>" );
   var a = new Array();
   mp.fset( a, mp.F( str ) );
@@ -1231,10 +1233,21 @@ function round( str, prec ){
  }
 }
 function main( id ){
- var i;
  con = new _Console( id );
  setMathEnv( new _MathEnv() );
  mp = new _MultiPrec();
+ con.lock();
+ try {
+  testSqrt( 1000 );
+  testRound1();
+  testRound2();
+ } catch( e ){
+  catchError( e );
+ }
+ con.unlock();
+}
+function testSqrt( prec ){
+ var i;
  for( var order = 0; order <= 7; order++ ){
   if( order != 0 ){
    con.println();
@@ -1249,9 +1262,9 @@ function main( id ){
   start = 0;
   if( order == 7 ){
    mp.mul = mul;
-   while( pi_out5( 1000, 1, 4 ) ){}
+   while( pi_out5( prec, 1, 4 ) ){}
   } else {
-   while( pi_out5( 1000, 1, order ) ){}
+   while( pi_out5( prec, 1, order ) ){}
   }
   con.println( "" + ((new Date()).getTime() - time) + " ms" );
   var str = mp.fnum2str( pi );
@@ -1264,7 +1277,8 @@ function main( id ){
   }
  }
  con.println();
- con.println( "fround" );
+}
+function testRound1(){
  con.print( "<table border='1' cellspacing='1' cellpadding='4'>" );
  con.print( "<tr>" );
  con.print( "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>" );
@@ -1275,52 +1289,54 @@ function main( id ){
  con.print( "<td>H_UP&nbsp;&nbsp;&nbsp;</td>" );
  con.print( "<td>H_DOWN&nbsp;</td>" );
  con.print( "<td>H_EVEN&nbsp;</td>" );
+ con.print( "<td>H_DOWN2</td>" );
+ con.print( "<td>H_EVEN2</td>" );
  con.print( "</tr>" );
- con.print( "<tr><td>&nbsp;5.5</td>" ); round( "5.5", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>&nbsp;2.5</td>" ); round( "2.5", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>&nbsp;1.6</td>" ); round( "1.6", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>&nbsp;1.1</td>" ); round( "1.1", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>&nbsp;1.0</td>" ); round( "1.0", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>-1.0</td>" ); round( "-1.0", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>-1.1</td>" ); round( "-1.1", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>-1.6</td>" ); round( "-1.6", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>-2.5</td>" ); round( "-2.5", 0 ); con.print( "</tr>" );
- con.print( "<tr><td>-5.5</td>" ); round( "-5.5", 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;5.501</td>" ); round( "5.501" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;5.5</td>" ); round( "5.5" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;2.501</td>" ); round( "2.501" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;2.5</td>" ); round( "2.5" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;1.6</td>" ); round( "1.6" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;1.1</td>" ); round( "1.1" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>&nbsp;1.0</td>" ); round( "1.0" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-1.0</td>" ); round( "-1.0" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-1.1</td>" ); round( "-1.1" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-1.6</td>" ); round( "-1.6" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-2.5</td>" ); round( "-2.5" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-2.501</td>" ); round( "-2.501", 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-5.5</td>" ); round( "-5.5" , 0 ); con.print( "</tr>" );
+ con.print( "<tr><td>-5.501</td>" ); round( "-5.501", 0 ); con.print( "</tr>" );
  con.print( "</table>" );
  con.println();
+}
+function testRound2(){
  var a = new Array();
  mp.fsqrt( a, mp.F( "2" ), 45 );
  var b = new Array();
  var s;
- for( i = 0; i <= 45; i++ ){
-  con.println( mp.fnum2str( a ).substring( 0, i + 3 ) );
-  for( var mode = 0; mode <= 6; mode++ ){
+ for( var i = 0; i <= 45; i++ ){
+  s = mp.fnum2str( a );
+  con.setColor( "0000ff" );
+  con.print( s.substring( 0, i + 3 ) );
+  con.setColor();
+  con.println( s.substring( i + 3 ) );
+  for( var mode = 0; mode <= 8; mode++ ){
    mp.fset( b, a );
    mp.fround( b, i, mode );
    s = mp.fnum2str( b );
-   con.print( "fround&nbsp;&nbsp;" );
    switch( mode ){
    case _MP_FROUND_UP : con.print( "UP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" ); break;
    case _MP_FROUND_DOWN : con.print( "DOWN&nbsp;&nbsp;&nbsp;" ); break;
    case _MP_FROUND_CEILING : con.print( "CEILING" ); break;
    case _MP_FROUND_FLOOR : con.print( "FLOOR&nbsp;&nbsp;" ); break;
    case _MP_FROUND_HALF_UP : con.print( "H_UP&nbsp;&nbsp;&nbsp;" ); break;
-   case _MP_FROUND_HALF_DOWN: con.print( "H_DOWN&nbsp;" ); break;
-   case _MP_FROUND_HALF_EVEN: con.print( "H_EVEN&nbsp;" ); break;
+   case _MP_FROUND_HALF_DOWN : con.print( "H_DOWN&nbsp;" ); break;
+   case _MP_FROUND_HALF_EVEN : con.print( "H_EVEN&nbsp;" ); break;
+   case _MP_FROUND_HALF_DOWN2: con.print( "H_DOWN2" ); break;
+   case _MP_FROUND_HALF_EVEN2: con.print( "H_EVEN2" ); break;
    }
    con.println( "&nbsp;" + s );
   }
-  mp.fset( b, a );
-  mp.fround( b, i, _MP_FROUND_HALF_DOWN );
-  con.println( "fround&nbsp;&nbsp;even:0&nbsp;&nbsp;" + mp.fnum2str( b ) );
-  mp.fset( b, a );
-  mp.fround2( b, i, false );
-  con.println( "fround2&nbsp;even:0&nbsp;&nbsp;" + mp.fnum2str( b ) );
-  mp.fset( b, a );
-  mp.fround( b, i, _MP_FROUND_HALF_EVEN );
-  con.println( "fround&nbsp;&nbsp;even:1&nbsp;&nbsp;" + mp.fnum2str( b ) );
-  mp.fset( b, a );
-  mp.fround2( b, i, true );
-  con.println( "fround2&nbsp;even:1&nbsp;&nbsp;" + mp.fnum2str( b ) );
  }
+ con.println();
 }

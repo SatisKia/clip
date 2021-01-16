@@ -6,7 +6,9 @@
 // 多倍長浮動小数点数を文字列に変換する
 
 _MultiPrec.prototype._fnum2str = function( s/*Array*/, n/*Array*/ ){
-	var p = this._getPrec( n );
+	n = this.clone( n );
+
+	var p = this.getPrec( n );
 	var ss = new Array();
 	this._num2str( ss, n );
 	var l = this._strlen( ss );

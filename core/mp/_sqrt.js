@@ -6,11 +6,11 @@
 // 多倍長整数の平方根
 // aが負の値の場合trueを返す。
 _MultiPrec.prototype.sqrt = function( x/*Array*/, a/*Array*/ ){
-	a = this._clone( a );
+	a = this.clone( a );
 
 	this._setLen( x, 0 );
 	if( a[0] < 0 ){ return true; }
-	var la = this._getLen( a );
+	var la = this.getLen( a );
 	if( la == 0 ){ return false; }
 	if( la == 1 ){
 		this._setLen( x, 1 );
@@ -58,7 +58,7 @@ _MultiPrec.prototype.sqrt = function( x/*Array*/, a/*Array*/ ){
 		if( l > 1 ){
 			this._fill( 0, q, 1, l - 1 );
 		}
-		if( this._getLen( q ) > l ){
+		if( this.getLen( q ) > l ){
 			q[l] = _MP_ELEMENT - 1;
 			this._setLen( q, l );
 		}

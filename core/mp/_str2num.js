@@ -6,8 +6,6 @@
 // 文字列を多倍長整数に変換する
 
 _MultiPrec.prototype._str2num = function( n/*Array*/, s/*Array*/ ){
-	s = this._clone( s );
-
 	var m = (s[0] == _CHAR( '-' )) ? 1 : 0;
 	var ss = m;
 	while( s[ss] >= _CHAR_CODE_0 && s[ss] <= _CHAR_CODE_9 ){ ss++; }

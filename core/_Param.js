@@ -26,6 +26,8 @@ function _Param( num, parentParam, inherit ){
 	this._fps        = inherit ? parentParam._fps        : _CLIP_DEFFPS;
 	this._prec       = inherit ? parentParam._prec       : _CLIP_DEFPREC;
 	this._radix      = inherit ? parentParam._radix      : _CLIP_DEFRADIX;
+	this._mpPrec     = inherit ? parentParam._mpPrec     : _CLIP_DEFMPPREC;
+	this._mpRound    = inherit ? parentParam._mpRound    : _CLIP_DEFMPROUND;
 
 	if( parentParam != undefined ){
 		this._saveMode = parentParam._mode;
@@ -74,6 +76,8 @@ function _Param( num, parentParam, inherit ){
 
 	this._seFlag  = false;
 	this._seToken = _CLIP_SE_NULL;
+
+	this._mpFlag = false;
 }
 
 _Param.prototype = {
@@ -134,6 +138,10 @@ _Param.prototype = {
 //		return this._mode;
 //	},
 
+	isMultiPrec : function(){
+		return ((this._mode & _CLIP_MODE_MULTIPREC) != 0);
+	},
+
 	updateFps : function(){
 		setTimeFps( this._fps );
 	},
@@ -171,6 +179,45 @@ _Param.prototype = {
 	},
 //	radix : function(){
 //		return this._radix;
+//	},
+
+	mpSetPrec : function( prec ){
+		if( prec < _CLIP_MINMPPREC ){
+			this._mpPrec = _CLIP_DEFMPPREC;
+		} else {
+			this._mpPrec = prec;
+		}
+	},
+//	mpPrec : function(){
+//		return this._mpPrec;
+//	},
+
+	mpSetRound : function( mode ){
+		if( mode == "up" ){
+			this._mpRound = _MP_FROUND_UP;
+		} else if( mode == "down" ){
+			this._mpRound = _MP_FROUND_DOWN;
+		} else if( mode == "ceiling" ){
+			this._mpRound = _MP_FROUND_CEILING;
+		} else if( mode == "floor" ){
+			this._mpRound = _MP_FROUND_FLOOR;
+		} else if( mode == "h_up" ){
+			this._mpRound = _MP_FROUND_HALF_UP;
+		} else if( mode == "h_down" ){
+			this._mpRound = _MP_FROUND_HALF_DOWN;
+		} else if( mode == "h_even" ){
+			this._mpRound = _MP_FROUND_HALF_EVEN;
+		} else if( mode == "h_down2" ){
+			this._mpRound = _MP_FROUND_HALF_DOWN2;
+		} else if( mode == "h_even2" ){
+			this._mpRound = _MP_FROUND_HALF_EVEN2;
+		} else {
+			return false;
+		}
+		return true;
+	},
+//	mpRound : function(){
+//		return this._mpRound;
 //	},
 
 //	setAnsFlag : function( flag ){

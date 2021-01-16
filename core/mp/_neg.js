@@ -10,6 +10,6 @@ _MultiPrec.prototype.neg = function( rop/*Array*/, op/*Array*/ ){
 		return;
 	}
 
-	this._copy( op, 1, rop, 1, this._getLen( op ) );
+	this._copy( op, 1, rop, 1, this.getLen( op ) );
 	rop[0] = -op[0];
 };

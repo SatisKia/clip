@@ -5,7 +5,7 @@
 
 // 整数部の桁数
 _MultiPrec.prototype.fdigit = function( a/*Array*/ ){
-	var l = this._getLen( a );
+	var l = this.getLen( a );
 	if( l == 0 ){
 		return 0;
 	}
@@ -18,5 +18,5 @@ _MultiPrec.prototype.fdigit = function( a/*Array*/ ){
 	}
 	var d = (l - 1) * _MP_DIGIT + i;
 
-	return d - this._getPrec( a );
+	return d - this.getPrec( a );
 };

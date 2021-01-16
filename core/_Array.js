@@ -252,6 +252,11 @@ function _Array(){
 
 	this._node = _newArrayNodeArray( 256 );
 	this._mat  = newMatrixArray    ( 256 );
+
+	this._mp = new Array( 256 );
+	for( var i = 0; i < 256; i++ ){
+		this._mp[i] = new Array();
+	}
 }
 
 _Array.prototype = {
@@ -268,6 +273,7 @@ _Array.prototype = {
 			// 値を初期化する
 			this._node[index] = new __ArrayNode();
 			this._mat [index] = new _Matrix();
+			this._mp  [index] = new Array();
 		}
 		return index;
 	},
@@ -407,6 +413,7 @@ _Array.prototype = {
 		}
 		this._node[srcIndex].dup( dst._node[dstIndex] );
 		dst._mat[dstIndex].ass( this._mat[srcIndex] );
+		dst._mp[dstIndex] = Array.from( this._mp[srcIndex] );
 	},
 
 	// 配列を置き換える
@@ -416,6 +423,7 @@ _Array.prototype = {
 		}
 		dst._node[dstIndex] = this._node[srcIndex];
 		dst._mat[dstIndex] = this._mat[srcIndex];
+		dst._mp[dstIndex] = this._mp[srcIndex];
 	},
 
 	// 配列からトークンを構築する

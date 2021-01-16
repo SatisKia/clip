@@ -94,6 +94,8 @@ window.printAnsComplex = function( real, imag ){
     // The following is an example of generating a string
     var str = real + imag;
 };
+window.printAnsMultiPrec = function( str ){
+};
 window.printWarn = function( warn, num, func ){
     // The following is an example of generating a string
     var str = "warning: ";
@@ -202,6 +204,7 @@ clip.setArrayValue( 'h', [1, 1], 78 ); // @@h 1 1
 clip.setArrayComplex( 'i', [0], 12.3, 4.5 ); // @@i 0
 clip.setArrayFract( 'j', [2], 3, 7 ); // @@j 2
 clip.setString( 's', "Hello World!!" );
+clip.setMultiPrec( 'a', array/*Array*/ );
 ```
 
 ### Check the value of the variable
@@ -229,6 +232,7 @@ var array = clip.getArray( 'a', 2 ); // Two-dimensional element
 var array = clip.getArray( 'a', N ); // N-dimensional element
 var string = "@@d = " + clip.getArrayString( 'd', 6 );
 var string = clip.getString( 's' );
+var array = clip.getMultiPrec( 'a' );
 ```
 
 You can also convert it to a string by passing the Array object obtained by the getArray function to JSON.stringify.
@@ -244,6 +248,7 @@ var value = clip.getAnsValue().num();
 var value = clip.getAnsValue().denom();
 var matrix = clip.getAnsMatrix(); // _Matrix object
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
+var array = clip.getAnsMultiPrec();
 ```
 
 Since the return value of the getAnsValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
@@ -255,29 +260,45 @@ A group of functions that execute CLIP setting commands directly from JavaScript
 **Type specification**
 
 ```javascript
-clip.setMode( mode );
+clip.setMode( mode, param1, param2 );
 ```
 
-| mode | meaning |
+| `mode` | Meaning | `param1` | `param2` |
+| --- | --- | --- | --- |
+| _CLIP_MODE_E_FLOAT | Double precision floating point type (exponential notation) | Display accuracy | - |
+| _CLIP_MODE_F_FLOAT | Double precision floating point type (decimal point notation) | Display accuracy | - |
+| _CLIP_MODE_G_FLOAT | Double precision floating point type | Display accuracy | - |
+| _CLIP_MODE_E_COMPLEX | Complex type (exponential notation) | Display accuracy | - |
+| _CLIP_MODE_F_COMPLEX | Complex type (decimal point notation) | Display accuracy | - |
+| _CLIP_MODE_G_COMPLEX | Complex type | Display accuracy | - |
+| _CLIP_MODE_I_FRACT | Fractional type | - | - |
+| _CLIP_MODE_M_FRACT | Band Fractional Type | - | - |
+| _CLIP_MODE_H_TIME | Time type (hour) | Frames per second | - |
+| _CLIP_MODE_M_TIME | Time type (minutes) | Frames per second | - |
+| _CLIP_MODE_S_TIME | Time type (seconds) | Frames per second | - |
+| _CLIP_MODE_F_TIME | Time type (frame) | Frames per second | - |
+| _CLIP_MODE_S_CHAR | Signed 8-bit integer type | Radix | - |
+| _CLIP_MODE_U_CHAR | Unsigned 8-bit integer type | Radix | - |
+| _CLIP_MODE_S_SHORT | Signed 16-bit integer type | Radix | - |
+| _CLIP_MODE_U_SHORT | Unsigned 16-bit integer type | Radix | - |
+| _CLIP_MODE_S_LONG | Signed 32-bit integer type | Radix | - |
+| _CLIP_MODE_U_LONG | Unsigned 32-bit integer type | Radix | - |
+| _CLIP_MODE_F_MULTIPREC | Multiple-precision floating point type | precision | Rounding mode |
+| _CLIP_MODE_I_MULTIPREC | Multiple-precision integer type | precision | Rounding mode |
+
+| Rounding mode | Meaning |
 | --- | --- |
-| _CLIP_MODE_E_FLOAT | Double precision floating point type (exponential notation) |
-| _CLIP_MODE_F_FLOAT | Double precision floating point type (decimal point notation) |
-| _CLIP_MODE_G_FLOAT | Double precision floating point type |
-| _CLIP_MODE_E_COMPLEX | Complex type (exponential notation) |
-| _CLIP_MODE_F_COMPLEX | Complex type (decimal point notation) |
-| _CLIP_MODE_G_COMPLEX | Complex type |
-| _CLIP_MODE_I_FRACT | Fractional type |
-| _CLIP_MODE_M_FRACT | Band Fractional Type |
-| _CLIP_MODE_H_TIME | Time type (hour) |
-| _CLIP_MODE_M_TIME | Time type (minutes) |
-| _CLIP_MODE_S_TIME | Time type (seconds) |
-| _CLIP_MODE_F_TIME | Time type (frame) |
-| _CLIP_MODE_S_CHAR | Signed 8-bit integer type |
-| _CLIP_MODE_U_CHAR | Unsigned 8-bit integer type |
-| _CLIP_MODE_S_SHORT | Signed 16-bit integer type |
-| _CLIP_MODE_U_SHORT | Unsigned 16-bit integer type |
-| _CLIP_MODE_S_LONG | Signed 32-bit integer type |
-| _CLIP_MODE_U_LONG | Unsigned 32-bit integer type |
+| up | Round away from zero |
+| down | Round to near zero |
+| ceiling | Round to approach positive infinity |
+| floor | Round to approach negative infinity |
+| h_up | round up on 5 and round down on 4 |
+| h_down | round up on 6 and round down on 5 |
+| h_even | When rounding with `prec` digits, if the number in the `prec` digit is odd, h_up is processed, and if it is even, h_down is processed. |
+| h_down2 | banker's rounding |
+| h_even2 | When rounding with `prec` digits, if the number in the `prec` digit is odd, h_up is processed, and if it is even, h_down2 is processed. |
+
+`param1` and `param1` can be omitted.
 
 Immediately after building the _EasyClip object: _CLIP_MODE_G_FLOAT
 
@@ -311,7 +332,7 @@ Immediately after building the _EasyClip object: 10
 clip.setAngType( type );
 ```
 
-| type | meaning |
+| `type` | Meaning |
 | --- | --- |
 | _ANG_TYPE_RAD | Radian |
 | _ANG_TYPE_DEG | Degree |
@@ -333,9 +354,9 @@ Immediately after building the _EasyClip object: false
 clip.setBase( base );
 ```
 
-| base | meaning |
+| `base` | Meaning |
 | --- | --- |
-| 0 | 0 Origin |
+| 0 | 0 origin |
 | 1 | 1 origin |
 
 Immediately after building the _EasyClip object: 0
@@ -482,7 +503,7 @@ easyCanvas.setFont( canvas/*_Canvas*/, size, family );
 
 ### Other
 
-- Function used to implement the printAnsMatrix function called from the _Proc object
+- Function used to implement the printAnsMatrix function called from the _Proc object.
 
 ```javascript
 var string = clip.getArrayTokenString( param, array/*_Token*/, indent );
@@ -502,10 +523,16 @@ var proc = clip.proc();
 var param = clip.param();
 ```
 
-- Get the only _GWorld object that exists inside the _EasyClip object
+- Get the only _GWorld object that exists inside the _EasyClip object.
 
 ```javascript
 var gWorld = clip.gWorld();
+```
+
+- Get the only _MultiPrec object that exists in the CLIP engine.
+
+```javascript
+var mp = procMultiPrec();
 ```
 
 ----------
@@ -729,7 +756,7 @@ fdigit( a/*Array*/ )
 fround( a/*Array*/, prec, mode )
 ```
 
-| mode | meaning |
+| `mode` | Meaning |
 | --- | --- |
 | _MP_FROUND_UP | Round away from zero |
 | _MP_FROUND_DOWN | Round to near zero |
@@ -737,13 +764,8 @@ fround( a/*Array*/, prec, mode )
 | _MP_FROUND_FLOOR | Round to approach negative infinity |
 | _MP_FROUND_HALF_UP | round up on 5 and round down on 4 |
 | _MP_FROUND_HALF_DOWN | round up on 6 and round down on 5 |
-| _MP_FROUND_HALF_EVEN | Round to the closest value |
+| _MP_FROUND_HALF_EVEN | When rounding with `prec` digits, if the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN is processed. |
+| _MP_FROUND_HALF_DOWN2 | banker's rounding |
+| _MP_FROUND_HALF_EVEN2 | When rounding with `prec` digits, if the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN2 is processed. |
 
 If `mode` is omitted, the operation will be _MP_FROUND_HALF_EVEN.
-
-```javascript
-fround2( a/*Array*/, prec, even_flag ) // Bankers' rounding
-```
-
-The behavior when true is specified for `even_flag` is as follows:
-Suppose you want to round to `prec` digits. Let a be the number in the `prec+1` digit and b be the number in the `prec` digit. If b is odd, round off a. If b is even, bankers' rounding is done for a.

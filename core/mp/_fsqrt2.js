@@ -6,7 +6,7 @@
 // 多倍長浮動小数点数の平方根
 // aが負の値の場合trueを返す。
 _MultiPrec.prototype.fsqrt2 = function( ret/*Array*/, a/*Array*/, prec, order ){
-	a = this._clone( a );
+	a = this.clone( a );
 	if( this.fcmp( a, this.F( "0" ) ) > 0 ){
 		var g = new Array();
 		var h = new Array();

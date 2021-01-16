@@ -6,8 +6,8 @@
 // 多倍長浮動小数点数の平方根
 // aが負の値の場合trueを返す。
 _MultiPrec.prototype.fsqrt3 = function( ret/*Array*/, a/*Array*/, prec ){
-	a = this._clone( a );
-	var t = prec * 2 - this._getPrec( a );
+	a = this.clone( a );
+	var t = prec * 2 - this.getPrec( a );
 	var u;
 	if( t > 0 ){
 		if( (u = this._fmul( a, t )) > 0 ){
@@ -24,8 +24,8 @@ _MultiPrec.prototype.fsqrt3 = function( ret/*Array*/, a/*Array*/, prec ){
 		var k = new Array();
 		this._fcoef( k, u ); this.div( a, a, k );
 	}
-	if( a[this._getLen( a )] == 0 ){
-		this._setLen( a, this._getLen( a ) - 1 );
+	if( a[this.getLen( a )] == 0 ){
+		this._setLen( a, this.getLen( a ) - 1 );
 	}
 	var r = this.sqrt( ret, a );
 	this._setPrec( ret, prec );

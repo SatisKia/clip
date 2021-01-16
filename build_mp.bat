@@ -8,7 +8,7 @@ if "%AJAXMINPATH%"=="" goto error
 md %TMP%
 
 cd core\mp
-%CPP% ..\math\_Math.js ..\param\_Integer.js _MultiPrec.js _abs.js _add.js _cmp.js _div.js _fadd.js _fcmp.js _fdigit.js _fdiv.js _fdiv2.js _fmul.js _fnum2str.js _fround.js _fround2.js _fsqrt.js _fsqrt2.js _fsqrt3.js _fstr2num.js _fsub.js _ftrunc.js _mul.js _neg.js _num2str.js _set.js _sqrt.js _str2num.js _sub.js > ..\..\%TMP%\core.debug.js
+%CPP% ..\math\_Math.js ..\param\_Integer.js _MultiPrec.js _abs.js _add.js _cmp.js _div.js _fadd.js _fcmp.js _fdigit.js _fdiv.js _fdiv2.js _fmul.js _fnum2str.js _fround.js _fsqrt.js _fsqrt2.js _fsqrt3.js _fstr2num.js _fsub.js _ftrunc.js _mul.js _neg.js _num2str.js _set.js _sqrt.js _str2num.js _sub.js > ..\..\%TMP%\core.debug.js
 cd ..\..
 
 function %TMP%\core.debug.js %TMP%\function.js

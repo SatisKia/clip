@@ -5,8 +5,8 @@
 
 // 小数点以下の切り捨て
 _MultiPrec.prototype.ftrunc = function( rop/*Array*/, op/*Array*/ ){
-	op = this._clone( op );
-	var p = this._getPrec( op );
+	op = this.clone( op );
+	var p = this.getPrec( op );
 	var n = _INT( p / _MP_DIGIT );
 	if( n > 0 ){
 		p -= n * _MP_DIGIT;

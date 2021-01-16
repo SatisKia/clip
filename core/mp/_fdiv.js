@@ -6,12 +6,12 @@
 // 多倍長浮動小数点数同士の除算
 // 除数bが0のときはtrueを返す。
 _MultiPrec.prototype.fdiv = function( ret/*Array*/, a/*Array*/, b/*Array*/, prec ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 
 	var p = this._matchPrec( a, b );
 	var k = b[0] < 0 ? -1 : 1;
-	var l = this._getLen( b );
+	var l = this.getLen( b );
 	var i;
 	for( i = l; i > 0; i-- ){
 		if( b[i] != 0 ){ break; }

@@ -40,8 +40,8 @@ _MultiPrec.prototype._sub1 = function( a/*Array*/, b/*Array*/, aa, bb ){
 };
 
 _MultiPrec.prototype.div = function( q/*Array*/, a/*Array*/, b/*Array*/, r/*Array*/ ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 
 	if( r == undefined ){
 		r = new Array();
@@ -52,8 +52,8 @@ _MultiPrec.prototype.div = function( q/*Array*/, a/*Array*/, b/*Array*/, r/*Arra
 	if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
 	var l = (a[0] < 0) ? -1 : 1;
 
-	a[0] = this._getLen( a );
-	b[0] = this._getLen( b );
+	a[0] = this.getLen( a );
+	b[0] = this.getLen( b );
 	q[0] = 0; r[0] = 0;
 
 	var lq, lr;
@@ -85,8 +85,8 @@ _MultiPrec.prototype.div = function( q/*Array*/, a/*Array*/, b/*Array*/, r/*Arra
 
 	// 正規化
 	if( (K = _DIV( _MP_ELEMENT, b[b[0]] + 1 )) > 1 ){
-		this._mul1( a, this._clone( a ), K );
-		this._mul1( b, this._clone( b ), K );
+		this._mul1( a, this.clone( a ), K );
+		this._mul1( b, this.clone( b ), K );
 	}
 
 	q[0] = a[0] - b[0] + 1;

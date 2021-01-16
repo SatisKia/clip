@@ -6,8 +6,8 @@
 // 多倍長整数同士の減算
 
 _MultiPrec.prototype._sub = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
-	var la = this._getLen( a );
-	var lb = this._getLen( b );
+	var la = this.getLen( a );
+	var lb = this.getLen( b );
 	ret[la] = 0;	// 配列の確保
 
 	var r = 0, aa = 0, bb = 0, x = 0;
@@ -35,8 +35,8 @@ _MultiPrec.prototype._sub = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 };
 
 _MultiPrec.prototype.sub = function( ret/*Array*/, a/*Array*/, b/*Array*/ ){
-	a = this._clone( a );
-	b = this._clone( b );
+	a = this.clone( a );
+	b = this.clone( b );
 
 	if( a[0] < 0 && b[0] >= 0 ){
 		b[0] = -b[0];

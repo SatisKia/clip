@@ -46,7 +46,8 @@ var _TOKEN_OP = [
 	"^=",
 	",",
 	"**",
-	"**="
+	"**=",
+	"!"
 ];
 
 var _TOKEN_FUNC = [
@@ -201,6 +202,8 @@ var _TOKEN_COMMAND = [
 	"int",
 	"uint",
 	"radix",
+	"mfloat",
+	"mint",
 	"ptype",
 	"rad",
 	"deg",
@@ -578,51 +581,7 @@ _Token.prototype = {
 		default : top = 0; swi = false; break;
 		}
 
-		if( string.charAt( string.length - 1 ) == '!' ){
-			var tmpString = string.substring( top, string.length - 1 );
-			if( isCharEscape( tmpString, top ) ){
-				switch( tmpString.charAt( top + 1 ) ){
-				case 'b':
-				case 'B':
-					value.ass( stringToInt( tmpString, top + 2, stop, 2 ) );
-					break;
-				case '0':
-					value.ass( stringToInt( tmpString, top + 2, stop, 8 ) );
-					break;
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					value.ass( stringToInt( tmpString, top + 1, stop, 10 ) );
-					break;
-				case 'x':
-				case 'X':
-					value.ass( stringToInt( tmpString, top + 2, stop, 16 ) );
-					break;
-				default:
-					return false;
-				}
-			} else {
-				if( (param._mode & _CLIP_MODE_INT) != 0 ){
-					value.ass( stringToInt( tmpString, 0, stop, param._radix ) );
-				} else {
-					value.ass( stringToInt( tmpString, 0, stop, 10 ) );
-				}
-			}
-			if( stop._val < tmpString.length ){
-				return false;
-			}
-			if( swi ){
-				value.ass( value.factorial().minus() );
-			} else {
-				value.ass( value.factorial() );
-			}
-		} else if( string.charAt( top ) == '\'' ){
+		if( string.charAt( top ) == '\'' ){
 			value.ass( 0.0 );
 			j = 0;
 			for( i = 1; ; i++ ){
@@ -881,7 +840,7 @@ _Token.prototype = {
 						case 'f': case 'F': value.setSec ( tmp[0] ); value.setFrame( tmp[1] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param._mode ){
+						switch( param._mode & _CLIP_MODE_MASK ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME: value.setHour( tmp[0] ); value.setMin  ( tmp[1] ); value.timeReduce(); break;
 						case _CLIP_MODE_S_TIME: value.setMin ( tmp[0] ); value.setSec  ( tmp[1] ); value.timeReduce(); break;
@@ -898,7 +857,7 @@ _Token.prototype = {
 						case 'f': case 'F': value.setMin ( tmp[0] ); value.setSec( tmp[1] ); value.setFrame( tmp[2] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param._mode ){
+						switch( param._mode & _CLIP_MODE_MASK ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME:
 						case _CLIP_MODE_S_TIME: value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec  ( tmp[2] ); value.timeReduce(); break;
@@ -915,7 +874,7 @@ _Token.prototype = {
 						case 'f': case 'F': value.setHour( tmp[0] ); value.setMin( tmp[1] ); value.setSec( tmp[2] ); value.setFrame( tmp[3] ); value.timeReduce(); break;
 						}
 					} else {
-						switch( param._mode ){
+						switch( param._mode & _CLIP_MODE_MASK ){
 						case _CLIP_MODE_H_TIME:
 						case _CLIP_MODE_M_TIME:
 						case _CLIP_MODE_S_TIME:
@@ -942,7 +901,7 @@ _Token.prototype = {
 	_floatToString : function( param, value ){
 		var str = "";
 		var prec = param._prec;
-		switch( param._mode ){
+		switch( param._mode & _CLIP_MODE_MASK ){
 		case _CLIP_MODE_E_FLOAT:
 		case _CLIP_MODE_E_COMPLEX:
 			str = floatToExponential( value, (prec == 0) ? _EPREC( value ) : prec );
@@ -960,7 +919,7 @@ _Token.prototype = {
 	},
 
 	valueToString : function( param, value, real/*_String*/, imag/*_String*/ ){
-		switch( param._mode ){
+		switch( param._mode & _CLIP_MODE_MASK ){
 		case _CLIP_MODE_E_COMPLEX:
 		case _CLIP_MODE_F_COMPLEX:
 		case _CLIP_MODE_G_COMPLEX:
@@ -1197,6 +1156,8 @@ _Token.prototype = {
 			return dupValue( token );
 		case _CLIP_CODE_MATRIX:
 			return dupMatrix( token );
+		case _CLIP_CODE_MULTIPREC:
+			return Array.from( token );
 		}
 		return token;
 	},
@@ -1387,6 +1348,10 @@ _Token.prototype = {
 		cur._code  = _CLIP_CODE_MATRIX;
 		cur._token = dupMatrix( value );
 	},
+	_newTokenMultiPrec : function( cur, value ){
+		cur._code  = _CLIP_CODE_MULTIPREC;
+		cur._token = Array.from( value );
+	},
 
 	// トークン文字列を解放する
 	_delToken : function( cur ){
@@ -1427,16 +1392,32 @@ _Token.prototype = {
 		return tmp;
 	},
 	add : function( param, token, len, strToVal ){
-		var tmp = this._addToken();
-		this._newToken( tmp, param, token, len, strToVal );
+		var addFact = false;
+		if( (token.charAt( 0 ) != '"') && (token.charAt( len - 1 ) == '!') ){
+			if( len == 1 ){
+				token = String.fromCharCode( _CLIP_CODE_OPERATOR ) + String.fromCharCode( _CLIP_OP_FACT );
+			} else if( token.charAt( len - 2 ) != '@' ){
+				addFact = true;
+				token = token.substring( 0, len - 1 );
+			}
+		}
+		this._newToken( this._addToken(), param, token, len, strToVal );
+		if( addFact ){
+			token = String.fromCharCode( _CLIP_CODE_OPERATOR ) + String.fromCharCode( _CLIP_OP_FACT );
+			this._newToken( this._addToken(), param, token, 1, strToVal );
+		}
+	},
+	addSq : function( param, token, len, strToVal ){	// Square Bracket
+		this._newToken( this._addToken(), param, token, len, strToVal );
 	},
 	addValue : function( value ){
-		var tmp = this._addToken();
-		this._newTokenValue( tmp, value );
+		this._newTokenValue( this._addToken(), value );
 	},
 	addMatrix : function( value ){
-		var tmp = this._addToken();
-		this._newTokenMatrix( tmp, value );
+		this._newTokenMatrix( this._addToken(), value );
+	},
+	addMultiPrec : function( value ){
+		this._newTokenMultiPrec( this._addToken(), value );
 	},
 	addCode : function( code, token ){
 		var tmp = this._addToken();
@@ -1461,24 +1442,28 @@ _Token.prototype = {
 		if( cur == null ){
 			this.add( param, token, len, strToVal );
 		} else {
-			var tmp = this._insToken( cur );
-			this._newToken( tmp, param, token, len, strToVal );
+			this._newToken( this._insToken( cur ), param, token, len, strToVal );
 		}
 	},
 	_insValue : function( cur, value ){
 		if( cur == null ){
 			this.addValue( value );
 		} else {
-			var tmp = this._insToken( cur );
-			this._newTokenValue( tmp, value );
+			this._newTokenValue( this._insToken( cur ), value );
 		}
 	},
 	_insMatrix : function( cur, value ){
 		if( cur == null ){
 			this.addMatrix( value );
 		} else {
-			var tmp = this._insToken( cur );
-			this._newTokenMatrix( tmp, value );
+			this._newTokenMatrix( this._insToken( cur ), value );
+		}
+	},
+	_insMultiPrec : function( cur, value ){
+		if( cur == null ){
+			this.addMultiPrec( value );
+		} else {
+			this._newTokenMultiPrec( this._insToken( cur ), value );
 		}
 	},
 	_insCode : function( cur, code, token ){
@@ -1498,6 +1483,9 @@ _Token.prototype = {
 	},
 	insMatrix : function( num, value ){
 		this._insMatrix( this._searchList( num ), value );
+	},
+	insMultiPrec : function( num, value ){
+		this._insMultiPrec( this._searchList( num ), value );
 	},
 	insCode : function( num, code, token ){
 		this._insCode( this._searchList( num ), code, token );
@@ -1614,7 +1602,7 @@ _Token.prototype = {
 					token = String.fromCharCode( _CLIP_CODE_PARAM_ARRAY );
 					this.add( param, token, 1, strToVal );
 				} else {
-					this.add( param, token, len, strToVal );
+					this.addSq( param, token, len, strToVal );
 					len = 0;
 				}
 				strFlag = false;
@@ -1925,6 +1913,7 @@ _Token.prototype = {
 		switch( op ){
 		case _CLIP_OP_POSTFIXINC:
 		case _CLIP_OP_POSTFIXDEC:
+		case _CLIP_OP_FACT:
 			return 15;
 		case _CLIP_OP_INCREMENT:
 		case _CLIP_OP_DECREMENT:
@@ -1985,6 +1974,7 @@ _Token.prototype = {
 	_format : function( top, param, strToVal ){
 		var level, topLevel;
 		var assLevel = this._checkOp( _CLIP_OP_ASS );
+		var posLevel = this._checkOp( _CLIP_OP_POSTFIXINC );
 		var retTop, retEnd;
 		var tmpTop;
 		var tmpEnd;
@@ -2047,7 +2037,7 @@ _Token.prototype = {
 								break;
 							case _CLIP_CODE_OPERATOR:
 								if( i == 0 ){
-									if( this._checkOp( tmpEnd._token ) < topLevel ){
+									if( (level == posLevel) || (this._checkOp( tmpEnd._token ) < topLevel) ){
 										retEnd = 2;
 									}
 								}

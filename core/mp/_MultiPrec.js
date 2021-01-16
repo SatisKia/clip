@@ -8,6 +8,7 @@ var _MP_ELEMENT   = _POW( 10, _MP_DIGIT );
 var _MP_PREC_MASK = 0xFFFFFFFF;
 var _MP_LEN_COEF  = _MP_PREC_MASK + 1;
 
+// 多倍長演算クラス
 function _MultiPrec(){
 	this._I = new Array();
 	this._F = new Array();
@@ -32,7 +33,7 @@ _MultiPrec.prototype.F = function( str ){
 	return this._F["_" + str];
 };
 
-_MultiPrec.prototype._getLen = function( a/*Array*/ ){
+_MultiPrec.prototype.getLen = function( a/*Array*/ ){
 	return _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 };
 _MultiPrec.prototype._setLen = function( a/*Array*/, len ){
@@ -44,7 +45,7 @@ _MultiPrec.prototype._setLen = function( a/*Array*/, len ){
 	}
 };
 
-_MultiPrec.prototype._getPrec = function( a/*Array*/ ){
+_MultiPrec.prototype.getPrec = function( a/*Array*/ ){
 	return _AND( _ABS( a[0] ), _MP_PREC_MASK );
 };
 _MultiPrec.prototype._setPrec = function( a/*Array*/, prec ){
@@ -92,8 +93,8 @@ _MultiPrec.prototype._fcoef = function( k/*Array*/, prec ){
 
 // 小数点以下の桁数を揃える
 _MultiPrec.prototype._matchPrec = function( a/*Array*/, b/*Array*/ ){
-	var aa = this._getPrec( a );
-	var bb = this._getPrec( b );
+	var aa = this.getPrec( a );
+	var bb = this.getPrec( b );
 	var p = aa, t;
 	if( aa < bb ){
 		if( (t = this._fmul( a, bb - aa )) > 0 ){
@@ -112,16 +113,15 @@ _MultiPrec.prototype._matchPrec = function( a/*Array*/, b/*Array*/ ){
 	return p;
 };
 
-_MultiPrec.prototype._clone = function( array ){
-	var clone = new Array();
-	for( var i = 0; i < array.length; i++ ){
-		clone[i] = array[i];
+_MultiPrec.prototype.clone = function( a/*Array*/ ){
+	if( a.length == 0 ){
+		return [ _MP_LEN_COEF, 0 ];	// ゼロ値
 	}
-	return clone;
+	return Array.from( a );
 };
 
 _MultiPrec.prototype._copy = function( src, src_pos, dst, dst_pos, len ){
-	src = this._clone( src );
+	src = this.clone( src );
 	for( var i = 0; i < len; i++ ){
 		dst[dst_pos + i] = src[src_pos + i];
 	}

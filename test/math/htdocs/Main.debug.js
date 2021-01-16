@@ -1301,6 +1301,9 @@ function _FACTORIAL( x ){
  var f = 1;
  for( var i = 2; i <= x; i++ ){
   f *= i;
+  if( _ISINF( f ) ){
+   break;
+  }
  }
  return m ? -f : f;
 }

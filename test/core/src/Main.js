@@ -6,6 +6,10 @@
 //window.useStorage;	// ストレージを使用するかどうか
 //window.lockGUpdate;
 
+#ifndef DEBUG
+window.onerror = clip_onerror;
+#endif // DEBUG
+
 var testFlag = false;	// テスト表示するかどうか
 
 var traceLevel = 0;	// トレース・レベル（0～3）
@@ -36,6 +40,33 @@ var extFuncData = new Array();
 #include "math\_Matrix.js"
 #include "math\_Time.js"
 #include "math\_Value.js"
+
+#include "mp\_MultiPrec.js"
+#include "mp\_abs.js"
+#include "mp\_add.js"
+#include "mp\_cmp.js"
+#include "mp\_div.js"
+#include "mp\_fadd.js"
+#include "mp\_fcmp.js"
+#include "mp\_fdigit.js"
+#include "mp\_fdiv.js"
+#include "mp\_fdiv2.js"
+#include "mp\_fmul.js"
+#include "mp\_fnum2str.js"
+#include "mp\_fround.js"
+#include "mp\_fsqrt.js"
+#include "mp\_fsqrt2.js"
+#include "mp\_fsqrt3.js"
+#include "mp\_fstr2num.js"
+#include "mp\_fsub.js"
+#include "mp\_ftrunc.js"
+#include "mp\_mul.js"
+#include "mp\_neg.js"
+#include "mp\_num2str.js"
+#include "mp\_set.js"
+#include "mp\_sqrt.js"
+#include "mp\_str2num.js"
+#include "mp\_sub.js"
 
 #include "param\_Boolean.js"
 #include "param\_Float.js"
@@ -343,9 +374,12 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	// 定義定数の値（regGWorldBgColorより後に設定）
 	setDefineValue();
 
+	// 多倍長演算サポート
+	newProcMultiPrec();
+
 	// 計算処理メイン・クラスを生成する
 	setProcEnv( new _ProcEnv() );
-	topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
+	topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
 	topProc._printAns = true;
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( traceLevel > 0 );
@@ -900,6 +934,14 @@ function printAnsComplex( real, imag ){
 	con.println( real + imag );
 	con.setBold( false );
 }
+function printAnsMultiPrec( str ){
+	con.newLine();
+	con.setBold( true );
+	con.setColor( "0000ff" );
+	con.println( str );
+	con.setColor();
+	con.setBold( false );
+}
 function printWarn( warn, num, func ){
 	con.newLine();
 	if( (func != null) && (func.length > 0) ){
@@ -1098,7 +1140,7 @@ function doCommandGUpdate( gWorld ){
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 	childParam._enableCommand = false;
 	childParam._enableStat = false;
@@ -1110,7 +1152,7 @@ _CATCH
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 	childParam._enableCommand = false;
 	childParam._enableStat = false;
@@ -1205,7 +1247,7 @@ function doCustomCommand( _this, param, code, token ){
 
 		con.println( (param._base == 0) ? "zero-based" : "one-based" );
 
-		switch( param._mode ){
+		switch( param._mode & _CLIP_MODE_MASK ){
 		case _CLIP_MODE_E_FLOAT:   con.print( "efloat"   ); break;
 		case _CLIP_MODE_F_FLOAT:   con.print( "float"    ); break;
 		case _CLIP_MODE_G_FLOAT:   con.print( "gfloat"   ); break;
@@ -1238,6 +1280,27 @@ function doCustomCommand( _this, param, code, token ){
 		case _ANG_TYPE_GRAD: con.print( "grad" ); break;
 		}
 		con.println();
+
+		if( param.isMultiPrec() ){
+			switch( param._mode ){
+			case _CLIP_MODE_F_MULTIPREC: con.print( "mfloat" ); break;
+			case _CLIP_MODE_I_MULTIPREC: con.print( "mint"   ); break;
+			}
+			con.print( ", " ); con.print( "prec " + param._mpPrec );
+			con.print( ", " );
+			switch( param._mpRound ){
+			case _MP_FROUND_UP:         con.print( "up"      ); break;
+			case _MP_FROUND_DOWN:       con.print( "down"    ); break;
+			case _MP_FROUND_CEILING:    con.print( "ceiling" ); break;
+			case _MP_FROUND_FLOOR:      con.print( "floor"   ); break;
+			case _MP_FROUND_HALF_UP:    con.print( "h_up"    ); break;
+			case _MP_FROUND_HALF_DOWN:  con.print( "h_down"  ); break;
+			case _MP_FROUND_HALF_EVEN:  con.print( "h_even"  ); break;
+			case _MP_FROUND_HALF_DOWN2: con.print( "h_down2" ); break;
+			case _MP_FROUND_HALF_EVEN2: con.print( "h_even2" ); break;
+			}
+			con.println();
+		}
 
 		con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
 		con.print( ", " ); con.print( "warn "    + (_this._printWarn   ? "TRUE" : "FALSE") );
@@ -1462,14 +1525,14 @@ function doCustomCommand( _this, param, code, token ){
 		}
 		return _CLIP_PROC_ERR_COMMAND_NULL;
 	case _CLIP_COMMAND_CUSTOM_TEST:
-		var value = new _Matrix();
+		var value = new _ProcVal();
 		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-			testFlag = (_INT( value.toFloat( 0, 0 ) ) != 0);
+			testFlag = (_INT( value.mat().toFloat( 0, 0 ) ) != 0);
 			break;
 		}
 		return _CLIP_PROC_ERR_COMMAND_NULL;
 	case _CLIP_COMMAND_CUSTOM_TRACE:
-		var value = new _Matrix();
+		var value = new _ProcVal();
 		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
 			if( (traceLevel > 0) && (traceString.length > 0) ){
 				if( canUseWriteFile() ){
@@ -1478,7 +1541,7 @@ function doCustomCommand( _this, param, code, token ){
 			}
 			traceString = "";
 
-			traceLevel = _INT( value.toFloat( 0, 0 ) );
+			traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
 			setProcTraceFlag( traceLevel > 0 );
 
 			break;

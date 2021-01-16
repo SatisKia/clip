@@ -72,7 +72,7 @@ function _EasyClip(){
 	if( window.doCommandPlot == undefined ){
 		window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){
 			// 親プロセスの環境を受け継いで、子プロセスを実行する
-			var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -84,7 +84,7 @@ function _EasyClip(){
 	if( window.doCommandRePlot == undefined ){
 		window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){
 			// 親プロセスの環境を受け継いで、子プロセスを実行する
-			var childProc = new _Proc( parentParam._mode, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -99,10 +99,13 @@ function _EasyClip(){
 	// 定義定数の値
 	setDefineValue();
 
+	// 多倍長演算サポート
+	newProcMultiPrec();
+
 	// 計算処理メイン・クラスを生成する
 	this._procEnv = new _ProcEnv();
 	setProcEnv( this._procEnv );
-	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false/*_PROC_DEF_GUPDATE_FLAG*/ );
+	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false/*_PROC_DEF_GUPDATE_FLAG*/ );
 	this._proc._printAns = false;
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( false );
@@ -244,6 +247,10 @@ _EasyClip.prototype = {
 		this._proc.strSet( this._param._array, _CHAR( chr ), string );
 		return this;
 	},
+	setMultiPrec : function( chr, n/*Array*/ ){
+		this._setEnv();
+		this._param._array._mp[_CHAR( chr )] = Array.from( n );
+	},
 
 	// 変数・配列の値を確認する
 	getAnsValue : function(){
@@ -257,6 +264,10 @@ _EasyClip.prototype = {
 	getAnsMatrixString : function( indent ){
 		this._setEnv();
 		return this.getArrayTokenString( this._param, this._param._array.makeToken( new _Token(), 0 ), indent );
+	},
+	getAnsMultiPrec : function(){
+		this._setEnv();
+		return this._param._array._mp[0];
 	},
 	getValue : function( chr ){
 		this._setEnv();
@@ -412,11 +423,38 @@ _EasyClip.prototype = {
 		this._setEnv();
 		return this._proc.strGet( this._param._array, _CHAR( chr ) );
 	},
+	getMultiPrec : function( chr ){
+		this._setEnv();
+		return this._param._array._mp[_CHAR( chr )];
+	},
 
 	// 各種設定
-	setMode : function( mode ){
+	setMode : function( mode, param1, param2 ){
 		this._setEnv();
 		this._param.setMode( mode );
+		if( (mode & _CLIP_MODE_MULTIPREC) != 0 ){
+			if( param1 != undefined ){
+				if( param2 != undefined ){
+					this._param.mpSetPrec( param1 );
+					param1 = param2;
+				}
+				if( !(this._param.mpSetRound( param1 )) ){
+					this._param.mpSetPrec( param1 );
+				}
+			}
+		} else if( ((mode & _CLIP_MODE_FLOAT) != 0) || ((mode & _CLIP_MODE_COMPLEX) != 0) ){
+			if( param1 != undefined ){
+				this._param.setPrec( param1 );
+			}
+		} else if( (mode & _CLIP_MODE_TIME) != 0 ){
+			if( param1 != undefined ){
+				this._param.setFps( param1 );
+			}
+		} else if( (mode & _CLIP_MODE_INT) != 0 ){
+			if( param1 != undefined ){
+				this._param.setRadix( param1 );
+			}
+		}
 		return this;
 	},
 	setPrec : function( prec ){
