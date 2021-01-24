@@ -1395,19 +1395,85 @@ function doCustomCommand( _this, param, code, token ){
 			var label;
 
 			con.setColor( "0000ff" );
+			if( param.isMultiPrec() ){
+				for( var step = 0; step < 4; step++ ){
+					var tmp = new Array();
+					var i = 0;
+					for( index = 0; index < 256; index++ ){
+						if( index == 0 ){
+							if( step == 0 ){
+								if( (label = param._array._label._label[index]) != null ){
+									tmp[i] = label + "(@@:0)=" + _this.mpNum2Str( param, param._array._mp[index] );
+									i++;
+								} else if( param._array._mp[index].length > 0 ){
+									tmp[i] = "@@:0=" + _this.mpNum2Str( param, param._array._mp[index] );
+									i++;
+								}
+							}
+						} else if( (index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9) ){
+							if( step == 1 ){
+								if( (label = param._array._label._label[index]) != null ){
+									tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
+									i++;
+								} else if( param._array._mp[index].length > 0 ){
+									tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
+									i++;
+								}
+							}
+						} else {
+							if( step == 2 ){
+								if( (label = param._array._label._label[index]) != null ){
+									if( param._array._label._flag[index] == _LABEL_MOVABLE ){
+										if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
+											tmp[i] = label + "(@@:" + index + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
+										} else {
+											tmp[i] = label + "=" + _this.mpNum2Str( param, param._array._mp[index] );
+										}
+										i++;
+									}
+								}
+							}
+							if( step == 3 ){
+								if( (label = param._array._label._label[index]) != null ){
+									if( param._array._label._flag[index] != _LABEL_MOVABLE ){
+										tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
+										i++;
+									}
+								} else if( param._array._mp[index].length > 0 ){
+									tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
+									i++;
+								}
+							}
+						}
+					}
+					tmp.sort( function( a, b ){
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+						if( a < b ){
+							return -1;
+						} else if( a > b ){
+							return 1;
+						}
+						return 0;
+					} );
+					for( i = 0; i < tmp.length; i++ ){
+						con.println( tmp[i] );
+					}
+				}
+			}
 			for( var step = 0; step < 4; step++ ){
 				var tmp = new Array();
 				var i = 0;
 				for( index = 0; index < 256; index++ ){
 					if( index == 0 ){
-						if( step == 3 ){
+						if( step == 0 ){
 							if( (label = param._var._label._label[index]) != null ){
 								_token.valueToString( param, param.val( index ), real, imag );
-								tmp[i] = label + "(@)=" + real.str() + imag.str();
+								tmp[i] = label + "(@:0)=" + real.str() + imag.str();
 								i++;
 							} else if( !(param.isZero( index )) ){
 								_token.valueToString( param, param.val( index ), real, imag );
-								tmp[i] = "@ =" + real.str() + imag.str();
+								tmp[i] = "@:0=" + real.str() + imag.str();
 								i++;
 							}
 						}
@@ -1427,7 +1493,7 @@ function doCustomCommand( _this, param, code, token ){
 							}
 						}
 					} else {
-						if( step == 0 ){
+						if( step == 2 ){
 							if( (label = param._var._label._label[index]) != null ){
 								if( param._var._label._flag[index] == _LABEL_MOVABLE ){
 									_token.valueToString( param, param.val( index ), real, imag );
@@ -1440,7 +1506,7 @@ function doCustomCommand( _this, param, code, token ){
 								}
 							}
 						}
-						if( step == 2 ){
+						if( step == 3 ){
 							if( (label = param._var._label._label[index]) != null ){
 								if( param._var._label._flag[index] != _LABEL_MOVABLE ){
 									_token.valueToString( param, param.val( index ), real, imag );

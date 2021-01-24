@@ -8497,6 +8497,7 @@ _Proc.prototype = {
 				if( ret.set( this._processSe( param, this._valSeAns.setParam( param ) ) )._val != 0x00 ){
 					break;
 				}
+				param._mpFlag = this._valAns._mpFlag;
 			} else {
 				if( this._valAns._mpFlag ){
 					this._valAns._mp = Array.from( param._array._mp[0] );
@@ -8506,13 +8507,16 @@ _Proc.prototype = {
 				if( ret.set( this._processSub( param, this._valAns.setParam( param ) ) )._val != 0x00 ){
 					break;
 				}
+				param._mpFlag = this._valAns._mpFlag;
 				param._array.move( 0 );
 				if( this._valAns._mpFlag ){
 					param._array._mp[0] = Array.from( this._valAns._mp );
 				} else {
 					param._array._mat[0].ass( this._valAns._mat );
+					if( param.isMultiPrec() ){
+						param._array._mp[0] = Array.from( this._valAns.mp() );
+					}
 				}
-				param._mpFlag = this._valAns._mpFlag;
 			}
 			ret.set( 0x04 );
 			break;
@@ -8984,16 +8988,19 @@ _Proc.prototype = {
 		}
 		return func;
 	},
+	mpNum2Str : function( param, val ){
+		var tmp = new Array();
+		if( (param._mode == 0x1104) && (_proc_mp.getPrec( val ) > 0) ){
+			_proc_mp.ftrunc( tmp, val );
+		} else {
+			_proc_mp.fset( tmp, val );
+			_proc_mp.fround( tmp, param._mpPrec, param._mpRound );
+		}
+		return _proc_mp.fnum2str( tmp );
+	},
 	printAns : function( childParam ){
 		if( childParam._mpFlag ){
-			var tmp = new Array();
-			if( (childParam._mode == 0x1104) && (_proc_mp.getPrec( childParam._array._mp[0] ) > 0) ){
-				_proc_mp.ftrunc( tmp, childParam._array._mp[0] );
-			} else {
-				_proc_mp.fset( tmp, childParam._array._mp[0] );
-				_proc_mp.fround( tmp, childParam._mpPrec, childParam._mpRound );
-			}
-			printAnsMultiPrec( _proc_mp.fnum2str( tmp ) );
+			printAnsMultiPrec( this.mpNum2Str( childParam, childParam._array._mp[0] ) );
 		} else if( childParam._array._mat[0]._len > 1 ){
 			printAnsMatrix( childParam, childParam._array.makeToken( new _Token(), 0 ) );
 		} else {
@@ -9375,7 +9382,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				_proc_mp.fmul( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec );
+				_proc_mp.fmul( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec + 1 );
 			} else {
 				_proc_mp.mul( value.mp(), value.mp(), tmpValue.mp() );
 			}
@@ -9395,7 +9402,7 @@ _Proc.prototype = {
 				if( _this._printWarn && (_proc_mp.fcmp( tmpValue.mp(), _proc_mp.F( "0.0" ) ) == 0) ){
 					_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
 				}
-				_proc_mp.fdiv2( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec );
+				_proc_mp.fdiv2( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec + 1 );
 			} else {
 				if( _this._printWarn && (_proc_mp.cmp( tmpValue.mp(), _proc_mp.I( "0" ) ) == 0) ){
 					_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
@@ -9521,7 +9528,7 @@ _Proc.prototype = {
 			if( param._mode == 0x1011 ){
 				_proc_mp.fset( x, value.mp() );
 				for( var i = 1; i < y; i++ ){
-					_proc_mp.fmul( value.mp(), value.mp(), x, param._mpPrec );
+					_proc_mp.fmul( value.mp(), value.mp(), x, param._mpPrec + 1 );
 				}
 			} else {
 				_proc_mp.set( x, value.mp() );
@@ -9724,7 +9731,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				_proc_mp.fmul( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec );
+				_proc_mp.fmul( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec + 1 );
 			} else {
 				_proc_mp.mul( value.mp(), value.mp(), tmpValue.mp() );
 			}
@@ -9747,7 +9754,7 @@ _Proc.prototype = {
 				if( _this._printWarn && (_proc_mp.fcmp( tmpValue.mp(), _proc_mp.F( "0.0" ) ) == 0) ){
 					_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
 				}
-				_proc_mp.fdiv2( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec );
+				_proc_mp.fdiv2( value.mp(), value.mp(), tmpValue.mp(), param._mpPrec + 1 );
 			} else {
 				if( _this._printWarn && (_proc_mp.cmp( tmpValue.mp(), _proc_mp.I( "0" ) ) == 0) ){
 					_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
@@ -9891,7 +9898,7 @@ _Proc.prototype = {
 			if( param._mode == 0x1011 ){
 				_proc_mp.fset( x, value.mp() );
 				for( var i = 1; i < y; i++ ){
-					_proc_mp.fmul( value.mp(), value.mp(), x, param._mpPrec );
+					_proc_mp.fmul( value.mp(), value.mp(), x, param._mpPrec + 1 );
 				}
 			} else {
 				_proc_mp.set( x, value.mp() );
@@ -10126,56 +10133,24 @@ _Proc.prototype = {
 		var ret;
 		var tmpValue = new _ProcVal( _this, param );
 		if( (ret = _this._getSeOperand( param, code, token, tmpValue )) == 0x00 ){
-			if( param._mpFlag ){
-				if( param._mode == 0x1011 ){
-					if( _proc_mp.fcmp( rightValue.mp(), _proc_mp.F( "0.0" ) ) == 0 ){
-						if( (ret = _this._getSeOperand( param, code, token, value )) == 0x00 ){
-							ret = _this._skipSeOperand( code, token );
-						}
-					} else {
-						if( (ret = _this._skipSeOperand( code, token )) == 0x00 ){
-							ret = _this._getSeOperand( param, code, token, value );
-						}
-					}
-				} else {
-					if( _proc_mp.cmp( rightValue.mp(), _proc_mp.I( "0" ) ) == 0 ){
-						if( (ret = _this._getSeOperand( param, code, token, value )) == 0x00 ){
-							ret = _this._skipSeOperand( code, token );
-						}
-					} else {
-						if( (ret = _this._skipSeOperand( code, token )) == 0x00 ){
-							ret = _this._getSeOperand( param, code, token, value );
-						}
-					}
+			if( tmpValue.mat().notEqual( 0.0 ) ){
+				if( (ret = _this._getSeOperand( param, code, token, value )) == 0x00 ){
+					ret = _this._skipSeOperand( code, token );
 				}
 			} else {
-				if( tmpValue.mat().notEqual( 0.0 ) ){
-					if( (ret = _this._getSeOperand( param, code, token, value )) == 0x00 ){
-						ret = _this._skipSeOperand( code, token );
-					}
-				} else {
-					if( (ret = _this._skipSeOperand( code, token )) == 0x00 ){
-						ret = _this._getSeOperand( param, code, token, value );
-					}
+				if( (ret = _this._skipSeOperand( code, token )) == 0x00 ){
+					ret = _this._getSeOperand( param, code, token, value );
 				}
 			}
 		}
 		return ret;
 	},
 	_seSetFALSE : function( _this, param, code, token, value ){
-		if( param._mpFlag ){
-			_proc_mp.fset( value.mp(), _proc_mp.F( "0.0" ) );
-		} else {
-			value.matAss( 0 );
-		}
+		value.matAss( 0 );
 		return 0x00;
 	},
 	_seSetTRUE : function( _this, param, code, token, value ){
-		if( param._mpFlag ){
-			_proc_mp.fset( value.mp(), _proc_mp.F( "1.0" ) );
-		} else {
-			value.matAss( 1 );
-		}
+		value.matAss( 1 );
 		return 0x00;
 	},
 	_seSetZero : function( _this, param, code, token, value ){
@@ -10191,7 +10166,7 @@ _Proc.prototype = {
 		if( param._mode == 0x1011 ){
 			_proc_mp.fset( ret, x );
 			for( var i = 1; i < y; i++ ){
-				_proc_mp.fmul( ret, ret, x, param._mpPrec );
+				_proc_mp.fmul( ret, ret, x, param._mpPrec + 1 );
 			}
 		} else {
 			_proc_mp.set( ret, x );
@@ -10265,7 +10240,7 @@ _Proc.prototype = {
 		if( seFlag ){
 			if( !(this._curLine._token.skipComma()) ){
 				this._curLine._token.unlock( lock );
-				return null;
+				return -1;
 			}
 		}
 		if( this._curLine._token.getTokenParam( param ) ){
@@ -10292,7 +10267,6 @@ _Proc.prototype = {
 		}
 		if( index < 0 ){
 			this._curLine._token.unlock( lock );
-			return null;
 		}
 		return index;
 	},
@@ -10784,7 +10758,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				_proc_mp.fmul( value.mp(), tmpValue.mp(), tmpValue.mp(), param._mpPrec );
+				_proc_mp.fmul( value.mp(), tmpValue.mp(), tmpValue.mp(), param._mpPrec + 1 );
 			} else {
 				_proc_mp.mul( value.mp(), tmpValue.mp(), tmpValue.mp() );
 			}
@@ -10801,7 +10775,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				if( _proc_mp.fsqrt2( value.mp(), tmpValue.mp(), param._mpPrec, 4 ) ){
+				if( _proc_mp.fsqrt2( value.mp(), tmpValue.mp(), param._mpPrec + 1, 4 ) ){
 					_this._errorProc( 0x100A, _this._curLine._num, param, 14, null );
 				}
 			} else {
@@ -11485,7 +11459,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					_proc_mp.fmul( value.mp(), value.mp(), rightValue.mp(), param._mpPrec );
+					_proc_mp.fmul( value.mp(), value.mp(), rightValue.mp(), param._mpPrec + 1 );
 				} else {
 					_proc_mp.mul( value.mp(), value.mp(), rightValue.mp() );
 				}
@@ -11508,7 +11482,7 @@ _Proc.prototype = {
 					if( _this._printWarn && (_proc_mp.fcmp( rightValue.mp(), _proc_mp.F( "0.0" ) ) == 0) ){
 						_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
 					}
-					_proc_mp.fdiv2( value.mp(), value.mp(), rightValue.mp(), param._mpPrec );
+					_proc_mp.fdiv2( value.mp(), value.mp(), rightValue.mp(), param._mpPrec + 1 );
 				} else {
 					if( _this._printWarn && (_proc_mp.cmp( rightValue.mp(), _proc_mp.I( "0" ) ) == 0) ){
 						_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
@@ -11881,7 +11855,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					_proc_mp.fmul( value.mp(), value.mp(), rightValue.mp(), param._mpPrec );
+					_proc_mp.fmul( value.mp(), value.mp(), rightValue.mp(), param._mpPrec + 1 );
 				} else {
 					_proc_mp.mul( value.mp(), value.mp(), rightValue.mp() );
 				}
@@ -11908,7 +11882,7 @@ _Proc.prototype = {
 					if( _this._printWarn && (_proc_mp.fcmp( rightValue.mp(), _proc_mp.F( "0.0" ) ) == 0) ){
 						_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
 					}
-					_proc_mp.fdiv2( value.mp(), value.mp(), rightValue.mp(), param._mpPrec );
+					_proc_mp.fdiv2( value.mp(), value.mp(), rightValue.mp(), param._mpPrec + 1 );
 				} else {
 					if( _this._printWarn && (_proc_mp.cmp( rightValue.mp(), _proc_mp.I( "0" ) ) == 0) ){
 						_this._errorProc( 0x1001, _this._curLine._num, param, 14, null );
@@ -14281,27 +14255,13 @@ _Proc.prototype = {
 				_arrayIndex[1] = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
 				curPrint._string = _this.strGet( tmpParam._array, _arrayIndex[1] );
 				if( (curPrint._string.length == 0) && param._mpFlag ){
-					var tmp = new Array();
-					if( (param._mode == 0x1104) && (_proc_mp.getPrec( tmpParam._array._mp[_arrayIndex[1]] ) > 0) ){
-						_proc_mp.ftrunc( tmp, tmpParam._array._mp[_arrayIndex[1]] );
-					} else {
-						_proc_mp.fset( tmp, tmpParam._array._mp[_arrayIndex[1]] );
-						_proc_mp.fround( tmp, param._mpPrec, param._mpRound );
-					}
-					curPrint._string = _proc_mp.fnum2str( tmp );
+					curPrint._string = _this.mpNum2Str( tmpParam, tmpParam._array._mp[_arrayIndex[1]] );
 				}
 			} else {
 				_this._curLine._token.unlock( lock );
 				if( _this._const( param, code, token, value ) == 0x00 ){
 					if( param._mpFlag ){
-						var tmp = new Array();
-						if( (param._mode == 0x1104) && (_proc_mp.getPrec( value.mp() ) > 0) ){
-							_proc_mp.ftrunc( tmp, value.mp() );
-						} else {
-							_proc_mp.fset( tmp, value.mp() );
-							_proc_mp.fround( tmp, param._mpPrec, param._mpRound );
-						}
-						curPrint._string = _proc_mp.fnum2str( tmp );
+						curPrint._string = _this.mpNum2Str( param, value.mp() );
 					} else {
 						_this._token.valueToString( param, value.mat()._mat[0], real, imag );
 						curPrint._string = new String();
