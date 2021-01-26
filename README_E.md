@@ -86,15 +86,15 @@ window.errorProc = function( err, num, func, token ){
     var str = (((err & _CLIP_PROC_WARN) != 0) ? "warning:" : "error:") + intToString( err, 16, 4 ) + " line:" + num;
 };
 
-window.printAnsMatrix = function( param, array/*_Token*/ ){
-    // The following is an example of generating a string
-    var str = curClip().getArrayTokenString( param, array, 0 );
-};
 window.printAnsComplex = function( real, imag ){
     // The following is an example of generating a string
     var str = real + imag;
 };
 window.printAnsMultiPrec = function( str ){
+};
+window.printAnsMatrix = function( param, array/*_Token*/ ){
+    // The following is an example of generating a string
+    var str = curClip().getArrayTokenString( param, array, 0 );
 };
 window.printWarn = function( warn, num, func ){
     // The following is an example of generating a string
@@ -185,6 +185,7 @@ var clip = new _EasyClip();
 clip.setValue( 'a', 12.345 ); // @a in CLIP
 clip.setComplex( 'b', 12.3, 4.5 ); // @b in CLIP
 clip.setFract( 'c', -1, 3 ); // @c in CLIP
+clip.setMultiPrec( 'a', array/*Array*/ ); // @@a in CLIP
 ```
 
 ### Set values ​​in the array
@@ -204,7 +205,6 @@ clip.setArrayValue( 'h', [1, 1], 78 ); // @@h 1 1
 clip.setArrayComplex( 'i', [0], 12.3, 4.5 ); // @@i 0
 clip.setArrayFract( 'j', [2], 3, 7 ); // @@j 2
 clip.setString( 's', "Hello World!!" );
-clip.setMultiPrec( 'a', array/*Array*/ );
 ```
 
 ### Check the value of the variable
@@ -219,6 +219,7 @@ var value = clip.getValue( 'c' ).denom();
 var string = clip.getComplexString( 'b' );
 var string = clip.getFractString( 'c', false ); // Improper
 var string = clip.getFractString( 'c', true ); // Mixed
+var array = clip.getMultiPrec( 'a' );
 ```
 
 Since the return value of the getValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
@@ -232,7 +233,6 @@ var array = clip.getArray( 'a', 2 ); // Two-dimensional element
 var array = clip.getArray( 'a', N ); // N-dimensional element
 var string = "@@d = " + clip.getArrayString( 'd', 6 );
 var string = clip.getString( 's' );
-var array = clip.getMultiPrec( 'a' );
 ```
 
 You can also convert it to a string by passing the Array object obtained by the getArray function to JSON.stringify.
@@ -294,9 +294,9 @@ clip.setMode( mode, param1, param2 );
 | floor | Round to approach negative infinity |
 | h_up | round up on 5 and round down on 4 |
 | h_down | round up on 6 and round down on 5 |
-| h_even | When rounding with `prec` digits, if the number in the `prec` digit is odd, h_up is processed, and if it is even, h_down is processed. |
+| h_even | If the number in the `param1` digit is odd, h_up is processed, and if it is even, h_down is processed. |
 | h_down2 | banker's rounding |
-| h_even2 | When rounding with `prec` digits, if the number in the `prec` digit is odd, h_up is processed, and if it is even, h_down2 is processed. |
+| h_even2 | If the number in the `param1` digit is odd, h_up is processed, and if it is even, h_down2 is processed. |
 
 `param1` and `param1` can be omitted.
 
@@ -764,8 +764,8 @@ fround( a/*Array*/, prec, mode )
 | _MP_FROUND_FLOOR | Round to approach negative infinity |
 | _MP_FROUND_HALF_UP | round up on 5 and round down on 4 |
 | _MP_FROUND_HALF_DOWN | round up on 6 and round down on 5 |
-| _MP_FROUND_HALF_EVEN | When rounding with `prec` digits, if the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN is processed. |
+| _MP_FROUND_HALF_EVEN | If the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN is processed. |
 | _MP_FROUND_HALF_DOWN2 | banker's rounding |
-| _MP_FROUND_HALF_EVEN2 | When rounding with `prec` digits, if the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN2 is processed. |
+| _MP_FROUND_HALF_EVEN2 | If the number in the `prec` digit is odd, _MP_FROUND_HALF_UP is processed, and if it is even, _MP_FROUND_HALF_DOWN2 is processed. |
 
 If `mode` is omitted, the operation will be _MP_FROUND_HALF_EVEN.

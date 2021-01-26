@@ -77,8 +77,16 @@ dl {
 <hr class="hr">
 <a href="#operator_mat">演算子(行列計算)</a><br>
 <hr class="hr">
+<!--mp top-->
+<a href="#operator_mp">演算子(多倍長演算)</a><br>
+<hr class="hr">
+<!--mp end-->
 <a href="#func">内部関数</a><br>
 <hr class="hr">
+<!--mp top-->
+<a href="#func_mp">内部関数(多倍長演算)</a><br>
+<hr class="hr">
+<!--mp end-->
 <a href="#extfunc">外部関数</a><br>
 <hr class="hr">
 <a href="#eclipse">ECLIPSE</a><br>
@@ -201,6 +209,25 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <hr class="hr">
 <span class="pink">:radix </span><i>radix</i><br><dl><dd>基数<br></dl>
 <hr class="hr_border">
+<!--mp top-->
+<span class="pink">:mfloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>round_mode</i><span class="blue">]</span><br><dl><dd>多倍長浮動小数点型。<i>round_mode</i>は次のいずれかである。<br>
+<dl>
+<dd><span class="pink">up </span>ゼロから離れるように丸める<br>
+<dd><span class="pink">down </span>ゼロに近づくように丸める<br>
+<dd><span class="pink">ceiling </span>正の無限大に近づくように丸める<br>
+<dd><span class="pink">floor </span>負の無限大に近づくように丸める<br>
+<dd><span class="pink">h_up </span>四捨五入する<br>
+<dd><span class="pink">h_down </span>五捨六入する<br>
+<dd><span class="pink">h_even </span><i>prec</i>桁目の数値が奇数の場合はh_up、偶数の場合はh_down<br>
+<dd><span class="pink">h_down2 </span>五捨五超入する<br>
+<dd><span class="pink">h_even2 </span><i>prec</i>桁目の数値が奇数の場合はh_up、偶数の場合はh_down2<br>
+</dl>
+<dd>プロセス初期設定はh_even<br>
+</dl>
+<hr class="hr">
+<span class="pink">:mint</span><br><dl><dd>多倍長整数型<br></dl>
+<hr class="hr_border">
+<!--mp end-->
 <span class="pink">:ptype</span><br><dl><dd>親プロセスの型<br></dl>
 <hr class="hr_border">
 <span class="pink">:rad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>ラジアン。親プロセスに戻る時に計算結果の単位を変換しない／変換する。<br></dl>
@@ -668,6 +695,14 @@ CLIP言語では、多次元配列をサポートする。配列の要素数の�
 一次元配列を文字列として扱うことができる。文字列の各文字への設定または参照は、一次元配列への値の設定または参照により行う。<br>
 <hr class="hr">
 二次元配列を行列として扱うことができる。行列の要素への値の設定または参照は、二次元配列への値の設定または参照により行う。<br>
+<!--mp top-->
+<hr class="hr_border">
+多倍長型変数<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><br>
+<hr class="hr">
+配列データと多倍長数データは独立して保持される。<br>
+<!--mp end-->
 <hr class="hr_border">
 分数表現<br>
 <hr class="hr">
@@ -730,7 +765,7 @@ CLIP言語では、多次元配列をサポートする。配列の要素数の�
 <hr class="hr_border">
 CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が変数への代入の形になっていない場合、自動的に「計算結果用変数」に代入され、計算結果が保持される。そのため、計算記述を演算子から始めることができ、その場合、演算子の左辺は「計算結果用変数」になる。<br>
 <hr class="hr">
-変数<span class="pink">@:0</span>または行列<span class="pink">@@:0</span>を参照することで、現在の計算結果が得られる。それに加えて、文字<span class="pink">@</span>による参照ができる。これは、最後の計算結果がスカラーの場合、変数<span class="pink">@:0</span>が参照され、最後の計算結果が行列の場合、行列<span class="pink">@@:0</span>が参照される。<br>
+変数<span class="pink">@:0</span>または行列<!--mp top-->・多倍長型変数<!--mp end--><span class="pink">@@:0</span>を参照することで、現在の計算結果が得られる。それに加えて、文字<span class="pink">@</span>による参照ができる。これは、最後の計算結果がスカラーの場合、変数<span class="pink">@:0</span>が参照され、最後の計算結果が行列<!--mp top-->・多倍長数<!--mp end-->の場合、行列<!--mp top-->・多倍長型変数<!--mp end--><span class="pink">@@:0</span>が参照される。<br>
 
 <a name="stat"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -1001,6 +1036,80 @@ CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が�
 </tr>
 </table>
 
+<!--mp top-->
+<a name="operator_mp"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">演算子(多倍長演算)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+多倍長演算に用いることのできる演算子を優先度の高い順に挙げると次のようになる。<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+後置<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">++&nbsp;&nbsp;&nbsp;</span>後置インクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">--&nbsp;&nbsp;&nbsp;</span>後置デクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!&nbsp;&nbsp;&nbsp;&nbsp;</span>階乗<br>
+</td>
+</tr>
+<tr>
+<td>
+単項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[++]&nbsp;</span>前置インクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[--]&nbsp;</span>前置デクリメント<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-]&nbsp;&nbsp;</span>単項マイナス<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+]&nbsp;&nbsp;</span>単項プラス<br>
+二項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">**&nbsp;&nbsp;&nbsp;</span>累乗。右辺は整数値<br>
+</td>
+</tr>
+<tr>
+<td>
+二項<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">*&nbsp;&nbsp;&nbsp;&nbsp;</span>乗算<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">/&nbsp;&nbsp;&nbsp;&nbsp;</span>除算<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">%&nbsp;&nbsp;&nbsp;&nbsp;</span>モジュロ(剰余)。左辺、右辺は整数値<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">+&nbsp;&nbsp;&nbsp;&nbsp;</span>加算(プラス)<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">-&nbsp;&nbsp;&nbsp;&nbsp;</span>減算(マイナス)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&nbsp;&nbsp;&nbsp;&nbsp;</span>未満<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;=&nbsp;&nbsp;&nbsp;</span>以下<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&nbsp;&nbsp;&nbsp;&nbsp;</span>より大きい<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;=&nbsp;&nbsp;&nbsp;</span>以上<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">==&nbsp;&nbsp;&nbsp;</span>等しい<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!=&nbsp;&nbsp;&nbsp;</span>等しくない<br>
+</td>
+</tr>
+<tr>
+<td>
+三項(条件式)<br>
+<span class="pink">&nbsp;&nbsp;</span><i>condition</i> <span class="pink">?</span> <i>expr</i><span class="pink"> </span><i>expr</i><br>
+</td>
+</tr>
+<tr>
+<td>
+代入<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">= *= /= %= += -= **=</span><br>
+</td>
+</tr>
+</table>
+<!--mp end-->
+
 <a name="func"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
@@ -1208,6 +1317,28 @@ CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が�
 <hr class="hr">
 <span class="pink">indexof </span><i>label</i><br><dl><dd>ローカル変数・配列の一時インデックス<br></dl>
 
+<!--mp top-->
+<a name="func_mp"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">内部関数(多倍長演算)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">pow </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd><i>x</i>の<i>y</i>乗。<i>y</i>は整数値<br></dl>
+<hr class="hr">
+<span class="pink">sqr </span><i>val</i><br><dl><dd>自乗<br></dl>
+<hr class="hr">
+<span class="pink">sqrt </span><i>val</i><br><dl><dd>平方根<br></dl>
+<hr class="hr">
+<span class="pink">int </span><i>val</i><br><dl><dd>整数<br></dl>
+<hr class="hr">
+<span class="pink">abs </span><i>val</i><br><dl><dd>絶対値<br></dl>
+<hr class="hr">
+<span class="pink">fact </span><i>val</i><br><dl><dd>階乗<br></dl>
+<!--mp end-->
+
 <a name="extfunc"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
@@ -1250,9 +1381,9 @@ CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が�
 <hr class="hr">
 ニーモニックは、大文字・小文字は問わない。<br>
 <hr class="hr">
-第一オペランドには変数表現、配列表現、行列表現が使用できる。<br>
+第一オペランドには変数表現<!--mp top-->(多倍長型変数含む)<!--mp end-->、配列表現、行列表現が使用できる。<br>
 <hr class="hr">
-第二オペランド以降には、定数表現、変数表現、配列表現、行列表現、文字列表現、文字列定数が使用できる。<br>
+第二オペランド以降には、定数表現、変数表現<!--mp top-->(多倍長型変数含む)<!--mp end-->、配列表現、行列表現、文字列表現、文字列定数が使用できる。<br>
 <hr class="hr">
 括弧<span class="pink">()</span>で囲まれたCLIP記述を第二オペランド以降(ループ命令、リターン命令では第一オペランドも含む)に使用できる。ただし、括弧内の演算は、さらに括弧があればその中が優先されるが、原則は左側から右側へ行われる。また、ECLIPSEでは、括弧は釣り合いがとれている必要がある。<br>
 <hr class="hr">

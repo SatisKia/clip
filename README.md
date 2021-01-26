@@ -88,15 +88,15 @@ window.errorProc = function( err, num, func, token ){
     var str = (((err & _CLIP_PROC_WARN) != 0) ? "warning:" : "error:") + intToString( err, 16, 4 ) + " line:" + num;
 };
 
-window.printAnsMatrix = function( param, array/*_Token*/ ){
-    // 以下は文字列を生成する例
-    var str = curClip().getArrayTokenString( param, array, 0 );
-};
 window.printAnsComplex = function( real, imag ){
     // 以下は文字列を生成する例
     var str = real + imag;
 };
 window.printAnsMultiPrec = function( str ){
+};
+window.printAnsMatrix = function( param, array/*_Token*/ ){
+    // 以下は文字列を生成する例
+    var str = curClip().getArrayTokenString( param, array, 0 );
 };
 window.printWarn = function( warn, num, func ){
     // 以下は文字列を生成する例
@@ -187,6 +187,7 @@ var clip = new _EasyClip();
 clip.setValue( 'a', 12.345 ); // CLIPでの@a
 clip.setComplex( 'b', 12.3, 4.5 ); // CLIPでの@b
 clip.setFract( 'c', -1, 3 ); // CLIPでの@c
+clip.setMultiPrec( 'a', array/*Array*/ ); // CLIPでの@@a
 ```
 
 ### 配列に値を設定する
@@ -206,7 +207,6 @@ clip.setArrayValue( 'h', [1, 1], 78 ); // @@h 1 1
 clip.setArrayComplex( 'i', [0], 12.3, 4.5 ); // @@i 0
 clip.setArrayFract( 'j', [2], 3, 7 ); // @@j 2
 clip.setString( 's', "Hello World!!" );
-clip.setMultiPrec( 'a', array/*Array*/ );
 ```
 
 ### 変数の値を確認する
@@ -221,6 +221,7 @@ var value = clip.getValue( 'c' ).denom();
 var string = clip.getComplexString( 'b' );
 var string = clip.getFractString( 'c', false ); // Improper
 var string = clip.getFractString( 'c', true ); // Mixed
+var array = clip.getMultiPrec( 'a' );
 ```
 
 getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
@@ -234,7 +235,6 @@ var array = clip.getArray( 'a', 2 ); // Two-dimensional element
 var array = clip.getArray( 'a', N ); // N-dimensional element
 var string = "@@d = " + clip.getArrayString( 'd', 6 );
 var string = clip.getString( 's' );
-var array = clip.getMultiPrec( 'a' );
 ```
 
 getArray関数で取得したArrayオブジェクトをJSON.stringifyに渡すことでも文字列に変換できます。
@@ -296,9 +296,9 @@ clip.setMode( mode, param1, param2 );
 | floor | 負の無限大に近づくように丸める |
 | h_up | 四捨五入する |
 | h_down | 五捨六入する |
-| h_even | n桁で丸める場合のn桁目の数値が奇数の場合はh_up、偶数の場合はh_down |
+| h_even | `param1`桁目の数値が奇数の場合はh_up、偶数の場合はh_down |
 | h_down2 | 五捨五超入する |
-| h_even2 | n桁で丸める場合のn桁目の数値が奇数の場合はh_up、偶数の場合はh_down2 |
+| h_even2 | `param1`桁目の数値が奇数の場合はh_up、偶数の場合はh_down2 |
 
 `param1`、`param2`は省略できます。
 
@@ -766,8 +766,8 @@ fround( a/*Array*/, prec, mode )
 | _MP_FROUND_FLOOR | 負の無限大に近づくように丸める |
 | _MP_FROUND_HALF_UP | 四捨五入する |
 | _MP_FROUND_HALF_DOWN | 五捨六入する |
-| _MP_FROUND_HALF_EVEN | n桁で丸める場合のn桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN |
+| _MP_FROUND_HALF_EVEN | `prec`桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN |
 | _MP_FROUND_HALF_DOWN2 | 五捨五超入する |
-| _MP_FROUND_HALF_EVEN2 | n桁で丸める場合のn桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN2 |
+| _MP_FROUND_HALF_EVEN2 | `prec`桁目の数値が奇数の場合は_MP_FROUND_HALF_UP、偶数の場合は_MP_FROUND_HALF_DOWN2 |
 
 `mode`を省略すると、_MP_FROUND_HALF_EVENの動作になります。

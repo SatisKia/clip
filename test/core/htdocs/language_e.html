@@ -77,8 +77,16 @@ dl {
 <hr class="hr">
 <a href="#operator_mat">Operator (matrix calculation)</a><br>
 <hr class="hr">
+<!--mp top-->
+<a href="#operator_mp">Operator (multi-precision computation)</a><br>
+<hr class="hr">
+<!--mp end-->
 <a href="#func">Internal function</a><br>
 <hr class="hr">
+<!--mp top-->
+<a href="#func_mp">Internal function (multi-precision computation)</a><br>
+<hr class="hr">
+<!--mp end-->
 <a href="#extfunc">External function</a><br>
 <hr class="hr">
 <a href="#eclipse">ECLIPSE</a><br>
@@ -199,6 +207,25 @@ The comment start character is identified before <span class="pink">[]</span> or
 <hr class="hr">
 <span class="pink">:radix </span><i>radix</i><br><dl><dd>Radix<br></dl>
 <hr class="hr_border">
+<!--mp top-->
+<span class="pink">:mfloat </span><span class="blue">[</span><i>prec</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>round_mode</i><span class="blue">]</span><br><dl><dd>Multi-precision floating point type. <i>round_mode</i> is one of the following:<br>
+<dl>
+<dd><span class="pink">up </span>Round away from zero<br>
+<dd><span class="pink">down </span>Round to near zero<br>
+<dd><span class="pink">ceiling </span>Round to approach positive infinity<br>
+<dd><span class="pink">floor </span>Round to approach negative infinity<br>
+<dd><span class="pink">h_up </span>round up on 5 and round down on 4<br>
+<dd><span class="pink">h_down </span>round up on 6 and round down on 5<br>
+<dd><span class="pink">h_even </span>If the number in the <i>prec</i> digit is odd, h_up is processed, and if it is even, h_down is processed.<br>
+<dd><span class="pink">h_down2 </span>banker's rounding<br>
+<dd><span class="pink">h_even2 </span>If the number in the <i>prec</i> digit is odd, h_up is processed, and if it is even, h_down2 is processed.<br>
+</dl>
+<dd>The initial setting of the process is h_even<br>
+</dl>
+<hr class="hr">
+<span class="pink">:mint</span><br><dl><dd>Multi-precision integer type<br></dl>
+<hr class="hr_border">
+<!--mp end-->
 <span class="pink">:ptype</span><br><dl><dd>Type of parent process<br></dl>
 <hr class="hr_border">
 <span class="pink">:rad </span><span class="blue">[</span><span class="pink">FALSE</span><span class="blue">|</span><span class="pink">TRUE</span><span class="blue">]</span><br><dl><dd>Radian. Do not convert / Convert units of calculation result when returning to parent process.<br></dl>
@@ -659,11 +686,17 @@ String / Matrix<br>
 <hr class="hr">
 <span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><br>
 <hr class="hr">
-<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@:</span><i>code</i><br>
-<hr class="hr">
 One-dimensional arrays can be handled as character strings. Setting or referring to each character of a character string is performed by setting or referring to a one-dimensional array.<br>
 <hr class="hr">
 A two-dimensional array can be treated as a matrix. Setting or referring to the elements of the matrix is done by setting or referring to the values in the two-dimensional array.<br>
+<!--mp top-->
+<hr class="hr_border">
+Multi-precision variable<br>
+<hr class="hr">
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">@@</span><i>char</i><br>
+<hr class="hr">
+Array data and multi-precision data are held independently.<br>
+<!--mp end-->
 <hr class="hr_border">
 Fractional representation<br>
 <hr class="hr">
@@ -725,7 +758,7 @@ It is necessary to initialize the row vector and the column vector as a two-dime
 <hr class="hr_border">
 The CLIP language has the concept of &quot;variable for calculation result&quot;, and when the calculation description is not in the form of assignment to a variable, it is automatically assigned to &quot;variable for calculation result&quot; and the calculation result is held. Therefore, you can start a calculation description from an operator, in which case the left side of the operator is a &quot;variable for calculation result&quot;.<br>
 <hr class="hr">
-By referring to the variable <span class="pink">@:0</span> or matrix <span class="pink">@@:0</span>, the current calculation result is obtained. In addition, we can refer to by the letter <span class="pink">@</span>. If the last calculation result is a scalar, the variable <span class="pink">@:0</span> is referred to, and if the last calculation result is a matrix, the matrix <span class="pink">@@:0</span> is referred to.<br>
+By referring to the variable <span class="pink">@:0</span> or matrix<!--mp top--> / multi-precision<!--mp end--> <span class="pink">@@:0</span>, the current calculation result is obtained. In addition, we can refer to by the letter <span class="pink">@</span>. If the last calculation result is a scalar, <span class="pink">@:0</span> is referred to, and if the last calculation result is a matrix<!--mp top--> or multi-precision<!--mp end-->, <span class="pink">@@:0</span> is referred to.<br>
 
 <a name="stat"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -995,6 +1028,80 @@ Substitution<br>
 </tr>
 </table>
 
+<!--mp top-->
+<a name="operator_mp"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Operator (multi-precision computation)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+The operators that can be used for multi-precision computation are listed in descending order of priority as follows.<br>
+<hr class="hr">
+<table border="1" cellspacing="1" cellpadding="1">
+<tr>
+<td width="340">
+Postfix<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">++&nbsp;&nbsp;&nbsp;</span>Increment<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">--&nbsp;&nbsp;&nbsp;</span>Decrement<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!&nbsp;&nbsp;&nbsp;&nbsp;</span>Factorial<br>
+</td>
+</tr>
+<tr>
+<td>
+Unary<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[++]&nbsp;</span>Prefix increment<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[--]&nbsp;</span>Prefix decrement<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[-]&nbsp;&nbsp;</span>Unary minus<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">[+]&nbsp;&nbsp;</span>Unary plus<br>
+Binomial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">**&nbsp;&nbsp;&nbsp;</span>Powers. The right side is an integer value.<br>
+</td>
+</tr>
+<tr>
+<td>
+Binomial<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">*&nbsp;&nbsp;&nbsp;&nbsp;</span>Multiplication<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">/&nbsp;&nbsp;&nbsp;&nbsp;</span>Division<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">%&nbsp;&nbsp;&nbsp;&nbsp;</span>Modulo (remainder). The left and right sides are integer values.<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">+&nbsp;&nbsp;&nbsp;&nbsp;</span>Addition (plus)<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">-&nbsp;&nbsp;&nbsp;&nbsp;</span>Subtraction (minus)<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;&nbsp;&nbsp;&nbsp;&nbsp;</span>Less than<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&lt;=&nbsp;&nbsp;&nbsp;</span>Less than or equal<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;&nbsp;&nbsp;&nbsp;&nbsp;</span>Greater than<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">&gt;=&nbsp;&nbsp;&nbsp;</span>Greater than or equal<br>
+</td>
+</tr>
+<tr>
+<td>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">==&nbsp;&nbsp;&nbsp;</span>Equal<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">!=&nbsp;&nbsp;&nbsp;</span>Not equal<br>
+</td>
+</tr>
+<tr>
+<td>
+Third term (conditional expression)<br>
+<span class="pink">&nbsp;&nbsp;</span><i>condition</i> <span class="pink">?</span> <i>expr</i><span class="pink"> </span><i>expr</i><br>
+</td>
+</tr>
+<tr>
+<td>
+Substitution<br>
+<span class="pink">&nbsp;&nbsp;</span><span class="pink">= *= /= %= += -= **=</span><br>
+</td>
+</tr>
+</table>
+<!--mp end-->
+
 <a name="func"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
@@ -1202,6 +1309,28 @@ Substitution<br>
 <hr class="hr">
 <span class="pink">indexof </span><i>label</i><br><dl><dd>Temporary index of local variable or array<br></dl>
 
+<!--mp top-->
+<a name="func_mp"></a><br>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="100%" bgcolor="#000000"><span style="font-size:20px; color:#FFFFFF">Internal function (multi-precision computation)</span></td>
+	</tr>
+</table>
+<hr class="hr">
+
+<span class="pink">pow </span><i>x</i><span class="pink"> </span><i>y</i><br><dl><dd>Calculate <i>x</i> to the <i>y</i>th power. <i>y</i> is an integer value.<br></dl>
+<hr class="hr">
+<span class="pink">sqr </span><i>val</i><br><dl><dd>Squaring<br></dl>
+<hr class="hr">
+<span class="pink">sqrt </span><i>val</i><br><dl><dd>Square root<br></dl>
+<hr class="hr">
+<span class="pink">int </span><i>val</i><br><dl><dd>Integer<br></dl>
+<hr class="hr">
+<span class="pink">abs </span><i>val</i><br><dl><dd>Absolute value<br></dl>
+<hr class="hr">
+<span class="pink">fact </span><i>val</i><br><dl><dd>Factorial<br></dl>
+<!--mp end-->
+
 <a name="extfunc"></a><br>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
@@ -1243,9 +1372,9 @@ Instructions consist of mnemonic starting with <span class="pink">$</span> and z
 <hr class="hr">
 Mnemonics are case-insensitive.<br>
 <hr class="hr">
-Variable representation, array representation, matrix representation can be used for the first operand.<br>
+Variable representation<!--mp top--> (includes multi-precision variable)<!--mp end-->, array representation, matrix representation can be used for the first operand.<br>
 <hr class="hr">
-After the second operand, you can use constant expressions, variable expressions, array expressions, matrix expressions, character string expressions, and character string constants.<br>
+After the second operand, you can use constant expressions, variable expressions<!--mp top--> (includes multi-precision variable)<!--mp end-->, array expressions, matrix expressions, character string expressions, and character string constants.<br>
 <hr class="hr">
 CLIP description enclosed in parentheses <span class="pink">()</span> can be described from the second operand (including the first operand in a loop instruction and a return instruction). However, if there are more parentheses in the operation in parentheses, priority is given to them, but in principle it is done from the left side to the right side. In ECLIPSE, parentheses need to be balanced.<br>
 <hr class="hr">
