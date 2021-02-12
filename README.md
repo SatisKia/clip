@@ -186,7 +186,7 @@ var clip = new _EasyClip();
 ```javascript
 clip.setValue( 'a', 12.345 ); // CLIPでの@a
 clip.setComplex( 'b', 12.3, 4.5 ); // CLIPでの@b
-clip.setFract( 'c', -1, 3 ); // CLIPでの@c
+clip.setFract( 'c', -123, 45 ); // CLIPでの@c
 clip.setMultiPrec( 'a', array/*Array*/ ); // CLIPでの@@a
 ```
 
@@ -218,10 +218,11 @@ var value = clip.getValue( 'b' ).imag();
 var isMinus = clip.getValue( 'c' ).fractMinus();
 var value = clip.getValue( 'c' ).num();
 var value = clip.getValue( 'c' ).denom();
+var array = clip.getMultiPrec( 'a' ); // Arrayオブジェクト
 var string = clip.getComplexString( 'b' );
 var string = clip.getFractString( 'c', false ); // Improper
 var string = clip.getFractString( 'c', true ); // Mixed
-var array = clip.getMultiPrec( 'a' );
+var string = clip.getMultiPrecString( 'a' );
 ```
 
 getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
@@ -248,9 +249,10 @@ var value = clip.getAnsValue().imag();
 var isMinus = clip.getAnsValue().fractMinus();
 var value = clip.getAnsValue().num();
 var value = clip.getAnsValue().denom();
+var array = clip.getAnsMultiPrec(); // Arrayオブジェクト
 var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
-var array = clip.getAnsMultiPrec();
+var string = clip.getAnsMultiPrecString( 'a' );
 ```
 
 getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。

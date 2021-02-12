@@ -1,5 +1,6 @@
 #!NAMESPACE mp
 :include !mp:mp
+:include !mp:mpf
 
 func mp_fround_get a[] n
 	$SET @l,mp_get_len a
@@ -49,4 +50,20 @@ func mp_fround_up &a[] n
 		$SET_Z a @l
 	endif
 	$LOOPCONT
+endfunc
+
+func mp_fround_isnotzero a[] n
+	:long
+	@n = 1 + n / MP_DIGIT
+	if a @n % pow 10 (n % MP_DIGIT) != 0
+		return TRUE
+	else
+		$DEC @n
+		if @n > 0
+			$LOOPSTART	# @n
+			$RETURN_A	(a @n != 0),TRUE
+			$LOOPEND_D	@n,0
+		endif
+	endif
+	return FALSE
 endfunc

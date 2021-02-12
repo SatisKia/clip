@@ -1,6 +1,5 @@
 #!NAMESPACE mp
 #\!- <a> <prec> <even_flag>
-:include !mp:mpf
 :include !mp:fround
 
 :params &a[] prec even_flag
@@ -15,21 +14,7 @@ if even_flag && (mp_fround_get a @n) % 2 == 1 && @a > 4
 elif @a > 5
 	$SET_T @u
 elif @a == 5 && @n > 1
-	@i = 1 + int ((@n - 1) / MP_DIGIT)
-	if a @i % pow 10 ((@n - 1) % MP_DIGIT) != 0
-		$SET_T @u
-	else
-		$SET_F @u
-		$DEC   @i
-		if @i > 0
-			$LOOPSTART # @i
-			if a @i != 0
-				$SET_T @u
-				break
-			endif
-			$LOOPEND_D @i,0
-		endif
-	endif
+	$SET @u,mp_fround_isnotzero a (@n - 2)
 else
 	$SET_F @u
 endif

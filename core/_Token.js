@@ -722,7 +722,7 @@ _Token.prototype = {
 				tmp[0] = stringToFloat( string, top, stop );
 				switch( string.charAt( stop._val ) ){
 				case '_':
-				case '」':
+				case '⏌':
 					if( stop._val == top ){
 						return false;
 					}
@@ -737,7 +737,7 @@ _Token.prototype = {
 					tmp[0] = stringToFloat( string, top, stop );
 					switch( string.charAt( stop._val ) ){
 					case '_':
-					case '」':
+					case '⏌':
 						if( stop._val == top ){
 							return false;
 						}
@@ -946,9 +946,9 @@ _Token.prototype = {
 				if( _MOD( value.num(), value.denom() ) != 0 ){
 					real.set( value.fractMinus() ? "-" : "" );
 					real.add( _DIV( value.num(), value.denom() ) );
-					real.add( "」" );
+					real.add( "⏌" );
 					real.add( _MOD( value.num(), value.denom() ) );
-					real.add( "」" );
+					real.add( "⏌" );
 					real.add( value.denom() );
 				} else {
 					real.set( value.fractMinus() ? "-" : "" );
@@ -966,7 +966,7 @@ _Token.prototype = {
 			} else {
 				real.set( value.fractMinus() ? "-" : "" );
 				real.add( value.num() );
-				real.add( "」" );
+				real.add( "⏌" );
 				real.add( value.denom() );
 			}
 			imag.set( "" );
@@ -1089,7 +1089,7 @@ _Token.prototype = {
 				case 'i':
 				case 'I':
 				case '_':
-				case '」':
+				case '⏌':
 				case ':':
 					if( src.charAt( top ) == '.' ){
 						_float = true;
@@ -1120,7 +1120,7 @@ _Token.prototype = {
 				case 'i':
 				case 'I':
 				case '_':
-				case '」':
+				case '⏌':
 				case ':':
 					_break = true;
 					break;

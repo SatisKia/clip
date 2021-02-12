@@ -338,6 +338,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
 		if( isEnglish ) error = "You can only specify up to 10 arguments for the command \"" + token.slice( 1 ) + "\".";
 		else            error = "コマンド" + token.slice( 1 ) + "の引数は10個までしか指定できません";
 		break;
+	case _CLIP_PROC_ERR_COMMAND_RADIX:
+		if( isEnglish ) error = "Command \"" + token.slice( 1 ) + "\" is invalid.";
+		else            error = "コマンド" + token.slice( 1 ) + "は無効です";
+		break;
 	case _CLIP_PROC_ERR_FUNC_OPEN:
 		if( isEnglish ) error = "The external function \"" + token.slice( 1 ) + "\" can not be opened.";
 		else            error = "外部関数" + token.slice( 1 ) + "がオープンできません";

@@ -326,7 +326,7 @@ function _EasyClip(){
 	}
 	if( window.doCommandPlot == undefined ){
 		window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -337,7 +337,7 @@ function _EasyClip(){
 	}
 	if( window.doCommandRePlot == undefined ){
 		window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -349,19 +349,15 @@ function _EasyClip(){
 	defGWorldFunction();
 	defProcFunction();
 	setDefineValue();
-	newProcMultiPrec();
 	this._procEnv = new _ProcEnv();
 	setProcEnv( this._procEnv );
-	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false );
-	this._proc._printAns = false;
+	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, false, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false );
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( false );
 	setProcLoopMax( loopMax );
 	this._param = new _Param();
-	this._param._enableCommand = true;
-	this._param._enableOpPow = false;
-	this._param._enableStat = true;
 	setGlobalParam( this._param );
+	initProc();
 	srand( time() );
 	rand();
 	this._palette = null;
@@ -413,6 +409,10 @@ _EasyClip.prototype = {
 		this._param.setDenom ( index, _ABS( denom ), false );
 		this._param.fractReduce ( index, false );
 		return this;
+	},
+	setMultiPrec : function( chr, n ){
+		this._setEnv();
+		this._param._array._mp[_CHAR( chr )] = Array.from( n );
 	},
 	setVector : function( chr, value ){
 		this._setEnv();
@@ -481,13 +481,13 @@ _EasyClip.prototype = {
 		this._proc.strSet( this._param._array, _CHAR( chr ), string );
 		return this;
 	},
-	setMultiPrec : function( chr, n ){
-		this._setEnv();
-		this._param._array._mp[_CHAR( chr )] = Array.from( n );
-	},
 	getAnsValue : function(){
 		this._setEnv();
 		return this._param.val( 0 );
+	},
+	getAnsMultiPrec : function(){
+		this._setEnv();
+		return this._param._array._mp[0];
 	},
 	getAnsMatrix : function(){
 		this._setEnv();
@@ -497,13 +497,21 @@ _EasyClip.prototype = {
 		this._setEnv();
 		return this.getArrayTokenString( this._param, this._param._array.makeToken( new _Token(), 0 ), indent );
 	},
-	getAnsMultiPrec : function(){
-		this._setEnv();
-		return this._param._array._mp[0];
+	getAnsMultiPrecString : function(){
+		var array = this.getAnsMultiPrec();
+		var mp = procMultiPrec();
+		if( mp.getPrec( array ) == 0 ){
+			return mp.num2str( array );
+		}
+		return mp.fnum2str( array );
 	},
 	getValue : function( chr ){
 		this._setEnv();
 		return this._param.val( _CHAR( chr ) );
+	},
+	getMultiPrec : function( chr ){
+		this._setEnv();
+		return this._param._array._mp[_CHAR( chr )];
 	},
 	getComplexString : function( chr ){
 		var string = new String();
@@ -526,8 +534,8 @@ _EasyClip.prototype = {
 			if( _MOD( value.num(), value.denom() ) != 0 ){
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
-				string += "」" + _MOD( value.num(), value.denom() );
-				string += "」" + value.denom();
+				string += "⏌" + _MOD( value.num(), value.denom() );
+				string += "⏌" + value.denom();
 			} else {
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
@@ -540,10 +548,18 @@ _EasyClip.prototype = {
 				string += "" + value.num();
 			} else {
 				string = value.fractMinus() ? "-" : "";
-				string += "" + value.num() + "」" + value.denom();
+				string += "" + value.num() + "⏌" + value.denom();
 			}
 		}
 		return string;
+	},
+	getMultiPrecString : function( chr ){
+		var array = this.getMultiPrec( chr );
+		var mp = procMultiPrec();
+		if( mp.getPrec( array ) == 0 ){
+			return mp.num2str( array );
+		}
+		return mp.fnum2str( array );
 	},
 	getArray : function( chr, dim ){
 		this._setEnv();
@@ -608,7 +624,6 @@ _EasyClip.prototype = {
 	},
 	getArrayTokenString : function( param, array , indent ){
 		this._setEnv();
-		var _token = new _Token();
 		var i;
 		var code;
 		var token;
@@ -627,7 +642,7 @@ _EasyClip.prototype = {
 				}
 				enter = false;
 			}
-			string += _token.tokenString( param, code, token );
+			string += procToken().tokenString( param, code, token );
 			string += arrayTokenStringSpace;
 			if( code == _CLIP_CODE_ARRAY_TOP ){
 				indent += 2;
@@ -646,10 +661,6 @@ _EasyClip.prototype = {
 	getString : function( chr ){
 		this._setEnv();
 		return this._proc.strGet( this._param._array, _CHAR( chr ) );
-	},
-	getMultiPrec : function( chr ){
-		this._setEnv();
-		return this._param._array._mp[_CHAR( chr )];
 	},
 	setMode : function( mode, param1, param2 ){
 		this._setEnv();

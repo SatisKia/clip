@@ -72,7 +72,7 @@ function _EasyClip(){
 	if( window.doCommandPlot == undefined ){
 		window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){
 			// 親プロセスの環境を受け継いで、子プロセスを実行する
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -84,7 +84,7 @@ function _EasyClip(){
 	if( window.doCommandRePlot == undefined ){
 		window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){
 			// 親プロセスの環境を受け継いで、子プロセスを実行する
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 			childParam._enableCommand = false;
 			childParam._enableStat = false;
@@ -99,24 +99,19 @@ function _EasyClip(){
 	// 定義定数の値
 	setDefineValue();
 
-	// 多倍長演算サポート
-	newProcMultiPrec();
-
 	// 計算処理メイン・クラスを生成する
 	this._procEnv = new _ProcEnv();
 	setProcEnv( this._procEnv );
-	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false/*_PROC_DEF_GUPDATE_FLAG*/ );
-	this._proc._printAns = false;
+	this._proc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, false, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, false/*_PROC_DEF_GUPDATE_FLAG*/ );
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( false );
 	setProcLoopMax( loopMax );
 
 	// 計算パラメータ・クラスを生成する
 	this._param = new _Param();
-	this._param._enableCommand = true;
-	this._param._enableOpPow = false;
-	this._param._enableStat = true;
 	setGlobalParam( this._param );
+
+	initProc();	// setProcEnvより後に実行
 
 	// 乱数を初期化する
 	srand( time() );
@@ -179,6 +174,10 @@ _EasyClip.prototype = {
 		this._param.setDenom     ( index, _ABS( denom ), false );
 		this._param.fractReduce  ( index, false );
 		return this;
+	},
+	setMultiPrec : function( chr, n/*Array*/ ){
+		this._setEnv();
+		this._param._array._mp[_CHAR( chr )] = Array.from( n );
 	},
 	setVector : function( chr, value/*Array*/ ){
 		this._setEnv();
@@ -247,15 +246,15 @@ _EasyClip.prototype = {
 		this._proc.strSet( this._param._array, _CHAR( chr ), string );
 		return this;
 	},
-	setMultiPrec : function( chr, n/*Array*/ ){
-		this._setEnv();
-		this._param._array._mp[_CHAR( chr )] = Array.from( n );
-	},
 
 	// 変数・配列の値を確認する
 	getAnsValue : function(){
 		this._setEnv();
 		return this._param.val( 0 );
+	},
+	getAnsMultiPrec : function(){
+		this._setEnv();
+		return this._param._array._mp[0];
 	},
 	getAnsMatrix : function(){
 		this._setEnv();
@@ -265,13 +264,21 @@ _EasyClip.prototype = {
 		this._setEnv();
 		return this.getArrayTokenString( this._param, this._param._array.makeToken( new _Token(), 0 ), indent );
 	},
-	getAnsMultiPrec : function(){
-		this._setEnv();
-		return this._param._array._mp[0];
+	getAnsMultiPrecString : function(){
+		var array = this.getAnsMultiPrec();
+		var mp = procMultiPrec();
+		if( mp.getPrec( array ) == 0 ){
+			return mp.num2str( array );
+		}
+		return mp.fnum2str( array );
 	},
 	getValue : function( chr ){
 		this._setEnv();
 		return this._param.val( _CHAR( chr ) );
+	},
+	getMultiPrec : function( chr ){
+		this._setEnv();
+		return this._param._array._mp[_CHAR( chr )];
 	},
 	getComplexString : function( chr ){
 		var string = new String();
@@ -294,8 +301,8 @@ _EasyClip.prototype = {
 			if( _MOD( value.num(), value.denom() ) != 0 ){
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
-				string += "」" + _MOD( value.num(), value.denom() );
-				string += "」" + value.denom();
+				string += "⏌" + _MOD( value.num(), value.denom() );
+				string += "⏌" + value.denom();
 			} else {
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
@@ -308,10 +315,18 @@ _EasyClip.prototype = {
 				string += "" + value.num();
 			} else {
 				string = value.fractMinus() ? "-" : "";
-				string += "" + value.num() + "」" + value.denom();
+				string += "" + value.num() + "⏌" + value.denom();
 			}
 		}
 		return string;
+	},
+	getMultiPrecString : function( chr ){
+		var array = this.getMultiPrec( chr );
+		var mp = procMultiPrec();
+		if( mp.getPrec( array ) == 0 ){
+			return mp.num2str( array );
+		}
+		return mp.fnum2str( array );
 	},
 	getArray : function( chr, dim ){
 		this._setEnv();
@@ -381,8 +396,6 @@ _EasyClip.prototype = {
 	getArrayTokenString : function( param, array/*_Token*/, indent ){
 		this._setEnv();
 
-		var _token = new _Token();
-
 		var i;
 		var code;
 		var token;
@@ -402,7 +415,7 @@ _EasyClip.prototype = {
 				}
 				enter = false;
 			}
-			string += _token.tokenString( param, code, token );
+			string += procToken().tokenString( param, code, token );
 			string += arrayTokenStringSpace;
 			if( code == _CLIP_CODE_ARRAY_TOP ){
 				indent += 2;
@@ -422,10 +435,6 @@ _EasyClip.prototype = {
 	getString : function( chr ){
 		this._setEnv();
 		return this._proc.strGet( this._param._array, _CHAR( chr ) );
-	},
-	getMultiPrec : function( chr ){
-		this._setEnv();
-		return this._param._array._mp[_CHAR( chr )];
 	},
 
 	// 各種設定

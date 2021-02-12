@@ -6,7 +6,7 @@
 <title></title>
 <script type="text/javascript" src="_Console.js"></script>
 <script type="text/javascript" src="_EasyClip.js"></script>
-<script type="text/javascript" src="../clip.js"></script>
+<script type="text/javascript" src="../clip.debug.js"></script>
 <script type="text/javascript">
 function onConsoleUpdate( id ){
 }
@@ -57,12 +57,6 @@ function main(){
 	window.arrayTokenStringSpace = "&nbsp;";
 	window.arrayTokenStringBreak = "<br>";
 
-	window.printAnsMatrix = function( param, array/*_Token*/ ){
-		var str = curClip().getArrayTokenString( param, array, 0 );
-		con.setColor( "0000ff" );
-		con.println( str );
-		con.setColor();
-	};
 	window.printAnsComplex = function( real, imag ){
 		var str = real + imag;
 		con.setColor( "0000ff" );
@@ -70,6 +64,12 @@ function main(){
 		con.setColor();
 	};
 	window.printAnsMultiPrec = function( str ){
+		con.setColor( "0000ff" );
+		con.println( str );
+		con.setColor();
+	};
+	window.printAnsMatrix = function( param, array/*_Token*/ ){
+		var str = curClip().getArrayTokenString( param, array, 0 );
 		con.setColor( "0000ff" );
 		con.println( str );
 		con.setColor();
@@ -147,8 +147,9 @@ function main(){
 
 	con.println();
 
-	// 計算結果の値を確認する
 	clip.setAnsFlag( true );
+
+	// 計算結果の値を確認する
 	clip.procLine( "@a + @b" );
 	value = clip.getAnsValue().real(); con.println( "real: " + value );
 	value = clip.getAnsValue().imag(); con.println( "imag: " + value );
@@ -201,10 +202,10 @@ function main(){
 	mpPrint( con, clip.getMultiPrec( 'a' ) );
 	con.println();
 	var mp = procMultiPrec();
-	var b = new Array();
-	mp.fsqrt2( b, mp.F( "2.0" ), 1000, 4 );
-	mp.fneg( b );
-	clip.setMultiPrec( 'b', b );
+	array = new Array();
+	mp.fsqrt2( array, mp.F( "2.0" ), 1000, 4 );
+	mp.fneg( array );
+	clip.setMultiPrec( 'b', array );
 	if( mp.fcmp( clip.getMultiPrec( 'a' ), clip.getMultiPrec( 'b' ) ) == 0 ){
 		con.println( "true" );
 	} else {

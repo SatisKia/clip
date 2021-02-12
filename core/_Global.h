@@ -622,6 +622,7 @@
 #define _CLIP_PROC_ERR_COMMAND_DEFINE	0x2142//(_CLIP_PROC_ERR | 0x42)		// ラベルは既に定義されています
 #define _CLIP_PROC_ERR_COMMAND_UNDEF	0x2143//(_CLIP_PROC_ERR | 0x43)		// ラベルは定義されていません
 #define _CLIP_PROC_ERR_COMMAND_PARAMS	0x2144//(_CLIP_PROC_ERR | 0x44)		// コマンドの引数は10個までしか指定できません
+#define _CLIP_PROC_ERR_COMMAND_RADIX	0x2145//(_CLIP_PROC_ERR | 0x45)		// コマンドradixは無効です
 
 #define _CLIP_PROC_ERR_FUNC_OPEN		0x2160//(_CLIP_PROC_ERR | 0x60)		// 外部関数がオープンできません
 #define _CLIP_PROC_ERR_FUNC_PARANUM		0x2161//(_CLIP_PROC_ERR | 0x61)		// 外部関数の引数は10個までしか指定できません

@@ -36,6 +36,8 @@ function _Param( num, parentParam, inherit ){
 	this.updateMode();
 	this.updateFps();
 
+	this._saveRadix = this._radix;
+
 	this._var   = new _Variable();	// 変数
 	this._array = new _Array();		// 配列
 	this._func  = new _Func();		// ユーザー定義関数
@@ -51,7 +53,7 @@ function _Param( num, parentParam, inherit ){
 
 	// 各種フラグ
 	this._enableCommand = true;		// コマンドが使用できるかどうかのフラグ
-	this._enableOpPow   = false;	// 累乗演算子が使用できるかどうかのフラグ
+	this._enableOpPow   = false;	// 累乗演算子"^"が使用できるかどうかのフラグ
 	this._enableStat    = true;		// ステートメントが使用できるかどうかのフラグ
 	this._printAns      = true;		// 一行の計算が終了した時に計算結果を表示するかどうかのフラグ
 	this._assFlag       = false;	// 最後の計算が代入かどうかのフラグ
@@ -131,7 +133,14 @@ _Param.prototype = {
 		}
 	},
 	setMode : function( mode ){
+		if( this._mode == _CLIP_MODE_I_MULTIPREC ){
+			this._radix = this._saveRadix;
+		}
 		this._mode = mode;
+		if( this._mode == _CLIP_MODE_I_MULTIPREC ){
+			this._saveRadix = this._radix;
+			this._radix = 10;
+		}
 		this.updateMode();
 	},
 //	mode : function(){

@@ -8,15 +8,6 @@
 var _MIN_VALUE = [ _SMIN_8, 0          , _SMIN_16, 0           , _SMIN_32, 0            ];
 var _MAX_VALUE = [ _SMAX_8, _UMAX_8 - 1, _SMAX_16, _UMAX_16 - 1, _SMAX_32, _UMAX_32 - 1 ];
 
-// 多倍長演算サポート
-var _proc_mp = null;
-function newProcMultiPrec(){
-	_proc_mp = new _MultiPrec();
-}
-function procMultiPrec(){
-	return _proc_mp;
-}
-
 var _proc_env;
 function _ProcEnv(){
 	this._proc_graph          = new _Graph();				// グラフ描画サポート
@@ -205,10 +196,9 @@ __ProcScan.prototype = {
 			param = globalParam();
 			// そのまま下に流す
 		default:
-			var token = new _Token();
 			var real = new _String();
 			var imag = new _String();
-			token.valueToString( param, param.val( proc.varIndexDirect( param, this._code, this._token ) ), real, imag );
+			_proc_token.valueToString( param, param.val( proc.varIndexDirect( param, this._code, this._token ) ), real, imag );
 			defString = real.str() + imag.str();
 			break;
 		}
@@ -225,9 +215,8 @@ __ProcScan.prototype = {
 			proc.strSet( param._array, proc.arrayIndexDirect( param, this._code, this._token ), newString );
 			break;
 		default:
-			var token = new _Token();
 			var value = new _Value();
-			if( token.stringToValue( param, newString, value ) ){
+			if( _proc_token.stringToValue( param, newString, value ) ){
 				var moveFlag = new _Boolean();
 				var index = proc.varIndexDirectMove( param, this._code, this._token, moveFlag );
 				param.setVal( index, value, moveFlag._val );
@@ -275,11 +264,23 @@ __Index.prototype = {
 #define _STAT_MODE_REGISTERING	1	// 行データの取り込み中
 #define _STAT_MODE_PROCESSING	2	// 制御処理実行中
 
-// 計算クラス
-function _Proc( parentMode, parentMpPrec, parentMpRound, printAssert, printWarn, gUpdateFlag ){
-	this._token = new _Token();	// 汎用_Tokenオブジェクト
-	this._val   = new _Value();	// updateAns用
+var _proc_token;	// 汎用_Tokenオブジェクト
+var _proc_val;		// updateAns用
+var _proc_mp;		// 多倍長演算サポート
+function initProc(){
+	_proc_token = new _Token();
+	_proc_val   = new _Value();
+	_proc_mp    = new _MultiPrec();
+}
+function procToken(){
+	return _proc_token;
+}
+function procMultiPrec(){
+	return _proc_mp;
+}
 
+// 計算クラス
+function _Proc( parentMode, parentMpPrec, parentMpRound, printAns, printAssert, printWarn, gUpdateFlag ){
 	this._valAns   = new _ProcVal( this );
 	this._valSeAns = new _ProcVal( this );
 
@@ -305,7 +306,7 @@ function _Proc( parentMode, parentMpPrec, parentMpRound, printAssert, printWarn,
 
 	// 各種フラグ
 	this._quitFlag        = false;
-	this._printAns        = false;
+	this._printAns        = printAns;
 	this._printAssert     = printAssert;
 	this._prevPrintAssert = printAssert;
 	this._printWarn       = printWarn;
@@ -966,9 +967,9 @@ _Proc.prototype = {
 		newCode  = _get_code;
 		newToken = _get_token;
 
-		this._token.delToken( this._curInfo._assCode, this._curInfo._assToken );
+		_proc_token.delToken( this._curInfo._assCode, this._curInfo._assToken );
 		this._curInfo._assCode = newCode;
-		this._curInfo._assToken = this._token.newToken( newCode, newToken );
+		this._curInfo._assToken = _proc_token.newToken( newCode, newToken );
 
 		if( newCode == _CLIP_CODE_VARIABLE ){
 			return this._procVariableFirst( param, newToken, value );
@@ -1143,7 +1144,7 @@ _Proc.prototype = {
 
 		tmpInc._flag = flag;
 		tmpInc._code  = code;
-		tmpInc._token = this._token.newToken( code, token );
+		tmpInc._token = _proc_token.newToken( code, token );
 		if( array == null ){
 			tmpInc._array = null;
 		} else {
@@ -1166,7 +1167,7 @@ _Proc.prototype = {
 			tmp = cur;
 			cur = cur._next;
 
-			this._token.delToken( tmp._code, tmp._token );
+			_proc_token.delToken( tmp._code, tmp._token );
 			if( tmp._array != null ){
 				tmp._array = null;
 			}
@@ -1306,7 +1307,7 @@ _Proc.prototype = {
 			this._curLine._token.unlock( lock );
 			if( (ret = this._constFirst( param, _CLIP_CODE_NULL, null, value )) != _CLIP_NO_ERR ){
 				this._curInfo = savInfo;
-				this._token.delToken( subInfo._assCode, subInfo._assToken );
+				_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 				subInfo._curArray = null;
 				return ret;
 			}
@@ -1323,7 +1324,7 @@ _Proc.prototype = {
 					token = _get_token;
 
 					this._curInfo = savInfo;
-					this._token.delToken( subInfo._assCode, subInfo._assToken );
+					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo.curArray = null;
 					return this._retError( _CLIP_PROC_ERR_COMPLEX, code, token );
 				} else {
@@ -1332,7 +1333,7 @@ _Proc.prototype = {
 					this._curLine._token.getToken();
 
 					this._curInfo = savInfo;
-					this._token.delToken( subInfo._assCode, subInfo._assToken );
+					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
 					return _CLIP_NO_ERR;
 				}
@@ -1350,7 +1351,7 @@ _Proc.prototype = {
 					token = _get_token;
 
 					this._curInfo = savInfo;
-					this._token.delToken( subInfo._assCode, subInfo._assToken );
+					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
 					return this._retError( _CLIP_PROC_ERR_FRACT, code, token );
 				} else {
@@ -1360,7 +1361,7 @@ _Proc.prototype = {
 					this._curLine._token.getToken();
 
 					this._curInfo = savInfo;
-					this._token.delToken( subInfo._assCode, subInfo._assToken );
+					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 					subInfo._curArray = null;
 					return _CLIP_NO_ERR;
 				}
@@ -1370,7 +1371,7 @@ _Proc.prototype = {
 		while( this._curLine._token.checkToken( _CLIP_CODE_END ) ){
 			if( (ret = this._processOp( param, value )) != _CLIP_NO_ERR ){
 				this._curInfo = savInfo;
-				this._token.delToken( subInfo._assCode, subInfo._assToken );
+				_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 				subInfo._curArray = null;
 				return ret;
 			}
@@ -1379,7 +1380,7 @@ _Proc.prototype = {
 		this._curLine._token.getToken();
 
 		this._curInfo = savInfo;
-		this._token.delToken( subInfo._assCode, subInfo._assToken );
+		_proc_token.delToken( subInfo._assCode, subInfo._assToken );
 		subInfo._curArray = null;
 		return ret;
 	},
@@ -1859,9 +1860,9 @@ _Proc.prototype = {
 	updateAns : function( childParam ){
 		if( this._angUpdateFlag && (complexAngType() != this._parentAngType) ){
 			// 計算結果を親プロセスの角度の単位に変換する
-			this._val.ass( childParam._array._mat[0]._mat[0] );
-			this._val.angToAng( this._angType, this._parentAngType );
-			childParam._array.setMatrix( 0, this._val, true );
+			_proc_val.ass( childParam._array._mat[0]._mat[0] );
+			_proc_val.angToAng( this._angType, this._parentAngType );
+			childParam._array.setMatrix( 0, _proc_val, true );
 		}
 	},
 
@@ -2058,7 +2059,7 @@ _Proc.prototype = {
 		} else {
 			var real = new _String();
 			var imag = new _String();
-			this._token.valueToString( childParam, childParam.val( 0 ), real, imag );
+			_proc_token.valueToString( childParam, childParam.val( 0 ), real, imag );
 			printAnsComplex( real.str(), imag.str() );
 		}
 	},
@@ -2266,14 +2267,14 @@ _Proc.prototype = {
 				err,
 				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
-				this._token.tokenString( param, code, token )
+				_proc_token.tokenString( param, code, token )
 				);
 		} else if( (err & _CLIP_PROC_ERR) != 0 ){
 			errorProc(
 				err,
 				param._fileFlag ? ((param._topNum > 0) ? num - param._topNum + 1 : num) : 0,
 				(param._funcName == null) ? "" : param._funcName,
-				this._token.tokenString( param, code, token )
+				_proc_token.tokenString( param, code, token )
 				);
 		} else if( err >= _CLIP_ERR_START ){
 			errorProc(
@@ -4601,7 +4602,7 @@ _Proc.prototype = {
 			ret = _this._procExtFunc( _this, param, _CLIP_CODE_EXTFUNC, func.str().slice( 1 ), value );
 		} else {
 			var _func = new _Integer();
-			if( !_this._token.checkFunc( func.str(), _func ) ){
+			if( !_proc_token.checkFunc( func.str(), _func ) ){
 				ret = _this._retError( _CLIP_PROC_ERR_CALL, code, token );
 			} else {
 				ret = _this._procFunc( _this, param, _CLIP_CODE_FUNCTION, _func._val, value );
@@ -4625,7 +4626,7 @@ _Proc.prototype = {
 		}
 
 		// 親プロセスの環境を受け継いで、子プロセスを実行する
-		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
 		var childParam = new _Param( _this._curLine._num, param, true );
 		childParam._enableCommand = false;
 		childParam._enableStat = false;
@@ -6850,6 +6851,10 @@ _Proc.prototype = {
 		return _CLIP_PROC_SUB_END;
 	},
 	_commandRadix : function( _this, param, code, token ){
+		if( param._mode == _CLIP_MODE_I_MULTIPREC ){
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_RADIX, code, token );
+		}
+
 		var value = new _ProcVal( _this, param );
 
 		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
@@ -8019,7 +8024,7 @@ _Proc.prototype = {
 					if( param._mpFlag ){
 						curPrint._string = _this.mpNum2Str( param, value.mp() );
 					} else {
-						_this._token.valueToString( param, value.mat()._mat[0], real, imag );
+						_proc_token.valueToString( param, value.mat()._mat[0], real, imag );
 						curPrint._string = new String();
 						curPrint._string = real.str() + imag.str();
 					}
@@ -8106,7 +8111,7 @@ _Proc.prototype = {
 					}
 					break;
 				}
-				_this._token.delToken( curScan._code, curScan._token );
+				_proc_token.delToken( curScan._code, curScan._token );
 				curScan._code = newCode;
 				switch( newCode ){
 				case _CLIP_CODE_VARIABLE:
@@ -8116,7 +8121,7 @@ _Proc.prototype = {
 					curScan._token = _this.arrayIndexParam( param, newToken );
 					break;
 				default:
-					curScan._token = _this._token.newToken( newCode, newToken );
+					curScan._token = _proc_token.newToken( newCode, newToken );
 					break;
 				}
 
@@ -9331,7 +9336,7 @@ _Proc.prototype = {
 			var ret;
 
 			// 親プロセスの環境を受け継いで、子プロセスを実行する
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
 			var childParam = new _Param( _this._curLine._num, parentParam, false );
 			_this.initInternalProc( childProc, func, childParam, parentParam );
 			if( mainProc( _this, parentParam, func, funcParam, childProc, childParam ) == _CLIP_PROC_END ){
@@ -9430,7 +9435,7 @@ _Proc.prototype = {
 		_this._getParams( parentParam, code, token, funcParam );
 
 		// 親プロセスの環境を受け継いで、子プロセスを実行する
-		var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
+		var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
 		var childParam = new _Param( _this._curLine._num, parentParam, false );
 
 		if( (func = procFunc().search( token, true, parentParam._nameSpace )) != null ){
@@ -10037,9 +10042,9 @@ function defProcFunction(){
 
 	if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
 	if( window.printTest == undefined ) window.printTest = function( param, line, num, comment ){};
-	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array/*_Token*/ ){};
 	if( window.printAnsComplex == undefined ) window.printAnsComplex = function( real, imag ){};
 	if( window.printAnsMultiPrec == undefined ) window.printAnsMultiPrec = function( str ){};
+	if( window.printAnsMatrix == undefined ) window.printAnsMatrix = function( param, array/*_Token*/ ){};
 	if( window.printWarn == undefined ) window.printWarn = function( warn, num, func ){};
 	if( window.printError == undefined ) window.printError = function( error, num, func ){};
 

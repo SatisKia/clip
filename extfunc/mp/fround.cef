@@ -1,31 +1,31 @@
 #!NAMESPACE mp
 #\!- <a> <prec> [<mode>]
-:include !mp:mpf
 :include !mp:fround
 :include !mp:frmode
 
 :params &a[] prec mode
 :ans FALSE
 
-$SUB_A  @n,mpf_get_prec a,prec
-$RETURN (@n < 1)
-$SET    @a,mp_fround_get a (@n - 1)
+$SUB_A	@n,mpf_get_prec a,prec
+$RETURN	(@n < 1)
+$SET	@a,mp_fround_get a (@n - 1)
+#$SET_F	@u
+#$SET_F	@U
 
 if @! < 3 # パラメータが2つの場合
 	$SET mode,MP_FROUND_HALF_EVEN
 endif
 switch mode
 case MP_FROUND_UP
-	$SET @u,(@a > 0)
+	$SET_T @U
 	breakswi
 case MP_FROUND_DOWN
-	$SET_F @u
 	breakswi
 case MP_FROUND_CEILING
-	$SET @u,(a 0 > 0 && (@a > 0))
+	$SET @U,(a 0 > 0)
 	breakswi
 case MP_FROUND_FLOOR
-	$SET @u,(a 0 < 0 && (@a > 0))
+	$SET @U,(a 0 < 0)
 	breakswi
 case MP_FROUND_HALF_UP
 	$SET @u,(@a > 4)
@@ -41,6 +41,14 @@ case MP_FROUND_HALF_EVEN
 	endif
 	breakswi
 endswi
+
+if @U
+	if @a > 0
+		$SET_T @u
+	elif @n > 1
+		$SET @u,mp_fround_isnotzero a (@n - 2)
+	endif
+endif
 
 if @u
 	mp_fround_zero a @n

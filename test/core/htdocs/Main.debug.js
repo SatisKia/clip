@@ -1262,6 +1262,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
   if( isEnglish ) error = "You can only specify up to 10 arguments for the command \"" + token.slice( 1 ) + "\".";
   else error = "コマンド" + token.slice( 1 ) + "の引数は10個までしか指定できません";
   break;
+ case _CLIP_PROC_ERR_COMMAND_RADIX:
+  if( isEnglish ) error = "Command \"" + token.slice( 1 ) + "\" is invalid.";
+  else error = "コマンド" + token.slice( 1 ) + "は無効です";
+  break;
  case _CLIP_PROC_ERR_FUNC_OPEN:
   if( isEnglish ) error = "The external function \"" + token.slice( 1 ) + "\" can not be opened.";
   else error = "外部関数" + token.slice( 1 ) + "がオープンできません";
@@ -1480,18 +1484,14 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  inputFile = new _InputFile( inputFileId );
  procError = new _ProcError();
  setDefineValue();
- newProcMultiPrec();
  setProcEnv( new _ProcEnv() );
- topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
- topProc._printAns = true;
+ topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, true, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
  setProcWarnFlowFlag( true );
  setProcTraceFlag( traceLevel > 0 );
  setProcLoopMax( loopMax );
  topParam = new _Param();
- topParam._enableCommand = true;
- topParam._enableOpPow = false;
- topParam._enableStat = true;
  setGlobalParam( topParam );
+ initProc();
  regCustomCommand( "env" , _CLIP_COMMAND_CUSTOM );
  regCustomCommand( "list" , (_CLIP_COMMAND_CUSTOM + 1) );
  regCustomCommand( "listd" , (_CLIP_COMMAND_CUSTOM + 2) );
@@ -1850,7 +1850,7 @@ function printTrace( param, line, num, comment, skipFlag ){
   } else {
    traceString += " ";
   }
-  traceString += (new _Token()).tokenString( param, code, token );
+  traceString += procToken().tokenString( param, code, token );
   if( traceLevel >= 2 ){
    if( traceLevel == 3 ){
     if( code == _CLIP_CODE_LABEL ){
@@ -1895,7 +1895,7 @@ function printTest( param, line, num, comment ){
   } else {
    con.print( " " );
   }
-  con.print( (new _Token()).tokenString( param, code, token ) );
+  con.print( procToken().tokenString( param, code, token ) );
   if( traceLevel >= 2 ){
    con.setColor( "0000ff" );
    if( traceLevel == 3 ){
@@ -1923,7 +1923,6 @@ function printTest( param, line, num, comment ){
  }
 }
 function getArrayTokenString( param, array , indent, sp, br ){
- var _token = new _Token();
  var i;
  var code;
  var token;
@@ -1942,7 +1941,7 @@ function getArrayTokenString( param, array , indent, sp, br ){
    }
    enter = false;
   }
-  string += _token.tokenString( param, code, token );
+  string += procToken().tokenString( param, code, token );
   string += sp;
   if( code == _CLIP_CODE_ARRAY_TOP ){
    indent += 2;
@@ -1957,12 +1956,6 @@ function getArrayTokenString( param, array , indent, sp, br ){
 function printMatrix( param, array , indent ){
  con.println( getArrayTokenString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
-function printAnsMatrix( param, array ){
- con.newLine();
- con.setBold( true );
- printMatrix( param, array, 0 );
- con.setBold( false );
-}
 function printAnsComplex( real, imag ){
  con.newLine();
  con.setBold( true );
@@ -1975,6 +1968,12 @@ function printAnsMultiPrec( str ){
  con.setColor( "0000ff" );
  con.println( str );
  con.setColor();
+ con.setBold( false );
+}
+function printAnsMatrix( param, array ){
+ con.newLine();
+ con.setBold( true );
+ printMatrix( param, array, 0 );
  con.setBold( false );
 }
 function printWarn( warn, num, func ){
@@ -2167,7 +2166,7 @@ function doCommandGUpdate( gWorld ){
  gUpdate( gWorld );
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false );
+ var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
  var childParam = new _Param( parentProc._curLine._num, parentParam, true );
  childParam._enableCommand = false;
  childParam._enableStat = false;
@@ -2178,7 +2177,7 @@ try {
  childProc.end();
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false );
+ var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
  var childParam = new _Param( parentProc._curLine._num, parentParam, true );
  childParam._enableCommand = false;
  childParam._enableStat = false;
@@ -2208,12 +2207,11 @@ function doCommandUsage( topUsage ){
  }
 }
 function doCommandDumpVar( param, index ){
- var _token = new _Token();
  var real = new _String();
  var imag = new _String();
  var label;
  var string = "";
- _token.valueToString( param, param.val( index ), real, imag );
+ procToken().valueToString( param, param.val( index ), real, imag );
  if( (label = param._var._label._label[index]) != null ){
   string = label;
   if( param._var._label._flag[index] != _LABEL_MOVABLE ){
@@ -2386,7 +2384,6 @@ function doCustomCommand( _this, param, code, token ){
     }
    }
   } else {
-   var _token = new _Token();
    var index;
    var real = new _String();
    var imag = new _String();
@@ -2465,11 +2462,11 @@ function doCustomCommand( _this, param, code, token ){
      if( index == 0 ){
       if( step == 0 ){
        if( (label = param._var._label._label[index]) != null ){
-        _token.valueToString( param, param.val( index ), real, imag );
+        procToken().valueToString( param, param.val( index ), real, imag );
         tmp[i] = label + "(@:0)=" + real.str() + imag.str();
         i++;
        } else if( !(param.isZero( index )) ){
-        _token.valueToString( param, param.val( index ), real, imag );
+        procToken().valueToString( param, param.val( index ), real, imag );
         tmp[i] = "@:0=" + real.str() + imag.str();
         i++;
        }
@@ -2480,11 +2477,11 @@ function doCustomCommand( _this, param, code, token ){
      ){
       if( step == 1 ){
        if( (label = param._var._label._label[index]) != null ){
-        _token.valueToString( param, param.val( index ), real, imag );
+        procToken().valueToString( param, param.val( index ), real, imag );
         tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
         i++;
        } else if( !(param.isZero( index )) ){
-        _token.valueToString( param, param.val( index ), real, imag );
+        procToken().valueToString( param, param.val( index ), real, imag );
         tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
         i++;
        }
@@ -2493,7 +2490,7 @@ function doCustomCommand( _this, param, code, token ){
       if( step == 2 ){
        if( (label = param._var._label._label[index]) != null ){
         if( param._var._label._flag[index] == _LABEL_MOVABLE ){
-         _token.valueToString( param, param.val( index ), real, imag );
+         procToken().valueToString( param, param.val( index ), real, imag );
          if( token == (_CLIP_COMMAND_CUSTOM + 2) ){
           tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
          } else {
@@ -2506,12 +2503,12 @@ function doCustomCommand( _this, param, code, token ){
       if( step == 3 ){
        if( (label = param._var._label._label[index]) != null ){
         if( param._var._label._flag[index] != _LABEL_MOVABLE ){
-         _token.valueToString( param, param.val( index ), real, imag );
+         procToken().valueToString( param, param.val( index ), real, imag );
          tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
          i++;
         }
        } else if( !(param.isZero( index )) ){
-        _token.valueToString( param, param.val( index ), real, imag );
+        procToken().valueToString( param, param.val( index ), real, imag );
         tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
         i++;
        }

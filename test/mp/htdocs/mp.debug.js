@@ -974,6 +974,17 @@ _MultiPrec.prototype._froundUp = function( a , n ){
 		}
 	}
 };
+_MultiPrec.prototype._froundIsNotZero = function( a , n ){
+	var nn = 1 + _DIV( n, _MP_DIGIT );
+	if( _MOD( a[nn], _POW( 10, _MOD( n, _MP_DIGIT ) ) ) != 0 ){
+		return true;
+	} else {
+		for( nn--; nn > 0; nn-- ){
+			if( a[nn] != 0 ){ return true; }
+		}
+	}
+	return false;
+};
 _MultiPrec.prototype.fround = function( a , prec, mode ){
 	var n = this.getPrec( a ) - prec;
 	if( n < 1 ){
@@ -981,20 +992,21 @@ _MultiPrec.prototype.fround = function( a , prec, mode ){
 	}
 	var aa = this._froundGet( a, n - 1 );
 	var u = false;
+	var uu = false;
 	if( mode == undefined ){
 		mode = 6;
 	}
 	switch( mode ){
 	case 0:
-		if( aa > 0 ){ u = true; }
+		uu = true;
 		break;
 	case 1:
 		break;
 	case 2:
-		if( a[0] > 0 && aa > 0 ){ u = true; }
+		if( a[0] > 0 ){ uu = true; }
 		break;
 	case 3:
-		if( a[0] < 0 && aa > 0 ){ u = true; }
+		if( a[0] < 0 ){ uu = true; }
 		break;
 	case 4:
 		if( aa > 4 ){ u = true; }
@@ -1018,16 +1030,16 @@ _MultiPrec.prototype.fround = function( a , prec, mode ){
 		if( aa > 5 ){
 			u = true;
 		} else if( aa == 5 && n > 1 ){
-			var i = 1 + _DIV( n - 1, _MP_DIGIT );
-			if( _MOD( a[i], _POW( 10, _MOD( n - 1, _MP_DIGIT ) ) ) != 0 ){
-				u = true;
-			} else {
-				for( i--; i > 0; i-- ){
-					if( a[i] != 0 ){ u = true; break; }
-				}
-			}
+			u = this._froundIsNotZero( a, n - 2 );
 		}
 		break;
+	}
+	if( uu ){
+		if( aa > 0 ){
+			u = true;
+		} else if( n > 1 ){
+			u = this._froundIsNotZero( a, n - 2 );
+		}
 	}
 	if( u ){
 		this._froundZero( a, n );

@@ -184,7 +184,7 @@ var clip = new _EasyClip();
 ```javascript
 clip.setValue( 'a', 12.345 ); // @a in CLIP
 clip.setComplex( 'b', 12.3, 4.5 ); // @b in CLIP
-clip.setFract( 'c', -1, 3 ); // @c in CLIP
+clip.setFract( 'c', -123, 45 ); // @c in CLIP
 clip.setMultiPrec( 'a', array/*Array*/ ); // @@a in CLIP
 ```
 
@@ -216,10 +216,11 @@ var value = clip.getValue( 'b' ).imag();
 var isMinus = clip.getValue( 'c' ).fractMinus();
 var value = clip.getValue( 'c' ).num();
 var value = clip.getValue( 'c' ).denom();
+var array = clip.getMultiPrec( 'a' ); // Array object
 var string = clip.getComplexString( 'b' );
 var string = clip.getFractString( 'c', false ); // Improper
 var string = clip.getFractString( 'c', true ); // Mixed
-var array = clip.getMultiPrec( 'a' );
+var string = clip.getMultiPrecString( 'a' );
 ```
 
 Since the return value of the getValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
@@ -246,9 +247,9 @@ var value = clip.getAnsValue().imag();
 var isMinus = clip.getAnsValue().fractMinus();
 var value = clip.getAnsValue().num();
 var value = clip.getAnsValue().denom();
+var array = clip.getAnsMultiPrec(); // Array object
 var matrix = clip.getAnsMatrix(); // _Matrix object
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
-var array = clip.getAnsMultiPrec();
 ```
 
 Since the return value of the getAnsValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.

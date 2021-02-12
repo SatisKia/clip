@@ -374,23 +374,18 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	// 定義定数の値（regGWorldBgColorより後に設定）
 	setDefineValue();
 
-	// 多倍長演算サポート
-	newProcMultiPrec();
-
 	// 計算処理メイン・クラスを生成する
 	setProcEnv( new _ProcEnv() );
-	topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
-	topProc._printAns = true;
+	topProc = new _Proc( _PROC_DEF_PARENT_MODE, _PROC_DEF_PARENT_MP_PREC, _PROC_DEF_PARENT_MP_ROUND, true, _PROC_DEF_PRINT_ASSERT, _PROC_DEF_PRINT_WARN, _PROC_DEF_GUPDATE_FLAG );
 	setProcWarnFlowFlag( true );
 	setProcTraceFlag( traceLevel > 0 );
 	setProcLoopMax( loopMax );
 
 	// 計算パラメータ・クラスを生成する
 	topParam = new _Param();
-	topParam._enableCommand = true;
-	topParam._enableOpPow = false;
-	topParam._enableStat = true;
 	setGlobalParam( topParam );
+
+	initProc();	// setProcEnvより後に実行
 
 	// カスタム・コマンドの登録
 	regCustomCommand( "env"     , _CLIP_COMMAND_CUSTOM_ENV      );
@@ -804,7 +799,7 @@ function printTrace( param, line, num, comment, skipFlag ){
 			traceString += " ";
 		}
 
-		traceString += (new _Token()).tokenString( param, code, token );
+		traceString += procToken().tokenString( param, code, token );
 
 		if( traceLevel >= 2 ){
 			if( traceLevel == 3 ){
@@ -854,7 +849,7 @@ function printTest( param, line, num, comment ){
 			con.print( " " );
 		}
 
-		con.print( (new _Token()).tokenString( param, code, token ) );
+		con.print( procToken().tokenString( param, code, token ) );
 
 		if( traceLevel >= 2 ){
 			con.setColor( "0000ff" );
@@ -885,8 +880,6 @@ function printTest( param, line, num, comment ){
 	}
 }
 function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
-	var _token = new _Token();
-
 	var i;
 	var code;
 	var token;
@@ -906,7 +899,7 @@ function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
 			}
 			enter = false;
 		}
-		string += _token.tokenString( param, code, token );
+		string += procToken().tokenString( param, code, token );
 		string += sp;
 		if( code == _CLIP_CODE_ARRAY_TOP ){
 			indent += 2;
@@ -922,12 +915,6 @@ function getArrayTokenString( param, array/*_Token*/, indent, sp, br ){
 function printMatrix( param, array/*_Token*/, indent ){
 	con.println( getArrayTokenString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
-function printAnsMatrix( param, array/*_Token*/ ){
-	con.newLine();
-	con.setBold( true );
-	printMatrix( param, array, 0 );
-	con.setBold( false );
-}
 function printAnsComplex( real, imag ){
 	con.newLine();
 	con.setBold( true );
@@ -940,6 +927,12 @@ function printAnsMultiPrec( str ){
 	con.setColor( "0000ff" );
 	con.println( str );
 	con.setColor();
+	con.setBold( false );
+}
+function printAnsMatrix( param, array/*_Token*/ ){
+	con.newLine();
+	con.setBold( true );
+	printMatrix( param, array, 0 );
 	con.setBold( false );
 }
 function printWarn( warn, num, func ){
@@ -1140,7 +1133,7 @@ function doCommandGUpdate( gWorld ){
 }
 function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 	childParam._enableCommand = false;
 	childParam._enableStat = false;
@@ -1152,7 +1145,7 @@ _CATCH
 }
 function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
 	// 親プロセスの環境を受け継いで、子プロセスを実行する
-	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
+	var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false/*グラフィック画面更新OFF*/ );
 	var childParam = new _Param( parentProc._curLine._num, parentParam, true );
 	childParam._enableCommand = false;
 	childParam._enableStat = false;
@@ -1182,14 +1175,12 @@ function doCommandUsage( topUsage ){
 	}
 }
 function doCommandDumpVar( param, index ){
-	var _token = new _Token();
-
 	var real = new _String();
 	var imag = new _String();
 	var label;
 	var string = "";
 
-	_token.valueToString( param, param.val( index ), real, imag );
+	procToken().valueToString( param, param.val( index ), real, imag );
 
 	if( (label = param._var._label._label[index]) != null ){
 		string = label;
@@ -1387,8 +1378,6 @@ function doCustomCommand( _this, param, code, token ){
 				}
 			}
 		} else {
-			var _token = new _Token();
-
 			var index;
 			var real = new _String();
 			var imag = new _String();
@@ -1468,11 +1457,11 @@ function doCustomCommand( _this, param, code, token ){
 					if( index == 0 ){
 						if( step == 0 ){
 							if( (label = param._var._label._label[index]) != null ){
-								_token.valueToString( param, param.val( index ), real, imag );
+								procToken().valueToString( param, param.val( index ), real, imag );
 								tmp[i] = label + "(@:0)=" + real.str() + imag.str();
 								i++;
 							} else if( !(param.isZero( index )) ){
-								_token.valueToString( param, param.val( index ), real, imag );
+								procToken().valueToString( param, param.val( index ), real, imag );
 								tmp[i] = "@:0=" + real.str() + imag.str();
 								i++;
 							}
@@ -1483,11 +1472,11 @@ function doCustomCommand( _this, param, code, token ){
 					){
 						if( step == 1 ){
 							if( (label = param._var._label._label[index]) != null ){
-								_token.valueToString( param, param.val( index ), real, imag );
+								procToken().valueToString( param, param.val( index ), real, imag );
 								tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
 								i++;
 							} else if( !(param.isZero( index )) ){
-								_token.valueToString( param, param.val( index ), real, imag );
+								procToken().valueToString( param, param.val( index ), real, imag );
 								tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
 								i++;
 							}
@@ -1496,7 +1485,7 @@ function doCustomCommand( _this, param, code, token ){
 						if( step == 2 ){
 							if( (label = param._var._label._label[index]) != null ){
 								if( param._var._label._flag[index] == _LABEL_MOVABLE ){
-									_token.valueToString( param, param.val( index ), real, imag );
+									procToken().valueToString( param, param.val( index ), real, imag );
 									if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
 										tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
 									} else {
@@ -1509,12 +1498,12 @@ function doCustomCommand( _this, param, code, token ){
 						if( step == 3 ){
 							if( (label = param._var._label._label[index]) != null ){
 								if( param._var._label._flag[index] != _LABEL_MOVABLE ){
-									_token.valueToString( param, param.val( index ), real, imag );
+									procToken().valueToString( param, param.val( index ), real, imag );
 									tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
 									i++;
 								}
 							} else if( !(param.isZero( index )) ){
-								_token.valueToString( param, param.val( index ), real, imag );
+								procToken().valueToString( param, param.val( index ), real, imag );
 								tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
 								i++;
 							}

@@ -54,6 +54,18 @@ _MultiPrec.prototype._froundUp = function( a/*Array*/, n ){
 	}
 };
 
+_MultiPrec.prototype._froundIsNotZero = function( a/*Array*/, n ){
+	var nn = 1 + _DIV( n, _MP_DIGIT );
+	if( _MOD( a[nn], _POW( 10, _MOD( n, _MP_DIGIT ) ) ) != 0 ){
+		return true;
+	} else {
+		for( nn--; nn > 0; nn-- ){
+			if( a[nn] != 0 ){ return true; }
+		}
+	}
+	return false;
+};
+
 _MultiPrec.prototype.fround = function( a/*Array*/, prec, mode ){
 	var n = this.getPrec( a ) - prec;
 	if( n < 1 ){
@@ -61,21 +73,22 @@ _MultiPrec.prototype.fround = function( a/*Array*/, prec, mode ){
 	}
 	var aa = this._froundGet( a, n - 1 );
 	var u = false;
+	var uu = false;
 
 	if( mode == undefined ){	// パラメータが2つの場合
 		mode = _MP_FROUND_HALF_EVEN;
 	}
 	switch( mode ){
 	case _MP_FROUND_UP:
-		if( aa > 0 ){ u = true; }
+		uu = true;
 		break;
 	case _MP_FROUND_DOWN:
 		break;
 	case _MP_FROUND_CEILING:
-		if( a[0] > 0 && aa > 0 ){ u = true; }
+		if( a[0] > 0 ){ uu = true; }
 		break;
 	case _MP_FROUND_FLOOR:
-		if( a[0] < 0 && aa > 0 ){ u = true; }
+		if( a[0] < 0 ){ uu = true; }
 		break;
 	case _MP_FROUND_HALF_UP:
 		if( aa > 4 ){ u = true; }
@@ -100,16 +113,17 @@ _MultiPrec.prototype.fround = function( a/*Array*/, prec, mode ){
 		if( aa > 5 ){
 			u = true;
 		} else if( aa == 5 && n > 1 ){
-			var i = 1 + _DIV( n - 1, _MP_DIGIT );
-			if( _MOD( a[i], _POW( 10, _MOD( n - 1, _MP_DIGIT ) ) ) != 0 ){
-				u = true;
-			} else {
-				for( i--; i > 0; i-- ){
-					if( a[i] != 0 ){ u = true; break; }
-				}
-			}
+			u = this._froundIsNotZero( a, n - 2 );
 		}
 		break;
+	}
+
+	if( uu ){
+		if( aa > 0 ){
+			u = true;
+		} else if( n > 1 ){
+			u = this._froundIsNotZero( a, n - 2 );
+		}
 	}
 
 	if( u ){
