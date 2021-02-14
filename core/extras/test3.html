@@ -37,8 +37,9 @@ var script = [
 			":gupdate 0 # 画面更新をＯＦＦにする",
 			":gput @@a # 配列の内容をオフスクリーンに描画",
 			":gupdate \\-1 # 画面更新をＯＮにする",
-			":sprint @@s [\"Generation ] @g",
-			":gtext @@s 2 9 255",
+//			":sprint @@s [\"Generation ] @g",
+//			":gtext @@s 2 9 255",
+			"@G = @g",
 			"for @i = 1; @i <= @N; @i++",
 			"	for @j = 1; @j <= @M; @j++",
 			"		if @@a @i @j",
@@ -52,6 +53,7 @@ var script = [
 			"	for @j = 0; @j <= @M + 1; @j++",
 			"		if @@b @i @j != 2",
 			"			if @@b @i @j == 3; @@a @i @j++; else; @@a @i @j = 0; endif",
+			"			if @@a @i @j >= 255; @@a @i @j = 1; endif",
 			"		endif",
 			"		@@b @i @j = 0",
 			"	next",
@@ -90,8 +92,9 @@ var script = [
 			":gupdate 0 # 画面更新をＯＦＦにする",
 			":gput @@a # 配列の内容をオフスクリーンに描画",
 			":gupdate \\-1 # 画面更新をＯＮにする",
-			":sprint @@s [\"Generation ] @g",
-			":gtext @@s 2 9 255",
+//			":sprint @@s [\"Generation ] @g",
+//			":gtext @@s 2 9 255",
+			"@G = @g",
 			"for @i = 0; @i <= @N; @i++",
 			"	for @j = 0; @j <= @M; @j++",
 			"		if @@a @i @j",
@@ -109,6 +112,7 @@ var script = [
 			"	for @j = 0; @j <= @M; @j++",
 			"		if @@b @i @j != 2",
 			"			if @@b @i @j == 3; @@a @i @j++; else; @@a @i @j = 0; endif",
+			"			if @@a @i @j >= 255; @@a @i @j = 1; endif",
 			"		endif",
 			"		@@b @i @j = 0",
 			"	next",
@@ -266,9 +270,9 @@ function main(){
 function onTimer( timer ){
 	var clip = timer.object()[0];
 	clip.procScript( timer.object()[1] ); // メイン
-	if( timer.object()[2] != 2 ){
-		clip.procLine( ":gtext [\"Draw Time " + timer.lastTime() + "] 2 (gheight - 2) 255" );
-	}
+//	if( timer.object()[2] != 2 ){
+//		clip.procLine( ":gtext [\"Draw Time " + timer.lastTime() + "] 2 (gheight - 2) 255" );
+//	}
 	if( timer.object()[2] == 2 ){
 		if( clip.getValue( 'S' ).toFloat() != 0 && clip.getValue( 's' ).toFloat() == 0 ){
 			clip.setPaletteColor( 0, 0xFF0000 );
@@ -277,6 +281,15 @@ function onTimer( timer ){
 		}
 	}
 	clip.updateCanvas( 3 );
+
+	if( timer.object()[2] != 2 ){
+		var canvas = clip.canvas();
+		canvas.setColorRGB( 0x000000 );
+		canvas.setFont( 12, "Helvetica" );
+		canvas.drawString( "Generation " + clip.getValue( 'G' ).toFloat(), 4, 16 );
+		canvas.drawString( "Draw Time " + timer.lastTime(), 4, canvas.height() - 4 );
+	}
+
 	return true;
 }
 </script>
