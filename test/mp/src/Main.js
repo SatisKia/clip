@@ -166,7 +166,7 @@ function round( str, prec ){
 		var a = new Array();
 		mp.fset( a, mp.F( str ) );
 		mp.fround( a, prec, i );
-		var tmp = mp.fnum2str( a );
+		var tmp = mp.fnum2str( a, prec );
 		if( tmp.charAt( 0 ) != '-' ){
 			con.print( "&nbsp;" );
 		}
@@ -218,7 +218,7 @@ function testSqrt( prec ){
 			while( pi_out5( prec, 1, order ) ){}
 		}
 		con.println( "" + ((new Date()).getTime() - time) + " ms" );
-		var str = mp.fnum2str( pi );
+		var str = mp.fnum2str( pi, prec );
 
 		var tmp = str.split( "." );
 		con.println( tmp[0] + "." );
@@ -271,8 +271,8 @@ function testRound2(){
 
 	var b = new Array();
 	var s;
-	for( var i = 0; i <= 45; i++ ){
-		s = mp.fnum2str( a );
+	for( var i = 0; i < 45; i++ ){
+		s = mp.fnum2str( a, 45 );
 		con.setColor( "0000ff" );
 		con.print( s.substring( 0, i + 3 ) );
 		con.setColor();
@@ -281,7 +281,7 @@ function testRound2(){
 		for( var mode = 0; mode <= 8; mode++ ){
 			mp.fset( b, a );
 			mp.fround( b, i, mode );
-			s = mp.fnum2str( b );
+			s = mp.fnum2str( b, i );
 			switch( mode ){
 			case _MP_FROUND_UP        : con.print( "UP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" ); break;
 			case _MP_FROUND_DOWN      : con.print( "DOWN&nbsp;&nbsp;&nbsp;" ); break;

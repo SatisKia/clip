@@ -250,6 +250,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
 		if( isEnglish ) error = "Execution of evaluation was interrupted.";
 		else            error = "evalの実行が中断されました";
 		break;
+	case _CLIP_PROC_ERR_MULTIPREC:
+		if( isEnglish ) error = "\"" + token + "\": Multi-precision expression is wrong.";
+		else            error = token + ":多倍長数表現が間違っています";
+		break;
 	case _CLIP_PROC_ERR_STAT_IF:
 		if( isEnglish ) error = "\"" + token + "\" too many nests.";
 		else            error = token + "のネスト数が多すぎます";

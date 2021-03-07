@@ -270,7 +270,7 @@ _EasyClip.prototype = {
 		if( mp.getPrec( array ) == 0 ){
 			return mp.num2str( array );
 		}
-		return mp.fnum2str( array );
+		return mp.fnum2str( array, this._param._mpPrec );
 	},
 	getValue : function( chr ){
 		this._setEnv();
@@ -326,7 +326,7 @@ _EasyClip.prototype = {
 		if( mp.getPrec( array ) == 0 ){
 			return mp.num2str( array );
 		}
-		return mp.fnum2str( array );
+		return mp.fnum2str( array, this._param._mpPrec );
 	},
 	getArray : function( chr, dim ){
 		this._setEnv();

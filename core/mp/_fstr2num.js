@@ -35,11 +35,17 @@ _MultiPrec.prototype.fstr2num = function( n/*Array*/, s ){
 		}
 	}
 	ss[j] = 0;	// 文字列終端を書き込む
-	this._str2num( n, ss );
+	if( !this._str2num( n, ss ) ){
+		return false;
+	}
 
 	var e = 0;
 	for( ; i < l; i++ ){
-		e = e * 10 + (s[i] - _CHAR_CODE_0);
+		if( s[i] >= _CHAR_CODE_0 && s[i] <= _CHAR_CODE_9 ){
+			e = e * 10 + (s[i] - _CHAR_CODE_0);
+		} else {
+			return false;
+		}
 	}
 	if( m ){
 		p += e; e = 0;
@@ -56,4 +62,6 @@ _MultiPrec.prototype.fstr2num = function( n/*Array*/, s ){
 		this._fcoef( k, e );
 		this.fmul( n, n, k, p );
 	}
+
+	return true;
 };

@@ -75,24 +75,24 @@
 #define _CLIP_CODE_GLOBAL_ARRAY	0x46//(6 | _CLIP_CODE_ARRAY_MASK)	// グローバル配列
 
 #define _CLIP_CODE_CONSTANT		7	// 定数
-#define _CLIP_CODE_LABEL		8	// ラベル
-#define _CLIP_CODE_COMMAND		9	// コマンド
-#define _CLIP_CODE_STATEMENT	10	// 文
-#define _CLIP_CODE_OPERATOR		11	// 演算子
-#define _CLIP_CODE_FUNCTION		12	// 関数
-#define _CLIP_CODE_EXTFUNC		13	// 外部関数
+#define _CLIP_CODE_MULTIPREC	8	// 多倍長数
+#define _CLIP_CODE_LABEL		9	// ラベル
+#define _CLIP_CODE_COMMAND		10	// コマンド
+#define _CLIP_CODE_STATEMENT	11	// 文
+#define _CLIP_CODE_OPERATOR		12	// 演算子
+#define _CLIP_CODE_FUNCTION		13	// 関数
+#define _CLIP_CODE_EXTFUNC		14	// 外部関数
 
-#define _CLIP_CODE_PROC_END		14
+#define _CLIP_CODE_PROC_END		15
 
-#define _CLIP_CODE_NULL			14/*_CLIP_CODE_PROC_END*/
+#define _CLIP_CODE_NULL			15/*_CLIP_CODE_PROC_END*/
 
-#define _CLIP_CODE_END			15	// )
+#define _CLIP_CODE_END			16	// )
 
-#define _CLIP_CODE_ARRAY_TOP	16	// {
-#define _CLIP_CODE_ARRAY_END	17	// }
+#define _CLIP_CODE_ARRAY_TOP	17	// {
+#define _CLIP_CODE_ARRAY_END	18	// }
 
-#define _CLIP_CODE_MATRIX		18	// 行列
-#define _CLIP_CODE_MULTIPREC	19	// 多倍長
+#define _CLIP_CODE_MATRIX		19	// 行列
 #define _CLIP_CODE_STRING		20	// 文字列
 
 #define _CLIP_CODE_PARAM_ANS	21	// &
@@ -267,6 +267,8 @@
 
 #define _CLIP_FUNC_CALL		86
 #define _CLIP_FUNC_EVAL		87
+
+#define _CLIP_FUNC_MP		88
 
 /*
  * 文の種類
@@ -598,6 +600,7 @@
 #define _CLIP_PROC_ERR_ASS				0x210E//(_CLIP_PROC_ERR | 0x0E)		// 定数への代入は無効です
 #define _CLIP_PROC_ERR_CALL				0x210F//(_CLIP_PROC_ERR | 0x0F)		// 関数呼び出しに失敗しました
 #define _CLIP_PROC_ERR_EVAL				0x2110//(_CLIP_PROC_ERR | 0x10)		// evalの実行が中断されました
+#define _CLIP_PROC_ERR_MULTIPREC		0x2111//(_CLIP_PROC_ERR | 0x11)		// 多倍長数表現が間違っています
 
 #define _CLIP_PROC_ERR_STAT_IF			0x2120//(_CLIP_PROC_ERR | 0x20)		// ifのネスト数が多すぎます
 #define _CLIP_PROC_ERR_STAT_ENDIF		0x2121//(_CLIP_PROC_ERR | 0x21)		// endifに対応するifがありません

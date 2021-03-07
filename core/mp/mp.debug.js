@@ -888,7 +888,7 @@ _MultiPrec.prototype.fmul = function( ret , a , b , prec ){
 	}
 	this._setPrec( ret, p );
 };
-_MultiPrec.prototype._fnum2str = function( s , n ){
+_MultiPrec.prototype._fnum2str = function( s , n , prec ){
 	n = this.clone( n );
 	var p = this.getPrec( n );
 	var ss = new Array();
@@ -906,6 +906,7 @@ _MultiPrec.prototype._fnum2str = function( s , n ){
 	}
 	l = i + 1;
 	var j = 0, k = 0;
+	var pp = false;
 	if( ss[0] == _CHAR( '-' ) ){
 		s[j++] = ss[k++];
 		l--;
@@ -915,21 +916,33 @@ _MultiPrec.prototype._fnum2str = function( s , n ){
 	}
 	if( l < p ){
 		s[j++] = _CHAR( '.' );
+		pp = true;
 		for( i = 0; i < p - l; i++ ){
+			prec--;
+			if( prec < 0 ){
+				break;
+			}
 			s[j++] = _CHAR_CODE_0;
 		}
 	}
 	for( i = 0; i < l; i++ ){
 		if( i == l - p ){
 			s[j++] = _CHAR( '.' );
+			pp = true;
+		}
+		if( pp ){
+			prec--;
+			if( prec < 0 ){
+				break;
+			}
 		}
 		s[j++] = ss[k++];
 	}
 	s[j] = 0;
 };
-_MultiPrec.prototype.fnum2str = function( n ){
+_MultiPrec.prototype.fnum2str = function( n , prec ){
 	var array = new Array();
-	this._fnum2str( array, n );
+	this._fnum2str( array, n, prec );
 	return this._c2jstr( array );
 };
 _MultiPrec.prototype._froundGet = function( a , n ){
@@ -1196,10 +1209,16 @@ _MultiPrec.prototype.fstr2num = function( n , s ){
 		}
 	}
 	ss[j] = 0;
-	this._str2num( n, ss );
+	if( !this._str2num( n, ss ) ){
+		return false;
+	}
 	var e = 0;
 	for( ; i < l; i++ ){
-		e = e * 10 + (s[i] - _CHAR_CODE_0);
+		if( s[i] >= _CHAR_CODE_0 && s[i] <= _CHAR_CODE_9 ){
+			e = e * 10 + (s[i] - _CHAR_CODE_0);
+		} else {
+			return false;
+		}
 	}
 	if( m ){
 		p += e; e = 0;
@@ -1214,6 +1233,7 @@ _MultiPrec.prototype.fstr2num = function( n , s ){
 		this._fcoef( k, e );
 		this.fmul( n, n, k, p );
 	}
+	return true;
 };
 _MultiPrec.prototype.fsub = function( ret , a , b ){
 	a = this.clone( a );
@@ -1399,9 +1419,12 @@ _MultiPrec.prototype._str2num = function( n , s ){
 	var m = (s[0] == _CHAR( '-' )) ? 1 : 0;
 	var ss = m;
 	while( s[ss] >= _CHAR_CODE_0 && s[ss] <= _CHAR_CODE_9 ){ ss++; }
+	if( s[ss] != 0 ){
+		return false;
+	}
 	if( ss == 0 ){
 		n[0] = 0;
-		return;
+		return true;
 	}
 	var x = 0; k = 1;
 	var nn = 0;
@@ -1416,9 +1439,10 @@ _MultiPrec.prototype._str2num = function( n , s ){
 		n[++nn] = x;
 	}
 	this._setLen( n, (m == 1) ? -nn : nn );
+	return true;
 };
 _MultiPrec.prototype.str2num = function( n , s ){
-	this._str2num( n, this._j2cstr( s ) );
+	return this._str2num( n, this._j2cstr( s ) );
 }
 _MultiPrec.prototype._sub = function( ret , a , b ){
 	var la = this.getLen( a );

@@ -106,7 +106,7 @@ _ProcVal.prototype = {
 	},
 	mat : function(){
 		if( this._mpFlag ){
-			var str = _proc_mp.fnum2str( this._mp );
+			var str = _proc_mp.fnum2str( this._mp, this._param._mpPrec );
 			var val = stringToFloat( str, 0, new _Integer() );
 			this._mat.ass( val );
 			this._proc._updateMatrix( this._param, this._mat );
@@ -882,6 +882,7 @@ _Proc.prototype = {
 			if(
 				((newCode & (_CLIP_CODE_VAR_MASK | _CLIP_CODE_ARRAY_MASK)) != 0) ||
 				(newCode == _CLIP_CODE_CONSTANT) ||
+				(newCode == _CLIP_CODE_MULTIPREC) ||
 				(newCode == _CLIP_CODE_STRING)
 			){
 				funcParam.addCode( newCode, newToken );
@@ -2049,7 +2050,7 @@ _Proc.prototype = {
 			_proc_mp.fset( tmp, val );
 			_proc_mp.fround( tmp, param._mpPrec, param._mpRound );
 		}
-		return _proc_mp.fnum2str( tmp );
+		return _proc_mp.fnum2str( tmp, param._mpPrec );
 	},
 	printAns : function( childParam ){
 		if( childParam._mpFlag ){
@@ -3387,14 +3388,38 @@ _Proc.prototype = {
 	mpPow : function( param, ret/*Array*/, x/*Array*/, y ){
 		x = _proc_mp.clone( x );
 		if( param._mode == _CLIP_MODE_F_MULTIPREC ){
+/*
 			_proc_mp.fset( ret, x );
 			for( var i = 1; i < y; i++ ){
 				_proc_mp.fmul( ret, ret, x, param._mpPrec + 1 );
 			}
+*/
+			_proc_mp.fset( ret, _proc_mp.F( "1.0" ) );
+			while( y > 0 ){
+				if( (y % 2) == 0 ){
+					_proc_mp.fmul( x, x, x, param._mpPrec + 1 );
+					y /= 2;
+				} else {
+					_proc_mp.fmul( ret, ret, x, param._mpPrec + 1 );
+					y--;
+				}
+			}
 		} else {
+/*
 			_proc_mp.set( ret, x );
 			for( var i = 1; i < y; i++ ){
 				_proc_mp.mul( ret, ret, x );
+			}
+*/
+			_proc_mp.set( ret, _proc_mp.I( "1" ) );
+			while( y > 0 ){
+				if( (y % 2) == 0 ){
+					_proc_mp.mul( x, x, x );
+					y /= 2;
+				} else {
+					_proc_mp.mul( ret, ret, x );
+					y--;
+				}
 			}
 		}
 	},
@@ -4644,6 +4669,29 @@ _Proc.prototype = {
 			return _CLIP_NO_ERR;
 		}
 		return ret;
+	},
+	_funcMp : function( _this, param, code, token, value, seFlag ){
+		var ret;
+
+		if( seFlag ){
+			if( !(_this._curLine._token.skipComma()) ){
+				return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+			}
+		}
+
+		var string = new _String();
+		_this._getString( param, string );
+		if( string.isNull() ){
+			return _this._retError( _CLIP_PROC_ERR_STRING, code, token );
+		}
+
+		if( param._mode == _CLIP_MODE_F_MULTIPREC ){
+			ret = _proc_mp.fstr2num( value.mp(), string.str() );
+		} else {
+			ret = _proc_mp.str2num( value.mp(), string.str() );
+		}
+
+		return ret ? _CLIP_NO_ERR : _this._retError( _CLIP_PROC_ERR_MULTIPREC, _CLIP_CODE_LABEL, string.str() );
 	},
 
 	_incVal : function( param, code, token, value, incFlag ){
@@ -9325,6 +9373,10 @@ _Proc.prototype = {
 		_this._updateMatrix( param, value.mat() );
 		return _CLIP_NO_ERR;
 	},
+	_procMultiPrec : function( _this, param, code, token, value ){
+		_proc_mp.fset( value.mp(), token );
+		return _CLIP_NO_ERR;
+	},
 	_procLabel : function( _this, parentParam, code, token, value ){
 		var funcParam = new _Token();
 		var func;
@@ -9640,7 +9692,9 @@ var _procSubFunc = [
 	_Proc.prototype._funcWY,
 
 	_Proc.prototype._funcCall,
-	_Proc.prototype._funcEval
+	_Proc.prototype._funcEval,
+
+	_Proc.prototype._funcMp
 ];
 
 var _procSubOp = [
@@ -10006,6 +10060,7 @@ var _procSub = [
 	_Proc.prototype._procAutoArray,
 
 	_Proc.prototype._procConst,
+	_Proc.prototype._procMultiPrec,
 	_Proc.prototype._procLabel,
 	_Proc.prototype._procCommand,
 	_Proc.prototype._procStat,

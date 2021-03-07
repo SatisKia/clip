@@ -33,7 +33,7 @@ endfunc
 !mp:fnum2str @@s @@a
 :println ["               ] @@s
 
-for @i = 0; @i <= 45; @i++
+for @i = 0; @i < 45; @i++
 	!mp:fset @@b @@a
 	!mp:fround @@b @i mode
 	!mp:fnum2str @@s @@b

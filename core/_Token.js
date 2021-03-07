@@ -138,7 +138,8 @@ var _TOKEN_FUNC = [
 	"wx",
 	"wy",
 	"call",
-	"eval"
+	"eval",
+	"mp"
 ];
 
 var _TOKEN_STAT = [
@@ -1326,10 +1327,11 @@ _Token.prototype = {
 				cur._code  = _CLIP_CODE_STATEMENT;
 				cur._token = code._val;
 			} else {
-				cur._code  = _CLIP_CODE_CONSTANT;
 				cur._token = new _Value();
 				if( this.checkDefine( tmp, cur._token ) ){
+					cur._code = _CLIP_CODE_CONSTANT;
 				} else if( strToVal && this.stringToValue( param, tmp, cur._token ) ){
+					cur._code = _CLIP_CODE_CONSTANT;
 				} else {
 					cur._code  = _CLIP_CODE_LABEL;
 					cur._topen = new String();
@@ -2301,7 +2303,7 @@ _Token.prototype = {
 				var value = new _Value();
 				if( this.stringToValue( param, this._get._token, value ) ){
 					this._get._code  = _CLIP_CODE_CONSTANT;
-					this._get._token = dupValue( value );
+					this._get._token = value;
 				}
 				_get_code = this._get._code;
 			}

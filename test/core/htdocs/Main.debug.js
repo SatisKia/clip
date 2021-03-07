@@ -1174,6 +1174,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
   if( isEnglish ) error = "Execution of evaluation was interrupted.";
   else error = "evalの実行が中断されました";
   break;
+ case _CLIP_PROC_ERR_MULTIPREC:
+  if( isEnglish ) error = "\"" + token + "\": Multi-precision expression is wrong.";
+  else error = token + ":多倍長数表現が間違っています";
+  break;
  case _CLIP_PROC_ERR_STAT_IF:
   if( isEnglish ) error = "\"" + token + "\" too many nests.";
   else error = token + "のネスト数が多すぎます";
@@ -1807,6 +1811,7 @@ function codeString( code ){
  case _CLIP_CODE_AUTO_ARRAY: string = "AUTO_ARRAY"; break;
  case _CLIP_CODE_GLOBAL_ARRAY: string = "GLOBAL_ARRAY"; break;
  case _CLIP_CODE_CONSTANT: string = "CONSTANT"; break;
+ case _CLIP_CODE_MULTIPREC: string = "MULTIPREC"; break;
  case _CLIP_CODE_LABEL: string = "LABEL"; break;
  case _CLIP_CODE_COMMAND: string = "COMMAND"; break;
  case _CLIP_CODE_STATEMENT: string = "STATEMENT"; break;
@@ -1821,6 +1826,7 @@ function codeString( code ){
  case _CLIP_CODE_STRING: string = "STRING"; break;
  case _CLIP_CODE_PARAM_ANS: string = "PARAM_ANS"; break;
  case _CLIP_CODE_PARAM_ARRAY: string = "PARAM_ARRAY"; break;
+ case _CLIP_CODE_SE: string = "SE"; break;
  default:
   string = "" + code;
   break;

@@ -9,9 +9,12 @@ _MultiPrec.prototype._str2num = function( n/*Array*/, s/*Array*/ ){
 	var m = (s[0] == _CHAR( '-' )) ? 1 : 0;
 	var ss = m;
 	while( s[ss] >= _CHAR_CODE_0 && s[ss] <= _CHAR_CODE_9 ){ ss++; }
+	if( s[ss] != 0 ){
+		return false;
+	}
 	if( ss == 0 ){
 		n[0] = 0;
-		return;
+		return true;
 	}
 
 	var x = 0; k = 1;
@@ -28,8 +31,10 @@ _MultiPrec.prototype._str2num = function( n/*Array*/, s/*Array*/ ){
 	}
 
 	this._setLen( n, (m == 1) ? -nn : nn );
+
+	return true;
 };
 
 _MultiPrec.prototype.str2num = function( n/*Array*/, s ){
-	this._str2num( n, this._j2cstr( s ) );
+	return this._str2num( n, this._j2cstr( s ) );
 }
