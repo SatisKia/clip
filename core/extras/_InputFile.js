@@ -11,14 +11,27 @@ function canUseFile(){
 }
 
 // ファイル選択コントロール
-function _InputFile( id ){
+function _InputFile( id, mode ){
 	if( window.onInputFileLoadImage == undefined ) window.onInputFileLoadImage = function( name, image ){};
 	if( window.onInputFileLoad == undefined ) window.onInputFileLoad = function( func, data ){};
 	if( window.onInputFileLoadEnd == undefined ) window.onInputFileLoadEnd = function( num ){};
 
 	this._input = document.getElementById( id );
 
-	this._input.addEventListener( "change", _onInputFileChange, false );
+	if( mode == undefined ){
+		mode = 0;
+	}
+	switch( mode ){
+	case 0:
+		this._input.addEventListener( "change", _onInputFileChange, false );
+		break;
+	case 1:
+		this._input.addEventListener( "change", _onInputFileChangeExtfunc, false );
+		break;
+	case 2:
+		this._input.addEventListener( "change", _onInputFileChangeImage, false );
+		break;
+	}
 }
 
 _InputFile.prototype = {
@@ -27,28 +40,12 @@ _InputFile.prototype = {
 	}
 };
 
-function _onInputFileChange( e ){
+function _onInputFileChangeExtfunc( e ){
 	var files = e.target.files;
 	if( files.length == 0 ){
 		return;
 	}
 
-	// 画像ファイル
-	if( files[0].type.indexOf( "image/" ) == 0 ){
-		var name = files[0].name;
-		var reader = new FileReader();
-		reader.onload = function(){
-			var image = new Image();
-			image.onload = function(){
-				onInputFileLoadImage( name, image );
-			};
-			image.src = reader.result;
-		};
-		reader.readAsDataURL( files[0] );
-		return;
-	}
-
-	// 外部関数ファイル
 	_input_file_cnt = 0;
 	_input_file_num = files.length;
 	for( var i = 0; i < files.length; i++ ){
@@ -107,4 +104,34 @@ function _onInputFileChange( e ){
 
 		reader.readAsText( file );
 	}
+}
+
+function _onInputFileChangeImage( e ){
+	var files = e.target.files;
+	if( files.length == 0 ){
+		return true;
+	}
+
+	if( files[0].type.indexOf( "image/" ) == 0 ){
+		var name = files[0].name;
+		var reader = new FileReader();
+		reader.onload = function(){
+			var image = new Image();
+			image.onload = function(){
+				onInputFileLoadImage( name, image );
+			};
+			image.src = reader.result;
+		};
+		reader.readAsDataURL( files[0] );
+		return true;
+	}
+
+	return false;
+}
+
+function _onInputFileChange( e ){
+	if( _onInputFileChangeImage( e ) ){
+		return;
+	}
+	_onInputFileChangeExtfunc( e );
 }

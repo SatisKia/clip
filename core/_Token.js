@@ -1294,7 +1294,7 @@ _Token.prototype = {
 				}
 			} else if( tmp.charAt( 0 ) == '!' ){
 				cur._code  = _CLIP_CODE_EXTFUNC;
-				cur._token = tmp.substring( 1, len );
+				cur._token = tmp.substring( 1, len ).toLowerCase();
 			} else if( tmp.charAt( 0 ) == '"' ){
 				cur._code  = _CLIP_CODE_STRING;
 				cur._token = new String();
@@ -1320,7 +1320,7 @@ _Token.prototype = {
 						cur._token += tmp.charAt( i );
 					}
 				}
-			} else if( this.checkFunc( tmp, code ) ){
+			} else if( this.checkFunc( tmp.toLowerCase(), code ) ){
 				cur._code  = _CLIP_CODE_FUNCTION;
 				cur._token = code._val;
 			} else if( this.checkStat( tmp, code ) ){

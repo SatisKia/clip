@@ -1,0 +1,76 @@
+#!NAMESPACE image
+#バイリニア補間法
+#\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
+:ans FALSE
+:param 7 TRUE
+$SUB_A		@W,@3,@1
+$SUB_A		@H,@4,@2
+$SET		@w,@5
+$SET		@h,@6
+$DIV_A		@M,(@W - 1),(@w - 1)
+$DIV_A		@N,(@H - 1),(@h - 1)
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$MODF		@P,(@M * @x + @1),@X
+$MODF		@Q,(@N * @y + @2),@Y
+$SUB_A		@R,1.0,@P
+$SUB_A		@S,1.0,@Q
+# 左上
+$SET		@c,@@0 @Y @X
+$MUL_A		@k,@R,@S
+$AND_A		@r,@c,\xFF0000
+$SHIFTR		@r,16
+$MUL		@r,@k
+$AND_A		@g,@c,\x00FF00
+$SHIFTR		@g,8
+$MUL		@g,@k
+$AND_A		@b,@c,\x0000FF
+$MUL		@b,@k
+# 右上
+$SET		@c,@@0 @Y (@X + 1)
+$MUL_A		@k,@P,@S
+$AND_A		@R,@c,\xFF0000
+$SHIFTR		@R,16
+$MUL		@R,@k
+$ADD		@r,@R
+$AND_A		@G,@c,\x00FF00
+$SHIFTR		@G,8
+$MUL		@G,@k
+$ADD		@g,@G
+$AND_A		@B,@c,\x0000FF
+$MUL		@B,@k
+$ADD		@b,@B
+# 左下
+$SET		@c,@@0 (@Y + 1) @X
+$MUL_A		@k,@R,@Q
+$AND_A		@R,@c,\xFF0000
+$SHIFTR		@R,16
+$MUL		@R,@k
+$ADD		@r,@R
+$AND_A		@G,@c,\x00FF00
+$SHIFTR		@G,8
+$MUL		@G,@k
+$ADD		@g,@G
+$AND_A		@B,@c,\x0000FF
+$MUL		@B,@k
+$ADD		@b,@B
+# 右下
+$SET		@c,@@0 (@Y + 1) (@X + 1)
+$MUL_A		@k,@P,@Q
+$AND_A		@R,@c,\xFF0000
+$SHIFTR		@R,16
+$MUL		@R,@k
+$ADD		@r,@R
+$AND_A		@G,@c,\x00FF00
+$SHIFTR		@G,8
+$MUL		@G,@k
+$ADD		@g,@G
+$AND_A		@B,@c,\x0000FF
+$MUL		@B,@k
+$ADD		@b,@B
+# ピクセル値
+@@7 @y @x = (int @r << 16) + (int @g << 8) + int @b
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

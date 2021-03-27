@@ -4975,7 +4975,7 @@ _Func.prototype = {
   }
   var cur = this._top;
   while( cur != null ){
-   if( name == cur._info._name ){
+   if( name.toLowerCase() == cur._info._name.toLowerCase() ){
     if( updateCnt ){
      cur._info._cnt++;
     }
@@ -17481,7 +17481,7 @@ _Token.prototype = {
     }
    } else if( tmp.charAt( 0 ) == '!' ){
     cur._code = 14;
-    cur._token = tmp.substring( 1, len );
+    cur._token = tmp.substring( 1, len ).toLowerCase();
    } else if( tmp.charAt( 0 ) == '"' ){
     cur._code = 20;
     cur._token = new String();
@@ -17507,7 +17507,7 @@ _Token.prototype = {
       cur._token += tmp.charAt( i );
      }
     }
-   } else if( this.checkFunc( tmp, code ) ){
+   } else if( this.checkFunc( tmp.toLowerCase(), code ) ){
     cur._code = 13;
     cur._token = code._val;
    } else if( this.checkStat( tmp, code ) ){
@@ -19512,34 +19512,34 @@ var _input_file_num;
 function canUseFile(){
  return (window.FileReader && window.FileList && window.File);
 }
-function _InputFile( id ){
+function _InputFile( id, mode ){
  if( window.onInputFileLoadImage == undefined ) window.onInputFileLoadImage = function( name, image ){};
  if( window.onInputFileLoad == undefined ) window.onInputFileLoad = function( func, data ){};
  if( window.onInputFileLoadEnd == undefined ) window.onInputFileLoadEnd = function( num ){};
  this._input = document.getElementById( id );
- this._input.addEventListener( "change", _onInputFileChange, false );
+ if( mode == undefined ){
+  mode = 0;
+ }
+ switch( mode ){
+ case 0:
+  this._input.addEventListener( "change", _onInputFileChange, false );
+  break;
+ case 1:
+  this._input.addEventListener( "change", _onInputFileChangeExtfunc, false );
+  break;
+ case 2:
+  this._input.addEventListener( "change", _onInputFileChangeImage, false );
+  break;
+ }
 }
 _InputFile.prototype = {
  element : function(){
   return this._input;
  }
 };
-function _onInputFileChange( e ){
+function _onInputFileChangeExtfunc( e ){
  var files = e.target.files;
  if( files.length == 0 ){
-  return;
- }
- if( files[0].type.indexOf( "image/" ) == 0 ){
-  var name = files[0].name;
-  var reader = new FileReader();
-  reader.onload = function(){
-   var image = new Image();
-   image.onload = function(){
-    onInputFileLoadImage( name, image );
-   };
-   image.src = reader.result;
-  };
-  reader.readAsDataURL( files[0] );
   return;
  }
  _input_file_cnt = 0;
@@ -19595,6 +19595,32 @@ function _onInputFileChange( e ){
   })( file );
   reader.readAsText( file );
  }
+}
+function _onInputFileChangeImage( e ){
+ var files = e.target.files;
+ if( files.length == 0 ){
+  return true;
+ }
+ if( files[0].type.indexOf( "image/" ) == 0 ){
+  var name = files[0].name;
+  var reader = new FileReader();
+  reader.onload = function(){
+   var image = new Image();
+   image.onload = function(){
+    onInputFileLoadImage( name, image );
+   };
+   image.src = reader.result;
+  };
+  reader.readAsDataURL( files[0] );
+  return true;
+ }
+ return false;
+}
+function _onInputFileChange( e ){
+ if( _onInputFileChangeImage( e ) ){
+  return;
+ }
+ _onInputFileChangeExtfunc( e );
 }
 var inputFile;
 function drawInputFileImage( image, w , h ){
@@ -20379,11 +20405,13 @@ function loadExtFuncFile(){
 }
 function onInputFileLoad( func, data ){
  var i;
+ func = func.toLowerCase();
  topProc.clearFuncCache( func );
  var name = "/" + func + ".cef";
  var index = extFuncFile.length;
  for( i = 0; i < extFuncFile.length; i++ ){
-  if( extFuncFile[i] == name ){
+  if( extFuncFile[i].toLowerCase() == name ){
+   name = extFuncFile[i];
    index = i;
    break;
   }
@@ -20428,7 +20456,7 @@ function getExtFuncDataDirect( func ){
 }
 function getExtFuncDataNameSpace( func ){
  for( var i = 0; i < extFuncFile.length; i++ ){
-  if( extFuncName( extFuncFile[i] ) == func ){
+  if( extFuncName( extFuncFile[i] ).toLowerCase() == func.toLowerCase() ){
    if( i < extFuncData.length ){
     return extFuncData[i];
    }
@@ -21242,13 +21270,11 @@ function doCustomCommand( _this, param, code, token ){
   for( i = 0, j = 0; i < extFuncData.length; i++ ){
    var name = extFuncName( extFuncFile[i] );
    if( name.length > 0 ){
-    tmp[j] = name;
+    tmp[j] = name.toLowerCase();
     j++;
    }
   }
   tmp.sort( function( a, b ){
-   a = a.toLowerCase();
-   b = b.toLowerCase();
    if( a < b ){
     return -1;
    } else if( a > b ){

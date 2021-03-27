@@ -221,7 +221,7 @@ _Func.prototype = {
 		}
 		var cur = this._top;
 		while( cur != null ){
-			if( name == cur._info._name ){
+			if( name.toLowerCase() == cur._info._name.toLowerCase() ){
 				if( updateCnt ){
 					cur._info._cnt++;
 				}

@@ -4851,7 +4851,7 @@ _Func.prototype = {
 		}
 		var cur = this._top;
 		while( cur != null ){
-			if( name == cur._info._name ){
+			if( name.toLowerCase() == cur._info._name.toLowerCase() ){
 				if( updateCnt ){
 					cur._info._cnt++;
 				}
@@ -17357,7 +17357,7 @@ _Token.prototype = {
 				}
 			} else if( tmp.charAt( 0 ) == '!' ){
 				cur._code = 14;
-				cur._token = tmp.substring( 1, len );
+				cur._token = tmp.substring( 1, len ).toLowerCase();
 			} else if( tmp.charAt( 0 ) == '"' ){
 				cur._code = 20;
 				cur._token = new String();
@@ -17383,7 +17383,7 @@ _Token.prototype = {
 						cur._token += tmp.charAt( i );
 					}
 				}
-			} else if( this.checkFunc( tmp, code ) ){
+			} else if( this.checkFunc( tmp.toLowerCase(), code ) ){
 				cur._code = 13;
 				cur._token = code._val;
 			} else if( this.checkStat( tmp, code ) ){

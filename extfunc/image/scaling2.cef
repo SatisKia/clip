@@ -1,5 +1,5 @@
 #!NAMESPACE image
-#スケーリング
+#画素混合
 #\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
 
 func add
@@ -37,8 +37,8 @@ endfunc
 :ans FALSE
 :param 7 TRUE
 
-$SET		@W,(@3 - @1 + 1)
-$SET		@H,(@4 - @2 + 1)
+$SUB_A		@W,@3,@1
+$SUB_A		@H,@4,@2
 $SET		@w,@5
 $SET		@h,@6
 $CND		@M,(@W > @w),(@W / @w),((@W - 1) / (@w - 1))

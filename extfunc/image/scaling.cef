@@ -1,10 +1,10 @@
 #!NAMESPACE image
-#スケーリング
+#最近傍法
 #\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
 :ans FALSE
 :param 7 TRUE
-$SET		@W,(@3 - @1 + 1)
-$SET		@H,(@4 - @2 + 1)
+$SUB_A		@W,@3,@1
+$SUB_A		@H,@4,@2
 $SET		@w,@5
 $SET		@h,@6
 $CND		@M,(@W > @w),((@W - 1) / (@w - 1)),(@W / @w)

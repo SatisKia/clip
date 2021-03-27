@@ -619,6 +619,8 @@ function loadExtFuncFile(){
 function onInputFileLoad( func, data ){
 	var i;
 
+	func = func.toLowerCase();
+
 	// 外部関数キャッシュのクリア
 	topProc.clearFuncCache( func );
 
@@ -626,7 +628,8 @@ function onInputFileLoad( func, data ){
 
 	var index = extFuncFile.length;
 	for( i = 0; i < extFuncFile.length; i++ ){
-		if( extFuncFile[i] == name ){
+		if( extFuncFile[i].toLowerCase() == name ){
+			name = extFuncFile[i];
 			index = i;
 			break;
 		}
@@ -674,7 +677,7 @@ function getExtFuncDataDirect( func ){
 }
 function getExtFuncDataNameSpace( func ){
 	for( var i = 0; i < extFuncFile.length; i++ ){
-		if( extFuncName( extFuncFile[i] ) == func ){
+		if( extFuncName( extFuncFile[i] ).toLowerCase() == func.toLowerCase() ){
 			if( i < extFuncData.length ){
 				return extFuncData[i];
 			}
@@ -1542,13 +1545,11 @@ function doCustomCommand( _this, param, code, token ){
 		for( i = 0, j = 0; i < extFuncData.length; i++ ){
 			var name = extFuncName( extFuncFile[i] );
 			if( name.length > 0 ){
-				tmp[j] = name;
+				tmp[j] = name.toLowerCase();
 				j++;
 			}
 		}
 		tmp.sort( function( a, b ){
-			a = a.toLowerCase();
-			b = b.toLowerCase();
 			if( a < b ){
 				return -1;
 			} else if( a > b ){
