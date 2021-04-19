@@ -23,19 +23,17 @@ endswi
 :println (time-@t)
 
 # エンボスの場合、さらに計算値に128を加える
+:include !image:color
 if @1 == 5
 	@w = col @@o
 	@h = row @@o
 	for @y = 0; @y < @h; @y++
 		for @x = 0; @x < @w; @x++
 			@c = @@o @y @x
-			@r = ((@c & \xFF0000) >> 16) + 128
-			@g = ((@c & \x00FF00) >> 8 ) + 128
-			@b =  (@c & \x0000FF)        + 128
-			if @r > 255; @r = 255; endif
-			if @g > 255; @g = 255; endif
-			if @b > 255; @b = 255; endif
-			@@o @y @x = (@r << 16) + (@g << 8) + @b
+			@r = get_red   @c + 128
+			@g = get_green @c + 128
+			@b = get_blue  @c + 128
+			@@o @y @x = make_color_s @r @g @b
 		next
 	next
 endif

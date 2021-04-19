@@ -1,6 +1,7 @@
 #!NAMESPACE image
 #モザイク処理
 #\!- <array> <left> <top> <right> <bottom> <width> <height>
+:include !image:color
 
 func add
 	:ulong
@@ -9,16 +10,11 @@ func add
 #	$SET_Z		@b
 #	$SET_Z		@i
 	$LOOPSTART	# @i
-	$AND_A		@R,@@0 @i,\xFF0000
-	$SHIFTR		@R,16
-	$ADD		@r,@R
-	$AND_A		@G,@@0 @i,\x00FF00
-	$SHIFTR		@G,8
-	$ADD		@g,@G
-	$AND_A		@B,@@0 @i,\x0000FF
-	$ADD		@b,@B
+	$ADD		@r,get_red   (@@0 @i)
+	$ADD		@g,get_green (@@0 @i)
+	$ADD		@b,get_blue  (@@0 @i)
 	$LOOPEND_I	@i,@1
-	return ((@r / @1) << 16) + ((@g / @1) << 8) + (@b / @1)
+	return make_color (@r / @1) (@g / @1) (@b / @1)
 endfunc
 
 :ans FALSE

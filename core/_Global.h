@@ -662,6 +662,9 @@
 // エスケープ文字
 #define _CHAR_UTF8_YEN	'¥'/*0xC2A5*/
 
+// 分数表現で使う文字
+#define _CHAR_FRACT	'⏌'/*0x23CC*/
+
 // 不正な配列の要素番号
 #define _INVALID_ARRAY_INDEX	0xFFFFFFFF/*ULONG_MAX*/
 

@@ -866,13 +866,19 @@ _Proc.prototype = {
 		}
 		this._curInfo._curArray[this._curInfo._curArraySize] = -1;
 	},
-	_getParams : function( parentParam, code, token, funcParam/*_Token*/ ){
+	_getParams : function( parentParam, code, token, funcParam/*_Token*/, seFlag ){
 		var lock;
 		var newCode;
 		var newToken;
 		var tmpValue = new _ProcVal( this, parentParam );
 
-		while( true ){
+		while( this._curLine._token._get != null ){
+			if( seFlag ){
+				if( !(this._curLine._token.skipComma()) ){
+					return false;
+				}
+			}
+
 			lock = this._curLine._token.lock();
 			if( !(this._curLine._token.getTokenParam( parentParam )) ){
 				break;
@@ -902,6 +908,8 @@ _Proc.prototype = {
 				}
 			}
 		}
+
+		return true;
 	},
 	_formatError : function( format, funcName, error/*_String*/ ){
 		if( funcName == null ){
@@ -1398,7 +1406,7 @@ _Proc.prototype = {
 		if( param._seToken < _CLIP_SE_FUNC ){
 			ret = _procSubSe[param._seToken]( this, param, _CLIP_CODE_SE, param._seToken, value );
 		} else {
-			ret = this._procFuncSe( this, param, _CLIP_CODE_FUNCTION, param._seToken - _CLIP_SE_FUNC, value );
+			ret = this._procFunc( this, param, _CLIP_CODE_FUNCTION, param._seToken - _CLIP_SE_FUNC, value, true );
 		}
 
 		if( ret == _CLIP_NO_ERR ){
@@ -4624,13 +4632,19 @@ _Proc.prototype = {
 		}
 
 		if( func.str().charAt( 0 ) == '!' ){
-			ret = _this._procExtFunc( _this, param, _CLIP_CODE_EXTFUNC, func.str().slice( 1 ), value );
+			ret = _this._procExtFunc( _this, param, _CLIP_CODE_EXTFUNC, func.str().slice( 1 ), value, seFlag );
+			if( ret != _CLIP_NO_ERR ){
+				ret = _this._retError( _CLIP_PROC_ERR_CALL, code, token );
+			}
 		} else {
 			var _func = new _Integer();
-			if( !_proc_token.checkFunc( func.str(), _func ) ){
-				ret = _this._retError( _CLIP_PROC_ERR_CALL, code, token );
+			if( _proc_token.checkFunc( func.str(), _func ) ){
+				ret = _this._procFunc( _this, param, _CLIP_CODE_FUNCTION, _func._val, value, seFlag );
 			} else {
-				ret = _this._procFunc( _this, param, _CLIP_CODE_FUNCTION, _func._val, value );
+				ret = _this._procLabel( _this, param, _CLIP_CODE_LABEL, func.str(), value, seFlag );
+				if( ret != _CLIP_NO_ERR ){
+					ret = _this._retError( _CLIP_PROC_ERR_CALL, code, token );
+				}
 			}
 		}
 		return ret;
@@ -9194,11 +9208,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandNameSpace : function( _this, param, code, token ){
-		var newToken;
 		if( _this._curLine._token.getToken() ){
-			newToken = _get_token;
-			if( _get_code == _CLIP_CODE_LABEL ){
-				param._nameSpace = newToken;
+			var nameSpace = _proc_token.tokenString( param, _get_code, _get_token );
+			if( nameSpace.length > 0 ){
+				param._nameSpace = nameSpace;
 				return _CLIP_PROC_SUB_END;
 			}
 			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
@@ -9377,12 +9390,14 @@ _Proc.prototype = {
 		_proc_mp.fset( value.mp(), token );
 		return _CLIP_NO_ERR;
 	},
-	_procLabel : function( _this, parentParam, code, token, value ){
+	_procLabel : function( _this, parentParam, code, token, value, seFlag ){
 		var funcParam = new _Token();
 		var func;
 
 		// 関数のパラメータを取得する
-		_this._getParams( parentParam, code, token, funcParam );
+		if( !(_this._getParams( parentParam, code, token, funcParam, seFlag )) ){
+			return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+		}
 
 		if( (func = parentParam._func.search( token, false, null )) != null ){
 			var ret;
@@ -9437,13 +9452,13 @@ _Proc.prototype = {
 			return _this._retError( _CLIP_PROC_ERR_UNARY, code, token );
 		}
 	},
-	_procFunc : function( _this, param, code, token, value ){
+	_procFunc : function( _this, param, code, token, value, seFlag ){
 		var ret;
 
 		clearValueError();
 		clearMatrixError();
 
-		if( (ret = _procSubFunc[token]( _this, param, code, token, value, false )) != _CLIP_NO_ERR ){
+		if( (ret = _procSubFunc[token]( _this, param, code, token, value, seFlag )) != _CLIP_NO_ERR ){
 			return ret;
 		}
 		if( !(param._mpFlag) ){
@@ -9457,34 +9472,16 @@ _Proc.prototype = {
 
 		return _CLIP_NO_ERR;
 	},
-	_procFuncSe : function( _this, param, code, token, value ){
-		var ret;
-
-		clearValueError();
-		clearMatrixError();
-
-		if( (ret = _procSubFunc[token]( _this, param, code, token, value, true )) != _CLIP_NO_ERR ){
-			return ret;
-		}
-		if( !(param._mpFlag) ){
-			_this._updateMatrix( param, value.mat() );
-
-			if( valueError() ){
-				_this._errorProc( _CLIP_PROC_WARN_FUNCTION, _this._curLine._num, param, code, token );
-				clearValueError();
-			}
-		}
-
-		return _CLIP_NO_ERR;
-	},
-	_procExtFunc : function( _this, parentParam, code, token, value ){
+	_procExtFunc : function( _this, parentParam, code, token, value, seFlag ){
 		var ret;
 
 		var funcParam = new _Token();
 		var func;
 
 		// 関数のパラメータを取得する
-		_this._getParams( parentParam, code, token, funcParam );
+		if( !(_this._getParams( parentParam, code, token, funcParam, seFlag )) ){
+			return _this._retError( _CLIP_PROC_ERR_SE_OPERAND, code, token );
+		}
 
 		// 親プロセスの環境を受け継いで、子プロセスを実行する
 		var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );

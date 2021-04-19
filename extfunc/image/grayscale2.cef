@@ -1,13 +1,15 @@
 #!NAMESPACE image
 #グレースケール
 #\!- <array>
+:include !image:color
+
 :ans FALSE
 :gclear (gcolor \xFFFFFF)
 
 # グレースケールのパレットを構築する
 $SET_Z		@i
 $LOOPSTART	# @i
-:gcolor @i ((@i << 16) + (@i << 8) + @i)
+:gcolor @i (make_color @i @i @i)
 $LOOPEND_I	@i,256
 
 # RGB各要素の重み付け
@@ -25,17 +27,13 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$AND_A		@r,@C,\xFF0000
-$SHIFTR		@r,16
-$MUL_A		@Y,@r,GRAY_R_COEF
-$AND_A		@g,@C,\x00FF00
-$SHIFTR		@g,8
-$MUL		@g,GRAY_G_COEF
+$MUL_A		@r,get_red @C,GRAY_R_COEF
+$SET		@Y,@r
+$MUL_A		@g,get_green @C,GRAY_G_COEF
 $ADD		@Y,@g
-$AND_A		@b,@C,\x0000FF
-$MUL		@b,GRAY_B_COEF
+$MUL_A		@b,get_blue @C,GRAY_B_COEF
 $ADD		@Y,@b
 $INT		@Y,@Y
-:gput @x @y (gcolor ((@Y << 16) + (@Y << 8) + @Y))
+:gput @x @y @Y
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

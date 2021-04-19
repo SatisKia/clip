@@ -1,0 +1,26 @@
+#!NAMESPACE image
+
+func make_color r g b
+	:ulong
+	return (r << 16) + (g << 8) + b
+endfunc
+
+func make_color_s r g b # 飽和演算
+	:int
+	if r < 0; r = 0; elif r > 255; r = 255; endif
+	if g < 0; g = 0; elif g > 255; g = 255; endif
+	if b < 0; b = 0; elif b > 255; b = 255; endif
+	return (r << 16) + (g << 8) + b
+endfunc
+
+func get_red
+	return (@0 & \xFF0000) >> 16
+endfunc
+
+func get_green
+	return (@0 & \x00FF00) >> 8
+endfunc
+
+func get_blue
+	return @0 & \x0000FF
+endfunc

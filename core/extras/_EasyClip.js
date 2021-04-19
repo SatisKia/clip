@@ -301,8 +301,8 @@ _EasyClip.prototype = {
 			if( _MOD( value.num(), value.denom() ) != 0 ){
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
-				string += "⏌" + _MOD( value.num(), value.denom() );
-				string += "⏌" + value.denom();
+				string += "" + _CHAR_FRACT + _MOD( value.num(), value.denom() );
+				string += "" + _CHAR_FRACT + value.denom();
 			} else {
 				string = value.fractMinus() ? "-" : "";
 				string += "" + _DIV( value.num(), value.denom() );
@@ -315,7 +315,7 @@ _EasyClip.prototype = {
 				string += "" + value.num();
 			} else {
 				string = value.fractMinus() ? "-" : "";
-				string += "" + value.num() + "⏌" + value.denom();
+				string += "" + value.num() + _CHAR_FRACT + value.denom();
 			}
 		}
 		return string;
