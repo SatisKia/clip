@@ -3495,43 +3495,37 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_getFuncParamArray : function( param, code, token, moveFlag/*_Boolean*/, seFlag ){
-		var lock;
-		var newCode;
-		var newToken;
-		var index;
-
-		lock = this._curLine._token.lock();
+		var lock = this._curLine._token.lock();
 		if( seFlag ){
 			if( !(this._curLine._token.skipComma()) ){
 				this._curLine._token.unlock( lock );
-				return -1;
+				return null;
 			}
 		}
+		var index = new __Index();
 		if( this._curLine._token.getTokenParam( param ) ){
-			newCode  = _get_code;
-			newToken = _get_token;
+			var newCode  = _get_code;
+			var newToken = _get_token;
 			switch( newCode ){
 			case _CLIP_CODE_GLOBAL_ARRAY:
 				param = globalParam();
 				// そのまま下に流す
 			case _CLIP_CODE_ARRAY:
 			case _CLIP_CODE_AUTO_ARRAY:
-				index = this.arrayIndexIndirectMove( param, newCode, newToken, moveFlag );
+				index.set( param, this.arrayIndexIndirectMove( param, newCode, newToken, moveFlag ) );
 				break;
 			case _CLIP_CODE_LABEL:
 			case _CLIP_CODE_GLOBAL_VAR:
-				index = param._array._label.checkLabel( newToken );
+				index.set( param, param._array._label.checkLabel( newToken ) );
 				moveFlag.set( false );
 				break;
 			default:
-				index = -1;
-				break;
+				this._curLine._token.unlock( lock );
+				return null;
 			}
 		} else {
-			index = -1;
-		}
-		if( index < 0 ){
 			this._curLine._token.unlock( lock );
+			return null;
 		}
 		return index;
 	},
@@ -4087,8 +4081,8 @@ _Proc.prototype = {
 		var index;
 		var moveFlag = new _Boolean();
 
-		if( param._mpFlag && ((index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) >= 0) ){
-			tmpValue[0]._mp = Array.from( param._array._mp[index] );
+		if( param._mpFlag && ((index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) != null) ){
+			tmpValue[0]._mp = Array.from( index._param._array._mp[index._index] );
 			tmpValue[0]._mpFlag = true;
 		} else if( (ret = _this._getFuncParam( param, code, token, tmpValue[0], seFlag )) != _CLIP_NO_ERR ){
 			return ret;
@@ -4384,8 +4378,8 @@ _Proc.prototype = {
 		var index;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.matAss( param._array._mat[index]._row );
+		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) != null ){
+			value.matAss( index._param._array._mat[index._index]._row );
 		} else {
 			var ret;
 			var tmpValue = new _ProcVal( _this, param );
@@ -4402,8 +4396,8 @@ _Proc.prototype = {
 		var index;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.matAss( param._array._mat[index]._col );
+		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) != null ){
+			value.matAss( index._param._array._mat[index._index]._col );
 		} else {
 			var ret;
 			var tmpValue = new _ProcVal( _this, param );
@@ -4420,8 +4414,8 @@ _Proc.prototype = {
 		var index;
 		var moveFlag = new _Boolean();
 
-		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) >= 0 ){
-			value.matAss( param._array._mat[index].trans() );
+		if( (index = _this._getFuncParamArray( param, code, token, moveFlag, seFlag )) != null ){
+			value.matAss( index._param._array._mat[index._index].trans() );
 		} else {
 			var ret;
 			var tmpValue = new _ProcVal( _this, param );
