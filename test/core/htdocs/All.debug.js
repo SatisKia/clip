@@ -4658,6 +4658,15 @@ _Array.prototype = {
   }
   return index;
  },
+ undef : function( label ){
+  var index;
+  if( (index = this._label.undef( label )) >= 0 ){
+   this._node[index] = new __ArrayNode();
+   this._mat [index] = new _Matrix();
+   this._mp [index] = new Array();
+  }
+  return index;
+ },
  _moveData : function( index ){
   var newIndex;
   if( (newIndex = this._label.define( this._label._label[index] )) >= 0 ){
@@ -8625,10 +8634,10 @@ _Proc.prototype = {
   }
   var saveArray = this._curInfo._curArray;
   var saveArraySize = this._curInfo._curArraySize;
-  if( param._seToken < 69 ){
+  if( param._seToken < 70 ){
    ret = _procSubSe[param._seToken]( this, param, 23, param._seToken, value );
   } else {
-   ret = this._procFunc( this, param, 13, param._seToken - 69, value, true );
+   ret = this._procFunc( this, param, 13, param._seToken - 70, value, true );
   }
   if( ret == 0x00 ){
    if( this._curLine._token._get != null ){
@@ -9652,9 +9661,13 @@ _Proc.prototype = {
   var a = value.mat()._mat[0].toFloat() + tmpValue[0].mat()._mat[0].toFloat();
   var b = tmpValue[1].mat()._mat[0].toFloat();
   var c = tmpValue[2].mat()._mat[0].toFloat();
-  if( a < b ) a = b;
-  if( a > c ) a = c;
-  value.matAss( a );
+  if( a < b ){
+   value.matAss( b );
+  } else if( a > c ){
+   value.matAss( c );
+  } else {
+   value.matAss( a );
+  }
   return 0x00;
  },
  _seSub : function( _this, param, code, token, value ){
@@ -9689,9 +9702,13 @@ _Proc.prototype = {
   var a = value.mat()._mat[0].toFloat() - tmpValue[0].mat()._mat[0].toFloat();
   var b = tmpValue[1].mat()._mat[0].toFloat();
   var c = tmpValue[2].mat()._mat[0].toFloat();
-  if( a < b ) a = b;
-  if( a > c ) a = c;
-  value.matAss( a );
+  if( a < b ){
+   value.matAss( b );
+  } else if( a > c ){
+   value.matAss( c );
+  } else {
+   value.matAss( a );
+  }
   return 0x00;
  },
  _sePow : function( _this, param, code, token, value ){
@@ -10013,9 +10030,13 @@ _Proc.prototype = {
   var a = value.mat()._mat[0].toFloat() + tmpValue[0].mat()._mat[0].toFloat();
   var b = tmpValue[1].mat()._mat[0].toFloat();
   var c = tmpValue[2].mat()._mat[0].toFloat();
-  if( a < b ) a = b;
-  if( a > c ) a = c;
-  value.matAss( a );
+  if( a < b ){
+   value.matAss( b );
+  } else if( a > c ){
+   value.matAss( c );
+  } else {
+   value.matAss( a );
+  }
   return 0x00;
  },
  _seSubAndAss : function( _this, param, code, token, value ){
@@ -10056,9 +10077,13 @@ _Proc.prototype = {
   var a = value.mat()._mat[0].toFloat() - tmpValue[0].mat()._mat[0].toFloat();
   var b = tmpValue[1].mat()._mat[0].toFloat();
   var c = tmpValue[2].mat()._mat[0].toFloat();
-  if( a < b ) a = b;
-  if( a > c ) a = c;
-  value.matAss( a );
+  if( a < b ){
+   value.matAss( b );
+  } else if( a > c ){
+   value.matAss( c );
+  } else {
+   value.matAss( a );
+  }
   return 0x00;
  },
  _sePowAndAss : function( _this, param, code, token, value ){
@@ -10336,6 +10361,25 @@ _Proc.prototype = {
    _proc_mp.fset( value.mp(), _proc_mp.F( "0.0" ) );
   } else {
    value.matAss( 0.0 );
+  }
+  return 0x00;
+ },
+ _seSaturate : function( _this, param, code, token, value ){
+  var ret;
+  var tmpValue = newProcValArray( 2, _this, param );
+  if( (ret = _this._getSeOperand( param, code, token, tmpValue[0] )) != 0x00 ){
+   return ret;
+  }
+  if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
+   return ret;
+  }
+  var a = value.mat()._mat[0].toFloat();
+  var b = tmpValue[0].mat()._mat[0].toFloat();
+  var c = tmpValue[1].mat()._mat[0].toFloat();
+  if( a < b ){
+   value.matAss( b );
+  } else if( a > c ){
+   value.matAss( c );
   }
   return 0x00;
  },
@@ -13742,10 +13786,19 @@ _Proc.prototype = {
   if( _this._curLine._token.getTokenParam( param ) ){
    newCode = _get_code;
    newToken = _get_token;
-   if( (newCode == 9) || (newCode == 0x23) || (newCode == 0x46) ){
+   if( newCode == 9 ){
     return _this._retError( 0x2143, newCode, newToken );
    } else if( (newCode & 0x20) != 0 ){
+    if( newCode == 0x23 ){
+     param = globalParam();
+    }
     param._var.undef( param._var._label._label[_this.varIndexIndirect( param, newCode, newToken )] );
+    return 0x03;
+   } else if( (newCode & 0x40) != 0 ){
+    if( newCode == 0x46 ){
+     param = globalParam();
+    }
+    param._array.undef( param._array._label._label[_this.arrayIndexIndirect( param, newCode, newToken )] );
     return 0x03;
    }
   }
@@ -16160,7 +16213,8 @@ var _procSubSe = [
  _Proc.prototype._seConditional,
  _Proc.prototype._seSetFALSE,
  _Proc.prototype._seSetTRUE,
- _Proc.prototype._seSetZero
+ _Proc.prototype._seSetZero,
+ _Proc.prototype._seSaturate
 ];
 var _procSub = [
  _Proc.prototype._procTop,
@@ -16589,6 +16643,7 @@ var _TOKEN_SE = [
  "set_f",
  "set_t",
  "set_z",
+ "sat",
  "loopstart",
  "loopend",
  "loopend_i",
@@ -16772,7 +16827,7 @@ _Token.prototype = {
     return true;
   }
   if( this.checkFunc( string, se ) ){
-   se.set( 69 + se._val );
+   se.set( 70 + se._val );
    return true;
   }
   return false;
@@ -17406,51 +17461,51 @@ _Token.prototype = {
    if( tmp.charAt( 0 ) == '$' ){
     if( this.checkSe( tmp.substring( 1, len ).toLowerCase(), code ) ){
      switch( code._val ){
-     case 57:
+     case 58:
       cur._code = 11;
       cur._token = 0;
       break;
-     case 58:
+     case 59:
       cur._code = 11;
       cur._token = 1;
       break;
-     case 59:
+     case 60:
       cur._code = 11;
       cur._token = 2;
       break;
-     case 60:
+     case 61:
       cur._code = 11;
       cur._token = 3;
       break;
-     case 61:
+     case 62:
       cur._code = 11;
       cur._token = 4;
       break;
-     case 62:
+     case 63:
       cur._code = 11;
       cur._token = 5;
       break;
-     case 63:
+     case 64:
       cur._code = 11;
       cur._token = 6;
       break;
-     case 64:
+     case 65:
       cur._code = 11;
       cur._token = 7;
       break;
-     case 65:
+     case 66:
       cur._code = 11;
       cur._token = 28;
       break;
-     case 66:
+     case 67:
       cur._code = 11;
       cur._token = 29;
       break;
-     case 67:
+     case 68:
       cur._code = 11;
       cur._token = 32;
       break;
-     case 68:
+     case 69:
       cur._code = 11;
       cur._token = 33;
       break;
@@ -18497,7 +18552,7 @@ _Token.prototype = {
     string += _TOKEN_SE[token - 1];
     break;
    }
-   token -= 69;
+   token -= 70;
   case 13:
    string += _TOKEN_FUNC[token];
    break;

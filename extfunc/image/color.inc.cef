@@ -2,25 +2,38 @@
 
 func make_color r g b
 	:ulong
-	return (r << 16) + (g << 8) + b
+	$SHIFTL	r,16
+	$SHIFTL	g,8
+	$ADD	r,g
+	$ADD	r,b
+	return r
 endfunc
 
 func make_color_s r g b # 飽和演算
 	:int
-	if r < 0; r = 0; elif r > 255; r = 255; endif
-	if g < 0; g = 0; elif g > 255; g = 255; endif
-	if b < 0; b = 0; elif b > 255; b = 255; endif
-	return (r << 16) + (g << 8) + b
+	$SAT	r,0,255
+	$SAT	g,0,255
+	$SAT	b,0,255
+	$SHIFTL	r,16
+	$SHIFTL	g,8
+	$ADD	r,g
+	$ADD	r,b
+	return r
 endfunc
 
 func get_red
-	return (@0 & \xFF0000) >> 16
+	$AND	@0,\xFF0000
+	$SHIFTR	@0,16
+	return @0
 endfunc
 
 func get_green
-	return (@0 & \x00FF00) >> 8
+	$AND	@0,\x00FF00
+	$SHIFTR	@0,8
+	return @0
 endfunc
 
 func get_blue
-	return @0 & \x0000FF
+	$AND @0,\x0000FF
+	return @0
 endfunc

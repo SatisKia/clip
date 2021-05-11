@@ -341,6 +341,7 @@ var _TOKEN_SE = [
 	"set_f",
 	"set_t",
 	"set_z",
+	"sat",	// saturate
 	"loopstart",
 	"loopend",
 	"loopend_i",

@@ -27,30 +27,30 @@ $MUL_A		@b,get_blue  @c,@k
 # 右上
 $SET		@c,@@0 @Y (@X + 1)
 $MUL_A		@k,@P,@S
-$MUL_A		@R,get_red   @c,@k
-$MUL_A		@G,get_green @c,@k
-$MUL_A		@B,get_blue  @c,@k
-$ADD		@r,@R
-$ADD		@g,@G
-$ADD		@b,@B
+$MUL_A		@t,get_red   @c,@k
+$ADD		@r,@t
+$MUL_A		@t,get_green @c,@k
+$ADD		@g,@t
+$MUL_A		@t,get_blue  @c,@k
+$ADD		@b,@t
 # 左下
 $SET		@c,@@0 (@Y + 1) @X
 $MUL_A		@k,@R,@Q
-$MUL_A		@R,get_red   @c,@k
-$MUL_A		@G,get_green @c,@k
-$MUL_A		@B,get_blue  @c,@k
-$ADD		@r,@R
-$ADD		@g,@G
-$ADD		@b,@B
+$MUL_A		@t,get_red   @c,@k
+$ADD		@r,@t
+$MUL_A		@t,get_green @c,@k
+$ADD		@g,@t
+$MUL_A		@t,get_blue  @c,@k
+$ADD		@b,@t
 # 右下
 $SET		@c,@@0 (@Y + 1) (@X + 1)
 $MUL_A		@k,@P,@Q
-$MUL_A		@R,get_red   @c,@k
-$MUL_A		@G,get_green @c,@k
-$MUL_A		@B,get_blue  @c,@k
-$ADD		@r,@R
-$ADD		@g,@G
-$ADD		@b,@B
+$MUL_A		@t,get_red   @c,@k
+$ADD		@r,@t
+$MUL_A		@t,get_green @c,@k
+$ADD		@g,@t
+$MUL_A		@t,get_blue  @c,@k
+$ADD		@b,@t
 # ピクセル値
 @@7 @y @x = make_color @r @g @b
 $LOOPEND_I	@x,@w

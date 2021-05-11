@@ -2592,10 +2592,14 @@ _Proc.prototype = {
 		var a = value.mat()._mat[0].toFloat() + tmpValue[0].mat()._mat[0].toFloat();
 		var b = tmpValue[1].mat()._mat[0].toFloat();
 		var c = tmpValue[2].mat()._mat[0].toFloat();
-		if( a < b ) a = b;
-		if( a > c ) a = c;
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		} else {
+			value.matAss( a );
+		}
 
-		value.matAss( a );
 		return _CLIP_NO_ERR;
 	},
 	_seSub : function( _this, param, code, token, value ){
@@ -2636,10 +2640,14 @@ _Proc.prototype = {
 		var a = value.mat()._mat[0].toFloat() - tmpValue[0].mat()._mat[0].toFloat();
 		var b = tmpValue[1].mat()._mat[0].toFloat();
 		var c = tmpValue[2].mat()._mat[0].toFloat();
-		if( a < b ) a = b;
-		if( a > c ) a = c;
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		} else {
+			value.matAss( a );
+		}
 
-		value.matAss( a );
 		return _CLIP_NO_ERR;
 	},
 	_sePow : function( _this, param, code, token, value ){
@@ -3010,10 +3018,14 @@ _Proc.prototype = {
 		var a = value.mat()._mat[0].toFloat() + tmpValue[0].mat()._mat[0].toFloat();
 		var b = tmpValue[1].mat()._mat[0].toFloat();
 		var c = tmpValue[2].mat()._mat[0].toFloat();
-		if( a < b ) a = b;
-		if( a > c ) a = c;
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		} else {
+			value.matAss( a );
+		}
 
-		value.matAss( a );
 		return _CLIP_NO_ERR;
 	},
 	_seSubAndAss : function( _this, param, code, token, value ){
@@ -3062,10 +3074,14 @@ _Proc.prototype = {
 		var a = value.mat()._mat[0].toFloat() - tmpValue[0].mat()._mat[0].toFloat();
 		var b = tmpValue[1].mat()._mat[0].toFloat();
 		var c = tmpValue[2].mat()._mat[0].toFloat();
-		if( a < b ) a = b;
-		if( a > c ) a = c;
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		} else {
+			value.matAss( a );
+		}
 
-		value.matAss( a );
 		return _CLIP_NO_ERR;
 	},
 	_sePowAndAss : function( _this, param, code, token, value ){
@@ -3390,6 +3406,29 @@ _Proc.prototype = {
 		} else {
 			value.matAss( 0.0 );
 		}
+		return _CLIP_NO_ERR;
+	},
+	_seSaturate : function( _this, param, code, token, value ){
+		var ret;
+		var tmpValue = newProcValArray( 2, _this, param );
+
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[0] )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		var a = value.mat()._mat[0].toFloat();
+		var b = tmpValue[0].mat()._mat[0].toFloat();
+		var c = tmpValue[1].mat()._mat[0].toFloat();
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		}
+
 		return _CLIP_NO_ERR;
 	},
 
@@ -7273,10 +7312,19 @@ _Proc.prototype = {
 		if( _this._curLine._token.getTokenParam( param ) ){
 			newCode  = _get_code;
 			newToken = _get_token;
-			if( (newCode == _CLIP_CODE_LABEL) || (newCode == _CLIP_CODE_GLOBAL_VAR) || (newCode == _CLIP_CODE_GLOBAL_ARRAY) ){
+			if( newCode == _CLIP_CODE_LABEL ){
 				return _this._retError( _CLIP_PROC_ERR_COMMAND_UNDEF, newCode, newToken );
 			} else if( (newCode & _CLIP_CODE_VAR_MASK) != 0 ){
+				if( newCode == _CLIP_CODE_GLOBAL_VAR ){
+					param = globalParam();
+				}
 				param._var.undef( param._var._label._label[_this.varIndexIndirect( param, newCode, newToken )] );
+				return _CLIP_PROC_SUB_END;
+			} else if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
+				if( newCode == _CLIP_CODE_GLOBAL_ARRAY ){
+					param = globalParam();
+				}
+				param._array.undef( param._array._label._label[_this.arrayIndexIndirect( param, newCode, newToken )] );
 				return _CLIP_PROC_SUB_END;
 			}
 		}
@@ -10036,7 +10084,9 @@ var _procSubSe = [
 
 	_Proc.prototype._seSetFALSE,
 	_Proc.prototype._seSetTRUE,
-	_Proc.prototype._seSetZero
+	_Proc.prototype._seSetZero,
+
+	_Proc.prototype._seSaturate
 ];
 
 var _procSub = [

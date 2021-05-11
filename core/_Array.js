@@ -278,6 +278,18 @@ _Array.prototype = {
 		return index;
 	},
 
+	// 定義を削除する
+	undef : function( label ){
+		var index;
+		if( (index = this._label.undef( label )) >= 0 ){
+			// 値を初期化する
+			this._node[index] = new __ArrayNode();
+			this._mat [index] = new _Matrix();
+			this._mp  [index] = new Array();
+		}
+		return index;
+	},
+
 	_moveData : function( index ){
 		var newIndex;
 
