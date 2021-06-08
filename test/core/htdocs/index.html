@@ -10,16 +10,16 @@
 <script type="text/javascript" src="DefCharInfoLarge.js"></script>
 
 <!--リリース用-->
-<script type="text/javascript" src="clip.js?v=210507"></script>
-<script type="text/javascript" src="Main.js?v=210507"></script>
+<script type="text/javascript" src="clip.js?v=210608"></script>
+<script type="text/javascript" src="Main.js?v=210608"></script>
 
 <!--デバッグ用
-<script type="text/javascript" src="clip.debug.js?v=210507"></script>
-<script type="text/javascript" src="Main.debug.js?v=210507"></script>
+<script type="text/javascript" src="clip.debug.js?v=210608"></script>
+<script type="text/javascript" src="Main.debug.js?v=210608"></script>
 -->
 
 <!--ライブラリ未使用版デバッグ用
-<script type="text/javascript" src="All.debug.js?v=210507"></script>
+<script type="text/javascript" src="All.debug.js?v=210608"></script>
 -->
 
 <script type="text/javascript">
@@ -51,7 +51,7 @@ td {
 }
 button {
 	-webkit-appearance:button;
-	padding:0;
+	padding:0 2px 0 2px;
 	height:26px;
 	font-family:"Helvetica";
 	font-size:14px;
@@ -151,7 +151,7 @@ select::-ms-expand {
 	display:none;
 }
 .select_func {
-	width:45px;
+	width:50px;
 	height:26px;
 	padding-left:10px;
 	font-family:"Courier New";
@@ -242,19 +242,19 @@ input[type="checkbox"]:checked + label::after {
 							</td>
 							<td>
 								<form action="javascript:doClearFuncCache()">
-									<button type="submit" id="button_cache_clear">&nbsp;&nbsp;外部関数ｷｬｯｼｭのｸﾘｱ&nbsp;&nbsp;</button>
+									<button type="submit" id="button_cache_clear">外部関数ｷｬｯｼｭのｸﾘｱ</button>
 								</form>
 							</td>
 							<td width="10"></td>
 							<td>
 								<form action="javascript:doClearStorage()">
-									<button type="submit" id="button_storage_clear">&nbsp;&nbsp;ｽﾄﾚｰｼﾞのｸﾘｱ&nbsp;&nbsp;</button>
+									<button type="submit" id="button_storage_clear">ｽﾄﾚｰｼﾞのｸﾘｱ</button>
 								</form>
 							</td>
 							<td width="10"></td>
 							<td>
 								<form action="javascript:doClearCookie()">
-									<button type="submit" id="button_cookie_clear">&nbsp;&nbsp;Cookieのｸﾘｱ&nbsp;&nbsp;</button>
+									<button type="submit" id="button_cookie_clear">Cookieのｸﾘｱ</button>
 								</form>
 							</td>
 						</tr>
@@ -277,7 +277,7 @@ input[type="checkbox"]:checked + label::after {
 									<tr>
 										<td>
 											<form action="javascript:callFunc()">
-												<button type="submit" id="button_callfunc">&nbsp;&nbsp;呼び出し&nbsp;&nbsp;</button>
+												<button type="submit" id="button_callfunc">&nbsp;呼び出し&nbsp;</button>
 											</form>
 										</td>
 										<td width="10"></td>
@@ -317,7 +317,7 @@ input[type="checkbox"]:checked + label::after {
 										<td width="130">
 <div id="clip_savefunc" style="display:none">
 											<form action="javascript:saveFunc()">
-												<button type="submit" id="button_savefunc">&nbsp;&nbsp;メモリ保存&nbsp;&nbsp;</button>
+												<button type="submit" id="button_savefunc">&nbsp;メモリ保存&nbsp;</button>
 											</form>
 </div>
 										</td>
@@ -378,7 +378,7 @@ input[type="checkbox"]:checked + label::after {
 					</table>
 					<hr style="border:0; margin:0; height:5px">
 					<form action="javascript:saveCanvas()">
-						<button type="submit" id="button_savecanvas">&nbsp;&nbsp;ダウンロード&nbsp;&nbsp;</button>
+						<button type="submit" id="button_savecanvas">&nbsp;ダウンロード&nbsp;</button>
 					</form>
 					<hr style="border:0; margin:0; height:5px">
 				</div>

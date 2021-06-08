@@ -1553,14 +1553,19 @@ Saturation calculation<br>
 </tr>
 <tr>
 <td>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SAT</span></td><td><i>r</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SAT<br>$SETS</span></td><td><i>r</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
 </td>
 </tr>
 </table>
 <hr class="hr">
 Valid for floating-point and integer types.<br>
 <hr class="hr">
-This is an instruction to set the <i>min</i> value when the value of the first operand is less than the <i>min</i> value, and to the <i>max</i> value when the value exceeds the <i>max</i> value.<br>
+In <span class="pink">$SAT</span>, set the <i>min</i> value when the value of the first operand is less than the <i>min</i> value, and to the <i>max</i> value when the value exceeds the <i>max</i> value.<br>
+<hr class="hr">
+In <span class="pink">$SETS</span>, set the value of the first operand as follows:<br>
+a) If the value of the second operand is less than the <i>min</i> value, set it to the <i>min</i> value.<br>
+b) If the value of the second operand exceeds the <i>max</i> value, set it to the <i>max</i> value.<br>
+c) Otherwise, set to the value of the second operand.<br>
 <hr class="hr">
 <table border="1" cellspacing="1" cellpadding="1">
 <tr>

@@ -1,0 +1,50 @@
+#!NAMESPACE image
+# HSV‚©‚çRGB‚Ö‚Ì•ÏŠ·
+#\!- <h_array> <s_array> <v_array> <rgb_array>
+:include !image:color
+:ans FALSE
+:param 3 TRUE
+
+:var MIN
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$MOD_A		@H,@@0 @y @x + 360,360
+$SETS		@V,@@2 @y @x,0.0,1.0
+$SETS		@S,@@1 @y @x,0.0,@V
+
+$SUB_A		MIN,@V,@S
+
+if @H < 60
+	$SET		@R,@V
+	$SET		@G,{@V + (@H - 60) / 60 * @S}
+	$SET		@B,MIN
+elif @H < 120
+	$SET		@R,{@V - (@H - 60) / 60 * @S}
+	$SET		@G,@V
+	$SET		@B,MIN
+elif @H < 180
+	$SET		@R,MIN
+	$SET		@G,@V
+	$SET		@B,{@V + (@H - 180) / 60 * @S}
+elif @H < 240
+	$SET		@R,MIN
+	$SET		@G,{@V - (@H - 180) / 60 * @S}
+	$SET		@B,@V
+elif @H < 300
+	$SET		@R,{@V + (@H - 300) / 60 * @S}
+	$SET		@G,MIN
+	$SET		@B,@V
+else
+	$SET		@R,@V
+	$SET		@G,MIN
+	$SET		@B,{@V - (@H - 300) / 60 * @S}
+endif
+
+$SET		@@3 @y @x,make_color (int (@R * 255)) (int (@G * 255)) (int (@B * 255))
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

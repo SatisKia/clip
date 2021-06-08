@@ -3431,6 +3431,33 @@ _Proc.prototype = {
 
 		return _CLIP_NO_ERR;
 	},
+	_seSetS : function( _this, param, code, token, value ){
+		var ret;
+		var tmpValue = newProcValArray( 2, _this, param );
+
+		if( (ret = _this._getSeOperand( param, code, token, value )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[0] )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		var a = value.mat()._mat[0].toFloat();
+		var b = tmpValue[0].mat()._mat[0].toFloat();
+		var c = tmpValue[1].mat()._mat[0].toFloat();
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		}
+
+		return _CLIP_NO_ERR;
+	},
 
 	mpPow : function( param, ret/*Array*/, x/*Array*/, y ){
 		x = _proc_mp.clone( x );
@@ -4682,6 +4709,15 @@ _Proc.prototype = {
 		}
 		return ret;
 	},
+	initEvalProc : function( childParam, parentParam ){
+		childParam._enableCommand = false;
+		childParam._enableStat = false;
+
+		// ユーザー定義関数を取り込む
+		childParam._func.openAll( parentParam._func );
+
+		childParam.setDefNameSpace( parentParam._defNameSpace );
+	},
 	_funcEval : function( _this, param, code, token, value, seFlag ){
 		var ret;
 
@@ -4700,8 +4736,7 @@ _Proc.prototype = {
 		// 親プロセスの環境を受け継いで、子プロセスを実行する
 		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
 		var childParam = new _Param( _this._curLine._num, param, true );
-		childParam._enableCommand = false;
-		childParam._enableStat = false;
+		_this.initEvalProc( childParam, param );
 		ret = doFuncEval( _this, childProc, childParam, string.str(), value );
 		childProc.end();
 		childParam.end();
@@ -9116,7 +9151,13 @@ _Proc.prototype = {
 			}
 		}
 
-		doCommandPlot( _this, param, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		// 親プロセスの環境を受け継いで、子プロセスを実行する
+		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, false/*グラフィック画面更新OFF*/ );
+		var childParam = new _Param( _this._curLine._num, param, true );
+		_this.initEvalProc( childParam, param );
+		doCommandPlot( _this, childProc, childParam, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		childProc.end();
+		childParam.end();
 
 		return _CLIP_PROC_SUB_END;
 	},
@@ -9184,7 +9225,13 @@ _Proc.prototype = {
 			}
 		}
 
-		doCommandRePlot( _this, param, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		// 親プロセスの環境を受け継いで、子プロセスを実行する
+		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, false/*グラフィック画面更新OFF*/ );
+		var childParam = new _Param( _this._curLine._num, param, true );
+		_this.initEvalProc( childParam, param );
+		doCommandRePlot( _this, childProc, childParam, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		childProc.end();
+		childParam.end();
 
 		return _CLIP_PROC_SUB_END;
 	},
@@ -10086,7 +10133,8 @@ var _procSubSe = [
 	_Proc.prototype._seSetTRUE,
 	_Proc.prototype._seSetZero,
 
-	_Proc.prototype._seSaturate
+	_Proc.prototype._seSaturate,
+	_Proc.prototype._seSetS
 ];
 
 var _procSub = [
@@ -10160,8 +10208,8 @@ function defProcFunction(){
 	if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width/*_Integer*/, height/*_Integer*/ ){ return null; };
 	if( window.doCommandGGet24End == undefined ) window.doCommandGGet24End = function(){};
 	if( window.doCommandGUpdate == undefined ) window.doCommandGUpdate = function( gWorld ){};
-	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){};
-	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
+	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
 	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return _CLIP_PROC_ERR_COMMAND_NULL/*_CLIP_NO_ERR*/; };
 

@@ -22,9 +22,9 @@ endswi
 !image:filter @@0 @@m @@o
 :println (time-@t)
 
-# エンボスの場合、さらに計算値に128を加える
 :include !image:color
 if @1 == 5
+	# エンボスの場合、さらに計算値に128を加える
 	@w = col @@o
 	@h = row @@o
 	for @y = 0; @y < @h; @y++
@@ -33,6 +33,21 @@ if @1 == 5
 			@r = get_red   @c + 128
 			@g = get_green @c + 128
 			@b = get_blue  @c + 128
+			@@o @y @x = make_color_s @r @g @b
+		next
+	next
+endif
+if @1 == 7
+	# 輪郭強調の場合、処理前の画像データに加算
+	@w = col @@o
+	@h = row @@o
+	for @y = 0; @y < @h; @y++
+		for @x = 0; @x < @w; @x++
+			@C = @@0 @y @x
+			@c = @@o @y @x
+			@r = get_red   @C + get_red   @c
+			@g = get_green @C + get_green @c
+			@b = get_blue  @C + get_blue  @c
 			@@o @y @x = make_color_s @r @g @b
 		next
 	next

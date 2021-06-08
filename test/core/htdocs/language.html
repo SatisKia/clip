@@ -1562,14 +1562,16 @@ CLIP式中にECLIPSE命令を含めることはできない。独立した行に
 </tr>
 <tr>
 <td>
-<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SAT</span></td><td><i>r</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
+<table border="0" cellspacing="0" cellpadding="0"><tr><td width="120"><span class="pink">$SAT<br>$SETS</span></td><td><i>r</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i><br><i>r</i><span class="pink">,</span><i>x</i><span class="pink">,</span><i>min</i><span class="pink">,</span><i>max</i></td></tr></table>
 </td>
 </tr>
 </table>
 <hr class="hr">
 浮動小数点型または整数型で有効である。<br>
 <hr class="hr">
-第一オペランドの値が<i>min</i>値を下回る場合<i>min</i>値に、<i>max</i>値を上回る場合<i>max</i>値に設定する命令である。<br>
+<span class="pink">$SAT</span>は、第一オペランドの値が<i>min</i>値を下回る場合<i>min</i>値に、<i>max</i>値を上回る場合<i>max</i>値に設定する命令である。<br>
+<hr class="hr">
+<span class="pink">$SETS</span>は、第一オペランドの値を、第二オペランドの値が<i>min</i>値を下回る場合<i>min</i>値に、<i>max</i>値を上回る場合<i>max</i>値に、それ以外の場合は第二オペランドの値に設定する命令である。<br>
 <hr class="hr">
 <table border="1" cellspacing="1" cellpadding="1">
 <tr>

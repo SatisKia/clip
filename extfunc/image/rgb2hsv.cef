@@ -1,0 +1,52 @@
+#!NAMESPACE image
+# RGBからHSVへの変換
+#\!- <rgb_array> <h_array> <s_array> <v_array>
+:include !image:color
+:ans FALSE
+:param 1 TRUE
+:param 2 TRUE
+:param 3 TRUE
+
+:var MIN
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@C,@@0 @y @x
+$DIV_A		@R,get_red   @C,255
+$DIV_A		@G,get_green @C,255
+$DIV_A		@B,get_blue  @C,255
+
+$CND		MIN,@G < @R,@G,@R
+if @B < MIN
+	$SET MIN,@B
+endif
+
+# Value（明度）：0.0～1.0
+$CND		@V,@G > @R,@G,@R
+if @B > @V
+	$SET @V,@B
+endif
+
+# Saturation（彩度）：0.0～1.0
+$SUB_A		@S,@V,MIN
+
+# Hue（色相）：0.0～360.0
+if MIN == @V
+	$SET_Z		@H
+elif MIN == @B
+	$SET		@H,{60 * (@G - @R) / @S + 60}
+elif MIN == @R
+	$SET		@H,{60 * (@B - @G) / @S + 180}
+else
+	$SET		@H,{60 * (@R - @B) / @S + 300}
+endif
+
+$MOD_A		@@1 @y @x,@H + 360,360
+$SET		@@2 @y @x,@S
+$SET		@@3 @y @x,@V
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h

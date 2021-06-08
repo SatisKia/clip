@@ -2199,27 +2199,15 @@ function doCommandGUpdate( gWorld ){
  }
  gUpdate( gWorld );
 }
-function doCommandPlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
- var childParam = new _Param( parentProc._curLine._num, parentParam, true );
- childParam._enableCommand = false;
- childParam._enableStat = false;
+function doCommandPlot( parentProc, childProc, childParam, graph, start, end, step ){
 try {
  parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
- childParam.end();
- childProc.end();
 }
-function doCommandRePlot( parentProc, parentParam, graph, start, end, step ){
- var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
- var childParam = new _Param( parentProc._curLine._num, parentParam, true );
- childParam._enableCommand = false;
- childParam._enableStat = false;
+function doCommandRePlot( parentProc, childProc, childParam, graph, start, end, step ){
 try {
  parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
- childParam.end();
- childProc.end();
 }
 function doCommandUsage( topUsage ){
  if( !addExtFuncList ){
@@ -2662,13 +2650,13 @@ function onEndRePlot(){
  onEndPlot();
 }
 function updateLanguage(){
- document.getElementById( "button_cache_clear" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Clear cache" : "外部関数ｷｬｯｼｭのｸﾘｱ") + "&nbsp;&nbsp;";
- document.getElementById( "button_storage_clear" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Clear storage" : "ｽﾄﾚｰｼﾞのｸﾘｱ") + "&nbsp;&nbsp;";
- document.getElementById( "button_cookie_clear" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Clear cookie" : "Cookieのｸﾘｱ") + "&nbsp;&nbsp;";
- document.getElementById( "button_callfunc" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Call" : "呼び出し") + "&nbsp;&nbsp;";
- document.getElementById( "button_savefunc" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Save to memory" : "メモリ保存") + "&nbsp;&nbsp;";
- document.getElementById( "button_savecanvas" ).innerHTML = "&nbsp;&nbsp;" + (englishFlag ? "Download" : "ダウンロード") + "&nbsp;&nbsp;";
- document.getElementById( "static_tab" ).innerHTML = (englishFlag ? "Tab width" : "Tab幅") + ":&nbsp;";
+ document.getElementById( "button_cache_clear" ).innerHTML = englishFlag ? "Clear cache" : "外部関数ｷｬｯｼｭのｸﾘｱ";
+ document.getElementById( "button_storage_clear" ).innerHTML = englishFlag ? "Clear storage" : "ｽﾄﾚｰｼﾞのｸﾘｱ";
+ document.getElementById( "button_cookie_clear" ).innerHTML = englishFlag ? "Clear cookie" : "Cookieのｸﾘｱ";
+ document.getElementById( "button_callfunc" ).innerHTML = "&nbsp;" + (englishFlag ? "Call" : "呼び出し") + "&nbsp;";
+ document.getElementById( "button_savefunc" ).innerHTML = "&nbsp;" + (englishFlag ? "Save to memory" : "メモリ保存") + "&nbsp;";
+ document.getElementById( "button_savecanvas" ).innerHTML = "&nbsp;" + (englishFlag ? "Download" : "ダウンロード") + "&nbsp;";
+ document.getElementById( "static_tab" ).innerHTML = (englishFlag ? "Tab width" : "Tab幅") + "&nbsp;";
  document.getElementById( "static_smart" ).innerHTML = englishFlag ? "Smart" : "スマート";
  document.getElementById( "static_command_env" ).innerHTML = englishFlag ? "List environment" : "環境の一覧";
  document.getElementById( "static_command_list_var" ).innerHTML = englishFlag ? "List variables" : "変数の一覧";

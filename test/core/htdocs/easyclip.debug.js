@@ -325,25 +325,13 @@ function _EasyClip(){
 		};
 	}
 	if( window.doCommandPlot == undefined ){
-		window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
-			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
-			childParam._enableCommand = false;
-			childParam._enableStat = false;
+		window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){
 			parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
-			childParam.end();
-			childProc.end();
 		};
 	}
 	if( window.doCommandRePlot == undefined ){
-		window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){
-			var childProc = new _Proc( parentParam._mode, parentParam._mpPrec, parentParam._mpRound, false, parentProc._printAssert, parentProc._printWarn, false );
-			var childParam = new _Param( parentProc._curLine._num, parentParam, true );
-			childParam._enableCommand = false;
-			childParam._enableStat = false;
+		window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){
 			parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
-			childParam.end();
-			childProc.end();
 		};
 	}
 	defGWorldFunction();

@@ -526,21 +526,22 @@
 #define _CLIP_SE_SET_ZERO		56
 
 #define _CLIP_SE_SATURATE		57
+#define _CLIP_SE_SETS			58
 
-#define _CLIP_SE_LOOPSTART		58
-#define _CLIP_SE_LOOPEND		59
-#define _CLIP_SE_LOOPEND_INC	60
-#define _CLIP_SE_LOOPEND_DEC	61
-#define _CLIP_SE_LOOPENDEQ		62
-#define _CLIP_SE_LOOPENDEQ_INC	63
-#define _CLIP_SE_LOOPENDEQ_DEC	64
-#define _CLIP_SE_LOOPCONT		65
-#define _CLIP_SE_CONTINUE		66
-#define _CLIP_SE_BREAK			67
-#define _CLIP_SE_RETURN			68
-#define _CLIP_SE_RETURN_ANS		69
+#define _CLIP_SE_LOOPSTART		59
+#define _CLIP_SE_LOOPEND		60
+#define _CLIP_SE_LOOPEND_INC	61
+#define _CLIP_SE_LOOPEND_DEC	62
+#define _CLIP_SE_LOOPENDEQ		63
+#define _CLIP_SE_LOOPENDEQ_INC	64
+#define _CLIP_SE_LOOPENDEQ_DEC	65
+#define _CLIP_SE_LOOPCONT		66
+#define _CLIP_SE_CONTINUE		67
+#define _CLIP_SE_BREAK			68
+#define _CLIP_SE_RETURN			69
+#define _CLIP_SE_RETURN_ANS		70
 
-#define _CLIP_SE_FUNC			70
+#define _CLIP_SE_FUNC			71
 
 /*
  * エラー・コード

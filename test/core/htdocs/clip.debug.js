@@ -8510,10 +8510,10 @@ _Proc.prototype = {
 		}
 		var saveArray = this._curInfo._curArray;
 		var saveArraySize = this._curInfo._curArraySize;
-		if( param._seToken < 70 ){
+		if( param._seToken < 71 ){
 			ret = _procSubSe[param._seToken]( this, param, 23, param._seToken, value );
 		} else {
-			ret = this._procFunc( this, param, 13, param._seToken - 70, value, true );
+			ret = this._procFunc( this, param, 13, param._seToken - 71, value, true );
 		}
 		if( ret == 0x00 ){
 			if( this._curLine._token._get != null ){
@@ -10259,6 +10259,28 @@ _Proc.prototype = {
 		}
 		return 0x00;
 	},
+	_seSetS : function( _this, param, code, token, value ){
+		var ret;
+		var tmpValue = newProcValArray( 2, _this, param );
+		if( (ret = _this._getSeOperand( param, code, token, value )) != 0x00 ){
+			return ret;
+		}
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[0] )) != 0x00 ){
+			return ret;
+		}
+		if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
+			return ret;
+		}
+		var a = value.mat()._mat[0].toFloat();
+		var b = tmpValue[0].mat()._mat[0].toFloat();
+		var c = tmpValue[1].mat()._mat[0].toFloat();
+		if( a < b ){
+			value.matAss( b );
+		} else if( a > c ){
+			value.matAss( c );
+		}
+		return 0x00;
+	},
 	mpPow : function( param, ret , x , y ){
 		x = _proc_mp.clone( x );
 		if( param._mode == 0x1011 ){
@@ -11328,6 +11350,12 @@ _Proc.prototype = {
 		}
 		return ret;
 	},
+	initEvalProc : function( childParam, parentParam ){
+		childParam._enableCommand = false;
+		childParam._enableStat = false;
+		childParam._func.openAll( parentParam._func );
+		childParam.setDefNameSpace( parentParam._defNameSpace );
+	},
 	_funcEval : function( _this, param, code, token, value, seFlag ){
 		var ret;
 		if( seFlag ){
@@ -11342,8 +11370,7 @@ _Proc.prototype = {
 		}
 		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, _this._gUpdateFlag );
 		var childParam = new _Param( _this._curLine._num, param, true );
-		childParam._enableCommand = false;
-		childParam._enableStat = false;
+		_this.initEvalProc( childParam, param );
 		ret = doFuncEval( _this, childProc, childParam, string.str(), value );
 		childProc.end();
 		childParam.end();
@@ -15266,7 +15293,12 @@ _Proc.prototype = {
 				break;
 			}
 		}
-		doCommandPlot( _this, param, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, false );
+		var childParam = new _Param( _this._curLine._num, param, true );
+		_this.initEvalProc( childParam, param );
+		doCommandPlot( _this, childProc, childParam, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		childProc.end();
+		childParam.end();
 		return 0x03;
 	},
 	_commandRePlot : function( _this, param, code, token ){
@@ -15322,7 +15354,12 @@ _Proc.prototype = {
 				break;
 			}
 		}
-		doCommandRePlot( _this, param, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		var childProc = new _Proc( param._mode, param._mpPrec, param._mpRound, false, _this._printAssert, _this._printWarn, false );
+		var childParam = new _Param( _this._curLine._num, param, true );
+		_this.initEvalProc( childParam, param );
+		doCommandRePlot( _this, childProc, childParam, procGraph(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), value[2].mat()._mat[0].toFloat() );
+		childProc.end();
+		childParam.end();
 		return 0x03;
 	},
 	_commandCalculator : function( _this, param, code, token ){
@@ -16090,7 +16127,8 @@ var _procSubSe = [
 	_Proc.prototype._seSetFALSE,
 	_Proc.prototype._seSetTRUE,
 	_Proc.prototype._seSetZero,
-	_Proc.prototype._seSaturate
+	_Proc.prototype._seSaturate,
+	_Proc.prototype._seSetS
 ];
 var _procSub = [
 	_Proc.prototype._procTop,
@@ -16152,8 +16190,8 @@ function defProcFunction(){
 	if( window.doCommandGGet24Begin == undefined ) window.doCommandGGet24Begin = function( width , height ){ return null; };
 	if( window.doCommandGGet24End == undefined ) window.doCommandGGet24End = function(){};
 	if( window.doCommandGUpdate == undefined ) window.doCommandGUpdate = function( gWorld ){};
-	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, parentParam, graph, start, end, step ){};
-	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, parentParam, graph, start, end, step ){};
+	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
+	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
 	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return 0x2140 ; };
 	if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
@@ -16520,6 +16558,7 @@ var _TOKEN_SE = [
 	"set_t",
 	"set_z",
 	"sat",
+	"sets",
 	"loopstart",
 	"loopend",
 	"loopend_i",
@@ -16703,7 +16742,7 @@ _Token.prototype = {
 				return true;
 		}
 		if( this.checkFunc( string, se ) ){
-			se.set( 70 + se._val );
+			se.set( 71 + se._val );
 			return true;
 		}
 		return false;
@@ -17337,51 +17376,51 @@ _Token.prototype = {
 			if( tmp.charAt( 0 ) == '$' ){
 				if( this.checkSe( tmp.substring( 1, len ).toLowerCase(), code ) ){
 					switch( code._val ){
-					case 58:
+					case 59:
 						cur._code = 11;
 						cur._token = 0;
 						break;
-					case 59:
+					case 60:
 						cur._code = 11;
 						cur._token = 1;
 						break;
-					case 60:
+					case 61:
 						cur._code = 11;
 						cur._token = 2;
 						break;
-					case 61:
+					case 62:
 						cur._code = 11;
 						cur._token = 3;
 						break;
-					case 62:
+					case 63:
 						cur._code = 11;
 						cur._token = 4;
 						break;
-					case 63:
+					case 64:
 						cur._code = 11;
 						cur._token = 5;
 						break;
-					case 64:
+					case 65:
 						cur._code = 11;
 						cur._token = 6;
 						break;
-					case 65:
+					case 66:
 						cur._code = 11;
 						cur._token = 7;
 						break;
-					case 66:
+					case 67:
 						cur._code = 11;
 						cur._token = 28;
 						break;
-					case 67:
+					case 68:
 						cur._code = 11;
 						cur._token = 29;
 						break;
-					case 68:
+					case 69:
 						cur._code = 11;
 						cur._token = 32;
 						break;
-					case 69:
+					case 70:
 						cur._code = 11;
 						cur._token = 33;
 						break;
@@ -18428,7 +18467,7 @@ _Token.prototype = {
 				string += _TOKEN_SE[token - 1];
 				break;
 			}
-			token -= 70;
+			token -= 71;
 		case 13:
 			string += _TOKEN_FUNC[token];
 			break;
@@ -19243,19 +19282,20 @@ window._CLIP_SE_SET_FALSE = 54;
 window._CLIP_SE_SET_TRUE = 55;
 window._CLIP_SE_SET_ZERO = 56;
 window._CLIP_SE_SATURATE = 57;
-window._CLIP_SE_LOOPSTART = 58;
-window._CLIP_SE_LOOPEND = 59;
-window._CLIP_SE_LOOPEND_INC = 60;
-window._CLIP_SE_LOOPEND_DEC = 61;
-window._CLIP_SE_LOOPENDEQ = 62;
-window._CLIP_SE_LOOPENDEQ_INC = 63;
-window._CLIP_SE_LOOPENDEQ_DEC = 64;
-window._CLIP_SE_LOOPCONT = 65;
-window._CLIP_SE_CONTINUE = 66;
-window._CLIP_SE_BREAK = 67;
-window._CLIP_SE_RETURN = 68;
-window._CLIP_SE_RETURN_ANS = 69;
-window._CLIP_SE_FUNC = 70;
+window._CLIP_SE_SETS = 58;
+window._CLIP_SE_LOOPSTART = 59;
+window._CLIP_SE_LOOPEND = 60;
+window._CLIP_SE_LOOPEND_INC = 61;
+window._CLIP_SE_LOOPEND_DEC = 62;
+window._CLIP_SE_LOOPENDEQ = 63;
+window._CLIP_SE_LOOPENDEQ_INC = 64;
+window._CLIP_SE_LOOPENDEQ_DEC = 65;
+window._CLIP_SE_LOOPCONT = 66;
+window._CLIP_SE_CONTINUE = 67;
+window._CLIP_SE_BREAK = 68;
+window._CLIP_SE_RETURN = 69;
+window._CLIP_SE_RETURN_ANS = 70;
+window._CLIP_SE_FUNC = 71;
 window._CLIP_NO_ERR = 0x00;
 window._CLIP_LOOP_STOP = 0x01;
 window._CLIP_LOOP_CONT = 0x02;
