@@ -13,6 +13,6 @@ plot ["gamma (1/4) x] 1   25 @y
 plot ["gamma (1/3) x] 2   25 @y
 plot ["gamma (1/2) x] 3   25 @y
 plot ["gamma 1 x]     4   25 @y
-plot ["gamma 2 x]     254 25 @y
-plot ["gamma 3 x]     253 25 @y
-plot ["gamma 4 x]     252 25 @y
+plot ["gamma 2 x]     253 25 @y
+plot ["gamma 3 x]     252 25 @y
+plot ["gamma 4 x]     250 25 @y

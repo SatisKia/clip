@@ -2041,7 +2041,7 @@ _Token.prototype = {
 								break;
 							case _CLIP_CODE_OPERATOR:
 								if( i == 0 ){
-									if( (level == posLevel) || (this._checkOp( tmpEnd._token ) < topLevel) ){
+									if( (topLevel != assLevel) && ((level == posLevel) || (this._checkOp( tmpEnd._token ) <= topLevel)) ){
 										retEnd = 2;
 									}
 								}
