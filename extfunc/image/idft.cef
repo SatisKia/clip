@@ -1,0 +1,39 @@
+#!NAMESPACE image
+#逆離散フーリエ変換
+#\!- <in_array> <out_array> [<amplification>]
+:ans FALSE
+:param 1 TRUE
+:complex
+$COL		@w,@@0
+$ROW		@h,@@0
+
+:trans @@0
+
+$SET_Z		@i
+$LOOPSTART	# @i
+:arraycopy @@0 @i 0 @@a 0 @h
+!ft:idft @@b @h @@a @h
+:arraycopy @@b 0 @@t @i 0 @h
+$LOOPEND_I	@i,@w
+
+:trans @@t
+
+$SET_Z		@i
+$LOOPSTART	# @i
+:arraycopy @@t @i 0 @@a 0 @w
+!ft:idft @@b @w @@a @w
+:arraycopy @@b 0 @@1 @i 0 @w
+$LOOPEND_I	@i,@h
+
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+if @2 > 0.0
+	@@1 @y @x = int (@@1 @y @x * @2) # 増幅
+endif
+$SAT		@@1 @y @x,0,255
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h
+
+:mat @h @w @@1

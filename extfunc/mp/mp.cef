@@ -200,7 +200,7 @@ func makeToken expr[] &token[] &tokenNum
 							endif
 						elif (token end 0 == 1) && (checkOp (token end 1) > 0)
 							if @i == 0
-								if checkOp (token end 1) < topLevel
+								if (topLevel != assLevel) && (checkOp (token end 1) <= topLevel)
 									$SET retEnd,2
 								endif
 							endif

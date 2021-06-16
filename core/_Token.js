@@ -415,13 +415,14 @@ var _custom_command     = new Array();
 var _custom_command_num = 0;
 function __CustomCommand(){
 	this._name = new String();	// コマンド名
-	this._id   = -1;			// コマンドID
 }
-function regCustomCommand( name, id ){
-	_custom_command[_custom_command_num]       = new __CustomCommand();
+function regCustomCommand( name ){
+	_custom_command[_custom_command_num] = new __CustomCommand();
 	_custom_command[_custom_command_num]._name = name;
-	_custom_command[_custom_command_num]._id   = id;
 	_custom_command_num++;
+}
+function customCommandName( token ){
+	return _custom_command[token - _CLIP_COMMAND_CUSTOM]._name;
 }
 
 // トークン管理クラス
@@ -536,7 +537,7 @@ _Token.prototype = {
 
 		for( var i = 0; i < _custom_command_num; i++ ){
 			if( string == _custom_command[i]._name ){
-				command.set( _custom_command[i]._id );
+				command.set( _CLIP_COMMAND_CUSTOM + i );
 				return true;
 			}
 		}
@@ -2432,11 +2433,7 @@ _Token.prototype = {
 				if( token - 1 < _TOKEN_COMMAND.length ){
 					string += _TOKEN_COMMAND[token - 1];
 				} else {
-					for( var i = 0; i < _custom_command_num; i++ ){
-						if( token == _custom_command[i]._id ){
-							string += _custom_command[i]._name;
-						}
-					}
+					string += customCommandName( token );
 				}
 			}
 			break;

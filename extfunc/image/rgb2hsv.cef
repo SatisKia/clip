@@ -20,13 +20,13 @@ $DIV_A		@R,get_red   @C,255
 $DIV_A		@G,get_green @C,255
 $DIV_A		@B,get_blue  @C,255
 
-$CND		MIN,@G < @R,@G,@R
+$CND		MIN,(@G < @R),@G,@R
 if @B < MIN
 	$SET MIN,@B
 endif
 
 # Value（明度）：0.0～1.0
-$CND		@V,@G > @R,@G,@R
+$CND		@V,(@G > @R),@G,@R
 if @B > @V
 	$SET @V,@B
 endif

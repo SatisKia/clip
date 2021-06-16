@@ -1,5 +1,5 @@
 #!NAMESPACE image
-# HSVÇ©ÇÁRGBÇ÷ÇÃïœä∑
+# HSV„Åã„ÇâRGB„Å∏„ÅÆÂ§âÊèõ
 #\!- <h_array> <s_array> <v_array> <rgb_array>
 :include !image:color
 :ans FALSE
@@ -13,7 +13,7 @@ $SET_Z		@y
 $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
-$MOD_A		@H,@@0 @y @x + 360,360
+$MOD_A		@H,(@@0 @y @x + 360),360
 $SETS		@V,@@2 @y @x,0.0,1.0
 $SETS		@S,@@1 @y @x,0.0,@V
 

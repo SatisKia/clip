@@ -1,0 +1,17 @@
+#!NAMESPACE image
+:ans FALSE
+:param 0 TRUE
+:complex
+if @1 > 1.0; @1 = 1.0; endif
+@W = col @@0
+@H = row @@0
+@w = int (@W * @1)
+@h = int (@H * @1)
+@X = int ((@W - @w) / 2)
+@Y = int ((@H - @h) / 2)
+for @y = 0; @y < @H; @y++
+	:arrayfill 0 @@0 @y @X @w
+next
+for @y = @Y; @y < @Y + @h; @y++
+	:arrayfill 0 @@0 @y 0 @W
+next

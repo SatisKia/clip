@@ -27,11 +27,11 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$MUL_A		@r,get_red @C,GRAY_R_COEF
+$MUL_A		@r,get_red   @C,GRAY_R_COEF
 $SET		@Y,@r
 $MUL_A		@g,get_green @C,GRAY_G_COEF
 $ADD		@Y,@g
-$MUL_A		@b,get_blue @C,GRAY_B_COEF
+$MUL_A		@b,get_blue  @C,GRAY_B_COEF
 $ADD		@Y,@b
 $INT		@Y,@Y
 :gput @x @y @Y

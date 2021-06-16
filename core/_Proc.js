@@ -3593,6 +3593,9 @@ _Proc.prototype = {
 			this._curLine._token.unlock( lock );
 			return null;
 		}
+		if( index._index < 0 ){
+			return null;
+		}
 		return index;
 	},
 

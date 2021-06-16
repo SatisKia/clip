@@ -1,19 +1,17 @@
 #!NAMESPACE image
-# 色調補正
-#\!- <array> <brightness> <contrast>
+# ガンマ補正
+#\!- <array> <gamma>
 :include !image:color
 :ans FALSE
 :param 0 TRUE
 
-# 明るさ補正
-$ADD		@1,(128 * (1.0 - @2))
-
 # テーブル作成
+$DIV_A		@t,1,@1
 $SET_Z		@i
 $LOOPSTART	# @i
-# 積和演算
-$MUL_A		@@T @i,@2,@i
-$ADD		@@T @i,@1
+$DIV_A		@u,@i,255
+$POW		@@T @i,@u,@t
+$MUL		@@T @i,255
 $LOOPEND_I	@i,256
 
 $COL		@w,@@0
@@ -26,6 +24,6 @@ $SET		@C,@@0 @y @x
 $SET		@R,@@T (get_red   @C)
 $SET		@G,@@T (get_green @C)
 $SET		@B,@@T (get_blue  @C)
-$SET		@@0 @y @x,make_color_s @R @G @B # 飽和演算
+$SET		@@0 @y @x,make_color @R @G @B
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

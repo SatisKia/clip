@@ -285,17 +285,6 @@ var curFunc;
 // ファイル出力
 #include "_WriteFile.js"
 
-// カスタム・コマンド
-#define _CLIP_COMMAND_CUSTOM_ENV		 _CLIP_COMMAND_CUSTOM
-#define _CLIP_COMMAND_CUSTOM_LIST		(_CLIP_COMMAND_CUSTOM + 1)
-#define _CLIP_COMMAND_CUSTOM_LISTD		(_CLIP_COMMAND_CUSTOM + 2)
-#define _CLIP_COMMAND_CUSTOM_EXTFUNC	(_CLIP_COMMAND_CUSTOM + 3)
-#define _CLIP_COMMAND_CUSTOM_USAGE		(_CLIP_COMMAND_CUSTOM + 4)
-#define _CLIP_COMMAND_CUSTOM_ENGLISH	(_CLIP_COMMAND_CUSTOM + 5)
-#define _CLIP_COMMAND_CUSTOM_JAPANESE	(_CLIP_COMMAND_CUSTOM + 6)
-#define _CLIP_COMMAND_CUSTOM_TEST		(_CLIP_COMMAND_CUSTOM + 7)
-#define _CLIP_COMMAND_CUSTOM_TRACE		(_CLIP_COMMAND_CUSTOM + 8)
-
 var topProc;
 var topParam;
 
@@ -388,15 +377,15 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
 	initProc();	// setProcEnvより後に実行
 
 	// カスタム・コマンドの登録
-	regCustomCommand( "env"     , _CLIP_COMMAND_CUSTOM_ENV      );
-	regCustomCommand( "list"    , _CLIP_COMMAND_CUSTOM_LIST     );
-	regCustomCommand( "listd"   , _CLIP_COMMAND_CUSTOM_LISTD    );
-	regCustomCommand( "extfunc" , _CLIP_COMMAND_CUSTOM_EXTFUNC  );
-	regCustomCommand( "usage"   , _CLIP_COMMAND_CUSTOM_USAGE    );
-	regCustomCommand( "english" , _CLIP_COMMAND_CUSTOM_ENGLISH  );
-	regCustomCommand( "japanese", _CLIP_COMMAND_CUSTOM_JAPANESE );
-	regCustomCommand( "test"    , _CLIP_COMMAND_CUSTOM_TEST     );
-	regCustomCommand( "trace"   , _CLIP_COMMAND_CUSTOM_TRACE    );
+	regCustomCommand( "env"      );
+	regCustomCommand( "list"     );
+	regCustomCommand( "listd"    );
+	regCustomCommand( "extfunc"  );
+	regCustomCommand( "usage"    );
+	regCustomCommand( "english"  );
+	regCustomCommand( "japanese" );
+	regCustomCommand( "test"     );
+	regCustomCommand( "trace"    );
 
 	// 乱数を初期化する
 	srand( time() );
@@ -1205,297 +1194,220 @@ function doCommandDumpArray( param, index ){
 	traceString += string + getArrayTokenString( param, array, string.length, " ", "\n" );
 	traceString += "\n";
 }
-function doCustomCommand( _this, param, code, token ){
-	switch( token ){
-	case _CLIP_COMMAND_CUSTOM_ENGLISH:
-	case _CLIP_COMMAND_CUSTOM_JAPANESE:
-		englishFlag = (token == _CLIP_COMMAND_CUSTOM_ENGLISH) ? true : false;
+function _customCommandLanguage( _this, param, code, token, flag ){
+	englishFlag = flag;
 
-		if( englishFlag ){
-			con.print( "Change English mode. " );
-		} else {
-			con.print( "Change Japanese mode. " );
+	if( englishFlag ){
+		con.print( "Change English mode. " );
+	} else {
+		con.print( "Change Japanese mode. " );
+	}
+
+	updateLanguage();
+
+	preference.set( PROFILE_PREFIX + "ENV_Language", englishFlag ? "" + LANG_ENGLISH : "" + LANG_JAPANESE );
+
+	return _CLIP_NO_ERR;
+}
+function _customCommandEnv( _this, param, code, token ){
+	con.setColor( "0000ff" );
+
+	con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
+
+	con.println( (param._base == 0) ? "zero-based" : "one-based" );
+
+	switch( param._mode & _CLIP_MODE_MASK ){
+	case _CLIP_MODE_E_FLOAT:   con.print( "efloat"   ); break;
+	case _CLIP_MODE_F_FLOAT:   con.print( "float"    ); break;
+	case _CLIP_MODE_G_FLOAT:   con.print( "gfloat"   ); break;
+	case _CLIP_MODE_E_COMPLEX: con.print( "ecomplex" ); break;
+	case _CLIP_MODE_F_COMPLEX: con.print( "complex"  ); break;
+	case _CLIP_MODE_G_COMPLEX: con.print( "gcomplex" ); break;
+	case _CLIP_MODE_I_FRACT:   con.print( "fract"    ); break;
+	case _CLIP_MODE_M_FRACT:   con.print( "mfract"   ); break;
+	case _CLIP_MODE_H_TIME:    con.print( "htime"    ); break;
+	case _CLIP_MODE_M_TIME:    con.print( "mtime"    ); break;
+	case _CLIP_MODE_S_TIME:    con.print( "time"     ); break;
+	case _CLIP_MODE_F_TIME:    con.print( "ftime"    ); break;
+	case _CLIP_MODE_S_CHAR:    con.print( "char"     ); break;
+	case _CLIP_MODE_U_CHAR:    con.print( "uchar"    ); break;
+	case _CLIP_MODE_S_SHORT:   con.print( "short"    ); break;
+	case _CLIP_MODE_U_SHORT:   con.print( "ushort"   ); break;
+	case _CLIP_MODE_S_LONG:    con.print( "long"     ); break;
+	case _CLIP_MODE_U_LONG:    con.print( "ulong"    ); break;
+	}
+	con.print( ", " ); con.print( "fps " + param._fps );
+	con.print( ", " ); con.print( "prec " + param._prec );
+	con.print( ", " ); con.print( "radix " + param._radix );
+	con.print( ", " );
+	var type       = new _Integer();
+	var updateFlag = new _Boolean();
+	_this.getAngType( type, updateFlag );
+	switch( type._val ){
+	case _ANG_TYPE_RAD:  con.print( "rad"  ); break;
+	case _ANG_TYPE_DEG:  con.print( "deg"  ); break;
+	case _ANG_TYPE_GRAD: con.print( "grad" ); break;
+	}
+	con.println();
+
+	if( param.isMultiPrec() ){
+		switch( param._mode ){
+		case _CLIP_MODE_F_MULTIPREC: con.print( "mfloat" ); break;
+		case _CLIP_MODE_I_MULTIPREC: con.print( "mint"   ); break;
 		}
-
-		updateLanguage();
-
-		preference.set( PROFILE_PREFIX + "ENV_Language", englishFlag ? "" + LANG_ENGLISH : "" + LANG_JAPANESE );
-
-		break;
-	case _CLIP_COMMAND_CUSTOM_ENV:
-		con.setColor( "0000ff" );
-
-		con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
-
-		con.println( (param._base == 0) ? "zero-based" : "one-based" );
-
-		switch( param._mode & _CLIP_MODE_MASK ){
-		case _CLIP_MODE_E_FLOAT:   con.print( "efloat"   ); break;
-		case _CLIP_MODE_F_FLOAT:   con.print( "float"    ); break;
-		case _CLIP_MODE_G_FLOAT:   con.print( "gfloat"   ); break;
-		case _CLIP_MODE_E_COMPLEX: con.print( "ecomplex" ); break;
-		case _CLIP_MODE_F_COMPLEX: con.print( "complex"  ); break;
-		case _CLIP_MODE_G_COMPLEX: con.print( "gcomplex" ); break;
-		case _CLIP_MODE_I_FRACT:   con.print( "fract"    ); break;
-		case _CLIP_MODE_M_FRACT:   con.print( "mfract"   ); break;
-		case _CLIP_MODE_H_TIME:    con.print( "htime"    ); break;
-		case _CLIP_MODE_M_TIME:    con.print( "mtime"    ); break;
-		case _CLIP_MODE_S_TIME:    con.print( "time"     ); break;
-		case _CLIP_MODE_F_TIME:    con.print( "ftime"    ); break;
-		case _CLIP_MODE_S_CHAR:    con.print( "char"     ); break;
-		case _CLIP_MODE_U_CHAR:    con.print( "uchar"    ); break;
-		case _CLIP_MODE_S_SHORT:   con.print( "short"    ); break;
-		case _CLIP_MODE_U_SHORT:   con.print( "ushort"   ); break;
-		case _CLIP_MODE_S_LONG:    con.print( "long"     ); break;
-		case _CLIP_MODE_U_LONG:    con.print( "ulong"    ); break;
-		}
-		con.print( ", " ); con.print( "fps " + param._fps );
-		con.print( ", " ); con.print( "prec " + param._prec );
-		con.print( ", " ); con.print( "radix " + param._radix );
+		con.print( ", " ); con.print( "prec " + param._mpPrec );
 		con.print( ", " );
-		var type       = new _Integer();
-		var updateFlag = new _Boolean();
-		_this.getAngType( type, updateFlag );
-		switch( type._val ){
-		case _ANG_TYPE_RAD:  con.print( "rad"  ); break;
-		case _ANG_TYPE_DEG:  con.print( "deg"  ); break;
-		case _ANG_TYPE_GRAD: con.print( "grad" ); break;
+		switch( param._mpRound ){
+		case _MP_FROUND_UP:         con.print( "up"      ); break;
+		case _MP_FROUND_DOWN:       con.print( "down"    ); break;
+		case _MP_FROUND_CEILING:    con.print( "ceiling" ); break;
+		case _MP_FROUND_FLOOR:      con.print( "floor"   ); break;
+		case _MP_FROUND_HALF_UP:    con.print( "h_up"    ); break;
+		case _MP_FROUND_HALF_DOWN:  con.print( "h_down"  ); break;
+		case _MP_FROUND_HALF_EVEN:  con.print( "h_even"  ); break;
+		case _MP_FROUND_HALF_DOWN2: con.print( "h_down2" ); break;
+		case _MP_FROUND_HALF_EVEN2: con.print( "h_even2" ); break;
 		}
 		con.println();
+	}
 
-		if( param.isMultiPrec() ){
-			switch( param._mode ){
-			case _CLIP_MODE_F_MULTIPREC: con.print( "mfloat" ); break;
-			case _CLIP_MODE_I_MULTIPREC: con.print( "mint"   ); break;
+	con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
+	con.print( ", " ); con.print( "warn "    + (_this._printWarn   ? "TRUE" : "FALSE") );
+//	con.print( ", " ); con.print( "gupdate " + (_this._gUpdateFlag ? "TRUE" : "FALSE") );
+	con.println();
+
+	var left   = procGWorld().wndPosX( 0                    );
+	var top    = procGWorld().wndPosY( 0                    );
+	var right  = procGWorld().wndPosX( procGWorld()._width  );
+	var bottom = procGWorld().wndPosY( procGWorld()._height );
+	con.println( "gworld " + procGWorld()._width + " " + procGWorld()._height );
+	con.println( "window " + left + " " + bottom + " " + right + " " + top );
+
+	switch( procGraph().mode() ){
+	case _GRAPH_MODE_RECT:  con.print( "rectangular" ); break;
+	case _GRAPH_MODE_PARAM: con.print( "parametric"  ); break;
+	case _GRAPH_MODE_POLAR: con.print( "polar"       ); break;
+	}
+	con.print( ", " );
+	if( procGraph().isLogScaleX() ){
+		con.print( "logscale x " + procGraph().logBaseX() );
+	} else {
+		con.print( "nologscale x" );
+	}
+	con.print( ", " );
+	if( procGraph().isLogScaleY() ){
+		con.print( "logscale y " + procGraph().logBaseY() );
+	} else {
+		con.print( "nologscale y" );
+	}
+	con.println();
+
+	con.setColor();
+
+	return _CLIP_NO_ERR;
+}
+function _customCommandList( _this, param, code, token, detail ){
+	var newCode;
+	var newToken;
+	if( _this._curLine._token.getTokenParam( param ) ){
+		newCode  = getCode();
+		newToken = getToken();
+		if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
+			if( newCode == _CLIP_CODE_GLOBAL_ARRAY ){
+				param = globalParam();
 			}
-			con.print( ", " ); con.print( "prec " + param._mpPrec );
-			con.print( ", " );
-			switch( param._mpRound ){
-			case _MP_FROUND_UP:         con.print( "up"      ); break;
-			case _MP_FROUND_DOWN:       con.print( "down"    ); break;
-			case _MP_FROUND_CEILING:    con.print( "ceiling" ); break;
-			case _MP_FROUND_FLOOR:      con.print( "floor"   ); break;
-			case _MP_FROUND_HALF_UP:    con.print( "h_up"    ); break;
-			case _MP_FROUND_HALF_DOWN:  con.print( "h_down"  ); break;
-			case _MP_FROUND_HALF_EVEN:  con.print( "h_even"  ); break;
-			case _MP_FROUND_HALF_DOWN2: con.print( "h_down2" ); break;
-			case _MP_FROUND_HALF_EVEN2: con.print( "h_even2" ); break;
-			}
-			con.println();
-		}
 
-		con.print( "assert " + (_this._printAssert ? "TRUE" : "FALSE") );
-		con.print( ", " ); con.print( "warn "    + (_this._printWarn   ? "TRUE" : "FALSE") );
-//		con.print( ", " ); con.print( "gupdate " + (_this._gUpdateFlag ? "TRUE" : "FALSE") );
-		con.println();
-
-		var left   = procGWorld().wndPosX( 0                    );
-		var top    = procGWorld().wndPosY( 0                    );
-		var right  = procGWorld().wndPosX( procGWorld()._width  );
-		var bottom = procGWorld().wndPosY( procGWorld()._height );
-		con.println( "gworld " + procGWorld()._width + " " + procGWorld()._height );
-		con.println( "window " + left + " " + bottom + " " + right + " " + top );
-
-		switch( procGraph().mode() ){
-		case _GRAPH_MODE_RECT:  con.print( "rectangular" ); break;
-		case _GRAPH_MODE_PARAM: con.print( "parametric"  ); break;
-		case _GRAPH_MODE_POLAR: con.print( "polar"       ); break;
-		}
-		con.print( ", " );
-		if( procGraph().isLogScaleX() ){
-			con.print( "logscale x " + procGraph().logBaseX() );
-		} else {
-			con.print( "nologscale x" );
-		}
-		con.print( ", " );
-		if( procGraph().isLogScaleY() ){
-			con.print( "logscale y " + procGraph().logBaseY() );
-		} else {
-			con.print( "nologscale y" );
-		}
-		con.println();
-
-		con.setColor();
-
-		break;
-	case _CLIP_COMMAND_CUSTOM_LIST:
-	case _CLIP_COMMAND_CUSTOM_LISTD:
-		var newCode;
-		var newToken;
-		if( _this._curLine._token.getTokenParam( param ) ){
-			newCode  = getCode();
-			newToken = getToken();
-			if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
-				if( newCode == _CLIP_CODE_GLOBAL_ARRAY ){
-					param = globalParam();
-				}
-
-				var index = _this.arrayIndexIndirect( param, newCode, newToken );
-				var array = new _Token();
-				var label;
-				var string = "";
-
-				param._array.makeToken( array, index );
-
-				if( (label = param._array._label._label[index]) != null ){
-					string = label;
-					if( param._array._label._flag[index] != _LABEL_MOVABLE ){
-						string += "(@@" + String.fromCharCode( index ) + ")";
-					} else if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
-						string += "(@@:" + index + ")";
-					}
-				} else {
-					string = "@@" + String.fromCharCode( index );
-				}
-				string += " ";
-
-				con.setColor( "0000ff" );
-				con.print( string );
-				printMatrix( param, array, string.length );
-				con.setColor();
-
-				break;
-			} else if( newCode == _CLIP_CODE_EXTFUNC ){
-				var func = new _String( newToken );
-				var data = _this.getExtFuncData( func, null );
-				if( data != null ){
-					con.setColor( "0000ff" );
-					for( var i = 0; i < data.length; i++ ){
-						con.println( (new _String( data[i] )).escape().str() );
-					}
-					con.setColor();
-
-					break;
-				}
-			}
-		} else {
-			var index;
-			var real = new _String();
-			var imag = new _String();
+			var index = _this.arrayIndexIndirect( param, newCode, newToken );
+			var array = new _Token();
 			var label;
+			var string = "";
+
+			param._array.makeToken( array, index );
+
+			if( (label = param._array._label._label[index]) != null ){
+				string = label;
+				if( param._array._label._flag[index] != _LABEL_MOVABLE ){
+					string += "(@@" + String.fromCharCode( index ) + ")";
+				} else if( detail ){
+					string += "(@@:" + index + ")";
+				}
+			} else {
+				string = "@@" + String.fromCharCode( index );
+			}
+			string += " ";
 
 			con.setColor( "0000ff" );
-			if( param.isMultiPrec() ){
-				for( var step = 0; step < 4; step++ ){
-					var tmp = new Array();
-					var i = 0;
-					for( index = 0; index < 256; index++ ){
-						if( index == 0 ){
-							if( step == 0 ){
-								if( (label = param._array._label._label[index]) != null ){
-									tmp[i] = label + "(@@:0)=" + _this.mpNum2Str( param, param._array._mp[index] );
-									i++;
-								} else if( param._array._mp[index].length > 0 ){
-									tmp[i] = "@@:0=" + _this.mpNum2Str( param, param._array._mp[index] );
-									i++;
-								}
-							}
-						} else if( (index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9) ){
-							if( step == 1 ){
-								if( (label = param._array._label._label[index]) != null ){
-									tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
-									i++;
-								} else if( param._array._mp[index].length > 0 ){
-									tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
-									i++;
-								}
-							}
-						} else {
-							if( step == 2 ){
-								if( (label = param._array._label._label[index]) != null ){
-									if( param._array._label._flag[index] == _LABEL_MOVABLE ){
-										if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
-											tmp[i] = label + "(@@:" + index + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
-										} else {
-											tmp[i] = label + "=" + _this.mpNum2Str( param, param._array._mp[index] );
-										}
-										i++;
-									}
-								}
-							}
-							if( step == 3 ){
-								if( (label = param._array._label._label[index]) != null ){
-									if( param._array._label._flag[index] != _LABEL_MOVABLE ){
-										tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
-										i++;
-									}
-								} else if( param._array._mp[index].length > 0 ){
-									tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
-									i++;
-								}
-							}
-						}
-					}
-					tmp.sort( function( a, b ){
-						a = a.toLowerCase();
-						b = b.toLowerCase();
-						if( a < b ){
-							return -1;
-						} else if( a > b ){
-							return 1;
-						}
-						return 0;
-					} );
-					for( i = 0; i < tmp.length; i++ ){
-						con.println( tmp[i] );
-					}
+			con.print( string );
+			printMatrix( param, array, string.length );
+			con.setColor();
+
+			return _CLIP_NO_ERR;
+		} else if( newCode == _CLIP_CODE_EXTFUNC ){
+			var func = new _String( newToken );
+			var data = _this.getExtFuncData( func, null );
+			if( data != null ){
+				con.setColor( "0000ff" );
+				for( var i = 0; i < data.length; i++ ){
+					con.println( (new _String( data[i] )).escape().str() );
 				}
+				con.setColor();
+
+				return _CLIP_NO_ERR;
 			}
+		}
+	} else {
+		var index;
+		var real = new _String();
+		var imag = new _String();
+		var label;
+
+		con.setColor( "0000ff" );
+		if( param.isMultiPrec() ){
 			for( var step = 0; step < 4; step++ ){
 				var tmp = new Array();
 				var i = 0;
 				for( index = 0; index < 256; index++ ){
 					if( index == 0 ){
 						if( step == 0 ){
-							if( (label = param._var._label._label[index]) != null ){
-								procToken().valueToString( param, param.val( index ), real, imag );
-								tmp[i] = label + "(@:0)=" + real.str() + imag.str();
+							if( (label = param._array._label._label[index]) != null ){
+								tmp[i] = label + "(@@:0)=" + _this.mpNum2Str( param, param._array._mp[index] );
 								i++;
-							} else if( !(param.isZero( index )) ){
-								procToken().valueToString( param, param.val( index ), real, imag );
-								tmp[i] = "@:0=" + real.str() + imag.str();
+							} else if( param._array._mp[index].length > 0 ){
+								tmp[i] = "@@:0=" + _this.mpNum2Str( param, param._array._mp[index] );
 								i++;
 							}
 						}
-					} else if(
-						(index == _CHAR_CODE_EX) ||
-						((index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9))
-					){
+					} else if( (index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9) ){
 						if( step == 1 ){
-							if( (label = param._var._label._label[index]) != null ){
-								procToken().valueToString( param, param.val( index ), real, imag );
-								tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
+							if( (label = param._array._label._label[index]) != null ){
+								tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
 								i++;
-							} else if( !(param.isZero( index )) ){
-								procToken().valueToString( param, param.val( index ), real, imag );
-								tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+							} else if( param._array._mp[index].length > 0 ){
+								tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
 								i++;
 							}
 						}
 					} else {
 						if( step == 2 ){
-							if( (label = param._var._label._label[index]) != null ){
-								if( param._var._label._flag[index] == _LABEL_MOVABLE ){
-									procToken().valueToString( param, param.val( index ), real, imag );
-									if( token == _CLIP_COMMAND_CUSTOM_LISTD ){
-										tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
+							if( (label = param._array._label._label[index]) != null ){
+								if( param._array._label._flag[index] == _LABEL_MOVABLE ){
+									if( detail ){
+										tmp[i] = label + "(@@:" + index + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
 									} else {
-										tmp[i] = label + "=" + real.str() + imag.str();
+										tmp[i] = label + "=" + _this.mpNum2Str( param, param._array._mp[index] );
 									}
 									i++;
 								}
 							}
 						}
 						if( step == 3 ){
-							if( (label = param._var._label._label[index]) != null ){
-								if( param._var._label._flag[index] != _LABEL_MOVABLE ){
-									procToken().valueToString( param, param.val( index ), real, imag );
-									tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
+							if( (label = param._array._label._label[index]) != null ){
+								if( param._array._label._flag[index] != _LABEL_MOVABLE ){
+									tmp[i] = label + "(@@" + String.fromCharCode( index ) + ")=" + _this.mpNum2Str( param, param._array._mp[index] );
 									i++;
 								}
-							} else if( !(param.isZero( index )) ){
-								procToken().valueToString( param, param.val( index ), real, imag );
-								tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+							} else if( param._array._mp[index].length > 0 ){
+								tmp[i] = "@@" + String.fromCharCode( index ) + "=" + _this.mpNum2Str( param, param._array._mp[index] );
 								i++;
 							}
 						}
@@ -1515,86 +1427,180 @@ function doCustomCommand( _this, param, code, token ){
 					con.println( tmp[i] );
 				}
 			}
-			con.setColor();
-
-			break;
 		}
-		return _CLIP_PROC_ERR_COMMAND_NULL;
-	case _CLIP_COMMAND_CUSTOM_EXTFUNC:
-		var i, j;
-
-		addExtFuncList = true;
-
-		con.setColor( "0000ff" );
-
-		var tmp = new Array();
-		for( i = 0, j = 0; i < extFuncData.length; i++ ){
-			var name = extFuncName( extFuncFile[i] );
-			if( name.length > 0 ){
-				tmp[j] = name.toLowerCase();
-				j++;
-			}
-		}
-		tmp.sort( function( a, b ){
-			if( a < b ){
-				return -1;
-			} else if( a > b ){
-				return 1;
-			}
-			return 0;
-		} );
-		for( i = 0; i < tmp.length; i++ ){
-			if( tmp[i].indexOf( ".inc" ) >= 0 ){
-				con.println( "<i>" + tmp[i] + "</i>" );
-			} else {
-				con.print( tmp[i] + "&nbsp;-&nbsp;" );
-				_this.usage( tmp[i], param, false/*キャッシュOFF*/ );
-				con.println();
-			}
-		}
-
-		con.setColor();
-
-		addExtFuncList = false;
-
-		break;
-	case _CLIP_COMMAND_CUSTOM_USAGE:
-		var newToken;
-		if( _this._curLine._token.getToken() ){
-			newToken = getToken();
-			if( getCode() == _CLIP_CODE_EXTFUNC ){
-				_this.usage( newToken, param, true/*キャッシュON*/ );
-				break;
-			}
-		}
-		return _CLIP_PROC_ERR_COMMAND_NULL;
-	case _CLIP_COMMAND_CUSTOM_TEST:
-		var value = new _ProcVal();
-		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-			testFlag = (_INT( value.mat().toFloat( 0, 0 ) ) != 0);
-			break;
-		}
-		return _CLIP_PROC_ERR_COMMAND_NULL;
-	case _CLIP_COMMAND_CUSTOM_TRACE:
-		var value = new _ProcVal();
-		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-			if( (traceLevel > 0) && (traceString.length > 0) ){
-				if( canUseWriteFile() ){
-					writeFile( "clip_trace_" + time() + ".log", traceString );
+		for( var step = 0; step < 4; step++ ){
+			var tmp = new Array();
+			var i = 0;
+			for( index = 0; index < 256; index++ ){
+				if( index == 0 ){
+					if( step == 0 ){
+						if( (label = param._var._label._label[index]) != null ){
+							procToken().valueToString( param, param.val( index ), real, imag );
+							tmp[i] = label + "(@:0)=" + real.str() + imag.str();
+							i++;
+						} else if( !(param.isZero( index )) ){
+							procToken().valueToString( param, param.val( index ), real, imag );
+							tmp[i] = "@:0=" + real.str() + imag.str();
+							i++;
+						}
+					}
+				} else if(
+					(index == _CHAR_CODE_EX) ||
+					((index >= _CHAR_CODE_0) && (index <= _CHAR_CODE_9))
+				){
+					if( step == 1 ){
+						if( (label = param._var._label._label[index]) != null ){
+							procToken().valueToString( param, param.val( index ), real, imag );
+							tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
+							i++;
+						} else if( !(param.isZero( index )) ){
+							procToken().valueToString( param, param.val( index ), real, imag );
+							tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+							i++;
+						}
+					}
+				} else {
+					if( step == 2 ){
+						if( (label = param._var._label._label[index]) != null ){
+							if( param._var._label._flag[index] == _LABEL_MOVABLE ){
+								procToken().valueToString( param, param.val( index ), real, imag );
+								if( detail ){
+									tmp[i] = label + "(@:" + index + ")=" + real.str() + imag.str();
+								} else {
+									tmp[i] = label + "=" + real.str() + imag.str();
+								}
+								i++;
+							}
+						}
+					}
+					if( step == 3 ){
+						if( (label = param._var._label._label[index]) != null ){
+							if( param._var._label._flag[index] != _LABEL_MOVABLE ){
+								procToken().valueToString( param, param.val( index ), real, imag );
+								tmp[i] = label + "(@" + String.fromCharCode( index ) + ")=" + real.str() + imag.str();
+								i++;
+							}
+						} else if( !(param.isZero( index )) ){
+							procToken().valueToString( param, param.val( index ), real, imag );
+							tmp[i] = "@" + String.fromCharCode( index ) + "=" + real.str() + imag.str();
+							i++;
+						}
+					}
 				}
 			}
-			traceString = "";
-
-			traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
-			setProcTraceFlag( traceLevel > 0 );
-
-			break;
+			tmp.sort( function( a, b ){
+				a = a.toLowerCase();
+				b = b.toLowerCase();
+				if( a < b ){
+					return -1;
+				} else if( a > b ){
+					return 1;
+				}
+				return 0;
+			} );
+			for( i = 0; i < tmp.length; i++ ){
+				con.println( tmp[i] );
+			}
 		}
-		return _CLIP_PROC_ERR_COMMAND_NULL;
-	default:
-		return _CLIP_PROC_ERR_COMMAND_NULL;
+		con.setColor();
+
+		return _CLIP_NO_ERR;
 	}
+	return _CLIP_PROC_ERR_COMMAND_NULL;
+}
+function _customCommandExtfunc( _this, param, code, token ){
+	var i, j;
+
+	addExtFuncList = true;
+
+	con.setColor( "0000ff" );
+
+	var tmp = new Array();
+	for( i = 0, j = 0; i < extFuncData.length; i++ ){
+		var name = extFuncName( extFuncFile[i] );
+		if( name.length > 0 ){
+			tmp[j] = name.toLowerCase();
+			j++;
+		}
+	}
+	tmp.sort( function( a, b ){
+		if( a < b ){
+			return -1;
+		} else if( a > b ){
+			return 1;
+		}
+		return 0;
+	} );
+	for( i = 0; i < tmp.length; i++ ){
+		if( tmp[i].indexOf( ".inc" ) >= 0 ){
+			con.println( "<i>" + tmp[i] + "</i>" );
+		} else {
+			con.print( tmp[i] + "&nbsp;-&nbsp;" );
+			_this.usage( tmp[i], param, false/*キャッシュOFF*/ );
+			con.println();
+		}
+	}
+
+	con.setColor();
+
+	addExtFuncList = false;
+
 	return _CLIP_NO_ERR;
+}
+function _customCommandUsage( _this, param, code, token ){
+	var newToken;
+	if( _this._curLine._token.getToken() ){
+		newToken = getToken();
+		if( getCode() == _CLIP_CODE_EXTFUNC ){
+			_this.usage( newToken, param, true/*キャッシュON*/ );
+			return _CLIP_NO_ERR;
+		}
+	}
+	return _CLIP_PROC_ERR_COMMAND_NULL;
+}
+function _customCommandTest( _this, param, code, token ){
+	var value = new _ProcVal();
+	if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+		testFlag = (_INT( value.mat().toFloat( 0, 0 ) ) != 0);
+		return _CLIP_NO_ERR;
+	}
+	return _CLIP_PROC_ERR_COMMAND_NULL;
+}
+function _customCommandTrace( _this, param, code, token ){
+	var value = new _ProcVal();
+	if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+		if( (traceLevel > 0) && (traceString.length > 0) ){
+			if( canUseWriteFile() ){
+				writeFile( "clip_trace_" + time() + ".log", traceString );
+			}
+		}
+		traceString = "";
+
+		traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
+		setProcTraceFlag( traceLevel > 0 );
+
+		return _CLIP_NO_ERR;
+	}
+	return _CLIP_PROC_ERR_COMMAND_NULL;
+}
+function doCustomCommand( _this, param, code, token ){
+	var command = customCommandName( token );
+	if( command == "english" || command == "japanese" ){
+		return _customCommandLanguage( _this, param, code, token, command == "english" );
+	} else if( command == "env" ){
+		return _customCommandEnv( _this, param, code, token );
+	} else if( command == "list" || command == "listd" ){
+		return _customCommandList( _this, param, code, token, command == "listd" );
+	} else if( command == "extfunc" ){
+		return _customCommandExtfunc( _this, param, code, token );
+	} else if( command == "usage" ){
+		return _customCommandUsage( _this, param, code, token );
+	} else if( command == "test" ){
+		return _customCommandTest( _this, param, code, token );
+	} else if( command == "trace" ){
+		return _customCommandTrace( _this, param, code, token );
+	}
+	return _CLIP_PROC_ERR_COMMAND_NULL;
 }
 
 function onWriteFileEnd( fileEntry ){

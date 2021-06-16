@@ -1,0 +1,22 @@
+#!NAMESPACE image
+#逆離散フーリエ変換
+#\!- <in_r_array> <in_g_array> <in_b_array> <out_array> [<amplification>]
+:include !image:color
+:ans FALSE
+:param 3 TRUE
+:complex
+
+!idft @@0 @@r @4
+!idft @@1 @@g @4
+!idft @@2 @@b @4
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@@3 @y @x,make_color (@@r @y @x) (@@g @y @x) (@@b @y @x)
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h
+:mat @y @x @@3

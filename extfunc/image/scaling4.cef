@@ -1,0 +1,81 @@
+#!NAMESPACE image
+#バイキュービック補間法
+#\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array> [<coef>]
+:include !image:color
+:ans FALSE
+:param 7 TRUE
+if @! == 8 # パラメータ数が8個の場合
+	$SET @8,\-0.75
+endif
+$SUB_A		@W,@3,@1
+$SUB_A		@H,@4,@2
+$SET		@w,@5
+$SET		@h,@6
+$DIV_A		@M,@W,@w
+$DIV_A		@N,@H,@h
+
+# テーブル作成
+$SET_Z		@i
+$LOOPSTART	# @i
+$DIV_A		@d,@i,100
+if @d <= 1.0
+	# d≦1.0
+	$SET @@T @i,{(@8 + 2) * @d ** 3 - (@8 + 3) * @d ** 2 + 1}
+else
+	# 1.0＜d≦2.0
+	$SET @@T @i,{@8 * @d ** 3 - 5 * @8 * @d ** 2 + 8 * @8 * @d - 4 * @8}
+endif
+$LOOPENDE_I	@i,200
+
+:var x y jx jy w_x w_y w ww
+:var sx sy
+
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$MUL_A		@m,@M,@x
+$MUL_A		@n,@N,@y
+$INT		x,@m
+$INT		y,@n
+$SET_Z		@r
+$SET_Z		@g
+$SET_Z		@b
+$SET_Z		ww # 重み付けの合計値
+$SUB_A		jy,y,1
+$LOOPSTART	# jy
+$SUB_A		jx,x,1
+$LOOPSTART	# jx
+
+# X方向重み付け
+$SUB_A		@d,@m,jx
+$ABS		@d,@d
+$MUL		@d,100 # 100倍してテーブル参照
+$INT		@d,@d
+$CND		w_x,(@d <= 200),@@T @d,0.0
+
+# Y方向重み付け
+$SUB_A		@d,@n,jy
+$ABS		@d,@d
+$MUL		@d,100 # 100倍してテーブル参照
+$INT		@d,@d
+$CND		w_y,(@d <= 200),@@T @d,0.0
+
+$MUL_A		w,w_x,w_y
+$CONTINUE	(w == 0)
+$CND		sx,{jx < 0 || jx > @W - 1},x,jx
+$CND		sy,{jy < 0 || jy > @H - 1},y,jy
+$SET		@c,@@0 (@2 + sy) (@1 + sx)
+$ADD		@r,(get_red   @c * w)
+$ADD		@g,(get_green @c * w)
+$ADD		@b,(get_blue  @c * w)
+$ADD		ww,w # 重み付けの合計値
+
+$LOOPENDE_I	jx,(x + 2)
+$LOOPENDE_I	jy,(y + 2)
+$DIV		@r,ww # 重み付けの合計値で割る
+$DIV		@g,ww # 重み付けの合計値で割る
+$DIV		@b,ww # 重み付けの合計値で割る
+$SET		@@7 @y @x,make_color_s @r @g @b
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h
