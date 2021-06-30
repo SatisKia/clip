@@ -195,6 +195,32 @@ _Graph.prototype = {
 		return this._info[this._curIndex]._expr2;
 	},
 
+	// 指定関数が計算式に含まれているかチェックする
+	_checkExpr : function( expr, func ){
+		var pos = expr.toLowerCase().indexOf( func.toLowerCase() );
+		if( pos >= 0 ){
+			if( expr.length > pos + func.length ){
+				var chr = expr.toLowerCase().charAt( pos + func.length );
+				var chrs = "0123456789_abcdefghijklmnopqrstuvwxyz";
+				if( chrs.indexOf( chr ) < 0 ){
+					return true;
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	},
+	checkExpr : function( func ){
+		if(
+			this._checkExpr( this._info[this._curIndex]._expr1, func ) ||
+			this._checkExpr( this._info[this._curIndex]._expr2, func )
+		){
+			// 計算結果保持バッファを解放
+			this.delAns();
+		}
+	},
+
 	setIndex : function( index ){
 		// X座標に対応する変数のインデックスを保持
 		this._info[this._curIndex]._index = index;

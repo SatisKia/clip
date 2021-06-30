@@ -9253,6 +9253,8 @@ _Proc.prototype = {
 		var saveCurLine  = _this._curLine;
 		var saveProcLine = _this._procLine;
 		var saveFuncName = param._funcName;
+		var saveDefNameSpace = param._defNameSpace;
+		var saveNameSpace = param._nameSpace;
 
 		var newToken;
 		if( _this._curLine._token.getToken() ){
@@ -9287,6 +9289,8 @@ _Proc.prototype = {
 		_this._curLine  = saveCurLine;
 		_this._procLine = saveProcLine;
 		param._funcName = saveFuncName;
+		param._defNameSpace = saveDefNameSpace;
+		param._nameSpace = saveNameSpace;
 
 		return (ret == _CLIP_NO_ERR) ? _CLIP_PROC_SUB_END : ret;
 	},

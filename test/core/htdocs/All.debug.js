@@ -5133,6 +5133,29 @@ _Graph.prototype = {
  expr2 : function(){
   return this._info[this._curIndex]._expr2;
  },
+ _checkExpr : function( expr, func ){
+  var pos = expr.toLowerCase().indexOf( func.toLowerCase() );
+  if( pos >= 0 ){
+   if( expr.length > pos + func.length ){
+    var chr = expr.toLowerCase().charAt( pos + func.length );
+    var chrs = "0123456789_abcdefghijklmnopqrstuvwxyz";
+    if( chrs.indexOf( chr ) < 0 ){
+     return true;
+    }
+   } else {
+    return true;
+   }
+  }
+  return false;
+ },
+ checkExpr : function( func ){
+  if(
+   this._checkExpr( this._info[this._curIndex]._expr1, func ) ||
+   this._checkExpr( this._info[this._curIndex]._expr2, func )
+  ){
+   this.delAns();
+  }
+ },
  setIndex : function( index ){
   this._info[this._curIndex]._index = index;
  },
@@ -15502,6 +15525,8 @@ _Proc.prototype = {
   var saveCurLine = _this._curLine;
   var saveProcLine = _this._procLine;
   var saveFuncName = param._funcName;
+  var saveDefNameSpace = param._defNameSpace;
+  var saveNameSpace = param._nameSpace;
   var newToken;
   if( _this._curLine._token.getToken() ){
    newToken = _get_token;
@@ -15534,6 +15559,8 @@ _Proc.prototype = {
   _this._curLine = saveCurLine;
   _this._procLine = saveProcLine;
   param._funcName = saveFuncName;
+  param._defNameSpace = saveDefNameSpace;
+  param._nameSpace = saveNameSpace;
   return (ret == 0x00) ? 0x03 : ret;
  },
  _commandBase : function( _this, param, code, token ){
@@ -20495,6 +20522,7 @@ function onInputFileLoad( func, data ){
  var i;
  func = func.toLowerCase();
  topProc.clearFuncCache( func );
+ procGraph().checkExpr( func );
  var name = "/" + func + ".cef";
  var index = extFuncFile.length;
  for( i = 0; i < extFuncFile.length; i++ ){
@@ -21486,6 +21514,7 @@ function getFunc( chr ){
 function setFunc( chr, text ){
  preference.set( "_CLIP_" + "!" + chr, text );
  topProc.clearFuncCache( "!" + chr );
+ procGraph().checkExpr( "!" + chr );
 }
 function loadFunc(){
  var text = getFunc( String.fromCharCode( curFunc ) );

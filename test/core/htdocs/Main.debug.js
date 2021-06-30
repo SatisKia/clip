@@ -1712,6 +1712,7 @@ function onInputFileLoad( func, data ){
  var i;
  func = func.toLowerCase();
  topProc.clearFuncCache( func );
+ procGraph().checkExpr( func );
  var name = "/" + func + ".cef";
  var index = extFuncFile.length;
  for( i = 0; i < extFuncFile.length; i++ ){
@@ -2703,6 +2704,7 @@ function getFunc( chr ){
 function setFunc( chr, text ){
  preference.set( "_CLIP_" + "!" + chr, text );
  topProc.clearFuncCache( "!" + chr );
+ procGraph().checkExpr( "!" + chr );
 }
 function loadFunc(){
  var text = getFunc( String.fromCharCode( curFunc ) );

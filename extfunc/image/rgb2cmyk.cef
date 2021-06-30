@@ -1,0 +1,40 @@
+#!NAMESPACE image
+#RGBからCMYKへの変換
+#\!- <rgb_array> <c_array> <m_array> <y_array> <k_array>
+:include !image:color
+:ans FALSE
+:param 1 TRUE
+:param 2 TRUE
+:param 3 TRUE
+:param 4 TRUE
+
+$COL		@w,@@0
+$ROW		@h,@@0
+$SET_Z		@y
+$LOOPSTART	# @y
+$SET_Z		@x
+$LOOPSTART	# @x
+$SET		@C,@@0 @y @x
+$DIV_A		@R,get_red   @C,255
+$DIV_A		@G,get_green @C,255
+$DIV_A		@B,get_blue  @C,255
+
+$SUB_A		@C,1,@R
+$SUB_A		@M,1,@G
+$SUB_A		@Y,1,@B
+
+$CND		@K,(@M < @C),@M,@C
+if @Y < @K
+	$SET @K,@Y
+endif
+
+$DIV_A		@C,(@C - @K),(1 - @K)
+$DIV_A		@M,(@M - @K),(1 - @K)
+$DIV_A		@Y,(@Y - @K),(1 - @K)
+
+$INT		@@1 @y @x,(@C * 255)
+$INT		@@2 @y @x,(@M * 255)
+$INT		@@3 @y @x,(@Y * 255)
+$INT		@@4 @y @x,(@K * 255)
+$LOOPEND_I	@x,@w
+$LOOPEND_I	@y,@h
