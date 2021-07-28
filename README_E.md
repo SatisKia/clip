@@ -250,7 +250,7 @@ var value = clip.getAnsValue().denom();
 var array = clip.getAnsMultiPrec(); // Array object
 var matrix = clip.getAnsMatrix(); // _Matrix object
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
-var string = clip.getAnsMultiPrecString( 'a' );
+var string = clip.getAnsMultiPrecString();
 ```
 
 Since the return value of the getAnsValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.

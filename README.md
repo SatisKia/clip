@@ -252,7 +252,7 @@ var value = clip.getAnsValue().denom();
 var array = clip.getAnsMultiPrec(); // Arrayオブジェクト
 var matrix = clip.getAnsMatrix(); // _Matrixオブジェクト
 var string = "Ans = " + clip.getAnsMatrixString( 6 );
-var string = clip.getAnsMultiPrecString( 'a' );
+var string = clip.getAnsMultiPrecString();
 ```
 
 getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
