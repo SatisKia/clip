@@ -1,7 +1,6 @@
 #!NAMESPACE image
 # HSVからRGBへの変換
 #\!- <h_array> <s_array> <v_array> <rgb_array>
-:include !image:color
 :ans FALSE
 :param 3 TRUE
 
@@ -45,6 +44,6 @@ else
 	$SET		@B,{@V - (@H - 300) / 60 * @S}
 endif
 
-$SET		@@3 @y @x,make_color (int (@R * 255)) (int (@G * 255)) (int (@B * 255))
+$MKCOLOR	@@3 @y @x,(int (@R * 255)),(int (@G * 255)),(int (@B * 255))
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

@@ -1,7 +1,6 @@
 #!NAMESPACE image
 # 色調補正
 #\!- <array> <hue> <saturation> <value>
-:include !image:color
 :ans FALSE
 :param 0 TRUE
 

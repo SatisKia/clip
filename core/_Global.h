@@ -264,11 +264,16 @@
 #define _CLIP_FUNC_GY		83
 #define _CLIP_FUNC_WX		84
 #define _CLIP_FUNC_WY		85
+#define _CLIP_FUNC_MKCOLOR	86
+#define _CLIP_FUNC_MKCOLORS	87
+#define _CLIP_FUNC_COL_GETR	88
+#define _CLIP_FUNC_COL_GETG	89
+#define _CLIP_FUNC_COL_GETB	90
 
-#define _CLIP_FUNC_CALL		86
-#define _CLIP_FUNC_EVAL		87
+#define _CLIP_FUNC_CALL		91
+#define _CLIP_FUNC_EVAL		92
 
-#define _CLIP_FUNC_MP		88
+#define _CLIP_FUNC_MP		93
 
 /*
  * 文の種類
@@ -451,8 +456,6 @@
 
 #define _CLIP_COMMAND_DUMP			101
 #define _CLIP_COMMAND_LOG			102
-
-#define _CLIP_COMMAND_CUSTOM		103
 
 /*
  * 単一式の種類

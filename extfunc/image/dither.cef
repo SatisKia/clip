@@ -1,17 +1,16 @@
 #!NAMESPACE image
 #誤差を右と下に拡散させる描画
 #\!- <array>
-:include !image:color
 
 func add
 	:int
-	$SET	@r,get_red   @0
-	$SET	@g,get_green @0
-	$SET	@b,get_blue  @0
-	$ADDS	@r,@1,0,255
-	$ADDS	@g,@2,0,255
-	$ADDS	@b,@3,0,255
-	return make_color @r @g @b
+	$COL_GETR	@r,@0
+	$COL_GETG	@g,@0
+	$COL_GETB	@b,@0
+	$ADDS		@r,@1,0,255
+	$ADDS		@g,@2,0,255
+	$ADDS		@b,@3,0,255
+	return mkcolor @r @g @b
 endfunc
 
 :ans FALSE
@@ -26,9 +25,9 @@ $LOOPSTART	# @x
 $SET		@C,@@0 @y @x	# 元画像のRGB値
 $GCOLOR24	@c,@C			# 描画するRGB値
 :gput @x @y
-$SUB_A		@r,get_red   @C,get_red   @c
-$SUB_A		@g,get_green @C,get_green @c
-$SUB_A		@b,get_blue  @C,get_blue  @c
+$SUB_A		@r,col_getr @C,col_getr @c
+$SUB_A		@g,col_getg @C,col_getg @c
+$SUB_A		@b,col_getb @C,col_getb @c
 $DIV		@r,2
 $DIV		@g,2
 $DIV		@b,2

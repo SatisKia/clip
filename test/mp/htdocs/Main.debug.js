@@ -1129,6 +1129,16 @@ _String.prototype = {
   }
   return this;
  },
+ replaceMulti : function( word, replacement ){
+  while( true ){
+   var tmp = this.str();
+   this.replace( word, replacement );
+   if( tmp == this.str() ){
+    break;
+   }
+  }
+  return this;
+ },
  replaceNewLine : function( replacement ){
   this.replace( "\r\n", "\n" );
   this.replace( "\r" , "\n" );

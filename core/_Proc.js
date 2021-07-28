@@ -1769,6 +1769,14 @@ _Proc.prototype = {
 			case _CLIP_CODE_MULTIPREC:
 				childParam._array.move( i );
 				childParam._array._mp[i] = Array.from( token );
+
+				{
+					var str = _proc_mp.fnum2str( childParam._array._mp[i], parentParam._mpPrec );
+					var val = stringToFloat( str, 0, new _Integer() );
+					childParam._var.set( i, val, true );
+					this._updateValue( parentParam, childParam._var.val( i ) );
+				}
+
 				break;
 			default:
 				this._curLine._token = saveLine;
@@ -4677,6 +4685,86 @@ _Proc.prototype = {
 		}
 
 		value.matAss( procGWorld().wndPosY( _INT( tmpValue.mat()._mat[0].toFloat() ) ) );
+		return _CLIP_NO_ERR;
+	},
+	_funcMkColor : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = newProcValArray( 3, _this, param );
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[0], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[2], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		var r = _INT( tmpValue[0].mat()._mat[0].toFloat() );
+		var g = _INT( tmpValue[1].mat()._mat[0].toFloat() );
+		var b = _INT( tmpValue[2].mat()._mat[0].toFloat() );
+		value.matAss( _SHIFTL( r, 16 ) + _SHIFTL( g, 8 ) + b );
+		return _CLIP_NO_ERR;
+	},
+	_funcMkColorS : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = newProcValArray( 3, _this, param );
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[0], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue[2], seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		var r = _INT( tmpValue[0].mat()._mat[0].toFloat() );
+		var g = _INT( tmpValue[1].mat()._mat[0].toFloat() );
+		var b = _INT( tmpValue[2].mat()._mat[0].toFloat() );
+		if( r < 0 ){ r = 0; } else if( r > 255 ){ r = 255; }
+		if( g < 0 ){ g = 0; } else if( g > 255 ){ g = 255; }
+		if( b < 0 ){ b = 0; } else if( b > 255 ){ b = 255; }
+		value.matAss( _SHIFTL( r, 16 ) + _SHIFTL( g, 8 ) + b );
+		return _CLIP_NO_ERR;
+	},
+	_funcColGetR : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = new _ProcVal( _this, param );
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		value.matAss( _SHIFTR( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0xFF0000 ), 16 ) );
+		return _CLIP_NO_ERR;
+	},
+	_funcColGetG : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = new _ProcVal( _this, param );
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		value.matAss( _SHIFTR( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0x00FF00 ), 8 ) );
+		return _CLIP_NO_ERR;
+	},
+	_funcColGetB : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = new _ProcVal( _this, param );
+
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != _CLIP_NO_ERR ){
+			return ret;
+		}
+
+		value.matAss( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0x0000FF ) );
 		return _CLIP_NO_ERR;
 	},
 	_funcCall : function( _this, param, code, token, value, seFlag ){
@@ -9520,14 +9608,8 @@ _Proc.prototype = {
 	_procCommand : function( _this, param, code, token, value ){
 		var ret;
 
-		if( token < _CLIP_COMMAND_CUSTOM ){
-			if( (ret = _procSubCommand[token]( _this, param, code, token )) != _CLIP_PROC_SUB_END ){
-				return ret;
-			}
-		} else {
-			if( (ret = doCustomCommand( _this, param, code, token )) != _CLIP_NO_ERR ){
-				return _this._retError( ret, code, token );
-			}
+		if( (ret = _procSubCommand[token]( _this, param, code, token )) != _CLIP_PROC_SUB_END ){
+			return ret;
 		}
 
 		var tmpValue = new _ProcVal( _this, param );
@@ -9783,6 +9865,11 @@ var _procSubFunc = [
 	_Proc.prototype._funcGY,
 	_Proc.prototype._funcWX,
 	_Proc.prototype._funcWY,
+	_Proc.prototype._funcMkColor,
+	_Proc.prototype._funcMkColorS,
+	_Proc.prototype._funcColGetR,
+	_Proc.prototype._funcColGetG,
+	_Proc.prototype._funcColGetB,
 
 	_Proc.prototype._funcCall,
 	_Proc.prototype._funcEval,

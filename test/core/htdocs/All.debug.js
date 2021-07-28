@@ -1,22 +1,42 @@
+var currentScript = (function(){
+ if( document.currentScript ){
+  return document.currentScript.src;
+ } else {
+  var scripts = document.getElementsByTagName( "script" );
+  var script = scripts[scripts.length - 1];
+  if( script.src ){
+   return script.src;
+  }
+ }
+})();
+function getParameter( key ){
+ var ret = "";
+ var start = currentScript.indexOf( "?" + key + "=" );
+ if( start < 0 ){
+  start = currentScript.indexOf( "&" + key + "=" );
+ }
+ if( start >= 0 ){
+  start += key.length + 2;
+  var end = currentScript.indexOf( "&", start );
+  if( end < 0 ){
+   end = currentScript.length;
+  }
+  ret = currentScript.substring( start, end );
+ }
+ return decodeURIComponent( ret );
+}
 var testFlag = false;
 var traceLevel = 0;
 var traceString = new String();
 var extFuncFile = new Array();
 var extFuncData = new Array();
-
-
 var _EPS5 = 0.001;
 var _SQRT05 = 0.7071067811865475244008444;
-
-
 function _Complex( re, im ){
  this._re = (re == undefined) ? 0.0 : re;
  this._im = (im == undefined) ? 0.0 : im;
 }
-
 _Complex.prototype = {
-
-
  angToAng : function( oldType, newType ){
   if( oldType != newType ){
    switch( oldType ){
@@ -35,18 +55,12 @@ _Complex.prototype = {
    }
   }
  },
-
-
  setReal : function( re ){
-
 assert( re != undefined );
-
   this._re = re;
  },
  setImag : function( im ){
-
 assert( im != undefined );
-
   this._im = im;
  },
  polar : function( rho, theta ){
@@ -54,25 +68,17 @@ assert( im != undefined );
   this._re = rho * _COS( theta );
   this._im = rho * _SIN( theta );
  },
-
-
  real : function(){
   return this._re;
  },
  imag : function(){
   return this._im;
  },
-
-
  toFloat : function(){
   return this._re;
  },
-
-
  ass : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    this._re = r._re;
    this._im = r._im;
@@ -82,17 +88,11 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  minus : function(){
   return new _Complex( -this._re, -this._im );
  },
-
-
  add : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    return new _Complex( this._re + r._re, this._im + r._im );
   }
@@ -4356,6 +4356,16 @@ _String.prototype = {
      top++;
      end++;
     }
+   }
+  }
+  return this;
+ },
+ replaceMulti : function( word, replacement ){
+  while( true ){
+   var tmp = this.str();
+   this.replace( word, replacement );
+   if( tmp == this.str() ){
+    break;
    }
   }
   return this;
@@ -8971,6 +8981,12 @@ _Proc.prototype = {
    case 8:
     childParam._array.move( i );
     childParam._array._mp[i] = Array.from( token );
+    {
+     var str = _proc_mp.fnum2str( childParam._array._mp[i], parentParam._mpPrec );
+     var val = stringToFloat( str, 0, new _Integer() );
+     childParam._var.set( i, val, true );
+     this._updateValue( parentParam, childParam._var.val( i ) );
+    }
     break;
    default:
     this._curLine._token = saveLine;
@@ -11468,6 +11484,72 @@ _Proc.prototype = {
    return ret;
   }
   value.matAss( procGWorld().wndPosY( _INT( tmpValue.mat()._mat[0].toFloat() ) ) );
+  return 0x00;
+ },
+ _funcMkColor : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = newProcValArray( 3, _this, param );
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[0], seFlag )) != 0x00 ){
+   return ret;
+  }
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != 0x00 ){
+   return ret;
+  }
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[2], seFlag )) != 0x00 ){
+   return ret;
+  }
+  var r = _INT( tmpValue[0].mat()._mat[0].toFloat() );
+  var g = _INT( tmpValue[1].mat()._mat[0].toFloat() );
+  var b = _INT( tmpValue[2].mat()._mat[0].toFloat() );
+  value.matAss( _SHIFTL( r, 16 ) + _SHIFTL( g, 8 ) + b );
+  return 0x00;
+ },
+ _funcMkColorS : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = newProcValArray( 3, _this, param );
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[0], seFlag )) != 0x00 ){
+   return ret;
+  }
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[1], seFlag )) != 0x00 ){
+   return ret;
+  }
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue[2], seFlag )) != 0x00 ){
+   return ret;
+  }
+  var r = _INT( tmpValue[0].mat()._mat[0].toFloat() );
+  var g = _INT( tmpValue[1].mat()._mat[0].toFloat() );
+  var b = _INT( tmpValue[2].mat()._mat[0].toFloat() );
+  if( r < 0 ){ r = 0; } else if( r > 255 ){ r = 255; }
+  if( g < 0 ){ g = 0; } else if( g > 255 ){ g = 255; }
+  if( b < 0 ){ b = 0; } else if( b > 255 ){ b = 255; }
+  value.matAss( _SHIFTL( r, 16 ) + _SHIFTL( g, 8 ) + b );
+  return 0x00;
+ },
+ _funcColGetR : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = new _ProcVal( _this, param );
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
+   return ret;
+  }
+  value.matAss( _SHIFTR( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0xFF0000 ), 16 ) );
+  return 0x00;
+ },
+ _funcColGetG : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = new _ProcVal( _this, param );
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
+   return ret;
+  }
+  value.matAss( _SHIFTR( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0x00FF00 ), 8 ) );
+  return 0x00;
+ },
+ _funcColGetB : function( _this, param, code, token, value, seFlag ){
+  var ret;
+  var tmpValue = new _ProcVal( _this, param );
+  if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
+   return ret;
+  }
+  value.matAss( _AND( _INT( tmpValue.mat()._mat[0].toFloat() ), 0x0000FF ) );
   return 0x00;
  },
  _funcCall : function( _this, param, code, token, value, seFlag ){
@@ -15766,14 +15848,8 @@ _Proc.prototype = {
  },
  _procCommand : function( _this, param, code, token, value ){
   var ret;
-  if( token < 103 ){
-   if( (ret = _procSubCommand[token]( _this, param, code, token )) != 0x03 ){
-    return ret;
-   }
-  } else {
-   if( (ret = doCustomCommand( _this, param, code, token )) != 0x00 ){
-    return _this._retError( ret, code, token );
-   }
+  if( (ret = _procSubCommand[token]( _this, param, code, token )) != 0x03 ){
+   return ret;
   }
   var tmpValue = new _ProcVal( _this, param );
   if( _this._const( param, code, token, tmpValue ) == 0x00 ){
@@ -15998,6 +16074,11 @@ var _procSubFunc = [
  _Proc.prototype._funcGY,
  _Proc.prototype._funcWX,
  _Proc.prototype._funcWY,
+ _Proc.prototype._funcMkColor,
+ _Proc.prototype._funcMkColorS,
+ _Proc.prototype._funcColGetR,
+ _Proc.prototype._funcColGetG,
+ _Proc.prototype._funcColGetB,
  _Proc.prototype._funcCall,
  _Proc.prototype._funcEval,
  _Proc.prototype._funcMp
@@ -16379,7 +16460,7 @@ function doFuncGColorBGR( rgb, bgrColorArray ){
 function _RGB2BGR( data ){
  return ((data & 0x0000FF) << 16) + (data & 0x00FF00) + ((data & 0xFF0000) >> 16);
 }
-var _TOKEN_OP = [
+var _tokenOp = [
  "[++]",
  "[--]",
  "[~]",
@@ -16423,7 +16504,7 @@ var _TOKEN_OP = [
  "**=",
  "!"
 ];
-var _TOKEN_FUNC = [
+var _tokenFunc = [
  "defined",
  "indexof",
  "isinf",
@@ -16510,11 +16591,16 @@ var _TOKEN_FUNC = [
  "gy",
  "wx",
  "wy",
+ "mkcolor",
+ "mkcolors",
+ "col_getr",
+ "col_getg",
+ "col_getb",
  "call",
  "eval",
  "mp"
 ];
-var _TOKEN_STAT = [
+var _tokenStat = [
  "$LOOPSTART",
  "$LOOPEND",
  "$LOOPEND_I",
@@ -16550,7 +16636,7 @@ var _TOKEN_STAT = [
  "$RETURN",
  "$RETURN_A"
 ];
-var _TOKEN_COMMAND = [
+var _tokenCommand = [
  "efloat",
  "float",
  "gfloat",
@@ -16654,7 +16740,7 @@ var _TOKEN_COMMAND = [
  "dump",
  "log"
 ];
-var _TOKEN_SE = [
+var _tokenSe = [
  "inc",
  "dec",
  "neg",
@@ -16726,7 +16812,7 @@ var _TOKEN_SE = [
  "return",
  "return_a"
 ];
-var _TOKEN_DEFINE = [
+var _tokenDefine = [
  "DBL_EPSILON",
  "HUGE_VAL",
  "RAND_MAX",
@@ -16737,17 +16823,17 @@ var _TOKEN_DEFINE = [
  "INFINITY",
  "NAN"
 ];
-var _VALUE_DEFINE = new Array( _TOKEN_DEFINE.length );
+var _valueDefine = new Array( _tokenDefine.length );
 function setDefineValue(){
- _VALUE_DEFINE[0] = _DBL_EPSILON;
- _VALUE_DEFINE[1] = Number.MAX_VALUE;
- _VALUE_DEFINE[2] = _RAND_MAX;
- _VALUE_DEFINE[3] = 0;
- _VALUE_DEFINE[4] = 1;
- _VALUE_DEFINE[5] = gWorldBgColor();
- _VALUE_DEFINE[6] = (new Date()).getTimezoneOffset() * -60;
- _VALUE_DEFINE[7] = Number.POSITIVE_INFINITY;
- _VALUE_DEFINE[8] = Number.NaN;
+ _valueDefine[0] = _DBL_EPSILON;
+ _valueDefine[1] = Number.MAX_VALUE;
+ _valueDefine[2] = _RAND_MAX;
+ _valueDefine[3] = 0;
+ _valueDefine[4] = 1;
+ _valueDefine[5] = gWorldBgColor();
+ _valueDefine[6] = (new Date()).getTimezoneOffset() * -60;
+ _valueDefine[7] = Number.POSITIVE_INFINITY;
+ _valueDefine[8] = Number.NaN;
 }
 function _indexOf( stringArray, string ){
  var len = stringArray.length;
@@ -16772,18 +16858,16 @@ function __Token(){
  this._before = null;
  this._next = null;
 }
-var _custom_command = new Array();
-var _custom_command_num = 0;
-function __CustomCommand(){
- this._name = new String();
+function addCommand( nameArray, funcArray ){
+ if( nameArray.length == funcArray.length ){
+  for( var i = 0; i < nameArray.length; i++ ){
+   _tokenCommand[_tokenCommand.length] = nameArray[i];
+   _procSubCommand[_procSubCommand.length] = funcArray[i];
+  }
+ }
 }
-function regCustomCommand( name ){
- _custom_command[_custom_command_num] = new __CustomCommand();
- _custom_command[_custom_command_num]._name = name;
- _custom_command_num++;
-}
-function customCommandName( token ){
- return _custom_command[token - 103]._name;
+function commandName( token ){
+ return _tokenCommand[token - 1];
 }
 function _Token(){
  this._top = null;
@@ -16871,28 +16955,19 @@ _Token.prototype = {
   return false;
  },
  checkFunc : function( string, func ){
-  func.set( _indexOf( _TOKEN_FUNC, string ) );
+  func.set( _indexOf( _tokenFunc, string ) );
   return (func._val >= 0);
  },
  checkStat : function( string, stat ){
-  stat.set( _indexOf( _TOKEN_STAT, string ) );
+  stat.set( _indexOf( _tokenStat, string ) );
   return (stat._val >= 0);
  },
  checkCommand : function( string, command ){
-  command.set( _indexOf( _TOKEN_COMMAND, string ) + 1 );
-  if( command._val >= 1 ){
-    return true;
-  }
-  for( var i = 0; i < _custom_command_num; i++ ){
-   if( string == _custom_command[i]._name ){
-    command.set( 103 + i );
-    return true;
-   }
-  }
-  return false;
+  command.set( _indexOf( _tokenCommand, string ) + 1 );
+  return (command._val >= 1);
  },
  checkSe : function( string, se ){
-  se.set( _indexOf( _TOKEN_SE, string ) + 1 );
+  se.set( _indexOf( _tokenSe, string ) + 1 );
   if( se._val >= 1 ){
     return true;
   }
@@ -16903,9 +16978,9 @@ _Token.prototype = {
   return false;
  },
  checkDefine : function( string, value ){
-  var define = _indexOf( _TOKEN_DEFINE, string );
+  var define = _indexOf( _tokenDefine, string );
   if( define >= 0 ){
-   value.ass( _VALUE_DEFINE[define] );
+   value.ass( _valueDefine[define] );
    return true;
   }
   return false;
@@ -18612,22 +18687,22 @@ _Token.prototype = {
    string = token;
    break;
   case 12:
-   string = _TOKEN_OP[token];
+   string = _tokenOp[token];
    break;
   case 23:
    string = "$";
    if( token == 0 ){
     break;
-   } else if( token - 1 < _TOKEN_SE.length ){
-    string += _TOKEN_SE[token - 1];
+   } else if( token - 1 < _tokenSe.length ){
+    string += _tokenSe[token - 1];
     break;
    }
    token -= 71;
   case 13:
-   string += _TOKEN_FUNC[token];
+   string += _tokenFunc[token];
    break;
   case 11:
-   string = _TOKEN_STAT[token];
+   string = _tokenStat[token];
    break;
   case 14:
    string = "!" + token;
@@ -18635,11 +18710,7 @@ _Token.prototype = {
   case 10:
    string = ":";
    if( token != 0 ){
-    if( token - 1 < _TOKEN_COMMAND.length ){
-     string += _TOKEN_COMMAND[token - 1];
-    } else {
-     string += customCommandName( token );
-    }
+    string += _tokenCommand[token - 1];
    }
    break;
   case 7:
@@ -19753,7 +19824,21 @@ function drawInputFileImage( image, w , h ){
   w.set( width );
   h.set( height );
   canvas.drawImage( image, width, height );
-  return canvas.imageData( width, height ).data;
+  var data = canvas.imageData( width, height ).data;
+  if( canvasScale > 1 ){
+   var x, y, r, g, b;
+   var i = 0;
+   for( y = 0; y < height; y++ ){
+    for( x = 0; x < width; x++ ){
+     r = data[i++];
+     g = data[i++];
+     b = data[i++];
+     i++;
+     doCommandGPut24( x, y, (r << 16) + (g << 8) + b );
+    }
+   }
+  }
+  return data;
  }
  return null;
 }
@@ -19779,7 +19864,24 @@ function doCommandGGet24Begin( w , h ){
  if( (width > 0) && (height > 0) ){
   w.set( width );
   h.set( height );
-  return canvas.imageData( width, height ).data;
+  var data = canvas.imageData( width * canvasScale, height * canvasScale ).data;
+  if( canvasScale == 1 ){
+   return data;
+  }
+  var data2 = new Array();
+  var ws = width * canvasScale * 4;
+  var x, y, y2, ys;
+  for( y = 0; y < height; y++ ){
+   y2 = y * width * 4;
+   ys = y * canvasScale * ws;
+   for( x = 0; x < width; x++ ){
+    data2[y2 + x * 4 ] = data[ys + x * canvasScale * 4 ];
+    data2[y2 + x * 4 + 1] = data[ys + x * canvasScale * 4 + 1];
+    data2[y2 + x * 4 + 2] = data[ys + x * canvasScale * 4 + 2];
+    data2[y2 + x * 4 + 3] = data[ys + x * canvasScale * 4 + 3];
+   }
+  }
+  return data2;
  }
  return null;
 }
@@ -20332,15 +20434,27 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  topParam = new _Param();
  setGlobalParam( topParam );
  initProc();
- regCustomCommand( "env" );
- regCustomCommand( "list" );
- regCustomCommand( "listd" );
- regCustomCommand( "extfunc" );
- regCustomCommand( "usage" );
- regCustomCommand( "english" );
- regCustomCommand( "japanese" );
- regCustomCommand( "test" );
- regCustomCommand( "trace" );
+ addCommand( [
+  "english",
+  "japanese",
+  "env",
+  "list",
+  "listd",
+  "extfunc",
+  "usage",
+  "test",
+  "trace"
+ ], [
+  _commandLanguage,
+  _commandLanguage,
+  _commandEnv,
+  _commandList,
+  _commandList,
+  _commandExtfunc,
+  _commandUsage,
+  _commandTest,
+  _commandTrace
+ ] );
  srand( time() );
  rand();
  if( dispCache ){
@@ -20365,6 +20479,13 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  }
  loadExtFuncFile();
  editor = new _Editor( editorId );
+ var fontSize = parseInt( preference.get( "_CLIP_" + "EDITOR_FontSize", "16" ) );
+ if( fontSize < 8 ){
+  fontSize = 8;
+ }
+ document.getElementById( "font_size" ).value = "" + fontSize;
+ cssSetPropertyValue( ".textarea_func", "font-size", "" + fontSize + "px" );
+ cssSetPropertyValue( ".textarea_func", "line-height", "" + (fontSize + 2) + "px" );
  var tabWidth = parseInt( preference.get( "_CLIP_" + "EDITOR_Tab", "4" ) );
  if( tabWidth < 0 ){
   tabWidth = 0;
@@ -20382,7 +20503,12 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  curFunc = select.options[selFunc].value;
  loadFunc();
  updateSelectFunc();
- con.println( "CLIP Copyright (C) SatisKia" );
+ con.print( "CLIP" );
+ var version = getParameter( "v" );
+ if( version.length > 0 ){
+  con.print( " [Version " + version + "]" );
+ }
+ con.println( " Copyright (C) SatisKia" );
  englishFlag = (parseInt( preference.get( "_CLIP_" + "ENV_Language", "" + 0 ) ) == 1);
  updateLanguage();
 }
@@ -21073,8 +21199,8 @@ function doCommandDumpArray( param, index ){
  traceString += string + getArrayTokenString( param, array, string.length, " ", "\n" );
  traceString += "\n";
 }
-function _customCommandLanguage( _this, param, code, token, flag ){
- englishFlag = flag;
+function _commandLanguage( _this, param, code, token ){
+ englishFlag = (commandName( token ) == "english") ? true : false;
  if( englishFlag ){
   con.print( "Change English mode. " );
  } else {
@@ -21082,9 +21208,9 @@ function _customCommandLanguage( _this, param, code, token, flag ){
  }
  updateLanguage();
  preference.set( "_CLIP_" + "ENV_Language", englishFlag ? "" + 1 : "" + 0 );
- return 0x00;
+ return 0x03;
 }
-function _customCommandEnv( _this, param, code, token ){
+function _commandEnv( _this, param, code, token ){
  con.setColor( "0000ff" );
  con.println( "calculator " + (param._calculator ? "TRUE" : "FALSE") );
  con.println( (param._base == 0) ? "zero-based" : "one-based" );
@@ -21169,9 +21295,10 @@ function _customCommandEnv( _this, param, code, token ){
  }
  con.println();
  con.setColor();
- return 0x00;
+ return 0x03;
 }
-function _customCommandList( _this, param, code, token, detail ){
+function _commandList( _this, param, code, token ){
+ var detail = (commandName( token ) == "listd") ? true : false;
  var newCode;
  var newToken;
  if( _this._curLine._token.getTokenParam( param ) ){
@@ -21201,7 +21328,7 @@ function _customCommandList( _this, param, code, token, detail ){
    con.print( string );
    printMatrix( param, array, string.length );
    con.setColor();
-   return 0x00;
+   return 0x03;
   } else if( newCode == 14 ){
    var func = new _String( newToken );
    var data = _this.getExtFuncData( func, null );
@@ -21211,7 +21338,7 @@ function _customCommandList( _this, param, code, token, detail ){
      con.println( (new _String( data[i] )).escape().str() );
     }
     con.setColor();
-    return 0x00;
+    return 0x03;
    }
   }
  } else {
@@ -21361,11 +21488,11 @@ function _customCommandList( _this, param, code, token, detail ){
    }
   }
   con.setColor();
-  return 0x00;
+  return 0x03;
  }
  return 0x2140;
 }
-function _customCommandExtfunc( _this, param, code, token ){
+function _commandExtfunc( _this, param, code, token ){
  var i, j;
  addExtFuncList = true;
  con.setColor( "0000ff" );
@@ -21396,28 +21523,28 @@ function _customCommandExtfunc( _this, param, code, token ){
  }
  con.setColor();
  addExtFuncList = false;
- return 0x00;
+ return 0x03;
 }
-function _customCommandUsage( _this, param, code, token ){
+function _commandUsage( _this, param, code, token ){
  var newToken;
  if( _this._curLine._token.getToken() ){
   newToken = getToken();
   if( getCode() == 14 ){
    _this.usage( newToken, param, true );
-   return 0x00;
+   return 0x03;
   }
  }
  return 0x2140;
 }
-function _customCommandTest( _this, param, code, token ){
+function _commandTest( _this, param, code, token ){
  var value = new _ProcVal();
  if( _this._const( param, code, token, value ) == 0x00 ){
   testFlag = (_INT( value.mat().toFloat( 0, 0 ) ) != 0);
-  return 0x00;
+  return 0x03;
  }
  return 0x2140;
 }
-function _customCommandTrace( _this, param, code, token ){
+function _commandTrace( _this, param, code, token ){
  var value = new _ProcVal();
  if( _this._const( param, code, token, value ) == 0x00 ){
   if( (traceLevel > 0) && (traceString.length > 0) ){
@@ -21428,26 +21555,7 @@ function _customCommandTrace( _this, param, code, token ){
   traceString = "";
   traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
   setProcTraceFlag( traceLevel > 0 );
-  return 0x00;
- }
- return 0x2140;
-}
-function doCustomCommand( _this, param, code, token ){
- var command = customCommandName( token );
- if( command == "english" || command == "japanese" ){
-  return _customCommandLanguage( _this, param, code, token, command == "english" );
- } else if( command == "env" ){
-  return _customCommandEnv( _this, param, code, token );
- } else if( command == "list" || command == "listd" ){
-  return _customCommandList( _this, param, code, token, command == "listd" );
- } else if( command == "extfunc" ){
-  return _customCommandExtfunc( _this, param, code, token );
- } else if( command == "usage" ){
-  return _customCommandUsage( _this, param, code, token );
- } else if( command == "test" ){
-  return _customCommandTest( _this, param, code, token );
- } else if( command == "trace" ){
-  return _customCommandTrace( _this, param, code, token );
+  return 0x03;
  }
  return 0x2140;
 }
@@ -21484,8 +21592,9 @@ function updateLanguage(){
  document.getElementById( "button_callfunc" ).innerHTML = "&nbsp;" + (englishFlag ? "Call" : "呼び出し") + "&nbsp;";
  document.getElementById( "button_savefunc" ).innerHTML = "&nbsp;" + (englishFlag ? "Save to memory" : "メモリ保存") + "&nbsp;";
  document.getElementById( "button_savecanvas" ).innerHTML = "&nbsp;" + (englishFlag ? "Download" : "ダウンロード") + "&nbsp;";
+ document.getElementById( "static_font" ).innerHTML = (englishFlag ? "Font size" : "文字ｻｲｽﾞ") + "&nbsp;";
  document.getElementById( "static_tab" ).innerHTML = (englishFlag ? "Tab width" : "Tab幅") + "&nbsp;";
- document.getElementById( "static_smart" ).innerHTML = englishFlag ? "Smart" : "スマート";
+ document.getElementById( "static_smart" ).innerHTML = englishFlag ? "Smart" : "ｽﾏｰﾄ";
  document.getElementById( "static_command_env" ).innerHTML = englishFlag ? "List environment" : "環境の一覧";
  document.getElementById( "static_command_list_var" ).innerHTML = englishFlag ? "List variables" : "変数の一覧";
  document.getElementById( "static_command_print_array_help" ).innerHTML = englishFlag ? "List elements of array" : "配列の要素一覧";
@@ -21562,6 +21671,16 @@ function callFunc(){
  input.value = val.substr( 0, pos ) + tmp + val.slice( pos );
  input.setSelectionRange( pos + tmp.length, pos + tmp.length );
  input.focus();
+}
+function onChangeFontSize(){
+ var fontSize = parseInt( document.getElementById( "font_size" ).value );
+ if( fontSize < 8 ){
+  fontSize = 8;
+  document.getElementById( "font_size" ).value = "" + fontSize;
+ }
+ cssSetPropertyValue( ".textarea_func", "font-size", "" + fontSize + "px" );
+ cssSetPropertyValue( ".textarea_func", "line-height", "" + (fontSize + 2) + "px" );
+ preference.set( "_CLIP_" + "EDITOR_FontSize", "" + fontSize );
 }
 function onChangeTabWidth(){
  var tabWidth = parseInt( document.getElementById( "tab_width" ).value );

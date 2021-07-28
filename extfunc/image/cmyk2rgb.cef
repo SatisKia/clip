@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #CMYKからRGBへの変換
 #\!- <c_array> <m_array> <y_array> <k_array> <rgb_array>
-:include !image:color
 :ans FALSE
 :param 4 TRUE
 
@@ -20,6 +19,6 @@ $MUL_A		@R,(1 - @C),(1 - @K)
 $MUL_A		@G,(1 - @M),(1 - @K)
 $MUL_A		@B,(1 - @Y),(1 - @K)
 
-$SET		@@4 @y @x,make_color_s (int (@R * 255)) (int (@G * 255)) (int (@B * 255))
+$MKCOLORS	@@4 @y @x,(int (@R * 255)),(int (@G * 255)),(int (@B * 255))
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

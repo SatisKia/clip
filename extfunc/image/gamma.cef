@@ -1,7 +1,6 @@
 #!NAMESPACE image
 # ガンマ補正
 #\!- <array> <gamma>
-:include !image:color
 :ans FALSE
 :param 0 TRUE
 
@@ -21,9 +20,9 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$SET		@R,@@T (get_red   @C)
-$SET		@G,@@T (get_green @C)
-$SET		@B,@@T (get_blue  @C)
-$SET		@@0 @y @x,make_color @R @G @B
+$SET		@R,@@T (col_getr @C)
+$SET		@G,@@T (col_getg @C)
+$SET		@B,@@T (col_getb @C)
+$MKCOLOR	@@0 @y @x,@R,@G,@B
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

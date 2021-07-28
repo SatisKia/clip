@@ -10,16 +10,16 @@
 <script type="text/javascript" src="DefCharInfoLarge.js"></script>
 
 <!--リリース用-->
-<script type="text/javascript" src="clip.js?v=210630"></script>
-<script type="text/javascript" src="Main.js?v=210630"></script>
+<script type="text/javascript" src="clip.js?v=210728"></script>
+<script type="text/javascript" src="Main.js?v=210728"></script>
 
 <!--デバッグ用
-<script type="text/javascript" src="clip.debug.js?v=210630"></script>
-<script type="text/javascript" src="Main.debug.js?v=210630"></script>
+<script type="text/javascript" src="clip.debug.js?v=210728"></script>
+<script type="text/javascript" src="Main.debug.js?v=210728"></script>
 -->
 
 <!--ライブラリ未使用版デバッグ用
-<script type="text/javascript" src="All.debug.js?v=210630"></script>
+<script type="text/javascript" src="All.debug.js?v=210727"></script>
 -->
 
 <script type="text/javascript">
@@ -272,7 +272,7 @@ input[type="checkbox"]:checked + label::after {
 					<hr style="border:0; margin:0; height:1px">
 					<table>
 						<tr>
-							<td width="320">
+							<td>
 								<table>
 									<tr>
 										<td>
@@ -314,7 +314,7 @@ input[type="checkbox"]:checked + label::after {
 										<td width="10"></td>
 										<td><span id="static_len" class="span">0</span></td>
 										<td width="10"></td>
-										<td width="130">
+										<td width="120">
 <div id="clip_savefunc" style="display:none">
 											<form action="javascript:saveFunc()">
 												<button type="submit" id="button_savefunc">&nbsp;メモリ保存&nbsp;</button>
@@ -324,7 +324,17 @@ input[type="checkbox"]:checked + label::after {
 									</tr>
 								</table>
 							</td>
-							<td width="100" align="right">
+							<td width="10"></td>
+							<td align="right">
+								<span id="static_font" class="span">文字ｻｲｽﾞ:&nbsp;</span>
+							</td>
+							<td>
+								<form action="javascript:onChangeFontSize()">
+									<input type="text" id="font_size" class="input" style="width:35px; height:20px" value="">
+								</form>
+							</td>
+							<td width="10"></td>
+							<td align="right">
 								<span id="static_tab" class="span">Tab幅:&nbsp;</span>
 							</td>
 							<td>
@@ -332,12 +342,14 @@ input[type="checkbox"]:checked + label::after {
 									<input type="text" id="tab_width" class="input" style="width:35px; height:20px" value="">
 								</form>
 							</td>
-							<td width="125" align="center">
+							<td width="10"></td>
+							<td align="center">
 								<div>
 									<input type="checkbox" id="check_smart" style="display:none" onchange="doCheckSmart()">
-									<label for="check_smart" class="label_checkbox" onclick=""><span id="static_smart" class="span">スマート</span></label>
+									<label for="check_smart" class="label_checkbox" onclick=""><span id="static_smart" class="span">ｽﾏｰﾄ</span></label>
 								</div>
 							</td>
+							<td width="10"></td>
 							<td>
 <div id="lang_japanese">
 								<form action="language.html" target="_blank">

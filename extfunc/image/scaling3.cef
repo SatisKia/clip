@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #バイリニア補間法
 #\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
-:include !image:color
 :ans FALSE
 :param 7 TRUE
 $SUB_A		@W,@3,@1
@@ -21,37 +20,37 @@ $SUB_A		@S,1.0,@Q
 # 左上
 $SET		@c,@@0 @Y @X
 $MUL_A		@k,@R,@S
-$MUL_A		@r,get_red   @c,@k
-$MUL_A		@g,get_green @c,@k
-$MUL_A		@b,get_blue  @c,@k
+$MUL_A		@r,col_getr @c,@k
+$MUL_A		@g,col_getg @c,@k
+$MUL_A		@b,col_getb @c,@k
 # 右上
 $SET		@c,@@0 @Y (@X + 1)
 $MUL_A		@k,@P,@S
-$MUL_A		@t,get_red   @c,@k
+$MUL_A		@t,col_getr @c,@k
 $ADD		@r,@t
-$MUL_A		@t,get_green @c,@k
+$MUL_A		@t,col_getg @c,@k
 $ADD		@g,@t
-$MUL_A		@t,get_blue  @c,@k
+$MUL_A		@t,col_getb @c,@k
 $ADD		@b,@t
 # 左下
 $SET		@c,@@0 (@Y + 1) @X
 $MUL_A		@k,@R,@Q
-$MUL_A		@t,get_red   @c,@k
+$MUL_A		@t,col_getr @c,@k
 $ADD		@r,@t
-$MUL_A		@t,get_green @c,@k
+$MUL_A		@t,col_getg @c,@k
 $ADD		@g,@t
-$MUL_A		@t,get_blue  @c,@k
+$MUL_A		@t,col_getb @c,@k
 $ADD		@b,@t
 # 右下
 $SET		@c,@@0 (@Y + 1) (@X + 1)
 $MUL_A		@k,@P,@Q
-$MUL_A		@t,get_red   @c,@k
+$MUL_A		@t,col_getr @c,@k
 $ADD		@r,@t
-$MUL_A		@t,get_green @c,@k
+$MUL_A		@t,col_getg @c,@k
 $ADD		@g,@t
-$MUL_A		@t,get_blue  @c,@k
+$MUL_A		@t,col_getb @c,@k
 $ADD		@b,@t
 # ピクセル値
-@@7 @y @x = make_color @r @g @b
+$MKCOLOR	@@7 @y @x,@r,@g,@b
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

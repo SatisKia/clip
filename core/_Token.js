@@ -5,7 +5,7 @@
 
 #include "_Global.h"
 
-var _TOKEN_OP = [
+var _tokenOp = [
 	"[++]",
 	"[--]",
 	"[~]",
@@ -50,7 +50,7 @@ var _TOKEN_OP = [
 	"!"
 ];
 
-var _TOKEN_FUNC = [
+var _tokenFunc = [
 	"defined",
 	"indexof",
 	"isinf",
@@ -137,12 +137,17 @@ var _TOKEN_FUNC = [
 	"gy",
 	"wx",
 	"wy",
+	"mkcolor",
+	"mkcolors",
+	"col_getr",
+	"col_getg",
+	"col_getb",
 	"call",
 	"eval",
 	"mp"
 ];
 
-var _TOKEN_STAT = [
+var _tokenStat = [
 	"$LOOPSTART",
 	"$LOOPEND",
 	"$LOOPEND_I",
@@ -179,7 +184,7 @@ var _TOKEN_STAT = [
 	"$RETURN_A"
 ];
 
-var _TOKEN_COMMAND = [
+var _tokenCommand = [
 	"efloat",
 	"float",
 	"gfloat",
@@ -284,7 +289,7 @@ var _TOKEN_COMMAND = [
 	"log"
 ];
 
-var _TOKEN_SE = [
+var _tokenSe = [
 	"inc",
 	"dec",
 	"neg",
@@ -357,7 +362,7 @@ var _TOKEN_SE = [
 	"return_a"
 ];
 
-var _TOKEN_DEFINE = [
+var _tokenDefine = [
 	"DBL_EPSILON",
 	"HUGE_VAL",
 	"RAND_MAX",
@@ -368,17 +373,17 @@ var _TOKEN_DEFINE = [
 	"INFINITY",
 	"NAN"
 ];
-var _VALUE_DEFINE = new Array( _TOKEN_DEFINE.length );
+var _valueDefine = new Array( _tokenDefine.length );
 function setDefineValue(){
-	_VALUE_DEFINE[0] = _DBL_EPSILON;
-	_VALUE_DEFINE[1] = Number.MAX_VALUE;
-	_VALUE_DEFINE[2] = _RAND_MAX;
-	_VALUE_DEFINE[3] = 0;
-	_VALUE_DEFINE[4] = 1;
-	_VALUE_DEFINE[5] = gWorldBgColor();
-	_VALUE_DEFINE[6] = (new Date()).getTimezoneOffset() * -60;
-	_VALUE_DEFINE[7] = Number.POSITIVE_INFINITY;
-	_VALUE_DEFINE[8] = Number.NaN;
+	_valueDefine[0] = _DBL_EPSILON;
+	_valueDefine[1] = Number.MAX_VALUE;
+	_valueDefine[2] = _RAND_MAX;
+	_valueDefine[3] = 0;
+	_valueDefine[4] = 1;
+	_valueDefine[5] = gWorldBgColor();
+	_valueDefine[6] = (new Date()).getTimezoneOffset() * -60;
+	_valueDefine[7] = Number.POSITIVE_INFINITY;
+	_valueDefine[8] = Number.NaN;
 }
 
 function _indexOf( stringArray, string ){
@@ -410,19 +415,17 @@ function __Token(){
 	this._next   = null;	// 次のトークン・データ
 }
 
-// カスタム・コマンド情報
-var _custom_command     = new Array();
-var _custom_command_num = 0;
-function __CustomCommand(){
-	this._name = new String();	// コマンド名
+// コマンドの追加
+function addCommand( nameArray, funcArray ){
+	if( nameArray.length == funcArray.length ){
+		for( var i = 0; i < nameArray.length; i++ ){
+			_tokenCommand[_tokenCommand.length] = nameArray[i];
+			_procSubCommand[_procSubCommand.length] = funcArray[i];
+		}
+	}
 }
-function regCustomCommand( name ){
-	_custom_command[_custom_command_num] = new __CustomCommand();
-	_custom_command[_custom_command_num]._name = name;
-	_custom_command_num++;
-}
-function customCommandName( token ){
-	return _custom_command[token - _CLIP_COMMAND_CUSTOM]._name;
+function commandName( token ){
+	return _tokenCommand[token - 1];
 }
 
 // トークン管理クラス
@@ -518,36 +521,25 @@ _Token.prototype = {
 
 	// 文字列が関数名かどうかチェックする
 	checkFunc : function( string, func/*_Integer*/ ){
-		func.set( _indexOf( _TOKEN_FUNC, string ) );
+		func.set( _indexOf( _tokenFunc, string ) );
 		return (func._val >= 0);
 	},
 
 	// 文字列が文かどうかチェックする
 	checkStat : function( string, stat/*_Integer*/ ){
-		stat.set( _indexOf( _TOKEN_STAT, string ) );
+		stat.set( _indexOf( _tokenStat, string ) );
 		return (stat._val >= 0);
 	},
 
 	// 文字列がコマンドかどうかチェックする
 	checkCommand : function( string, command/*_Integer*/ ){
-		command.set( _indexOf( _TOKEN_COMMAND, string ) + 1 );
-		if( command._val >= 1 ){
-				return true;
-		}
-
-		for( var i = 0; i < _custom_command_num; i++ ){
-			if( string == _custom_command[i]._name ){
-				command.set( _CLIP_COMMAND_CUSTOM + i );
-				return true;
-			}
-		}
-
-		return false;
+		command.set( _indexOf( _tokenCommand, string ) + 1 );
+		return (command._val >= 1);
 	},
 
 	// 文字列が単一式かどうかチェックする
 	checkSe : function( string, se/*_Integer*/ ){
-		se.set( _indexOf( _TOKEN_SE, string ) + 1 );
+		se.set( _indexOf( _tokenSe, string ) + 1 );
 		if( se._val >= 1 ){
 				return true;
 		}
@@ -562,9 +554,9 @@ _Token.prototype = {
 
 	// 文字列が定義定数かどうかチェックする
 	checkDefine : function( string, value/*_Value*/ ){
-		var define = _indexOf( _TOKEN_DEFINE, string );
+		var define = _indexOf( _tokenDefine, string );
 		if( define >= 0 ){
-			value.ass( _VALUE_DEFINE[define] );
+			value.ass( _valueDefine[define] );
 			return true;
 		}
 		return false;
@@ -2406,23 +2398,23 @@ _Token.prototype = {
 			string = token;
 			break;
 		case _CLIP_CODE_OPERATOR:
-			string = _TOKEN_OP[token];
+			string = _tokenOp[token];
 			break;
 		case _CLIP_CODE_SE:
 			string = "$";
 			if( token == _CLIP_SE_NULL ){
 				break;
-			} else if( token - 1 < _TOKEN_SE.length ){
-				string += _TOKEN_SE[token - 1];
+			} else if( token - 1 < _tokenSe.length ){
+				string += _tokenSe[token - 1];
 				break;
 			}
 			token -= _CLIP_SE_FUNC;
 			// そのまま下に流す
 		case _CLIP_CODE_FUNCTION:
-			string += _TOKEN_FUNC[token];
+			string += _tokenFunc[token];
 			break;
 		case _CLIP_CODE_STATEMENT:
-			string = _TOKEN_STAT[token];
+			string = _tokenStat[token];
 			break;
 		case _CLIP_CODE_EXTFUNC:
 			string = "!" + token;
@@ -2430,11 +2422,7 @@ _Token.prototype = {
 		case _CLIP_CODE_COMMAND:
 			string = ":";
 			if( token != _CLIP_COMMAND_NULL ){
-				if( token - 1 < _TOKEN_COMMAND.length ){
-					string += _TOKEN_COMMAND[token - 1];
-				} else {
-					string += customCommandName( token );
-				}
+				string += _tokenCommand[token - 1];
 			}
 			break;
 		case _CLIP_CODE_CONSTANT:

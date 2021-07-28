@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #画素混合
 #\!- <in_array> <left> <top> <right> <bottom> <width> <height> <out_array>
-:include !image:color
 
 func add
 	# ピクセル数を求める
@@ -20,14 +19,14 @@ func add
 	$LOOPSTART	# @i
 	$DIV_A		@k,@@0 (@i + 1),@n
 	$SET		@c,@@0 @i
-	$MUL_A		@t,get_red (@@0 @i),@k
+	$MUL_A		@t,col_getr (@@0 @i),@k
 	$ADD		@r,@t
-	$MUL_A		@t,get_green (@@0 @i),@k
+	$MUL_A		@t,col_getg (@@0 @i),@k
 	$ADD		@g,@t
-	$MUL_A		@t,get_blue (@@0 @i),@k
+	$MUL_A		@t,col_getb (@@0 @i),@k
 	$ADD		@b,@t
 	$LOOPEND	@i,@1,2
-	return make_color @r @g @b
+	return mkcolor @r @g @b
 endfunc
 
 :ans FALSE

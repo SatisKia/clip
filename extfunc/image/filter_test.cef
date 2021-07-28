@@ -22,35 +22,38 @@ endswi
 !image:filter @@0 @@m @@o
 :println (time-@t)
 
-:include !image:color
 if @1 == 5
 	# エンボスの場合、さらに計算値に128を加える
-	@w = col @@o
-	@h = row @@o
-	for @y = 0; @y < @h; @y++
-		for @x = 0; @x < @w; @x++
-			@c = @@o @y @x
-			@r = get_red   @c + 128
-			@g = get_green @c + 128
-			@b = get_blue  @c + 128
-			@@o @y @x = make_color_s @r @g @b
-		next
-	next
+	$COL		@w,@@o
+	$ROW		@h,@@o
+	$SET_Z		@y
+	$LOOPSTART	# @y
+	$SET_Z		@x
+	$LOOPSTART	# @x
+	$SET		@c,@@o @y @x
+	$ADD_S		@r,col_getr @c,128
+	$ADD_S		@g,col_getg @c,128
+	$ADD_S		@b,col_getb @c,128
+	$MKCOLORS	@@o @y @x,@r,@g,@b
+	$LOOPEND_I	@x,@w
+	$LOOPEND_I	@y,@h
 endif
 if @1 == 7
 	# 輪郭強調の場合、処理前の画像データに加算
-	@w = col @@o
-	@h = row @@o
-	for @y = 0; @y < @h; @y++
-		for @x = 0; @x < @w; @x++
-			@C = @@0 @y @x
-			@c = @@o @y @x
-			@r = get_red   @C + get_red   @c
-			@g = get_green @C + get_green @c
-			@b = get_blue  @C + get_blue  @c
-			@@o @y @x = make_color_s @r @g @b
-		next
-	next
+	$COL		@w,@@o
+	$ROW		@h,@@o
+	$SET_Z		@y
+	$LOOPSTART	# @y
+	$SET_Z		@x
+	$LOOPSTART	# @x
+	$SET		@C,@@0 @y @x
+	$SET		@c,@@o @y @x
+	$ADD_S		@r,col_getr @C,col_getr @c
+	$ADD_S		@g,col_getg @C,col_getg @c
+	$ADD_S		@b,col_getb @C,col_getb @c
+	$MKCOLORS	@@o @y @x,@r,@g,@b
+	$LOOPEND_I	@x,@w
+	$LOOPEND_I	@y,@h
 endif
 
 :gput24 @@o

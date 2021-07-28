@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #フィルター処理
 #\!- <in_array> <matrix> <out_array>
-:include !image:color
 
 func filter y x h w
 	:warn FALSE
@@ -16,15 +15,15 @@ func filter y x h w
 	$LOOPSTART	# @x
 	$SET		@c,filter_src @Y (x + @x)
 	$SET		@k,filter_mat @y @x
-	$MUL_A		@t,get_red @c,@k
+	$MUL_A		@t,col_getr @c,@k
 	$ADD		@r,@t
-	$MUL_A		@t,get_green @c,@k
+	$MUL_A		@t,col_getg @c,@k
 	$ADD		@g,@t
-	$MUL_A		@t,get_blue @c,@k
+	$MUL_A		@t,col_getb @c,@k
 	$ADD		@b,@t
 	$LOOPEND_I	@x,w
 	$LOOPEND_I	@y,h
-	return make_color_s @r @g @b # 飽和演算
+	return mkcolors @r @g @b # 飽和演算
 endfunc
 
 :ans FALSE

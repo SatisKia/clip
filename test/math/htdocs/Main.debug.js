@@ -95,6 +95,16 @@ _String.prototype = {
   }
   return this;
  },
+ replaceMulti : function( word, replacement ){
+  while( true ){
+   var tmp = this.str();
+   this.replace( word, replacement );
+   if( tmp == this.str() ){
+    break;
+   }
+  }
+  return this;
+ },
  replaceNewLine : function( replacement ){
   this.replace( "\r\n", "\n" );
   this.replace( "\r" , "\n" );
@@ -585,16 +595,12 @@ _Complex.prototype = {
   }
   return this.log().mul( y ).exp();
  },
-
-
  sqr : function(){
   if( this._im == 0.0 ){
    return floatToComplex( this._re * this._re );
   }
   return new _Complex( this._re * this._re - this._im * this._im, this._re * this._im + this._im * this._re );
  },
-
-
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
@@ -626,9 +632,7 @@ _Complex.prototype = {
    -_SQRT05 * r
    );
  }
-
 };
-
 function getComplex( c, re , im ){
  re.set( c._re );
  im.set( c._im );
@@ -638,16 +642,12 @@ function setComplex( c, re, im ){
  c._im = im;
  return c;
 }
-
 function dupComplex( x ){
  return new _Complex( x._re, x._im );
 }
-
 function floatToComplex( x ){
  return new _Complex( x, 0.0 );
 }
-
-
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }

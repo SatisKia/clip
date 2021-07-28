@@ -1,7 +1,6 @@
 #!NAMESPACE image
 # 色調補正
 #\!- <array> <brightness> <contrast>
-:include !image:color
 :ans FALSE
 :param 0 TRUE
 
@@ -23,9 +22,9 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$SET		@R,@@T (get_red   @C)
-$SET		@G,@@T (get_green @C)
-$SET		@B,@@T (get_blue  @C)
-$SET		@@0 @y @x,make_color_s @R @G @B # 飽和演算
+$SET		@R,@@T (col_getr @C)
+$SET		@G,@@T (col_getg @C)
+$SET		@B,@@T (col_getb @C)
+$MKCOLORS	@@0 @y @x,@R,@G,@B # 飽和演算
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

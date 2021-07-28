@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #RGBからCMYKへの変換
 #\!- <rgb_array> <c_array> <m_array> <y_array> <k_array>
-:include !image:color
 :ans FALSE
 :param 1 TRUE
 :param 2 TRUE
@@ -15,9 +14,9 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$DIV_A		@R,get_red   @C,255
-$DIV_A		@G,get_green @C,255
-$DIV_A		@B,get_blue  @C,255
+$DIV_A		@R,col_getr @C,255
+$DIV_A		@G,col_getg @C,255
+$DIV_A		@B,col_getb @C,255
 
 $SUB_A		@C,1,@R
 $SUB_A		@M,1,@G

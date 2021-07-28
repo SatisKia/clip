@@ -1310,6 +1310,19 @@ CLIP言語は、「計算結果用変数」の概念を持ち、計算記述が�
 <span class="pink">wx </span><i>x</i><br><dl><dd>オフスクリーンX座標→ウィンドウX座標<br></dl>
 <hr class="hr">
 <span class="pink">wy </span><i>y</i><br><dl><dd>オフスクリーンY座標→ウィンドウY座標<br></dl>
+<hr class="hr">
+<span class="pink">mkcolor </span><i>red</i><span class="pink"> </span><i>green</i><span class="pink"> </span><i>blue</i><br>
+<span class="pink">mkcolors </span><i>red</i><span class="pink"> </span><i>green</i><span class="pink"> </span><i>blue</i><br>
+<dl><dd>RGBカラー値を求める<br></dl>
+<dl>
+<dd><span class="pink">mkcolors</span>は指定されたRed、Green、Blue値が0から255の範囲に収められる(飽和処理)<br>
+</dl>
+<hr class="hr">
+<span class="pink">col_getr </span><i>rgb_color</i><br><dl><dd>指定のRGBカラー値からRed値を取得する<br></dl>
+<hr class="hr">
+<span class="pink">col_getg </span><i>rgb_color</i><br><dl><dd>指定のRGBカラー値からGreen値を取得する<br></dl>
+<hr class="hr">
+<span class="pink">col_getb </span><i>rgb_color</i><br><dl><dd>指定のRGBカラー値からBlue値を取得する<br></dl>
 <hr class="hr_border">
 <span class="pink">call &quot;</span><i>name</i><span class="pink"> </span><span class="blue">[</span><i>param</i><span class="blue">...]</span><br><dl><dd>関数の間接呼び出し<br></dl>
 <hr class="hr">

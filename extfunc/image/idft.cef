@@ -30,7 +30,7 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 if @2 > 0.0
-	@@1 @y @x = int (@@1 @y @x * @2) # 増幅
+	$INT @@1 @y @x,(@@1 @y @x * @2) # 増幅
 endif
 $SAT		@@1 @y @x,0,255
 $LOOPEND_I	@x,@w

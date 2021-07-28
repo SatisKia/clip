@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #離散フーリエ変換
 #\!- <in_array> <out_r_array> <out_g_array> <out_b_array>
-:include !image:color
 :ans FALSE
 :param 1 TRUE
 :param 2 TRUE
@@ -15,9 +14,9 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@c,@@0 @y @x
-$SET		@@r @y @x,get_red   @c
-$SET		@@g @y @x,get_green @c
-$SET		@@b @y @x,get_blue  @c
+$COL_GETR	@@r @y @x,@c
+$COL_GETG	@@g @y @x,@c
+$COL_GETB	@@b @y @x,@c
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h
 

@@ -1,7 +1,6 @@
 #!NAMESPACE image
 #モザイク処理
 #\!- <array> <left> <top> <right> <bottom> <width> <height>
-:include !image:color
 
 func add
 	:ulong
@@ -10,11 +9,11 @@ func add
 #	$SET_Z		@b
 #	$SET_Z		@i
 	$LOOPSTART	# @i
-	$ADD		@r,get_red   (@@0 @i)
-	$ADD		@g,get_green (@@0 @i)
-	$ADD		@b,get_blue  (@@0 @i)
+	$ADD		@r,col_getr (@@0 @i)
+	$ADD		@g,col_getg (@@0 @i)
+	$ADD		@b,col_getb (@@0 @i)
 	$LOOPEND_I	@i,@1
-	return make_color (@r / @1) (@g / @1) (@b / @1)
+	return mkcolor (@r / @1) (@g / @1) (@b / @1)
 endfunc
 
 :ans FALSE

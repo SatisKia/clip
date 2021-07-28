@@ -1,8 +1,6 @@
 #!NAMESPACE image
 #近い色に合わせ込む描画
 #\!- <array>
-:include !image:color
-
 :ans FALSE
 :gclear (gcolor \xFFFFFF)
 
@@ -11,9 +9,9 @@ $SET_Z		@i
 $LOOPSTART	# @i
 :gcolor @i
 $GCOLOR24	@c
-$SET		@@R @i,get_red   @c
-$SET		@@G @i,get_green @c
-$SET		@@B @i,get_blue  @c
+$COL_GETR	@@R @i,@c
+$COL_GETG	@@G @i,@c
+$COL_GETB	@@B @i,@c
 $LOOPEND_I	@i,256
 
 $COL		@w,@@0
@@ -23,9 +21,9 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $SET		@C,@@0 @y @x
-$SET		@r,get_red   @C
-$SET		@g,get_green @C
-$SET		@b,get_blue  @C
+$COL_GETR	@r,@C
+$COL_GETG	@g,@C
+$COL_GETB	@b,@C
 $SET		@d,766 # 255*3+1
 $SET_Z		@i
 $SET_Z		@j
