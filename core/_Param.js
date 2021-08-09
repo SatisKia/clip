@@ -5,6 +5,14 @@
 
 #include "_Global.h"
 
+// 置き換え
+function __Replace( descCode, descToken, realCode, realToken ){
+	this._descCode  = descCode;
+	this._descToken = descToken;
+	this._realCode  = realCode;
+	this._realToken = realToken;
+}
+
 // 計算パラメータ
 function _Param( num, parentParam, inherit ){
 	var i;
@@ -80,6 +88,18 @@ function _Param( num, parentParam, inherit ){
 	this._seToken = _CLIP_SE_NULL;
 
 	this._mpFlag = false;
+
+	this._replace = new Array();
+	if( parentParam != undefined ){
+		for( i = 0; i < parentParam._replace.length; i++ ){
+			this._replace[this._replace.length] = new __Replace(
+				parentParam._replace[i]._descCode,
+				parentParam._replace[i]._descToken,
+				parentParam._replace[i]._realCode,
+				parentParam._replace[i]._realToken
+				);
+		}
+	}
 }
 
 _Param.prototype = {
@@ -405,6 +425,42 @@ _Param.prototype = {
 //	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
+	},
+
+	setReplace : function( descCode, descToken, realCode, realToken ){
+		var i;
+		var tmp;
+		for( i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( descCode == tmp._descCode && descToken == tmp._descToken ){
+				tmp._realCode  = realCode;
+				tmp._realToken = realToken;
+				return;
+			}
+		}
+		this._replace[i] = new __Replace( descCode, descToken, realCode, realToken );
+	},
+	delReplace : function( descCode, descToken ){
+		var replace = new Array();
+		var tmp;
+		for( var i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( descCode != tmp._descCode || descToken != tmp._descToken ){
+				replace[replace.length] = tmp;
+			}
+		}
+		this._replace = replace;
+	},
+	replace : function( cur ){
+		var tmp;
+		for( var i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( cur._code == tmp._descCode && cur._token == tmp._descToken ){
+				cur._code  = tmp._realCode;
+				cur._token = tmp._realToken;
+				break;
+			}
+		}
 	}
 
 };

@@ -7045,6 +7045,12 @@ var _loopSub = [
 	_Loop.prototype._loopFunc,
 	_Loop.prototype._loopEndFunc
 ];
+function __Replace( descCode, descToken, realCode, realToken ){
+	this._descCode = descCode;
+	this._descToken = descToken;
+	this._realCode = realCode;
+	this._realToken = realToken;
+}
 function _Param( num, parentParam, inherit ){
 	var i;
 	this._parentNum = (parentParam == undefined) ? 0 : (
@@ -7101,6 +7107,17 @@ function _Param( num, parentParam, inherit ){
 	this._seFlag = false;
 	this._seToken = 0;
 	this._mpFlag = false;
+	this._replace = new Array();
+	if( parentParam != undefined ){
+		for( i = 0; i < parentParam._replace.length; i++ ){
+			this._replace[this._replace.length] = new __Replace(
+				parentParam._replace[i]._descCode,
+				parentParam._replace[i]._descToken,
+				parentParam._replace[i]._realCode,
+				parentParam._replace[i]._realToken
+				);
+		}
+	}
 }
 _Param.prototype = {
 	end : function(){
@@ -7331,6 +7348,41 @@ _Param.prototype = {
 	},
 	resetNameSpace : function(){
 		this._nameSpace = this._defNameSpace;
+	},
+	setReplace : function( descCode, descToken, realCode, realToken ){
+		var i;
+		var tmp;
+		for( i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( descCode == tmp._descCode && descToken == tmp._descToken ){
+				tmp._realCode = realCode;
+				tmp._realToken = realToken;
+				return;
+			}
+		}
+		this._replace[i] = new __Replace( descCode, descToken, realCode, realToken );
+	},
+	delReplace : function( descCode, descToken ){
+		var replace = new Array();
+		var tmp;
+		for( var i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( descCode != tmp._descCode || descToken != tmp._descToken ){
+				replace[replace.length] = tmp;
+			}
+		}
+		this._replace = replace;
+	},
+	replace : function( cur ){
+		var tmp;
+		for( var i = 0; i < this._replace.length; i++ ){
+			tmp = this._replace[i];
+			if( cur._code == tmp._descCode && cur._token == tmp._descToken ){
+				cur._code = tmp._realCode;
+				cur._token = tmp._realToken;
+				break;
+			}
+		}
 	}
 };
 var _MIN_VALUE = [ -128, 0 , -32768, 0 , -2147483648, 0 ];
@@ -8692,6 +8744,21 @@ _Proc.prototype = {
 		var line;
 		if( (line = this._procLine.getLine()) == null ){
 			return false;
+		}
+		var cur = line._token._top;
+		if( cur != null ){
+			if( (cur._code != 10) || ((cur._token != 101) && (cur._token != 102)) ){
+				while( cur != null ){
+					switch( cur._code ){
+					case 9:
+					case 13:
+					case 14:
+						param.replace( cur );
+						break;
+					}
+					cur = cur._next;
+				}
+			}
 		}
 		if( !this._regProcess( line, err ) ){
 			return false;
@@ -14495,7 +14562,7 @@ _Proc.prototype = {
 		case 61:
 		case 62:
 			break;
-		case 102:
+		case 104:
 			if( skipCommandLog() ){
 				while( true ){
 					if( !(_this._curLine._token.getTokenParam( param )) ){
@@ -14568,7 +14635,7 @@ _Proc.prototype = {
 			case 62:
 				doCommandPrint( topPrint, true );
 				break;
-			case 102:
+			case 104:
 				doCommandLog( topPrint );
 				break;
 			}
@@ -15541,6 +15608,60 @@ _Proc.prototype = {
 		param.resetNameSpace();
 		return 0x03;
 	},
+	_commandUse : function( _this, param, code, token ){
+		var descCode;
+		var descToken;
+		var realCode;
+		var realToken;
+		if( _this._curLine._token.getToken() ){
+			descCode = _get_code;
+			descToken = _get_token;
+			switch( descCode ){
+			case 9:
+			case 13:
+			case 14:
+				break;
+			default:
+				return _this._retError( 0x2141, code, token );
+			}
+			if( _this._curLine._token.getToken() ){
+				realCode = _get_code;
+				realToken = _get_token;
+				switch( realCode ){
+				case 9:
+				case 13:
+				case 14:
+					break;
+				default:
+					return _this._retError( 0x2141, code, token );
+				}
+			} else {
+				return _this._retError( 0x2141, code, token );
+			}
+		} else {
+			return _this._retError( 0x2141, code, token );
+		}
+		param.setReplace( descCode, descToken, realCode, realToken );
+		return 0x03;
+	},
+	_commandUnuse : function( _this, param, code, token ){
+		var descCode;
+		var descToken;
+		if( _this._curLine._token.getToken() ){
+			descCode = _get_code;
+			descToken = _get_token;
+			switch( descCode ){
+			case 9:
+			case 13:
+			case 14:
+				break;
+			default:
+				return _this._retError( 0x2141, code, token );
+			}
+		}
+		param.delReplace( descCode, descToken );
+		return 0x03;
+	},
 	_commandDump : function( _this, param, code, token ){
 		var newCode;
 		var newToken;
@@ -16177,6 +16298,8 @@ var _procSubCommand = [
 	_Proc.prototype._commandInclude,
 	_Proc.prototype._commandBase,
 	_Proc.prototype._commandNameSpace,
+	_Proc.prototype._commandUse,
+	_Proc.prototype._commandUnuse,
 	_Proc.prototype._commandDump,
 	_Proc.prototype._commandPrint
 ];
@@ -16613,6 +16736,8 @@ var _tokenCommand = [
 	"include",
 	"base",
 	"namespace",
+	"use",
+	"unuse",
 	"dump",
 	"log"
 ];
@@ -19318,8 +19443,10 @@ window._CLIP_COMMAND_CALCULATOR = 97;
 window._CLIP_COMMAND_INCLUDE = 98;
 window._CLIP_COMMAND_BASE = 99;
 window._CLIP_COMMAND_NAMESPACE = 100;
-window._CLIP_COMMAND_DUMP = 101;
-window._CLIP_COMMAND_LOG = 102;
+window._CLIP_COMMAND_USE = 101;
+window._CLIP_COMMAND_UNUSE = 102;
+window._CLIP_COMMAND_DUMP = 103;
+window._CLIP_COMMAND_LOG = 104;
 window._CLIP_SE_NULL = 0;
 window._CLIP_SE_INCREMENT = 1;
 window._CLIP_SE_DECREMENT = 2;

@@ -285,6 +285,8 @@ var _tokenCommand = [
 	"include",
 	"base",
 	"namespace",
+	"use",
+	"unuse",
 	"dump",
 	"log"
 ];

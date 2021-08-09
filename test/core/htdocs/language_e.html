@@ -347,6 +347,14 @@ The comment start character is identified before <span class="pink">[]</span> or
 <dl>
 <dd>When <i>name</i> is omitted, setting is canceled.<br>
 </dl>
+<span class="pink">:use </span><i>desc_name</i><span class="pink"> </span><i>real_name</i><br><dl><dd>Set so that the internal function name, user-defined function name, and external function name of <i>real_name</i> are used in the description of <i>desc_name</i>.<br></dl>
+<dl>
+<dd>The settings are passed on to the child process.<br>
+</dl>
+<span class="pink">:unuse </span><i>desc_name</i><br><dl><dd>Unset <i>desc_name</i>.<br></dl>
+<dl>
+<dd>Even if <span class="pink">:unuse</span> is executed in the child process, the setting of the parent process is not canceled.<br>
+</dl>
 <hr class="hr_border">
 <span class="pink">:real </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>Set the real part of the complex value<br></dl>
 <hr class="hr">

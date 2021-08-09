@@ -353,6 +353,14 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dl>
 <dd><i>name</i>を省略すると、指定が解除される。<br>
 </dl>
+<span class="pink">:use </span><i>desc_name</i><span class="pink"> </span><i>real_name</i><br><dl><dd><i>desc_name</i>の記述で<i>real_name</i>の内部関数名、ユーザー定義関数名、外部関数名が使用されるように設定する<br></dl>
+<dl>
+<dd>設定は子プロセスへ引き継がれる。<br>
+</dl>
+<span class="pink">:unuse </span><i>desc_name</i><br><dl><dd><i>desc_name</i>の設定を解除する<br></dl>
+<dl>
+<dd>子プロセスで<span class="pink">:unuse</span>を行っても親プロセスの設定は解除されない。<br>
+</dl>
 <hr class="hr_border">
 <span class="pink">:real </span><i>var</i><span class="pink"> </span><i>val</i><br><dl><dd>複素数値の実数部を設定する<br></dl>
 <hr class="hr">

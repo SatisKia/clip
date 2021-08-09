@@ -1579,6 +1579,24 @@ _Proc.prototype = {
 		if( (line = this._procLine.getLine()) == null ){
 			return false;
 		}
+
+		// 置き換え
+		var cur = line._token._top;
+		if( cur != null ){
+			if( (cur._code != _CLIP_CODE_COMMAND) || ((cur._token != _CLIP_COMMAND_USE) && (cur._token != _CLIP_COMMAND_UNUSE)) ){
+				while( cur != null ){
+					switch( cur._code ){
+					case _CLIP_CODE_LABEL:
+					case _CLIP_CODE_FUNCTION:
+					case _CLIP_CODE_EXTFUNC:
+						param.replace( cur );
+						break;
+					}
+					cur = cur._next;
+				}
+			}
+		}
+
 		if( !this._regProcess( line, err ) ){
 			return false;
 		}
@@ -9403,6 +9421,60 @@ _Proc.prototype = {
 		param.resetNameSpace();
 		return _CLIP_PROC_SUB_END;
 	},
+	_commandUse : function( _this, param, code, token ){
+		var descCode;
+		var descToken;
+		var realCode;
+		var realToken;
+		if( _this._curLine._token.getToken() ){
+			descCode  = _get_code;
+			descToken = _get_token;
+			switch( descCode ){
+			case _CLIP_CODE_LABEL:
+			case _CLIP_CODE_FUNCTION:
+			case _CLIP_CODE_EXTFUNC:
+				break;
+			default:
+				return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+			}
+			if( _this._curLine._token.getToken() ){
+				realCode  = _get_code;
+				realToken = _get_token;
+				switch( realCode ){
+				case _CLIP_CODE_LABEL:
+				case _CLIP_CODE_FUNCTION:
+				case _CLIP_CODE_EXTFUNC:
+					break;
+				default:
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			} else {
+				return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+			}
+		} else {
+			return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+		}
+		param.setReplace( descCode, descToken, realCode, realToken );
+		return _CLIP_PROC_SUB_END;
+	},
+	_commandUnuse : function( _this, param, code, token ){
+		var descCode;
+		var descToken;
+		if( _this._curLine._token.getToken() ){
+			descCode  = _get_code;
+			descToken = _get_token;
+			switch( descCode ){
+			case _CLIP_CODE_LABEL:
+			case _CLIP_CODE_FUNCTION:
+			case _CLIP_CODE_EXTFUNC:
+				break;
+			default:
+				return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+			}
+		}
+		param.delReplace( descCode, descToken );
+		return _CLIP_PROC_SUB_END;
+	},
 	_commandDump : function( _this, param, code, token ){
 		var newCode;
 		var newToken;
@@ -10154,6 +10226,9 @@ var _procSubCommand = [
 	_Proc.prototype._commandBase,
 
 	_Proc.prototype._commandNameSpace,
+
+	_Proc.prototype._commandUse,
+	_Proc.prototype._commandUnuse,
 
 	_Proc.prototype._commandDump,
 	_Proc.prototype._commandPrint

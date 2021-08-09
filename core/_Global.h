@@ -454,8 +454,11 @@
 
 #define _CLIP_COMMAND_NAMESPACE		100
 
-#define _CLIP_COMMAND_DUMP			101
-#define _CLIP_COMMAND_LOG			102
+#define _CLIP_COMMAND_USE			101
+#define _CLIP_COMMAND_UNUSE			102
+
+#define _CLIP_COMMAND_DUMP			103
+#define _CLIP_COMMAND_LOG			104
 
 /*
  * 単一式の種類

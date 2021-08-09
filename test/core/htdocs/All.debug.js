@@ -99,9 +99,7 @@ assert( r != undefined );
   return new _Complex( this._re + r, this._im );
  },
  addAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    this._re += r._re;
    this._im += r._im;
@@ -110,21 +108,15 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  sub : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    return new _Complex( this._re - r._re, this._im - r._im );
   }
   return new _Complex( this._re - r, this._im );
  },
  subAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    this._re -= r._re;
    this._im -= r._im;
@@ -133,12 +125,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  mul : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re * r._re, this._im * r._re );
@@ -148,9 +136,7 @@ assert( r != undefined );
   return new _Complex( this._re * r, this._im * r );
  },
  mulAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re *= r._re;
@@ -166,12 +152,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  div : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re / r._re, this._im / r._re );
@@ -188,9 +170,7 @@ assert( r != undefined );
   return new _Complex( this._re / r, this._im / r );
  },
  divAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re /= r._re;
@@ -214,12 +194,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  mod : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re % r._re, this._im % r._re );
@@ -234,9 +210,7 @@ assert( r != undefined );
   return new _Complex( this._re % r, this._im % r );
  },
  modAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re = this._re % r._re;
@@ -255,8 +229,6 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  equal : function( r ){
   if( r instanceof _Complex ){
    return (this._re == r._re) && (this._im == r._im);
@@ -269,8 +241,6 @@ assert( r != undefined );
   }
   return (this._re != r) || (this._im != 0.0);
  },
-
-
  fabs : function(){
   if( this._re == 0.0 ){
    return _ABS( this._im );
@@ -285,23 +255,15 @@ assert( r != undefined );
   var t = this._im / this._re;
   return _ABS( this._re ) * _SQRT( 1.0 + t * t );
  },
-
-
  farg : function(){
   return fatan2( this._im, this._re );
  },
-
-
  fnorm : function(){
   return this._re * this._re + this._im * this._im;
  },
-
-
  conjg : function(){
   return new _Complex( this._re, -this._im );
  },
-
-
  sin : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsin( this._re ) );
@@ -313,8 +275,6 @@ assert( r != undefined );
    _COS( re ) * fsinh( im )
    );
  },
-
-
  cos : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcos( this._re ) );
@@ -326,8 +286,6 @@ assert( r != undefined );
    -_SIN( re ) * fsinh( im )
    );
  },
-
-
  tan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftan( this._re ) );
@@ -343,8 +301,6 @@ assert( r != undefined );
    fsinh( im2 ) / d
    );
  },
-
-
  asin : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -356,15 +312,12 @@ assert( r != undefined );
     return floatToComplex( fasin( this._re ) );
    }
   }
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.minus().mul( i.mul( this ).add( this.sqr().minus().add( 1.0 ).sqrt() ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  acos : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -376,19 +329,12 @@ assert( r != undefined );
     return floatToComplex( facos( this._re ) );
    }
   }
-
-
-
-
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( this.sub( i.mul( this.sqr().minus().add( 1.0 ).sqrt() ) ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  atan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fatan( this._re ) );
@@ -397,15 +343,12 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( i.add( this ).div( d ).log() ).mul( 0.5 );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  sinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsinh( this._re ) );
@@ -415,8 +358,6 @@ assert( r != undefined );
    fcosh( this._re ) * _SIN( this._im )
    );
  },
-
-
  cosh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcosh( this._re ) );
@@ -426,8 +367,6 @@ assert( r != undefined );
    fsinh( this._re ) * _SIN( this._im )
    );
  },
-
-
  tanh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftanh( this._re ) );
@@ -443,17 +382,12 @@ assert( r != undefined );
    _SIN( im2 ) / d
    );
  },
-
-
  asinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fasinh( this._re ) );
   }
-
   return this.add( this.sqr().add( 1.0 ).sqrt() ).log();
  },
-
-
  acosh : function(){
   if( this._im == 0.0 ){
    if( this._re < 1.0 ){
@@ -465,11 +399,8 @@ assert( r != undefined );
     return floatToComplex( facosh( this._re ) );
    }
   }
-
   return this.add( this.sqr().sub( 1.0 ).sqrt() ).log();
  },
-
-
  atanh : function(){
   if( this._im == 0.0 ){
    if( (this._re <= -1.0) || (this._re >= 1.0) ){
@@ -485,27 +416,20 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
-
   return this.add( 1.0 ).div( d ).log().mul( 0.5 );
  },
-
-
  ceil : function(){
   return new _Complex(
    _CEIL( this._re ),
    _CEIL( this._im )
    );
  },
-
-
  floor : function(){
   return new _Complex(
    _FLOOR( this._re ),
    _FLOOR( this._im )
    );
  },
-
-
  exp : function(){
   if( this._im == 0.0 ){
    return floatToComplex( _EXP( this._re ) );
@@ -527,8 +451,6 @@ assert( r != undefined );
    e * _SIN( im )
    );
  },
-
-
  log : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
@@ -561,40 +483,30 @@ assert( r != undefined );
    _ATAN2( this._im, this._re ) * _NORMALIZE
    );
  },
-
-
  pow : function( y ){
   if( y instanceof _Complex ){
    if( y._im == 0.0 ){
     if( this._im == 0.0 ){
      return floatToComplex( _POW( this._re, y._re ) );
     }
-
     return this.log().mul( y._re ).exp();
    }
    if( this._im == 0.0 ){
-
     return y.mul( _LOG( this._re ) ).exp();
    }
-
    return this.log().mul( y ).exp();
   }
   if( this._im == 0.0 ){
    return floatToComplex( _POW( this._re, y ) );
   }
-
   return this.log().mul( y ).exp();
  },
-
-
  sqr : function(){
   if( this._im == 0.0 ){
    return floatToComplex( this._re * this._re );
   }
   return new _Complex( this._re * this._re - this._im * this._im, this._re * this._im + this._im * this._re );
  },
-
-
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
@@ -626,9 +538,7 @@ assert( r != undefined );
    -_SQRT05 * r
    );
  }
-
 };
-
 function getComplex( c, re , im ){
  re.set( c._re );
  im.set( c._im );
@@ -638,26 +548,18 @@ function setComplex( c, re, im ){
  c._im = im;
  return c;
 }
-
 function dupComplex( x ){
  return new _Complex( x._re, x._im );
 }
-
 function floatToComplex( x ){
  return new _Complex( x, 0.0 );
 }
-
-
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
-
-
 function _angToRad( ang ){
  return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
-
-
 function fsin( x ){
  return _SIN( _angToRad( x ) );
 }
@@ -7169,6 +7071,12 @@ var _loopSub = [
  _Loop.prototype._loopFunc,
  _Loop.prototype._loopEndFunc
 ];
+function __Replace( descCode, descToken, realCode, realToken ){
+ this._descCode = descCode;
+ this._descToken = descToken;
+ this._realCode = realCode;
+ this._realToken = realToken;
+}
 function _Param( num, parentParam, inherit ){
  var i;
  this._parentNum = (parentParam == undefined) ? 0 : (
@@ -7225,6 +7133,17 @@ function _Param( num, parentParam, inherit ){
  this._seFlag = false;
  this._seToken = 0;
  this._mpFlag = false;
+ this._replace = new Array();
+ if( parentParam != undefined ){
+  for( i = 0; i < parentParam._replace.length; i++ ){
+   this._replace[this._replace.length] = new __Replace(
+    parentParam._replace[i]._descCode,
+    parentParam._replace[i]._descToken,
+    parentParam._replace[i]._realCode,
+    parentParam._replace[i]._realToken
+    );
+  }
+ }
 }
 _Param.prototype = {
  end : function(){
@@ -7455,6 +7374,41 @@ _Param.prototype = {
  },
  resetNameSpace : function(){
   this._nameSpace = this._defNameSpace;
+ },
+ setReplace : function( descCode, descToken, realCode, realToken ){
+  var i;
+  var tmp;
+  for( i = 0; i < this._replace.length; i++ ){
+   tmp = this._replace[i];
+   if( descCode == tmp._descCode && descToken == tmp._descToken ){
+    tmp._realCode = realCode;
+    tmp._realToken = realToken;
+    return;
+   }
+  }
+  this._replace[i] = new __Replace( descCode, descToken, realCode, realToken );
+ },
+ delReplace : function( descCode, descToken ){
+  var replace = new Array();
+  var tmp;
+  for( var i = 0; i < this._replace.length; i++ ){
+   tmp = this._replace[i];
+   if( descCode != tmp._descCode || descToken != tmp._descToken ){
+    replace[replace.length] = tmp;
+   }
+  }
+  this._replace = replace;
+ },
+ replace : function( cur ){
+  var tmp;
+  for( var i = 0; i < this._replace.length; i++ ){
+   tmp = this._replace[i];
+   if( cur._code == tmp._descCode && cur._token == tmp._descToken ){
+    cur._code = tmp._realCode;
+    cur._token = tmp._realToken;
+    break;
+   }
+  }
  }
 };
 var _MIN_VALUE = [ -128, 0 , -32768, 0 , -2147483648, 0 ];
@@ -8816,6 +8770,21 @@ _Proc.prototype = {
   var line;
   if( (line = this._procLine.getLine()) == null ){
    return false;
+  }
+  var cur = line._token._top;
+  if( cur != null ){
+   if( (cur._code != 10) || ((cur._token != 101) && (cur._token != 102)) ){
+    while( cur != null ){
+     switch( cur._code ){
+     case 9:
+     case 13:
+     case 14:
+      param.replace( cur );
+      break;
+     }
+     cur = cur._next;
+    }
+   }
   }
   if( !this._regProcess( line, err ) ){
    return false;
@@ -14619,7 +14588,7 @@ _Proc.prototype = {
   case 61:
   case 62:
    break;
-  case 102:
+  case 104:
    if( skipCommandLog() ){
     while( true ){
      if( !(_this._curLine._token.getTokenParam( param )) ){
@@ -14692,7 +14661,7 @@ _Proc.prototype = {
    case 62:
     doCommandPrint( topPrint, true );
     break;
-   case 102:
+   case 104:
     doCommandLog( topPrint );
     break;
    }
@@ -15665,6 +15634,60 @@ _Proc.prototype = {
   param.resetNameSpace();
   return 0x03;
  },
+ _commandUse : function( _this, param, code, token ){
+  var descCode;
+  var descToken;
+  var realCode;
+  var realToken;
+  if( _this._curLine._token.getToken() ){
+   descCode = _get_code;
+   descToken = _get_token;
+   switch( descCode ){
+   case 9:
+   case 13:
+   case 14:
+    break;
+   default:
+    return _this._retError( 0x2141, code, token );
+   }
+   if( _this._curLine._token.getToken() ){
+    realCode = _get_code;
+    realToken = _get_token;
+    switch( realCode ){
+    case 9:
+    case 13:
+    case 14:
+     break;
+    default:
+     return _this._retError( 0x2141, code, token );
+    }
+   } else {
+    return _this._retError( 0x2141, code, token );
+   }
+  } else {
+   return _this._retError( 0x2141, code, token );
+  }
+  param.setReplace( descCode, descToken, realCode, realToken );
+  return 0x03;
+ },
+ _commandUnuse : function( _this, param, code, token ){
+  var descCode;
+  var descToken;
+  if( _this._curLine._token.getToken() ){
+   descCode = _get_code;
+   descToken = _get_token;
+   switch( descCode ){
+   case 9:
+   case 13:
+   case 14:
+    break;
+   default:
+    return _this._retError( 0x2141, code, token );
+   }
+  }
+  param.delReplace( descCode, descToken );
+  return 0x03;
+ },
  _commandDump : function( _this, param, code, token ){
   var newCode;
   var newToken;
@@ -16301,6 +16324,8 @@ var _procSubCommand = [
  _Proc.prototype._commandInclude,
  _Proc.prototype._commandBase,
  _Proc.prototype._commandNameSpace,
+ _Proc.prototype._commandUse,
+ _Proc.prototype._commandUnuse,
  _Proc.prototype._commandDump,
  _Proc.prototype._commandPrint
 ];
@@ -16737,6 +16762,8 @@ var _tokenCommand = [
  "include",
  "base",
  "namespace",
+ "use",
+ "unuse",
  "dump",
  "log"
 ];
