@@ -6,6 +6,9 @@
 <title></title>
 <script type="text/javascript" src="_Console.js"></script>
 <script type="text/javascript" src="_EasyClip.js"></script>
+<script type="text/javascript" src="_LoopFor.js"></script>
+<script type="text/javascript" src="_LoopWhile.js"></script>
+<script type="text/javascript" src="_MeasureTime.js"></script>
 <script type="text/javascript" src="../clip.js"></script>
 <script type="text/javascript">
 function onConsoleUpdate( id ){
@@ -218,6 +221,111 @@ function main(){
 	clip.setMode( _CLIP_MODE_F_MULTIPREC, "h_even" );
 	con.println( "round h_even:" );
 	clip.procLine( "sqr @@b" );
+
+	con.println();
+
+	var prec_pi = 10000;
+	var prec_e  = 10000;
+	var time = new Array();
+	for( var i = 0; i < 11; i++ ){
+		time[i] = new _MeasureTime();
+	}
+	(new _LoopFor( function( _this, i ){
+		switch( i ){
+		case 0:
+			clip.setValue( 'N', _INT( Math.log( prec_pi ) / Math.log( 2 ) ) );
+			con.println( "@N = " + clip.getValue( 'N' ).toFloat() );
+
+			clip.setMode( _CLIP_MODE_F_MULTIPREC, Math.pow( 2, clip.getValue( 'N' ).toFloat() + 1 ) );
+			con.println( "prec " + clip.param()._mpPrec );
+
+			clip.setAnsFlag( false );
+			return true;
+		case 1: time[0].run( function(){ return clip.procLine( ":array a b t p an" ); } ); return true;
+		case 2: time[1].run( function(){ return clip.procLine( "a = 1"             ); } ); return true;
+		case 3: time[2].run( function(){ return clip.procLine( "b = 1 / sqrt 2"    ); } ); return true;
+		case 4: time[3].run( function(){ return clip.procLine( "t = 1 / 4"         ); } ); return true;
+		case 5: time[4].run( function(){ return clip.procLine( "p = 1"             ); } ); return true;
+		default:
+			window.count = 0;
+		}
+		return false;
+	}, function( _this, i ){
+		if( window.count >= clip.getValue( 'N' ).toFloat() ){
+			_this.end();
+
+//			con.setColor( "0000ff" );
+			con.println( clip.getAnsMultiPrecString().substring( 0, 2 + prec_pi ) );
+//			con.setColor();
+			for( var i = 0; i < 11; i++ ){
+				con.println( "stat " + (i + 1) + " : " + (time[i].total() / 1000) + " s" );
+			}
+		}
+		return false;
+	}, function( _this, i ){
+		window.count++;
+		return false;
+	}, function( _this, i ){
+		switch( i ){
+		case 0: time[5].run( function(){ return clip.procLine( "an = (a + b) / 2"       ); } ); return true;
+		case 1: time[6].run( function(){ return clip.procLine( "b = sqrt (a * b)"       ); } ); return true;
+		case 2: time[7].run( function(){ return clip.procLine( "t -= p * (a - an) ** 2" ); } ); return true;
+		case 3: time[8].run( function(){ return clip.procLine( "p *= 2"                 ); } ); return true;
+		case 4: time[9].run( function(){ return clip.procLine( "a = an"                 ); } ); return true;
+		default:
+			time[10].run( function(){ return clip.procLine( "((a + b) ** 2) / (4 * t)" ); } );
+			var str = clip.getAnsMultiPrecString();
+			var end = 2 + Math.pow( 2, window.count + 2 );
+			con.setColor( "0000ff" );
+			if( end >= str.length ){
+				con.print( str );
+				con.setColor();
+			} else {
+				con.print( str.substring( 0, end ) );
+				con.setColor();
+				con.print( str.substring( end, str.length ) );
+			}
+			con.println();
+		}
+		return false;
+	}, function(){
+
+		con.println();
+
+		clip.setMode( _CLIP_MODE_F_MULTIPREC, prec_e );
+		clip.setAnsFlag( false );
+		clip.procLine( "@@e = 0; @@a = 1; @n = 1" );
+
+		var old_str = "";
+		var end = 0;
+		(new _LoopWhile( function( _this, i ){
+			clip.procLine( "@@e != @@p" );
+
+			if( clip.getAnsValue().toFloat() == 0 ){
+				_this.end();
+
+				con.println();
+			}
+			return false;
+		}, function( _this, i ){
+			clip.procLine( "@@p = @@e; @@e += @@a; @@a /= @n; @n++" );
+
+			var str = clip.getMultiPrecString( 'e' );
+			var top = end;
+			for( ; end < old_str.length; end++ ){
+				if( old_str.charAt( end ) != str.charAt( end ) ){
+					break;
+				}
+			}
+			old_str = str;
+			if( end - top > 0 ){
+				con.print( str.substring( top, end ) );
+			}
+			return false;
+		}, function(){
+		} )).start( 100, true/*doループ*/ );
+
+	} )).start( 100 );
 }
 </script>
 </head>
