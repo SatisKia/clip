@@ -144,7 +144,8 @@ var _tokenFunc = [
 	"col_getb",
 	"call",
 	"eval",
-	"mp"
+	"mp",
+	"mround"
 ];
 
 var _tokenStat = [

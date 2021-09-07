@@ -274,6 +274,7 @@
 #define _CLIP_FUNC_EVAL		92
 
 #define _CLIP_FUNC_MP		93
+#define _CLIP_FUNC_MROUND	94
 
 /*
  * 文の種類

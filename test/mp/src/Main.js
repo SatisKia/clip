@@ -52,9 +52,9 @@ function mul( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	a = mp.clone( a );
 	b = mp.clone( b );
 
-	var k = 1;
-	if( a[0] < 0 && b[0] >= 0 ){ k = -1; }
-	if( b[0] < 0 && a[0] >= 0 ){ k = -1; }
+	var isMinus = false;
+	if( a[0] < 0 && b[0] >= 0 ){ isMinus = true; }
+	if( b[0] < 0 && a[0] >= 0 ){ isMinus = true; }
 
 	var la = mp.getLen( a );
 	var lb = mp.getLen( b );
@@ -70,6 +70,7 @@ function mul( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	ret[n] = 0;	// 配列の確保
 	var c = 0;
 	var i, rr;
+	ret[0] = 0;
 	for( i = 1; i < n; i++ ){
 		rr = _INT( r[i - 1] + 0.5 ) + c;
 		ret[i] = _MOD( rr, _MP_ELEMENT );
@@ -77,7 +78,7 @@ function mul( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	}
 	ret[i] = c;
 
-	mp._setLen( ret, (c != 0 ? n : n - 1) * k );
+	mp.setLen( ret, c != 0 ? n : n - 1, isMinus );
 };
 
 #include "extras\_Console.js"

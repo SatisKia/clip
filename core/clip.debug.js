@@ -3088,6 +3088,17 @@ _MultiPrec.prototype.F = function( str ){
 _MultiPrec.prototype.getLen = function( a ){
 	return _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 };
+_MultiPrec.prototype.isMinus = function( a ){
+	return a[0] < 0 ? true : false;
+};
+_MultiPrec.prototype.setLen = function( a , len, isMinus ){
+	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
+	if( len == 0 ){
+		a[0] = _MP_LEN_COEF + p; a[1] = 0;
+	} else {
+		a[0] = (len * _MP_LEN_COEF + p) * (isMinus ? -1 : 1);
+	}
+};
 _MultiPrec.prototype._setLen = function( a , len ){
 	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
 	if( len == 0 ){
@@ -9157,7 +9168,7 @@ _Proc.prototype = {
 		}
 		return func;
 	},
-	mpNum2Str : function( param, val ){
+	mpRound : function( param, val ){
 		var tmp = new Array();
 		if( (param._mode == 0x1104) && (_proc_mp.getPrec( val ) > 0) ){
 			_proc_mp.ftrunc( tmp, val );
@@ -9165,7 +9176,16 @@ _Proc.prototype = {
 			_proc_mp.fset( tmp, val );
 			_proc_mp.fround( tmp, param._mpPrec, param._mpRound );
 		}
+		return tmp;
+	},
+	mpNum2Str : function( param, val ){
+		var tmp = this.mpRound( param, val );
 		return _proc_mp.fnum2str( tmp, param._mpPrec );
+	},
+	mpfCmp : function( param, val1, val2 ){
+		var tmp1 = this.mpRound( param, val1 );
+		var tmp2 = this.mpRound( param, val2 );
+		return _proc_mp.fcmp( tmp1, tmp2 );
 	},
 	printAns : function( childParam ){
 		if( childParam._mpFlag ){
@@ -9771,7 +9791,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
 			}
@@ -9788,7 +9808,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
 			}
@@ -9805,7 +9825,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
 			}
@@ -9822,7 +9842,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
 			}
@@ -9839,7 +9859,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
 			}
@@ -9856,7 +9876,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
 			}
@@ -10167,7 +10187,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) < 0) ? 1 : 0 );
 			}
@@ -10187,7 +10207,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) <= 0) ? 1 : 0 );
 			}
@@ -10207,7 +10227,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) > 0) ? 1 : 0 );
 			}
@@ -10227,7 +10247,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) >= 0) ? 1 : 0 );
 			}
@@ -10247,7 +10267,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) == 0) ? 1 : 0 );
 			}
@@ -10267,7 +10287,7 @@ _Proc.prototype = {
 		}
 		if( param._mpFlag ){
 			if( param._mode == 0x1011 ){
-				value.matAss( (_proc_mp.fcmp( value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
+				value.matAss( (_this.mpfCmp( param, value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
 			} else {
 				value.matAss( (_proc_mp.cmp( value.mp(), tmpValue.mp() ) != 0) ? 1 : 0 );
 			}
@@ -11579,6 +11599,20 @@ _Proc.prototype = {
 		}
 		return ret ? 0x00 : _this._retError( 0x2111, 9, string.str() );
 	},
+	_funcMRound : function( _this, param, code, token, value, seFlag ){
+		var ret;
+		var tmpValue = new _ProcVal( _this, param );
+		if( (ret = _this._getFuncParam( param, code, token, tmpValue, seFlag )) != 0x00 ){
+			return ret;
+		}
+		if( (param._mode == 0x1104) && (_proc_mp.getPrec( tmpValue.mp() ) > 0) ){
+			_proc_mp.ftrunc( value.mp(), tmpValue.mp() );
+		} else {
+			_proc_mp.fset( value.mp(), tmpValue.mp() );
+			_proc_mp.fround( value.mp(), param._mpPrec, param._mpRound );
+		}
+		return 0x00;
+	},
 	_incVal : function( param, code, token, value, incFlag ){
 		switch( this._curInfo._assCode ){
 		case 0x21:
@@ -11932,7 +11966,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) < 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) < 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) < 0) ? 1 : 0 );
 				}
@@ -11951,7 +11985,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) <= 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) <= 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) <= 0) ? 1 : 0 );
 				}
@@ -11970,7 +12004,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) > 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) > 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) > 0) ? 1 : 0 );
 				}
@@ -11989,7 +12023,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) >= 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) >= 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) >= 0) ? 1 : 0 );
 				}
@@ -12008,7 +12042,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) == 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) == 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) == 0) ? 1 : 0 );
 				}
@@ -12027,7 +12061,7 @@ _Proc.prototype = {
 		if( (ret = _this._const( param, code, token, rightValue )) == 0x00 ){
 			if( param._mpFlag ){
 				if( param._mode == 0x1011 ){
-					value.matAss( (_proc_mp.fcmp( value.mp(), rightValue.mp() ) != 0) ? 1 : 0 );
+					value.matAss( (_this.mpfCmp( param, value.mp(), rightValue.mp() ) != 0) ? 1 : 0 );
 				} else {
 					value.matAss( (_proc_mp.cmp( value.mp(), rightValue.mp() ) != 0) ? 1 : 0 );
 				}
@@ -16078,7 +16112,8 @@ var _procSubFunc = [
 	_Proc.prototype._funcColGetB,
 	_Proc.prototype._funcCall,
 	_Proc.prototype._funcEval,
-	_Proc.prototype._funcMp
+	_Proc.prototype._funcMp,
+	_Proc.prototype._funcMRound
 ];
 var _procSubOp = [
 	_Proc.prototype._unaryIncrement,
@@ -16597,7 +16632,8 @@ var _tokenFunc = [
 	"col_getb",
 	"call",
 	"eval",
-	"mp"
+	"mp",
+	"mround"
 ];
 var _tokenStat = [
 	"$LOOPSTART",
@@ -19307,6 +19343,7 @@ window._CLIP_FUNC_COL_GETB = 90;
 window._CLIP_FUNC_CALL = 91;
 window._CLIP_FUNC_EVAL = 92;
 window._CLIP_FUNC_MP = 93;
+window._CLIP_FUNC_MROUND = 94;
 window._CLIP_STAT_START = 0;
 window._CLIP_STAT_END = 1;
 window._CLIP_STAT_END_INC = 2;

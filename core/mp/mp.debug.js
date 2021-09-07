@@ -454,6 +454,17 @@ _MultiPrec.prototype.F = function( str ){
 _MultiPrec.prototype.getLen = function( a ){
 	return _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 };
+_MultiPrec.prototype.isMinus = function( a ){
+	return a[0] < 0 ? true : false;
+};
+_MultiPrec.prototype.setLen = function( a , len, isMinus ){
+	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
+	if( len == 0 ){
+		a[0] = _MP_LEN_COEF + p; a[1] = 0;
+	} else {
+		a[0] = (len * _MP_LEN_COEF + p) * (isMinus ? -1 : 1);
+	}
+};
 _MultiPrec.prototype._setLen = function( a , len ){
 	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
 	if( len == 0 ){
