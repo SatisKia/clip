@@ -8550,7 +8550,7 @@ _Proc.prototype = {
 					token = _get_token;
 					this._curInfo = savInfo;
 					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
-					subInfo.curArray = null;
+					subInfo._curArray = null;
 					return this._retError( 0x210C, code, token );
 				} else {
 					value.mat()._mat[0].setImag( tmpValue1.mat()._mat[0].real() );
@@ -8667,13 +8667,15 @@ _Proc.prototype = {
 					break;
 				}
 				param._mpFlag = this._valAns._mpFlag;
-				param._array.move( 0 );
-				if( this._valAns._mpFlag ){
-					param._array._mp[0] = Array.from( this._valAns._mp );
-				} else {
-					param._array._mat[0].ass( this._valAns._mat );
-					if( param.isMultiPrec() ){
-						param._array._mp[0] = Array.from( this._valAns.mp() );
+				if( !(param._assFlag) ){
+					param._array.move( 0 );
+					if( this._valAns._mpFlag ){
+						param._array._mp[0] = Array.from( this._valAns._mp );
+					} else {
+						param._array._mat[0].ass( this._valAns._mat );
+						if( param.isMultiPrec() ){
+							param._array._mp[0] = Array.from( this._valAns.mp() );
+						}
 					}
 				}
 			}

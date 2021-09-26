@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title></title>
+<script type="text/javascript" src="_Canvas.js"></script>
+<script type="text/javascript" src="_EasyClip.js"></script>
+<script type="text/javascript" src="_InputFile.js"></script>
+<script type="text/javascript" src="_InputNumber.js"></script>
+<script type="text/javascript" src="_InputRange.js"></script>
+<script type="text/javascript" src="../clip.js"></script>
+<script type="text/javascript">
+// _EasyClip
+var clip;
+
+// キャンバス
+var canvas;
+
+// ファイル選択
+var inputFile;
+function onInputFileLoadImage( name, image ){
+	var width  = image.width;
+	var height = image.height;
+	canvas.setSize( width, height );
+	canvas.drawImage( image, width, height );
+	var data = canvas.imageData( width, height ).data;
+	var array = new Array();
+	var x, y, r, g, b;
+	var i = 0;
+	for( y = 0; y < height; y++ ){
+		array[y] = new Array();
+		for( x = 0; x < width; x++ ){
+			r = data[i++];
+			g = data[i++];
+			b = data[i++];
+			i++;
+			array[y][x] = (r << 16) + (g << 8) + b;
+		}
+	}
+	clip.setMatrix( 'a', array );
+
+	// スライダーの初期化
+	rangeBrightness.value( 0 );
+	inputBrightness.value( 0 );
+	rangeContrast  .value( 0 );
+	inputContrast  .value( 0 );
+	rangeHue       .value( 0 );
+	inputHue       .value( 0 );
+	rangeSaturation.value( 0 );
+	inputSaturation.value( 0 );
+	rangeValue     .value( 0 );
+	inputValue     .value( 0 );
+
+	// スライダーの表示
+	document.getElementById( "control0" ).style.display = "block";
+}
+
+// 明るさ
+var rangeBrightness;
+var inputBrightness;
+function onChangeInputBrightness(){
+	rangeBrightness.value( inputBrightness.value() );
+	tone();
+}
+
+// コントラスト
+var rangeContrast;
+var inputContrast;
+function onChangeInputContrast(){
+	var value = inputContrast.value();
+	if( value < 0 ){
+		value *= 2;
+	}
+	rangeContrast.value( value );
+	tone();
+}
+
+// 色相
+var rangeHue;
+var inputHue;
+function onChangeInputHue(){
+	rangeHue.value( inputHue.value() );
+	tone();
+}
+
+// 彩度
+var rangeSaturation;
+var inputSaturation;
+function onChangeInputSaturation(){
+	rangeSaturation.value( inputSaturation.value() );
+	tone();
+}
+
+// 明度
+var rangeValue;
+var inputValue;
+function onChangeInputValue(){
+	rangeValue.value( inputValue.value() );
+	tone();
+}
+
+function onInputRangeChange( element ){
+	if( element == rangeBrightness.element() ){
+		// 明るさ
+		inputBrightness.value( element.value );
+	} else if( element == rangeContrast.element() ){
+		// コントラスト
+		var value = element.value;
+		if( value < 0 ){
+			inputContrast.value( Math.ceil( value / 2 ) );
+		} else {
+			inputContrast.value( value );
+		}
+	} else if( element == rangeHue.element() ){
+		// 色相
+		inputHue.value( element.value );
+	} else if( element == rangeSaturation.element() ){
+		// 彩度
+		inputSaturation.value( element.value );
+	} else if( element == rangeValue.element() ){
+		// 明度
+		inputValue.value( element.value );
+	}
+	tone();
+}
+
+function onInputNumberChange( element ){
+	if( element == inputBrightness.element() ){
+		// 明るさ
+		onChangeInputBrightness();
+	} else if( element == inputContrast.element() ){
+		// コントラスト
+		onChangeInputContrast();
+	} else if( element == inputHue.element() ){
+		// 色相
+		onChangeInputHue();
+	} else if( element == inputSaturation.element() ){
+		// 彩度
+		onChangeInputSaturation();
+	} else if( element == inputValue.element() ){
+		// 明度
+		onChangeInputValue();
+	}
+}
+
+var toneBrightness = 0;
+var toneContrast   = 0;
+var toneHue        = 0;
+var toneSaturation = 0;
+var toneValue      = 0;
+function tone(){
+	var oldBrightness = toneBrightness;
+	var oldContrast   = toneContrast;
+	var oldHue        = toneHue;
+	var oldSaturation = toneSaturation;
+	var oldValue      = toneValue;
+	toneBrightness = inputBrightness.value();
+	toneContrast   = inputContrast  .value();
+	toneHue        = inputHue       .value();
+	toneSaturation = inputSaturation.value();
+	toneValue      = inputValue     .value();
+	if( (toneBrightness == oldBrightness) && (toneContrast == oldContrast) && (toneHue == oldHue) && (toneSaturation == oldSaturation) && (toneValue == oldValue) ){
+		return;
+	}
+
+	clip.procLine( "@@0 = @@a" );
+	clip.procLine( "@w = col @@0" );
+	clip.procLine( "@h = row @@0" );
+
+	// 明るさ・コントラスト
+	clip.setValue( '1', toneBrightness );
+	clip.setValue( '2', 1.0 + toneContrast / 100 );
+	clip.procScript( [
+		"# 明るさ補正",
+		"$ADD        @1,(128 * (1.0 - @2))",
+
+		"# テーブル作成",
+		"$SET_Z      @i",
+		"$LOOPSTART  # @i",
+		"# 積和演算",
+		"$MUL_A      @@T @i,@2,@i",
+		"$ADD        @@T @i,@1",
+		"$LOOPEND_I  @i,256",
+
+		"$SET_Z      @y",
+		"$LOOPSTART  # @y",
+		"$SET_Z      @x",
+		"$LOOPSTART  # @x",
+		"$SET        @C,@@0 @y @x",
+		"$SET        @R,@@T (col_getr @C)",
+		"$SET        @G,@@T (col_getg @C)",
+		"$SET        @B,@@T (col_getb @C)",
+		"$MKCOLORS   @@0 @y @x,@R,@G,@B # 飽和演算",
+		"$LOOPEND_I  @x,@w",
+		"$LOOPEND_I  @y,@h"
+	] );
+
+	// RGBからHSVへの変換
+	clip.procScript( [
+		":mat @h @w @@H # 配列の確保",
+		":mat @h @w @@S # 配列の確保",
+		":mat @h @w @@V # 配列の確保",
+		"$SET_Z      @y",
+		"$LOOPSTART  # @y",
+		"$SET_Z      @x",
+		"$LOOPSTART  # @x",
+		"$SET        @C,@@0 @y @x",
+		"$DIV_A      @R,col_getr @C,255",
+		"$DIV_A      @G,col_getg @C,255",
+		"$DIV_A      @B,col_getb @C,255",
+
+		"$CND        @M,(@G < @R),@G,@R",
+		"if @B < @M",
+		"    $SET @M,@B",
+		"endif",
+
+		"# Value（明度）：0.0～1.0",
+		"$CND        @V,(@G > @R),@G,@R",
+		"if @B > @V",
+		"    $SET @V,@B",
+		"endif",
+
+		"# Saturation（彩度）：0.0～1.0",
+		"$SUB_A      @S,@V,@M",
+
+		"# Hue（色相）：0.0～360.0",
+		"if @M == @V",
+		"    $SET_Z      @H",
+		"elif @M == @B",
+		"    $SET        @H,{60 * (@G - @R) / @S + 60}",
+		"elif @M == @R",
+		"    $SET        @H,{60 * (@B - @G) / @S + 180}",
+		"else",
+		"    $SET        @H,{60 * (@R - @B) / @S + 300}",
+		"endif",
+
+		"$MOD_A      @@H @y @x,(@H + 360),360",
+		"$SET        @@S @y @x,@S",
+		"$SET        @@V @y @x,@V",
+		"$LOOPEND_I  @x,@w",
+		"$LOOPEND_I  @y,@h"
+	] );
+
+	// 色相・彩度・明度
+	clip.setValue( '1', toneHue );
+	clip.setValue( '2', toneSaturation / 100 );
+	clip.setValue( '3', toneValue / 100 );
+	clip.procScript( [
+		"$SET_Z      @y",
+		"$LOOPSTART  # @y",
+		"$SET_Z      @x",
+		"$LOOPSTART  # @x",
+		"$ADD        @@H @y @x,@1",
+		"$ADD        @@S @y @x,(@@S @y @x * @2)",
+		"$ADD        @@V @y @x,@3",
+		"$LOOPEND_I  @x,@w",
+		"$LOOPEND_I  @y,@h"
+	] );
+
+	// HSVからRGBへの変換
+	clip.procScript( [
+		"$SET_Z      @y",
+		"$LOOPSTART  # @y",
+		"$SET_Z      @x",
+		"$LOOPSTART  # @x",
+		"$MOD_A      @H,(@@H @y @x + 360),360",
+		"$SETS       @V,@@V @y @x,0.0,1.0",
+		"$SETS       @S,@@S @y @x,0.0,@V",
+
+		"$SUB_A      @M,@V,@S",
+
+		"if @H < 60",
+		"    $SET        @R,@V",
+		"    $SET        @G,{@V + (@H - 60) / 60 * @S}",
+		"    $SET        @B,@M",
+		"elif @H < 120",
+		"    $SET        @R,{@V - (@H - 60) / 60 * @S}",
+		"    $SET        @G,@V",
+		"    $SET        @B,@M",
+		"elif @H < 180",
+		"    $SET        @R,@M",
+		"    $SET        @G,@V",
+		"    $SET        @B,{@V + (@H - 180) / 60 * @S}",
+		"elif @H < 240",
+		"    $SET        @R,@M",
+		"    $SET        @G,{@V - (@H - 180) / 60 * @S}",
+		"    $SET        @B,@V",
+		"elif @H < 300",
+		"    $SET        @R,{@V + (@H - 300) / 60 * @S}",
+		"    $SET        @G,@M",
+		"    $SET        @B,@V",
+		"else",
+		"    $SET        @R,@V",
+		"    $SET        @G,@M",
+		"    $SET        @B,{@V - (@H - 300) / 60 * @S}",
+		"endif",
+
+		"$MKCOLOR    @@0 @y @x,(int (@R * 255)),(int (@G * 255)),(int (@B * 255))",
+		"$LOOPEND_I  @x,@w",
+		"$LOOPEND_I  @y,@h"
+	] );
+
+	var array = clip.getArray( '0', 2 );
+	var x, y;
+	for( y = 0; y < array.length; y++ ){
+		for( x = 0; x < array[y].length; x++ ){
+			canvas.setColorRGB( array[y][x] );
+			canvas.put( x, y );
+		}
+	}
+}
+
+function main(){
+	clip = new _EasyClip();
+
+	// キャンバス
+	setCanvasEnv( new _CanvasEnv() );
+	canvas = new _Canvas( "canvas0" );
+
+	// ファイル選択コントロール
+	inputFile = new _InputFile( "file0" );
+
+	// スライダー
+	rangeBrightness = new _InputRange ( "range_brightness" );
+	inputBrightness = new _InputNumber( "input_brightness", -150, 150 );
+	rangeContrast   = new _InputRange ( "range_contrast" );
+	inputContrast   = new _InputNumber( "input_contrast", -50, 100 );
+	rangeHue        = new _InputRange ( "range_hue" );
+	inputHue        = new _InputNumber( "input_hue", -180, 180 );
+	rangeSaturation = new _InputRange ( "range_saturation" );
+	inputSaturation = new _InputNumber( "input_saturation", -100, 100 );
+	rangeValue      = new _InputRange ( "range_value" );
+	inputValue      = new _InputNumber( "input_value", -100, 100 );
+}
+</script>
+<style type="text/css">
+table {
+	border-collapse:collapse;
+	border:0px;
+}
+</style>
+</head>
+<body onload="main()">
+<input type="file" id="file0"><br>
+<canvas id="canvas0" width="1" height="1"></canvas><br>
+<div id="control0" style="display:none">
+	<table>
+		<tr>
+			<td>
+				明るさ<br>
+			</td>
+			<td>
+				<input type="range" id="range_brightness" style="width:200px" min="-150" max="150" step="1">
+			</td>
+			<td>
+				<form action="javascript:onChangeInputBrightness()">
+					<input type="text" id="input_brightness" style="width:39px; height:24px" value="0">
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				コントラスト<br>
+			</td>
+			<td>
+				<input type="range" id="range_contrast" style="width:200px" min="-100" max="100" step="1">
+			</td>
+			<td>
+				<form action="javascript:onChangeInputContrast()">
+					<input type="text" id="input_contrast" style="width:39px; height:24px" value="0">
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				色相<br>
+			</td>
+			<td>
+				<input type="range" id="range_hue" style="width:200px" min="-180" max="180" step="1">
+			</td>
+			<td>
+				<form action="javascript:onChangeInputHue()">
+					<input type="text" id="input_hue" style="width:39px; height:24px" value="0">
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				彩度<br>
+			</td>
+			<td>
+				<input type="range" id="range_saturation" style="width:200px" min="-100" max="100" step="1">
+			</td>
+			<td>
+				<form action="javascript:onChangeInputSaturation()">
+					<input type="text" id="input_saturation" style="width:39px; height:24px" value="0">
+				</form>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				明度<br>
+			</td>
+			<td>
+				<input type="range" id="range_value" style="width:200px" min="-100" max="100" step="1">
+			</td>
+			<td>
+				<form action="javascript:onChangeInputValue()">
+					<input type="text" id="input_value" style="width:39px; height:24px" value="0">
+				</form>
+			</td>
+		</tr>
+	</table>
+</div>
+</body>
+</html>

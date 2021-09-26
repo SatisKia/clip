@@ -1334,7 +1334,7 @@ _Proc.prototype = {
 
 					this._curInfo = savInfo;
 					_proc_token.delToken( subInfo._assCode, subInfo._assToken );
-					subInfo.curArray = null;
+					subInfo._curArray = null;
 					return this._retError( _CLIP_PROC_ERR_COMPLEX, code, token );
 				} else {
 					value.mat()._mat[0].setImag( tmpValue1.mat()._mat[0].real() );
@@ -1479,14 +1479,16 @@ _Proc.prototype = {
 
 				param._mpFlag = this._valAns._mpFlag;
 
-				// 計算結果用変数の値を更新
-				param._array.move( 0 );
-				if( this._valAns._mpFlag ){
-					param._array._mp[0] = Array.from( this._valAns._mp );
-				} else {
-					param._array._mat[0].ass( this._valAns._mat );
-					if( param.isMultiPrec() ){
-						param._array._mp[0] = Array.from( this._valAns.mp() );
+				if( !(param._assFlag) ){
+					// 計算結果用変数の値を更新
+					param._array.move( 0 );
+					if( this._valAns._mpFlag ){
+						param._array._mp[0] = Array.from( this._valAns._mp );
+					} else {
+						param._array._mat[0].ass( this._valAns._mat );
+						if( param.isMultiPrec() ){
+							param._array._mp[0] = Array.from( this._valAns.mp() );
+						}
 					}
 				}
 			}

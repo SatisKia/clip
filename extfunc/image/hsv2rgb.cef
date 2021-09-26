@@ -8,6 +8,7 @@
 
 $COL		@w,@@0
 $ROW		@h,@@0
+:mat @h @w @@3 # 配列の確保
 $SET_Z		@y
 $LOOPSTART	# @y
 $SET_Z		@x

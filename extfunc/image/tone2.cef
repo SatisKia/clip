@@ -13,7 +13,7 @@ $LOOPSTART	# @y
 $SET_Z		@x
 $LOOPSTART	# @x
 $ADD		@@H @y @x,@1
-$ADD		@@S @y @x,@@S @y @x * @2
+$ADD		@@S @y @x,(@@S @y @x * @2)
 $ADD		@@V @y @x,@3
 $LOOPEND_I	@x,@w
 $LOOPEND_I	@y,@h

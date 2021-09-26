@@ -10,6 +10,9 @@
 
 $COL		@w,@@0
 $ROW		@h,@@0
+:mat @h @w @@1 # 配列の確保
+:mat @h @w @@2 # 配列の確保
+:mat @h @w @@3 # 配列の確保
 $SET_Z		@y
 $LOOPSTART	# @y
 $SET_Z		@x
@@ -44,7 +47,7 @@ else
 	$SET		@H,{60 * (@R - @B) / @S + 300}
 endif
 
-$MOD_A		@@1 @y @x,@H + 360,360
+$MOD_A		@@1 @y @x,(@H + 360),360
 $SET		@@2 @y @x,@S
 $SET		@@3 @y @x,@V
 $LOOPEND_I	@x,@w
