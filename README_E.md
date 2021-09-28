@@ -485,11 +485,20 @@ var canvas = clip.canvas(); // _Canvas object
 vvar ret = clip.createImage( script/*Array*/, id, type, encoderOptions ); // Returns _CLIP_PROC_END upon normal completion
 ```
 
-ʻid` is the id of the img element
+The command :gworld must be included in `script` to be executed.
+
+`id` is the id of the img element
 
 `type` is a DOMString that indicates the image format. If not specified, the default format is "image/png"
 
-ʻencoderOptions` is the image quality of an image format that uses lossy compression, such as "image/jpeg" or "image/webp", indicated by a number between 0 and 1. The default value is 0.92
+`encoderOptions` is the image quality of an image format that uses lossy compression, such as "image/jpeg" or "image/webp", indicated by a number between 0 and 1. The default value is 0.92
+
+### Execute JavaScript code
+
+The following commands can be used in the script specified for the procLine, procScript, and createImage functions.
+
+:javascript ["str]|[val]...
+Execute the string as JavaScript code.
 
 ### Use the _EasyCanvas object
 

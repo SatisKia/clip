@@ -3,6 +3,62 @@
  * Copyright (C) SatisKia. All rights reserved.
  */
 
+function _commandJavaScript( _this, param, code, token ){
+	var script = new String();
+	var newCode;
+	var newToken;
+	var errFlag;
+	var lock;
+	var value = new _ProcVal( _this, param );
+	var real = new _String();
+	var imag = new _String();
+
+	errFlag = false;
+	while( true ){
+		lock = _this._curLine._token.lock();
+		if( !(_this._curLine._token.getTokenParam( param )) ){
+			break;
+		}
+		newCode  = getCode();
+		newToken = getToken();
+
+		if( newCode == _CLIP_CODE_STRING ){
+			script += newToken;
+		} else if( (newCode & _CLIP_CODE_ARRAY_MASK) != 0 ){
+			var tmpParam = (newCode == _CLIP_CODE_GLOBAL_ARRAY) ? globalParam() : param;
+			var tmpIndex = _this.arrayIndexIndirect( tmpParam, newCode, newToken );
+			var tmpString = _this.strGet( tmpParam._array, tmpIndex );
+			if( (tmpString.length == 0) && param._mpFlag ){
+				tmpString = _this.mpNum2Str( tmpParam, tmpParam._array._mp[tmpIndex] );
+			}
+			script += tmpString;
+		} else {
+			_this._curLine._token.unlock( lock );
+			if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
+				if( param._mpFlag ){
+					script += _this.mpNum2Str( param, value.mp() );
+				} else {
+					procToken().valueToString( param, value.mat()._mat[0], real, imag );
+					script += real.str() + imag.str();
+				}
+			} else {
+				errFlag = true;
+				break;
+			}
+		}
+	}
+
+	if( errFlag ){
+		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+	} else {
+		try {
+			(new Function( script ))();
+		} catch( e ){}
+	}
+
+	return _CLIP_PROC_SUB_END;
+}
+
 var _cur_clip;
 function setClip( clip ){
 	_cur_clip = clip;
@@ -98,6 +154,13 @@ function _EasyClip(){
 	setGlobalParam( this._param );
 
 	initProc();	// setProcEnvより後に実行
+
+	// コマンドの追加
+	addCommand( [
+		"javascript"
+	], [
+		_commandJavaScript
+	] );
 
 	// 乱数を初期化する
 	srand( time() );

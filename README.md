@@ -487,14 +487,23 @@ var canvas = clip.canvas(); // _Canvasオブジェクト
 var ret = clip.createImage( script/*Array*/, id, type, encoderOptions ); // 正常終了時、_CLIP_PROC_ENDが返る
 ```
 
+実行する`script`内に:gworldコマンドを含める必要があります。
+
 `id`はimg要素のid
 
 `type`は画像フォーマットを示すDOMString。指定しなかった場合、デフォルトのフォーマット形式は"image/png"
 
 `encoderOptions`は0から1の間のNumberで示す、"image/jpeg"や"image/webp"のような非可逆圧縮を使う画像フォーマットの画質。デフォルト値は0.92
 
+### JavaScriptコードを実行する
+
+procLine、procScript、createImage関数に指定するスクリプト内に、次のコマンドが使用できます。
+
+:javascript ["str]|[val]...
+文字列をJavaScriptコードとして実行する
+
 ### _EasyCanvasオブジェクトを使用する
- 
+
 _EasyCanvasオブジェクトを構築すると、以降、CLIPのグラフィックス命令が直接キャンバスに描画されるようになり、updateCanvas関数を呼ぶ必要がなくなります。
  
 ```javascript

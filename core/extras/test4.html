@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title></title>
-<script type="text/javascript" src="_Canvas.js"></script>
-<script type="text/javascript" src="_EasyClip.js"></script>
 <script type="text/javascript" src="_InputFile.js"></script>
 <script type="text/javascript" src="_InputNumber.js"></script>
 <script type="text/javascript" src="_InputRange.js"></script>
+<script type="text/javascript" src="easyclip.js"></script>
 <script type="text/javascript" src="../clip.js"></script>
 <script type="text/javascript">
 // _EasyClip
@@ -40,6 +39,13 @@ function onInputFileLoadImage( name, image ){
 	}
 	clip.setMatrix( 'a', array );
 
+	// 色調補正を実行した値をクリア
+	toneBrightness = 0;
+	toneContrast   = 0;
+	toneHue        = 0;
+	toneSaturation = 0;
+	toneValue      = 0;
+
 	// スライダーの初期化
 	rangeBrightness.value( 0 );
 	inputBrightness.value( 0 );
@@ -53,6 +59,7 @@ function onInputFileLoadImage( name, image ){
 	inputValue     .value( 0 );
 
 	// スライダーの表示
+	document.getElementById( "text0" ).style.display = "none";
 	document.getElementById( "control0" ).style.display = "block";
 }
 
@@ -144,6 +151,81 @@ function onInputNumberChange( element ){
 	}
 }
 
+// RGBからHSVへの変換
+function rgb2hsv( r, g, b ){
+	var h, s, v;
+
+	var MIN = g < r ? g : r;
+	if( b < MIN ){
+		MIN = b;
+	}
+
+	// Value（明度）：0.0～1.0
+	v = g > r ? g : r;
+	if( b > v ){
+		v = b;
+	}
+
+	// Saturation（彩度）：0.0～1.0
+	s = v - MIN;
+
+	// Hue（色相）：0.0～360.0
+	if( MIN == v ){
+		h = 0.0;
+	} else if( MIN == b ){
+		h = 60 * (g - r) / s + 60;
+	} else if( MIN == r ){
+		h = 60 * (b - g) / s + 180;
+	} else {
+		h = 60 * (r - b) / s + 300;
+	}
+
+	clip.setValue( 'H', h );
+	clip.setValue( 'S', s );
+	clip.setValue( 'V', v );
+}
+
+// HSVからRGBへの変換
+function hsv2rgb( h, s, v ){
+	var r, g, b;
+
+	if( v < 0.0 ){ v = 0.0; } else if( v > 1.0 ){ v = 1.0; }
+	if( s < 0.0 ){ s = 0.0; } else if( s > v   ){ s = v  ; }
+
+	var MIN = v - s;
+
+	if( h < 60 ){
+		r = v;
+		g = v + (h - 60) / 60 * s;
+		b = MIN;
+	} else if( h < 120 ){
+		r = v - (h - 60) / 60 * s;
+		g = v;
+		b = MIN;
+	} else if( h < 180 ){
+		r = MIN;
+		g = v;
+		b = v + (h - 180) / 60 * s;
+	} else if( h < 240 ){
+		r = MIN;
+		g = v - (h - 180) / 60 * s;
+		b = v;
+	} else if( h < 300 ){
+		r = v + (h - 300) / 60 * s;
+		g = MIN;
+		b = v;
+	} else {
+		r = v;
+		g = MIN;
+		b = v - (h - 300) / 60 * s;
+	}
+
+	clip.setValue( 'R', r );
+	clip.setValue( 'G', g );
+	clip.setValue( 'B', b );
+}
+
+// 色調補正を実行
 var toneBrightness = 0;
 var toneContrast   = 0;
 var toneHue        = 0;
@@ -169,20 +251,17 @@ function tone(){
 	clip.procLine( "@h = row @@0" );
 
 	// 明るさ・コントラスト
-	clip.setValue( '1', toneBrightness );
-	clip.setValue( '2', 1.0 + toneContrast / 100 );
+	var brightness = toneBrightness;
+	var contrast   = 1.0 + toneContrast / 100;
+	brightness += 128 * (1.0 - contrast); // 明るさ補正
+	clip.setValue( '1', brightness );
+	clip.setValue( '2', contrast   );
+	var table = new Array( 256 );
+	for( var i = 0; i < 256; i++ ){ // テーブル作成
+		table[i] = contrast * i + brightness; // 積和演算
+	}
+	clip.setVector( 'T', table );
 	clip.procScript( [
-		"# 明るさ補正",
-		"$ADD        @1,(128 * (1.0 - @2))",
-
-		"# テーブル作成",
-		"$SET_Z      @i",
-		"$LOOPSTART  # @i",
-		"# 積和演算",
-		"$MUL_A      @@T @i,@2,@i",
-		"$ADD        @@T @i,@1",
-		"$LOOPEND_I  @i,256",
-
 		"$SET_Z      @y",
 		"$LOOPSTART  # @y",
 		"$SET_Z      @x",
@@ -209,32 +288,7 @@ function tone(){
 		"$DIV_A      @R,col_getr @C,255",
 		"$DIV_A      @G,col_getg @C,255",
 		"$DIV_A      @B,col_getb @C,255",
-
-		"$CND        @M,(@G < @R),@G,@R",
-		"if @B < @M",
-		"    $SET @M,@B",
-		"endif",
-
-		"# Value（明度）：0.0～1.0",
-		"$CND        @V,(@G > @R),@G,@R",
-		"if @B > @V",
-		"    $SET @V,@B",
-		"endif",
-
-		"# Saturation（彩度）：0.0～1.0",
-		"$SUB_A      @S,@V,@M",
-
-		"# Hue（色相）：0.0～360.0",
-		"if @M == @V",
-		"    $SET_Z      @H",
-		"elif @M == @B",
-		"    $SET        @H,{60 * (@G - @R) / @S + 60}",
-		"elif @M == @R",
-		"    $SET        @H,{60 * (@B - @G) / @S + 180}",
-		"else",
-		"    $SET        @H,{60 * (@R - @B) / @S + 300}",
-		"endif",
-
+		':javascript ["rgb2hsv(] @R [",] @G [",] @B [")]',
 		"$MOD_A      @@H @y @x,(@H + 360),360",
 		"$SET        @@S @y @x,@S",
 		"$SET        @@V @y @x,@V",
@@ -267,35 +321,7 @@ function tone(){
 		"$MOD_A      @H,(@@H @y @x + 360),360",
 		"$SETS       @V,@@V @y @x,0.0,1.0",
 		"$SETS       @S,@@S @y @x,0.0,@V",
-
-		"$SUB_A      @M,@V,@S",
-
-		"if @H < 60",
-		"    $SET        @R,@V",
-		"    $SET        @G,{@V + (@H - 60) / 60 * @S}",
-		"    $SET        @B,@M",
-		"elif @H < 120",
-		"    $SET        @R,{@V - (@H - 60) / 60 * @S}",
-		"    $SET        @G,@V",
-		"    $SET        @B,@M",
-		"elif @H < 180",
-		"    $SET        @R,@M",
-		"    $SET        @G,@V",
-		"    $SET        @B,{@V + (@H - 180) / 60 * @S}",
-		"elif @H < 240",
-		"    $SET        @R,@M",
-		"    $SET        @G,{@V - (@H - 180) / 60 * @S}",
-		"    $SET        @B,@V",
-		"elif @H < 300",
-		"    $SET        @R,{@V + (@H - 300) / 60 * @S}",
-		"    $SET        @G,@M",
-		"    $SET        @B,@V",
-		"else",
-		"    $SET        @R,@V",
-		"    $SET        @G,@M",
-		"    $SET        @B,{@V - (@H - 300) / 60 * @S}",
-		"endif",
-
+		':javascript ["hsv2rgb(] @H [",] @S [",] @V [")]',
 		"$MKCOLOR    @@0 @y @x,(int (@R * 255)),(int (@G * 255)),(int (@B * 255))",
 		"$LOOPEND_I  @x,@w",
 		"$LOOPEND_I  @y,@h"
@@ -332,18 +358,83 @@ function main(){
 	inputSaturation = new _InputNumber( "input_saturation", -100, 100 );
 	rangeValue      = new _InputRange ( "range_value" );
 	inputValue      = new _InputNumber( "input_value", -100, 100 );
+
+	var i;
+	var h, s, v;
+	var r, g, b;
+	clip.newPalette();
+
+	// 色相
+	var MIN;
+	for( i = 0; i < 256; i++ ){
+		h = i / 256 * 360;
+		s = 1.0;
+		v = 1.0;
+		hsv2rgb( h, s, v );
+		r = clip.getValue( 'R' ).toFloat();
+		g = clip.getValue( 'G' ).toFloat();
+		b = clip.getValue( 'B' ).toFloat();
+		clip.setPaletteColor( i, (_INT( b * 255 ) << 16) + (_INT( g * 255 ) << 8) + _INT( r * 255 ) );
+	}
+	clip.createImage( [
+		":gworld 256 10",
+		"for @i = 0; @i < 256; @i++",
+		"    :gline @i 0 @i 49 @i",
+		"next"
+	], "hue", "image/png" );
+
+	// 彩度
+	for( i = 0; i < 256; i++ ){
+		r = 128 + _DIV( i, 2 );
+		g = 128 - _DIV( i, 2 );
+		b = 128 - _DIV( i, 2 );
+		clip.setPaletteColor( i, (b << 16) + (g << 8) + r );
+	}
+	clip.createImage( [
+		":gworld 256 10",
+		"for @i = 0; @i < 256; @i++",
+		"    :gline @i 0 @i 49 @i",
+		"next"
+	], "saturation", "image/png" );
+
+	// 明度
+	for( i = 0; i < 256; i++ ){
+		clip.setPaletteColor( i, (i << 16) + (i << 8) + i );
+	}
+	clip.createImage( [
+		":gworld 256 10",
+		"for @i = 0; @i < 256; @i++",
+		"    :gline @i 0 @i 49 @i",
+		"next"
+	], "value", "image/png" );
 }
 </script>
 <style type="text/css">
+.hr {
+	border:0;
+	margin:0;
+	height:8px;
+}
 table {
 	border-collapse:collapse;
 	border:0px;
 }
+.td0 {
+	padding-top:0;
+	padding-bottom:0;
+}
 </style>
 </head>
 <body onload="main()">
-<input type="file" id="file0"><br>
-<canvas id="canvas0" width="1" height="1"></canvas><br>
+
+<input type="file" id="file0">
+
+<hr class="hr">
+
+<div id="text0">画像ファイルを指定してください</div>
+
+<canvas id="canvas0" width="1" height="1"></canvas>
+
 <div id="control0" style="display:none">
 	<table>
 		<tr>
@@ -373,6 +464,15 @@ table {
 			</td>
 		</tr>
 		<tr>
+			<td class="td0">
+			</td>
+			<td class="td0">
+				<img id="hue" width="200">
+			</td>
+			<td class="td0">
+			</td>
+		</tr>
+		<tr>
 			<td>
 				色相<br>
 			</td>
@@ -386,6 +486,15 @@ table {
 			</td>
 		</tr>
 		<tr>
+			<td class="td0">
+			</td>
+			<td class="td0">
+				<img id="saturation" width="200">
+			</td>
+			<td class="td0">
+			</td>
+		</tr>
+		<tr>
 			<td>
 				彩度<br>
 			</td>
@@ -396,6 +505,15 @@ table {
 				<form action="javascript:onChangeInputSaturation()">
 					<input type="text" id="input_saturation" style="width:39px; height:24px" value="0">
 				</form>
+			</td>
+		</tr>
+		<tr>
+			<td class="td0">
+			</td>
+			<td class="td0">
+				<img id="value" width="200">
+			</td>
+			<td class="td0">
 			</td>
 		</tr>
 		<tr>
@@ -413,5 +531,6 @@ table {
 		</tr>
 	</table>
 </div>
+
 </body>
 </html>

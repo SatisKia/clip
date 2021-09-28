@@ -11,7 +11,7 @@ function _MeasureTime(){
 }
 
 _MeasureTime.prototype = {
-	run : function( func ){
+	exec : function( func ){
 		var startTime = (new Date()).getTime();
 		var ret = func();
 		var time = (new Date()).getTime() - startTime;
