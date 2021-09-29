@@ -13,14 +13,12 @@
 // _EasyClip
 var clip;
 
-// キャンバス
-var canvas;
-
 // ファイル選択
 var inputFile;
 function onInputFileLoadImage( name, image ){
 	var width  = image.width;
 	var height = image.height;
+	var canvas = clip.canvas();
 	canvas.setSize( width, height );
 	canvas.drawImage( image, width, height );
 	var data = canvas.imageData( width, height ).data;
@@ -327,6 +325,7 @@ function tone(){
 		"$LOOPEND_I  @y,@h"
 	] );
 
+	var canvas = clip.canvas();
 	var array = clip.getArray( '0', 2 );
 	var x, y;
 	for( y = 0; y < array.length; y++ ){
@@ -341,8 +340,7 @@ function main(){
 	clip = new _EasyClip();
 
 	// キャンバス
-	setCanvasEnv( new _CanvasEnv() );
-	canvas = new _Canvas( "canvas0" );
+	clip.setCanvas( "canvas0" );
 
 	// ファイル選択コントロール
 	inputFile = new _InputFile( "file0" );

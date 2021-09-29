@@ -60,7 +60,7 @@ CLIPエンジンをJavaScriptから簡単に実行する機能を提供します
 - _EasyClip（core/extras/_EasyClip.js）
 - _StringUtil（core/extras/_StringUtil.js）
 
-_EasyClipオブジェクトの使用サンプルとして、core/extras/test.html、core/extras/test2.html、core/extras/test3.htmlを置いています。
+_EasyClipオブジェクトの使用サンプルとして、core/extras/test.html、core/extras/test2.html、core/extras/test3.html、core/extras/test4.htmlを置いています。
 
 ### 変数・関数の上書き
 
@@ -225,7 +225,7 @@ var string = clip.getFractString( 'c', true ); // Mixed
 var string = clip.getMultiPrecString( 'a' );
 ```
 
-getValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
+getValue関数の戻り値は_Valueオブジェクト（core/math/_Value.js）なので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
 
 ### 配列の値を確認する
 
@@ -255,7 +255,7 @@ var string = "Ans = " + clip.getAnsMatrixString( 6 );
 var string = clip.getAnsMultiPrecString();
 ```
 
-getAnsValue関数の戻り値は_Valueオブジェクトなので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
+getAnsValue関数の戻り値は_Valueオブジェクト（core/math/_Value.js）なので、toFloat、real、imag、fractMinus、num、denom関数以外の関数も使えます。
 
 ### 各種設定
 
@@ -292,15 +292,15 @@ clip.setMode( mode, param1, param2 );
 
 | 丸めモード | 意味 |
 | --- | --- |
-| up | ゼロから離れるように丸める |
-| down | ゼロに近づくように丸める |
-| ceiling | 正の無限大に近づくように丸める |
-| floor | 負の無限大に近づくように丸める |
-| h_up | 四捨五入する |
-| h_down | 五捨六入する |
-| h_even | `param1`桁目の数値が奇数の場合はh_up、偶数の場合はh_down |
-| h_down2 | 五捨五超入する |
-| h_even2 | `param1`桁目の数値が奇数の場合はh_up、偶数の場合はh_down2 |
+| "up" | ゼロから離れるように丸める |
+| "down" | ゼロに近づくように丸める |
+| "ceiling" | 正の無限大に近づくように丸める |
+| "floor" | 負の無限大に近づくように丸める |
+| "h_up" | 四捨五入する |
+| "h_down" | 五捨六入する |
+| "h_even" | `param1`桁目の数値が奇数の場合は"h_up"、偶数の場合は"h_down" |
+| "h_down2" | 五捨五超入する |
+| "h_even2" | `param1`桁目の数値が奇数の場合は"h_up"、偶数の場合は"h_down2" |
 
 `param1`、`param2`は省略できます。
 
@@ -524,25 +524,25 @@ var string = clip.getArrayTokenString( param, array/*_Token*/, indent );
 
 printAnsMatrix関数のパラメータのparam、arrayをそのまま渡すことができます。
 
-- _EasyClipオブジェクト内に唯一存在する計算処理メイン・クラスである_Procオブジェクトを取得する
+- _EasyClipオブジェクト内に唯一存在する計算処理メイン・クラスである_Procオブジェクト（core/_Proc.js）を取得する
 
 ```javascript
 var proc = clip.proc();
 ```
 
-- _EasyClipオブジェクト内に唯一存在する計算パラメータ・クラスである_Paramオブジェクトを取得する
+- _EasyClipオブジェクト内に唯一存在する計算パラメータ・クラスである_Paramオブジェクト（core/_Param.js）を取得する
 
 ```javascript
 var param = clip.param();
 ```
 
-- _EasyClipオブジェクト内に唯一存在する_GWorldオブジェクトを取得する
+- _EasyClipオブジェクト内に唯一存在する_GWorldオブジェクト（core/_GWorld.js）を取得する
 
 ```javascript
 var gWorld = clip.gWorld();
 ```
 
-- CLIPエンジン内に唯一存在する_MultiPrecオブジェクトを取得する
+- CLIPエンジン内に唯一存在する_MultiPrecオブジェクト（core/mp/_MultiPrec.js）を取得する
 
 ```javascript
 var mp = procMultiPrec();

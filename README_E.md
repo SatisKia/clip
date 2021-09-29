@@ -58,7 +58,7 @@ It contains the following objects:
 - _EasyClip (core/extras/_EasyClip.js)
 - _StringUtil (core/extras/_StringUtil.js)
 
-_EasyClip object usage sample core/extras/test.html, core/extras/test2.html, and core/extras/test3.html are placed.
+_EasyClip object usage sample core/extras/test.html, core/extras/test2.html, core/extras/test3.html, and core/extras/test4.html are placed.
 
 ### Overwriting variables / functions
 
@@ -223,7 +223,7 @@ var string = clip.getFractString( 'c', true ); // Mixed
 var string = clip.getMultiPrecString( 'a' );
 ```
 
-Since the return value of the getValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
+Since the return value of the getValue function is a _Value object (core/math/_Value.js), you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
 
 ### Check the values ​​in the array
 
@@ -253,7 +253,7 @@ var string = "Ans = " + clip.getAnsMatrixString( 6 );
 var string = clip.getAnsMultiPrecString();
 ```
 
-Since the return value of the getAnsValue function is a _Value object, you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
+Since the return value of the getAnsValue function is a _Value object (core/math/_Value.js), you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
 
 ### various settings
 
@@ -290,15 +290,15 @@ clip.setMode( mode, param1, param2 );
 
 | Rounding mode | Meaning |
 | --- | --- |
-| up | Round away from zero |
-| down | Round to near zero |
-| ceiling | Round to approach positive infinity |
-| floor | Round to approach negative infinity |
-| h_up | round up on 5 and round down on 4 |
-| h_down | round up on 6 and round down on 5 |
-| h_even | If the number in the `param1` digit is odd, h_up is processed, and if it is even, h_down is processed. |
-| h_down2 | banker's rounding |
-| h_even2 | If the number in the `param1` digit is odd, h_up is processed, and if it is even, h_down2 is processed. |
+| "up" | Round away from zero |
+| "down" | Round to near zero |
+| "ceiling" | Round to approach positive infinity |
+| "floor" | Round to approach negative infinity |
+| "h_up" | round up on 5 and round down on 4 |
+| "h_down" | round up on 6 and round down on 5 |
+| "h_even" | If the number in the `param1` digit is odd, "h_up" is processed, and if it is even, "h_down" is processed. |
+| "h_down2" | banker's rounding |
+| "h_even2" | If the number in the `param1` digit is odd, "h_up" is processed, and if it is even, "h_down2" is processed. |
 
 `param1` and `param1` can be omitted.
 
@@ -522,25 +522,25 @@ var string = clip.getArrayTokenString( param, array/*_Token*/, indent );
 
 You can pass the parameters param and array of the printAnsMatrix function as they are.
 
-- Get the _Proc object, which is the only computational main class that exists in the _EasyClip object.
+- Get the _Proc object (core/_Proc.js), which is the only computational main class that exists in the _EasyClip object.
 
 ```javascript
 var proc = clip.proc();
 ```
 
-- Get the _Param object, which is the only calculated parameter class that exists in the _EasyClip object.
+- Get the _Param object (core/_Param.js), which is the only calculated parameter class that exists in the _EasyClip object.
 
 ```javascript
 var param = clip.param();
 ```
 
-- Get the only _GWorld object that exists inside the _EasyClip object.
+- Get the only _GWorld object (core/_GWorld.js) that exists inside the _EasyClip object.
 
 ```javascript
 var gWorld = clip.gWorld();
 ```
 
-- Get the only _MultiPrec object that exists in the CLIP engine.
+- Get the only _MultiPrec object (core/mp/_MultiPrec.js) that exists in the CLIP engine.
 
 ```javascript
 var mp = procMultiPrec();

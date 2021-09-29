@@ -959,6 +959,7 @@ _EasyClip.prototype = {
 		return this._canvas;
 	},
 	createImage : function( script , id, type, encoderOptions ){
+		var saveCanvas = this._canvas;
 		var saveFunc = window.doCommandGWorld;
 		window.doCommandGWorld = function( width, height ){
 			curClip().createCanvas( width, height );
@@ -976,6 +977,7 @@ _EasyClip.prototype = {
 				img.src = canvas.element().toDataURL( type, encoderOptions );
 			}
 		}
+		this._canvas = saveCanvas;
 		return ret;
 	}
 };
