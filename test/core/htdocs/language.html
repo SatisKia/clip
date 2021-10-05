@@ -426,6 +426,18 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dl>
 <dd><i>w</i>または<i>h</i>に<span class="pink">0</span>または負の値を指定すると、オフスクリーンが消去される。<br>
 </dl>
+<span class="pink">:gworld24 </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>RGBカラーオフスクリーンの作成<br></dl>
+<dl>
+<dd><i>w</i>または<i>h</i>に<span class="pink">0</span>または負の値を指定すると、オフスクリーンが消去される。<br>
+</dl>
+<dl>
+<dd>グラフィックス系、プロット系コマンドの<i>col</i>指定がRGBカラー値の指定になる。<br>
+<dd><span class="pink">:gcolor</span>コマンドの引数は1つのみとなる。<br>
+<dd><span class="pink">:gput24</span>コマンドは<span class="pink">:gput</span>コマンドと同じ機能になる。<br>
+<dd><span class="pink">:gget24</span>コマンドは<span class="pink">:gget</span>コマンドと同じ機能になる。<br>
+<dd><span class="pink">gcolor</span>関数は現在のRGBカラー値を返す。引数は無しになる。<br>
+<dd><span class="pink">gcolor24</span>関数は<span class="pink">gcolor</span>関数と同じ機能になる。<br>
+</dl>
 <span class="pink">:gclear </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>オフスクリーンのクリア<br></dl>
 <dl>
 <dd><i>col</i>が省略されると、0でクリアされる。<br>
@@ -445,6 +457,12 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dl><dd>テキスト描画<br></dl>
 <dl>
 <dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向右側が現在点に設定される。<br>
+</dl>
+<span class="pink">:gtextr &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:gtextrl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>右寄せテキスト描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>に設定される。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向左側が現在点に設定される。<br>
 </dl>
 <span class="pink">:gline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ライン描画<br></dl>
 <dl>
@@ -488,6 +506,12 @@ D) 単項演算子は、括弧<span class="pink">[]</span>で囲んで記述す�
 <dl><dd>テキスト描画<br></dl>
 <dl>
 <dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向右側が現在点に設定される。<br>
+</dl>
+<span class="pink">:wtextr &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:wtextrl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>右寄せテキスト描画<br></dl>
+<dl>
+<dd><i>col</i>が指定されると、現在色インデックスが<i>col</i>になる。<i>x</i>と<i>y</i>が指定されていないと、現在点が使用される。描画後、テキストのX方向左側が現在点に設定される。<br>
 </dl>
 <span class="pink">:wline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>ライン描画<br></dl>
 <dl>

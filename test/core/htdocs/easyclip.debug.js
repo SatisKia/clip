@@ -782,7 +782,13 @@ _EasyClip.prototype = {
 	commandGWorld : function( width, height ){
 		this._setEnv();
 		doCommandGWorld( width, height );
-		procGWorld().create( width, height, true );
+		procGWorld().create( width, height, true, false );
+		return this;
+	},
+	commandGWorld24 : function( width, height ){
+		this._setEnv();
+		doCommandGWorld24( width, height );
+		procGWorld().create( width, height, true, true );
 		return this;
 	},
 	commandWindow : function( left, bottom, right, top ){
@@ -952,7 +958,7 @@ _EasyClip.prototype = {
 			yy = y * offset;
 			sy = y * scale;
 			for( x = 0; x < width; x++ ){
-				this._canvas.setColorBGR( this._palette[image[yy + x]] );
+				this._canvas.setColorBGR( gWorld._rgbFlag ? _RGB2BGR( image[yy + x] ) : this._palette[image[yy + x]] );
 				this._canvas.fill( x * scale, sy, scale, scale );
 			}
 		}
@@ -961,11 +967,16 @@ _EasyClip.prototype = {
 	createImage : function( script , id, type, encoderOptions ){
 		var saveCanvas = this._canvas;
 		var saveFunc = window.doCommandGWorld;
+		var saveFunc24 = window.doCommandGWorld24;
 		window.doCommandGWorld = function( width, height ){
+			curClip().createCanvas( width, height );
+		};
+		window.doCommandGWorld24 = function( width, height ){
 			curClip().createCanvas( width, height );
 		};
 		var ret = this.procScript( script );
 		window.doCommandGWorld = saveFunc;
+		window.doCommandGWorld24 = saveFunc24;
 		if( ret == _CLIP_PROC_END ){
 			var canvas = this.updateCanvas();
 			var img = document.getElementById( id );

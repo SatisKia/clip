@@ -4613,6 +4613,11 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_funcGColor : function( _this, param, code, token, value, seFlag ){
+		if( procGWorld()._rgbFlag ){
+			value.matAss( procGWorld()._color );
+			return _CLIP_NO_ERR;
+		}
+
 		var lock;
 		var tmpValue = new _ProcVal( _this, param );
 
@@ -8527,8 +8532,13 @@ _Proc.prototype = {
 		if( ret == _CLIP_NO_ERR ){
 			var width  = _INT( value[0].mat()._mat[0].toFloat() );
 			var height = _INT( value[1].mat()._mat[0].toFloat() );
-			doCommandGWorld( width, height );
-			procGWorld().create( width, height, true );
+			if( token == _CLIP_COMMAND_GWORLD ){
+				doCommandGWorld( width, height );
+				procGWorld().create( width, height, true, false );
+			} else {
+				doCommandGWorld24( width, height );
+				procGWorld().create( width, height, true, true );
+			}
 			return _CLIP_PROC_SUB_END;
 		}
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
@@ -8555,7 +8565,7 @@ _Proc.prototype = {
 		var value = new _ProcVal( _this, param );
 
 		if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-			procGWorld().clear( _UNSIGNED( value.mat()._mat[0].toFloat(), _UMAX_8 ) );
+			procGWorld().clear( _UNSIGNED( value.mat()._mat[0].toFloat(), procGWorld().umax() ) );
 		} else {
 			procGWorld().clear( 0 );
 		}
@@ -8565,9 +8575,15 @@ _Proc.prototype = {
 		var value = newProcValArray( 2, _this, param );
 
 		if( _this._const( param, code, token, value[0] ) == _CLIP_NO_ERR ){
-			var color = _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 );
-			if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
-				doCommandGColor( color, _UNSIGNED( value[1].mat()._mat[0].toFloat(), _UMAX_24 ) );
+			var color = _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() );
+			if( procGWorld()._rgbFlag ){
+				if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
+					return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
+				}
+			} else {
+				if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
+					doCommandGColor( color, _UNSIGNED( value[1].mat()._mat[0].toFloat(), _UMAX_24 ) );
+				}
 			}
 			procGWorld().setColor( color );
 			return _CLIP_PROC_SUB_END;
@@ -8583,7 +8599,7 @@ _Proc.prototype = {
 		}
 		if( ret == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[4] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().fill(
 				_INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() ),
@@ -8602,7 +8618,7 @@ _Proc.prototype = {
 		}
 		if( ret == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[4] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndFill(
 				value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(),
@@ -8651,12 +8667,12 @@ _Proc.prototype = {
 		ret = _this._const( param, code, token, value[0] );
 		if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().drawText( text.str(), _INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() ), false );
 		} else {
 			if( ret == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().drawTextTo( text.str(), false );
 		}
@@ -8676,12 +8692,12 @@ _Proc.prototype = {
 		ret = _this._const( param, code, token, value[0] );
 		if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().drawText( text.str(), _INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() ), true );
 		} else {
 			if( ret == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().drawTextTo( text.str(), true );
 		}
@@ -8701,12 +8717,12 @@ _Proc.prototype = {
 		ret = _this._const( param, code, token, value[0] );
 		if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndDrawText( text.str(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), false );
 		} else {
 			if( ret == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndDrawTextTo( text.str(), false );
 		}
@@ -8726,12 +8742,12 @@ _Proc.prototype = {
 		ret = _this._const( param, code, token, value[0] );
 		if( _this._const( param, code, token, value[1] ) == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndDrawText( text.str(), value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(), true );
 		} else {
 			if( ret == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndDrawTextTo( text.str(), true );
 		}
@@ -8773,7 +8789,7 @@ _Proc.prototype = {
 			ret = _this._const( param, code, token, value[2] );
 			if( _this._const( param, code, token, value[3] ) == _CLIP_NO_ERR ){
 				if( _this._const( param, code, token, value[4] ) == _CLIP_NO_ERR ){
-					procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), _UMAX_8 ) );
+					procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 				}
 				procGWorld().line(
 					_INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() ),
@@ -8782,7 +8798,7 @@ _Proc.prototype = {
 				return _CLIP_PROC_SUB_END;
 			} else {
 				if( ret == _CLIP_NO_ERR ){
-					procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+					procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 				}
 				procGWorld().lineTo(
 					_INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() )
@@ -8803,7 +8819,7 @@ _Proc.prototype = {
 			ret = _this._const( param, code, token, value[2] );
 			if( _this._const( param, code, token, value[3] ) == _CLIP_NO_ERR ){
 				if( _this._const( param, code, token, value[4] ) == _CLIP_NO_ERR ){
-					procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), _UMAX_8 ) );
+					procGWorld().setColor( _UNSIGNED( value[4].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 				}
 				procGWorld().wndLine(
 					value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat(),
@@ -8812,7 +8828,7 @@ _Proc.prototype = {
 				return _CLIP_PROC_SUB_END;
 			} else {
 				if( ret == _CLIP_NO_ERR ){
-					procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+					procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 				}
 				procGWorld().wndLineTo(
 					value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat()
@@ -8850,7 +8866,7 @@ _Proc.prototype = {
 						arrayList[1] = x;
 						procGWorld().putColor(
 							x, y,
-							_UNSIGNED( param._array.val( _arrayIndex, arrayList, 2 ).toFloat(), _UMAX_8 )
+							_UNSIGNED( param._array.val( _arrayIndex, arrayList, 2 ).toFloat(), procGWorld().umax() )
 							);
 					}
 				}
@@ -8866,7 +8882,7 @@ _Proc.prototype = {
 				}
 				if( ret == _CLIP_NO_ERR ){
 					if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-						procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+						procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 					}
 					procGWorld().put( _INT( value[0].mat()._mat[0].toFloat() ), _INT( value[1].mat()._mat[0].toFloat() ) );
 					return _CLIP_PROC_SUB_END;
@@ -8876,6 +8892,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGPut24 : function( _this, param, code, token ){
+		if( procGWorld()._rgbFlag ){
+			return _this._commandGPut( _this, param, code, token );
+		}
+
 		var newCode;
 		var newToken;
 
@@ -8923,7 +8943,7 @@ _Proc.prototype = {
 		}
 		if( ret == _CLIP_NO_ERR ){
 			if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
-				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGWorld().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 			}
 			procGWorld().wndPut( value[0].mat()._mat[0].toFloat(), value[1].mat()._mat[0].toFloat() );
 			return _CLIP_PROC_SUB_END;
@@ -9003,6 +9023,10 @@ _Proc.prototype = {
 		return _this._retError( _CLIP_PROC_ERR_COMMAND_PARAM, code, token );
 	},
 	_commandGGet24 : function( _this, param, code, token ){
+		if( procGWorld()._rgbFlag ){
+			return _this._commandGGet( _this, param, code, token );
+		}
+
 		var newCode;
 		var newToken;
 
@@ -9234,7 +9258,7 @@ _Proc.prototype = {
 				case _GRAPH_MODE_RECT:
 					if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
 						// パラメータが3個指定されている...
-						procGraph().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+						procGraph().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 					} else {
 						// パラメータが2個指定されている...
 					}
@@ -9244,7 +9268,7 @@ _Proc.prototype = {
 					if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
 						if( _this._const( param, code, token, value[3] ) == _CLIP_NO_ERR ){
 							// パラメータが4個指定されている...
-							procGraph().setColor( _UNSIGNED( value[3].mat()._mat[0].toFloat(), _UMAX_8 ) );
+							procGraph().setColor( _UNSIGNED( value[3].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 						} else {
 							// パラメータが3個指定されている...
 						}
@@ -9256,7 +9280,7 @@ _Proc.prototype = {
 				}
 			} else {
 				// パラメータが1個指定されている...
-				procGraph().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGraph().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 
 				switch( procGraph().mode() ){
 				case _GRAPH_MODE_RECT:
@@ -9308,7 +9332,7 @@ _Proc.prototype = {
 				case _GRAPH_MODE_RECT:
 					if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
 						// パラメータが3個指定されている...
-						procGraph().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), _UMAX_8 ) );
+						procGraph().setColor( _UNSIGNED( value[2].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 					} else {
 						// パラメータが2個指定されている...
 					}
@@ -9318,7 +9342,7 @@ _Proc.prototype = {
 					if( _this._const( param, code, token, value[2] ) == _CLIP_NO_ERR ){
 						if( _this._const( param, code, token, value[3] ) == _CLIP_NO_ERR ){
 							// パラメータが4個指定されている...
-							procGraph().setColor( _UNSIGNED( value[3].mat()._mat[0].toFloat(), _UMAX_8 ) );
+							procGraph().setColor( _UNSIGNED( value[3].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 						} else {
 							// パラメータが3個指定されている...
 						}
@@ -9330,7 +9354,7 @@ _Proc.prototype = {
 				}
 			} else {
 				// パラメータが1個指定されている...
-				procGraph().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), _UMAX_8 ) );
+				procGraph().setColor( _UNSIGNED( value[0].mat()._mat[0].toFloat(), procGWorld().umax() ) );
 
 				switch( procGraph().mode() ){
 				case _GRAPH_MODE_RECT:
@@ -10213,6 +10237,7 @@ var _procSubCommand = [
 	_Proc.prototype._commandScan,
 
 	_Proc.prototype._commandGWorld,
+	_Proc.prototype._commandGWorld,
 	_Proc.prototype._commandGClear,
 	_Proc.prototype._commandGColor,
 	_Proc.prototype._commandGFill,
@@ -10397,6 +10422,7 @@ function defProcFunction(){
 	if( window.doCommandPrint == undefined ) window.doCommandPrint = function( topPrint, flag ){};
 	if( window.doCommandScan == undefined ) window.doCommandScan = function( topScan, proc, param ){};
 	if( window.doCommandGWorld == undefined ) window.doCommandGWorld = function( width, height ){};
+	if( window.doCommandGWorld24 == undefined ) window.doCommandGWorld24 = function( width, height ){};
 	if( window.doCommandWindow == undefined ) window.doCommandWindow = function( left, bottom, right, top ){};
 	if( window.doCommandGColor == undefined ) window.doCommandGColor = function( index, rgb ){};
 	if( window.doCommandGPut24Begin == undefined ) window.doCommandGPut24Begin = function(){};

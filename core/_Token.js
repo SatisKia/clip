@@ -251,6 +251,7 @@ var _tokenCommand = [
 	"sprint",
 	"scan",
 	"gworld",
+	"gworld24",
 	"gclear",
 	"gcolor",
 	"gfill",

@@ -161,6 +161,9 @@ window.doCommandScan = function( topScan, proc, param ){
 window.doCommandGWorld = function( width, height ){
     // コマンド:gworld実行時に呼ばれる関数
 };
+window.doCommandGWorld24 = function( width, height ){
+    // コマンド:gworld24実行時に呼ばれる関数
+};
 ```
 
 上書き関数の内部で_EasyClipオブジェクト操作する場合、次のように_EasyClipオブジェクトを取得します。
@@ -398,6 +401,10 @@ clip.commandGWorld( width, height );
 ```
 
 ```javascript
+clip.commandGWorld24( width, height );
+```
+
+```javascript
 clip.commandWindow( left, bottom, right, top );
 ```
 
@@ -487,7 +494,7 @@ var canvas = clip.canvas(); // _Canvasオブジェクト
 var ret = clip.createImage( script/*Array*/, id, type, encoderOptions ); // 正常終了時、_CLIP_PROC_ENDが返る
 ```
 
-実行する`script`内に:gworldコマンドを含める必要があります。
+実行する`script`内に:gworld、:gworld24コマンドを含める必要があります。
 
 `id`はimg要素のid
 

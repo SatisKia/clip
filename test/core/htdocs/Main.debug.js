@@ -1000,6 +1000,19 @@ function onInputFileLoadImage( name, image ){
   }
   con.println( "" + width + "x" + height );
   con.setBold( false );
+  if( procGWorld()._rgbFlag ){
+   var x, y, r, g, b;
+   var i = 0;
+   for( y = 0; y < height; y++ ){
+    for( x = 0; x < width; x++ ){
+     r = data[i++];
+     g = data[i++];
+     b = data[i++];
+     i++;
+     procGWorld().putColor( x, y, (r << 16) + (g << 8) + b );
+    }
+   }
+  }
  }
 }
 function doCommandGGet24Begin( w , h ){
@@ -2184,21 +2197,24 @@ function doCommandGWorld( width, height ){
  canvas.setStrokeWidth( canvasScale );
  canvasSetSize( width * canvasScale, height * canvasScale );
 }
+function doCommandGWorld24( width, height ){
+ doCommandGWorld( width, height );
+}
 function gWorldClear( gWorld, color ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
  }
  canvasClear();
- canvasSetColor( COLOR_WIN[color] );
+ canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( color ) : COLOR_WIN[color] );
  canvasFill( 0, 0, gWorld._width, gWorld._height );
- canvasSetColor( COLOR_WIN[gWorld._color] );
+ canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
 }
 function gWorldSetColor( gWorld, color ){
  if( lockGUpdate ){
   return;
  }
- canvasSetColor( COLOR_WIN[color] );
+ canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( color ) : COLOR_WIN[color] );
 }
 function gWorldPutColor( gWorld, x, y, color ){
  if( lockGUpdate ){
@@ -2206,9 +2222,9 @@ function gWorldPutColor( gWorld, x, y, color ){
   return;
  }
  if( topProc._gUpdateFlag ){
-  canvasSetColor( COLOR_WIN[color] );
+  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( color ) : COLOR_WIN[color] );
   canvasPut( x, y );
-  canvasSetColor( COLOR_WIN[gWorld._color] );
+  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
  }
 }
 function gWorldPut( gWorld, x, y ){
@@ -2267,11 +2283,11 @@ function gUpdate( gWorld ){
   yy = y * offset;
   sy = y * canvasScale;
   for( x = 0; x < width; x++ ){
-   canvasSetColor( COLOR_WIN[image[yy + x]] );
+   canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( image[yy + x] ) : COLOR_WIN[image[yy + x]] );
    canvas.fill( x * canvasScale, sy, canvasScale, canvasScale );
   }
  }
- canvasSetColor( COLOR_WIN[gWorld._color] );
+ canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
 }
 function doCommandGUpdate( gWorld ){
  if( lockGUpdate ){

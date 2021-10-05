@@ -77,6 +77,7 @@ function _GWorld(){
 	this._width      = 0;		// イメージの論理幅
 	this._height     = 0;		// イメージの高さ
 	this._createFlag = false;	// イメージが新規作成か登録されたかのフラグ
+	this._rgbFlag    = false;	// RGBカラーモードかどうかのフラグ
 
 	// ウィンドウ情報
 	this._offsetX = 0.0;	// Ｘ方向オフセット
@@ -111,7 +112,7 @@ function _GWorld(){
 _GWorld.prototype = {
 
 	// イメージを確保する
-	create : function( width, height, initWindow ){
+	create : function( width, height, initWindow, rgbFlag ){
 		// イメージを開放する
 		this._dispose();
 
@@ -125,6 +126,7 @@ _GWorld.prototype = {
 		this._width      = width;
 		this._height     = height;
 		this._createFlag = true;
+		this._rgbFlag    = (rgbFlag == undefined) ? false : rgbFlag;
 
 		// ウィンドウ情報
 		if( initWindow ){
@@ -142,7 +144,7 @@ _GWorld.prototype = {
 	},
 
 	// イメージを登録する
-	open : function( image, offset, width, height, initWindow ){
+	open : function( image, offset, width, height, initWindow, rgbFlag ){
 		// イメージを開放する
 		this._dispose();
 
@@ -156,6 +158,7 @@ _GWorld.prototype = {
 		this._width      = width;
 		this._height     = height;
 		this._createFlag = false;
+		this._rgbFlag    = (rgbFlag == undefined) ? false : rgbFlag;
 
 		// ウィンドウ情報
 		if( initWindow ){
@@ -318,7 +321,16 @@ _GWorld.prototype = {
 		if( (x < 0) || (x >= _INT( this._width )) || (y < 0) || (y >= _INT( this._height )) ){
 			return false;
 		}
-		var color = 255 - this._image[y * this._offset + x];
+		var color;
+		if( this._rgbFlag ){
+			var rgb = this._image[y * this._offset + x];
+			var r = (rgb & 0xFF0000) >> 16;
+			var g = (rgb & 0x00FF00) >> 8;
+			var b =  rgb & 0x0000FF;
+			color = ((255 - r) << 16) + ((255 - g) << 8) + (255 - b);
+		} else {
+			color = 255 - this._image[y * this._offset + x];
+		}
 		this._image[y * this._offset + x] = color;
 		if( this._gWorldPut ){
 			gWorldPutColor( this, x, y, color );
@@ -750,7 +762,11 @@ _GWorld.prototype = {
 //	},
 //	height : function(){
 //		return this._height;
-//	}
+//	},
+
+	umax : function(){
+		return this._rgbFlag ? _UMAX_24 : _UMAX_8;
+	}
 
 };
 

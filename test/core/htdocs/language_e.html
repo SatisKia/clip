@@ -416,9 +416,21 @@ The comment start character is identified before <span class="pink">[]</span> or
 <hr class="hr">
 <span class="pink">:scan </span><span class="blue">[[</span><span class="pink">&quot;</span><i>prompt</i><span class="blue">]</span><span class="pink"> @</span><i>index</i><span class="blue">|</span><span class="pink">@@</span><i>index</i><span class="blue">]...</span><br><dl><dd>Enter variable value / character string<br></dl>
 <hr class="hr_border">
-<span class="pink">:gworld </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>Secure off-screen<br></dl>
+<span class="pink">:gworld </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>Create off-screen<br></dl>
 <dl>
 <dd>If <span class="pink">0</span> or negative value is specified for <i>w</i> or <i>h</i>, off-screen is erased.<br>
+</dl>
+<span class="pink">:gworld24 </span><i>w</i><span class="pink"> </span><i>h</i><br><dl><dd>Create RGB color off-screen<br></dl>
+<dl>
+<dd>If <span class="pink">0</span> or negative value is specified for <i>w</i> or <i>h</i>, off-screen is erased.<br>
+</dl>
+<dl>
+<dd>The <i>col</i> specification of the graphics system and plot system commands becomes the RGB color value specification.<br>
+<dd>The <span class="pink">:gcolor</span> command has only one argument.<br>
+<dd>The <span class="pink">:gput24</span> command has the same function as the <span class="pink">:gput</span> command.<br>
+<dd>The <span class="pink">:gget24</span> command has the same function as the <span class="pink">:gget</span> command.<br>
+<dd>The <span class="pink">gcolor</span> function returns the current RGB color value. There are no arguments.<br>
+<dd>The <span class="pink">gcolor24</span> function has the same function as the <span class="pink">gcolor</span> function.<br>
 </dl>
 <span class="pink">:gclear </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Clear off-screen<br></dl>
 <dl>
@@ -439,6 +451,12 @@ The comment start character is identified before <span class="pink">[]</span> or
 <dl><dd>Text drawing<br></dl>
 <dl>
 <dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the right side of the text in the X direction is set as the current point.<br>
+</dl>
+<span class="pink">:gtextr &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:gtextrl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>Right-justified text drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the left side of the text in the X direction is set as the current point.<br>
 </dl>
 <span class="pink">:gline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Line drawing<br></dl>
 <dl>
@@ -464,7 +482,7 @@ The comment start character is identified before <span class="pink">[]</span> or
 <hr class="hr_border">
 <span class="pink">:window </span><i>left</i><span class="pink"> </span><i>bottom</i><span class="pink"> </span><i>right</i><span class="pink"> </span><i>top</i><br><dl><dd>Set the window<br></dl>
 <dl>
-<dd>The logical coordinates corresponding to the lower-left coordinates of the off-screen image secured by the command <span class="pink">:gworld</span> are designated as <i>left</i> and <i>bottom</i>, and the logical coordinates corresponding to the upper-right coordinates as <i>right</i> and <i>top</i>. It does not matter whether <i>left</i> and <i>right</i>, or <i>bottom</i> and <i>top</i> are large or small. For example:<br>
+<dd>The logical coordinates corresponding to the lower-left coordinates of the off-screen image created by the command <span class="pink">:gworld</span> are designated as <i>left</i> and <i>bottom</i>, and the logical coordinates corresponding to the upper-right coordinates as <i>right</i> and <i>top</i>. It does not matter whether <i>left</i> and <i>right</i>, or <i>bottom</i> and <i>top</i> are large or small. For example:<br>
 <dl>
 <dd><span class="pink">:window \-3 \-2 10 8</span><br>
 </dl>
@@ -482,6 +500,12 @@ The comment start character is identified before <span class="pink">[]</span> or
 <dl><dd>Text drawing<br></dl>
 <dl>
 <dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the right side of the text in the X direction is set as the current point.<br>
+</dl>
+<span class="pink">:wtextr &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<span class="pink">:wtextrl &quot;</span><i>str</i><span class="pink"> </span><span class="blue">[</span><i>x</i><span class="pink"> </span><i>y</i><span class="blue">]</span><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br>
+<dl><dd>Right-justified text drawing<br></dl>
+<dl>
+<dd>When <i>col</i> is specified, the current color index is set to <i>col</i>. If <i>x</i> and <i>y</i> are not specified, the current point is used. After drawing, the left side of the text in the X direction is set as the current point.<br>
 </dl>
 <span class="pink">:wline </span><span class="blue">[</span><i>x1</i><span class="pink"> </span><i>y1</i><span class="blue">]</span><span class="pink"> </span><i>x2</i><span class="pink"> </span><i>y2</i><span class="pink"> </span><span class="blue">[</span><i>col</i><span class="blue">]</span><br><dl><dd>Line drawing<br></dl>
 <dl>

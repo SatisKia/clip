@@ -159,6 +159,9 @@ window.doCommandScan = function( topScan, proc, param ){
 window.doCommandGWorld = function( width, height ){
     // Function called when command :gworld is executed
 };
+window.doCommandGWorld24 = function( width, height ){
+    // Function called when command :gworld24 is executed
+};
 ```
 
 When operating the _EasyClip object inside the overwrite function, get the _EasyClip object as follows.
@@ -396,6 +399,10 @@ clip.commandGWorld( width, height );
 ```
 
 ```javascript
+clip.commandGWorld24( width, height );
+```
+
+```javascript
 clip.commandWindow( left, bottom, right, top );
 ```
 
@@ -485,7 +492,7 @@ var canvas = clip.canvas(); // _Canvas object
 vvar ret = clip.createImage( script/*Array*/, id, type, encoderOptions ); // Returns _CLIP_PROC_END upon normal completion
 ```
 
-The command :gworld must be included in `script` to be executed.
+The command :gworld or :gworld24 must be included in `script` to be executed.
 
 `id` is the id of the img element
 
