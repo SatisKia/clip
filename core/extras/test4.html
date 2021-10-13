@@ -153,6 +153,10 @@ function onInputNumberChange( element ){
 function rgb2hsv( r, g, b ){
 	var h, s, v;
 
+	r /= 255;
+	g /= 255;
+	b /= 255;
+
 	var MIN = g < r ? g : r;
 	if( b < MIN ){
 		MIN = b;
@@ -178,7 +182,7 @@ function rgb2hsv( r, g, b ){
 		h = 60 * (r - b) / s + 300;
 	}
 
-	clip.setValue( 'H', h );
+	clip.setValue( 'H', (h + 360) % 360 );
 	clip.setValue( 'S', s );
 	clip.setValue( 'V', v );
 }
@@ -187,6 +191,7 @@ function rgb2hsv( r, g, b ){
 function hsv2rgb( h, s, v ){
 	var r, g, b;
 
+	h = (h + 360) % 360;
 	if( v < 0.0 ){ v = 0.0; } else if( v > 1.0 ){ v = 1.0; }
 	if( s < 0.0 ){ s = 0.0; } else if( s > v   ){ s = v  ; }
 
@@ -283,11 +288,8 @@ function tone(){
 		"$SET_Z      @x",
 		"$LOOPSTART  # @x",
 		"$SET        @C,@@0 @y @x",
-		"$DIV_A      @R,col_getr @C,255",
-		"$DIV_A      @G,col_getg @C,255",
-		"$DIV_A      @B,col_getb @C,255",
-		':javascript ["rgb2hsv(] @R [",] @G [",] @B [")]',
-		"$MOD_A      @@H @y @x,(@H + 360),360",
+		':javascript ["rgb2hsv(] (col_getr @C) [",] (col_getg @C) [",] (col_getb @C) [")]',
+		"$SET        @@H @y @x,@H",
 		"$SET        @@S @y @x,@S",
 		"$SET        @@V @y @x,@V",
 		"$LOOPEND_I  @x,@w",
@@ -316,10 +318,7 @@ function tone(){
 		"$LOOPSTART  # @y",
 		"$SET_Z      @x",
 		"$LOOPSTART  # @x",
-		"$MOD_A      @H,(@@H @y @x + 360),360",
-		"$SETS       @V,@@V @y @x,0.0,1.0",
-		"$SETS       @S,@@S @y @x,0.0,@V",
-		':javascript ["hsv2rgb(] @H [",] @S [",] @V [")]',
+		':javascript ["hsv2rgb(] (@@H @y @x) [",] (@@S @y @x) [",] (@@V @y @x) [")]',
 		"$MKCOLOR    @@0 @y @x,(int (@R * 255)),(int (@G * 255)),(int (@B * 255))",
 		"$LOOPEND_I  @x,@w",
 		"$LOOPEND_I  @y,@h"
@@ -357,52 +356,34 @@ function main(){
 	rangeValue      = new _InputRange ( "range_value" );
 	inputValue      = new _InputNumber( "input_value", -100, 100 );
 
-	var i;
-	var h, s, v;
-	var r, g, b;
-	clip.newPalette();
-
 	// 色相
-	var MIN;
-	for( i = 0; i < 256; i++ ){
-		h = i / 256 * 360;
-		s = 1.0;
-		v = 1.0;
-		hsv2rgb( h, s, v );
-		r = clip.getValue( 'R' ).toFloat();
-		g = clip.getValue( 'G' ).toFloat();
-		b = clip.getValue( 'B' ).toFloat();
-		clip.setPaletteColor( i, (_INT( b * 255 ) << 16) + (_INT( g * 255 ) << 8) + _INT( r * 255 ) );
-	}
 	clip.createImage( [
-		":gworld 256 10",
+		":gworld24 256 10",
 		"for @i = 0; @i < 256; @i++",
-		"    :gline @i 0 @i 49 @i",
+		"    @H = @i / 256 * 360",
+		"    @S = 1.0",
+		"    @V = 1.0",
+		'    :javascript ["hsv2rgb(] @H [",] @S [",] @V [")]',
+		"    :gline @i 0 @i 49 (mkcolor (int (@R * 255)) (int (@G * 255)) (int (@B * 255)))",
 		"next"
 	], "hue", "image/png" );
 
 	// 彩度
-	for( i = 0; i < 256; i++ ){
-		r = 128 + _DIV( i, 2 );
-		g = 128 - _DIV( i, 2 );
-		b = 128 - _DIV( i, 2 );
-		clip.setPaletteColor( i, (b << 16) + (g << 8) + r );
-	}
 	clip.createImage( [
-		":gworld 256 10",
+		":gworld24 256 10",
 		"for @i = 0; @i < 256; @i++",
-		"    :gline @i 0 @i 49 @i",
+		"    @R = 128 + (int (@i / 2))",
+		"    @G = 128 - (int (@i / 2))",
+		"    @B = 128 - (int (@i / 2))",
+		"    :gline @i 0 @i 49 (mkcolor @R @G @B)",
 		"next"
 	], "saturation", "image/png" );
 
 	// 明度
-	for( i = 0; i < 256; i++ ){
-		clip.setPaletteColor( i, (i << 16) + (i << 8) + i );
-	}
 	clip.createImage( [
-		":gworld 256 10",
+		":gworld24 256 10",
 		"for @i = 0; @i < 256; @i++",
-		"    :gline @i 0 @i 49 @i",
+		"    :gline @i 0 @i 49 (mkcolor @i @i @i)",
 		"next"
 	], "value", "image/png" );
 }

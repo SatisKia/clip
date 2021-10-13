@@ -1015,7 +1015,7 @@ function onInputFileLoadImage( name, image ){
   }
  }
 }
-function doCommandGGet24Begin( w , h ){
+window.doCommandGGet24Begin = function( w , h ){
  var width = procGWorld()._width;
  var height = procGWorld()._height;
  if( (width > 0) && (height > 0) ){
@@ -1041,9 +1041,7 @@ function doCommandGGet24Begin( w , h ){
   return data2;
  }
  return null;
-}
-function doCommandGGet24End(){
-}
+};
 function __ProcError(){
  this._err = 0;
  this._num = 0;
@@ -1847,13 +1845,13 @@ function extFuncName( str ){
  }
  return "";
 }
-function getExtFuncDataDirect( func ){
+window.getExtFuncDataDirect = function( func ){
  if( (func.charAt( 0 ) == "!") && (func.length == 2) ){
   return makeExtFuncData( getFunc( func.charAt( 1 ) ), true );
  }
  return null;
-}
-function getExtFuncDataNameSpace( func ){
+};
+window.getExtFuncDataNameSpace = function( func ){
  for( var i = 0; i < extFuncFile.length; i++ ){
   if( extFuncName( extFuncFile[i] ).toLowerCase() == func.toLowerCase() ){
    if( i < extFuncData.length ){
@@ -1862,8 +1860,8 @@ function getExtFuncDataNameSpace( func ){
   }
  }
  return null;
-}
-function mainProc( parentProc, parentParam, func, funcParam, childProc, childParam ){
+};
+window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){
  var ret;
 try {
  ret = childProc.mainLoop( func, childParam, funcParam, parentParam );
@@ -1881,8 +1879,8 @@ try {
   resetProcLoopCount();
  }
  return ret;
-}
-function assertProc( num, func ){
+};
+window.assertProc = function( num, func ){
  con.newLine();
  if( (func != null) && (func.length > 0) ){
   con.print( func + ": " );
@@ -1894,7 +1892,7 @@ function assertProc( num, func ){
  if( englishFlag ) con.println( "Error " + intToString( _CLIP_ERR_ASSERT, 16, 4 ) + ": Failed to assert." );
  else con.println( "エラー(" + intToString( _CLIP_ERR_ASSERT, 16, 4 ) + "): アサートに失敗しました" );
  return retAssertProc;
-}
+};
 function getErrorString( err, num, func, token ){
  var string = new String();
  var error = getProcErrorDefString( err, token, topParam._calculator, englishFlag );
@@ -1911,7 +1909,7 @@ function getErrorString( err, num, func, token ){
  }
  return string;
 }
-function errorProc( err, num, func, token ){
+window.errorProc = function( err, num, func, token ){
  if( silentErr ){
   procError.add( err, num, func, token );
  } else {
@@ -1921,7 +1919,7 @@ function errorProc( err, num, func, token ){
    con.println( string );
   }
  }
-}
+};
 function codeString( code ){
  var string = new String();
  switch( code ){
@@ -1955,7 +1953,7 @@ function codeString( code ){
  }
  return string;
 }
-function printTrace( param, line, num, comment, skipFlag ){
+window.printTrace = function( param, line, num, comment, skipFlag ){
  var string = new String();
  if( param._funcName != null ){
   string += "" + param._funcName + ":";
@@ -2002,8 +2000,8 @@ function printTrace( param, line, num, comment, skipFlag ){
  if( (i > 0) || (comment != null) ){
   traceString += "\n";
  }
-}
-function printTest( param, line, num, comment ){
+};
+window.printTest = function( param, line, num, comment ){
  var string = new String();
  if( param._funcName != null ){
   string += "" + param._funcName + ":";
@@ -2049,7 +2047,7 @@ function printTest( param, line, num, comment ){
  if( (i > 0) || (comment != null) ){
   con.println();
  }
-}
+};
 function getArrayTokenString( param, array , indent, sp, br ){
  var i;
  var code;
@@ -2084,27 +2082,27 @@ function getArrayTokenString( param, array , indent, sp, br ){
 function printMatrix( param, array , indent ){
  con.println( getArrayTokenString( param, array, indent, "&nbsp;", consoleBreak() ) );
 }
-function printAnsComplex( real, imag ){
+window.printAnsComplex = function( real, imag ){
  con.newLine();
  con.setBold( true );
  con.println( real + imag );
  con.setBold( false );
-}
-function printAnsMultiPrec( str ){
+};
+window.printAnsMultiPrec = function( str ){
  con.newLine();
  con.setBold( true );
  con.setColor( "0000ff" );
  con.println( str );
  con.setColor();
  con.setBold( false );
-}
-function printAnsMatrix( param, array ){
+};
+window.printAnsMatrix = function( param, array ){
  con.newLine();
  con.setBold( true );
  printMatrix( param, array, 0 );
  con.setBold( false );
-}
-function printWarn( warn, num, func ){
+};
+window.printWarn = function( warn, num, func ){
  con.newLine();
  if( (func != null) && (func.length > 0) ){
   con.print( func + ": " );
@@ -2115,8 +2113,8 @@ function printWarn( warn, num, func ){
  }
  if( englishFlag ) con.println( "Warning: " + warn );
  else con.println( "警告: " + warn );
-}
-function printError( error, num, func ){
+};
+window.printError = function( error, num, func ){
  con.newLine();
  if( (func != null) && (func.length > 0) ){
   con.print( func + ": " );
@@ -2127,24 +2125,24 @@ function printError( error, num, func ){
  }
  if( englishFlag ) con.println( "Error: " + error );
  else con.println( "エラー: " + error );
-}
-function doFuncGColor( rgb ){
+};
+window.doFuncGColor = function( rgb ){
  return doFuncGColorBGR( rgb, COLOR_WIN );
-}
-function doFuncGColor24( index ){
+};
+window.doFuncGColor24 = function( index ){
  return _RGB2BGR( COLOR_WIN[index] );
-}
-function doFuncEval( parentProc, childProc, childParam, string, value ){
+};
+window.doFuncEval = function( parentProc, childProc, childParam, string, value ){
  var ret;
 try {
  ret = parentProc.doFuncEval( childProc, childParam, string, value );
 } catch( e ){ catchError( e ); }
  return ret;
-}
-function doCommandClear(){
+};
+window.doCommandClear = function(){
  con.clear();
-}
-function doCommandPrint( topPrint, flag ){
+};
+window.doCommandPrint = function( topPrint, flag ){
  con.setColor( "ff00ff" );
  var cur = topPrint;
  while( cur != null ){
@@ -2159,11 +2157,11 @@ function doCommandPrint( topPrint, flag ){
   con.println();
  }
  con.setColor();
-}
-function skipCommandLog(){
+};
+window.skipCommandLog = function(){
  return (traceLevel == 0);
-}
-function doCommandLog( topPrint ){
+};
+window.doCommandLog = function( topPrint ){
  var cur = topPrint;
  while( cur != null ){
   if( cur._string != null ){
@@ -2172,8 +2170,8 @@ function doCommandLog( topPrint ){
   cur = cur._next;
  }
  traceString += "\n";
-}
-function doCommandScan( topScan, proc, param ){
+};
+window.doCommandScan = function( topScan, proc, param ){
  var defString = new String();
  var newString = new String();
  var cur = topScan;
@@ -2186,8 +2184,8 @@ function doCommandScan( topScan, proc, param ){
   cur.setNewValue( newString, proc, param );
   cur = cur._next;
  }
-}
-function doCommandGWorld( width, height ){
+};
+window.doCommandGWorld = function( width, height ){
  if( (width < canvasMinSize) || (height < canvasMinSize) ){
   canvasScale = _CEIL( canvasMinSize / ((width < height) ? width : height) );
  } else {
@@ -2196,11 +2194,11 @@ function doCommandGWorld( width, height ){
  canvasMinScale = canvasScale;
  canvas.setStrokeWidth( canvasScale );
  canvasSetSize( width * canvasScale, height * canvasScale );
-}
-function doCommandGWorld24( width, height ){
+};
+window.doCommandGWorld24 = function( width, height ){
  doCommandGWorld( width, height );
-}
-function gWorldClear( gWorld, color ){
+};
+window.gWorldClear = function( gWorld, color ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
@@ -2209,14 +2207,14 @@ function gWorldClear( gWorld, color ){
  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( color ) : COLOR_WIN[color] );
  canvasFill( 0, 0, gWorld._width, gWorld._height );
  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
-}
-function gWorldSetColor( gWorld, color ){
+};
+window.gWorldSetColor = function( gWorld, color ){
  if( lockGUpdate ){
   return;
  }
  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( color ) : COLOR_WIN[color] );
-}
-function gWorldPutColor( gWorld, x, y, color ){
+};
+window.gWorldPutColor = function( gWorld, x, y, color ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
@@ -2226,8 +2224,8 @@ function gWorldPutColor( gWorld, x, y, color ){
   canvasPut( x, y );
   canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
  }
-}
-function gWorldPut( gWorld, x, y ){
+};
+window.gWorldPut = function( gWorld, x, y ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
@@ -2235,8 +2233,8 @@ function gWorldPut( gWorld, x, y ){
  if( topProc._gUpdateFlag ){
   canvasPut( x, y );
  }
-}
-function gWorldFill( gWorld, x, y, w, h ){
+};
+window.gWorldFill = function( gWorld, x, y, w, h ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
@@ -2244,8 +2242,8 @@ function gWorldFill( gWorld, x, y, w, h ){
  if( topProc._gUpdateFlag ){
   canvasFill( x, y, w, h );
  }
-}
-function gWorldLine( gWorld, x1, y1, x2, y2 ){
+};
+window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
@@ -2253,25 +2251,25 @@ function gWorldLine( gWorld, x1, y1, x2, y2 ){
  if( topProc._gUpdateFlag ){
   canvasLine( x1, y1, x2, y2 );
  }
-}
-function gWorldTextColor( gWorld, text, x, y, color, right ){
+};
+window.gWorldTextColor = function( gWorld, text, x, y, color, right ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
  }
-}
-function doCommandGColor( index, rgb ){
+};
+window.doCommandGColor = function( index, rgb ){
  COLOR_WIN[index] = _RGB2BGR( rgb );
  needGUpdate = true;
-}
-function doCommandGPut24( x, y, rgb ){
+};
+window.doCommandGPut24 = function( x, y, rgb ){
  canvas.setColorRGB( rgb );
  canvasPut( x, y );
-}
-function doCommandGPut24End(){
+};
+window.doCommandGPut24End = function(){
  canvasSetColor( COLOR_WIN[procGWorld()._color] );
  needGUpdate = false;
-}
+};
 function gUpdate( gWorld ){
  canvasClear();
  var image = gWorld._image;
@@ -2289,24 +2287,24 @@ function gUpdate( gWorld ){
  }
  canvasSetColor( gWorld._rgbFlag ? _RGB2BGR( gWorld._color ) : COLOR_WIN[gWorld._color] );
 }
-function doCommandGUpdate( gWorld ){
+window.doCommandGUpdate = function( gWorld ){
  if( lockGUpdate ){
   needGUpdate = true;
   return;
  }
  gUpdate( gWorld );
-}
-function doCommandPlot( parentProc, childProc, childParam, graph, start, end, step ){
+};
+window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){
 try {
  parentProc.doCommandPlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
-}
-function doCommandRePlot( parentProc, childProc, childParam, graph, start, end, step ){
+};
+window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){
 try {
  parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 } catch( e ){ catchError( e ); }
-}
-function doCommandUsage( topUsage ){
+};
+window.doCommandUsage = function( topUsage ){
  if( !addExtFuncList ){
   con.setColor( "ff00ff" );
  }
@@ -2324,8 +2322,8 @@ function doCommandUsage( topUsage ){
  if( !addExtFuncList ){
   con.setColor();
  }
-}
-function doCommandDumpVar( param, index ){
+};
+window.doCommandDumpVar = function( param, index ){
  var real = new _String();
  var imag = new _String();
  var label;
@@ -2341,8 +2339,8 @@ function doCommandDumpVar( param, index ){
  }
  traceString += string + "=" + real.str() + imag.str();
  traceString += "\n";
-}
-function doCommandDumpArray( param, index ){
+};
+window.doCommandDumpArray = function( param, index ){
  var array = new _Token();
  var label;
  var string = "";
@@ -2358,7 +2356,7 @@ function doCommandDumpArray( param, index ){
  string += " ";
  traceString += string + getArrayTokenString( param, array, string.length, " ", "\n" );
  traceString += "\n";
-}
+};
 function _commandLanguage( _this, param, code, token ){
  englishFlag = (commandName( token ) == "english") ? true : false;
  if( englishFlag ){
@@ -2722,11 +2720,11 @@ function _commandTrace( _this, param, code, token ){
 function onWriteFileEnd( fileEntry ){
  con.println( "<b>[" + fileEntry.fullPath + "]</b>" );
 }
-function onStartPlot(){
+window.onStartPlot = function(){
  setProcTraceFlag( false );
  silentErr = true;
-}
-function onEndPlot(){
+};
+window.onEndPlot = function(){
  setProcTraceFlag( traceLevel > 0 );
  silentErr = false;
  var err = new _Integer();
@@ -2738,13 +2736,13 @@ function onEndPlot(){
   errorProc( err._val, num._val, func.str(), token.str() );
  }
  procError.delAll();
-}
-function onStartRePlot(){
+};
+window.onStartRePlot = function(){
  onStartPlot();
-}
-function onEndRePlot(){
+};
+window.onEndRePlot = function(){
  onEndPlot();
-}
+};
 function updateLanguage(){
  document.getElementById( "button_cache_clear" ).innerHTML = englishFlag ? "Clear cache" : "外部関数ｷｬｯｼｭのｸﾘｱ";
  document.getElementById( "button_storage_clear" ).innerHTML = englishFlag ? "Clear storage" : "ｽﾄﾚｰｼﾞのｸﾘｱ";

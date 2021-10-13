@@ -10434,7 +10434,6 @@ function defProcFunction(){
 	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
-	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return _CLIP_PROC_ERR_COMMAND_NULL/*_CLIP_NO_ERR*/; };
 
 	if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
 	if( window.doCommandLog == undefined ) window.doCommandLog = function( topPrint ){};

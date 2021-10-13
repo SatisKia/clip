@@ -70,4 +70,4 @@ _Timer.prototype = {
 
 };
 
-//function onTimer( timer ){ return true; }
+//window.onTimer( timer ){ return true; };

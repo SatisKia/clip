@@ -3,10 +3,10 @@ function setWindowImg( imgId ){
 	(new _EasyClip()).setPalette( COLOR_WIN ).createImage( [
 		"@w = 22 * 17",
 		"@h = 22 * 12",
-		":gworld @w @h",
-		":gfill 0 0 @w @h (gcolor \\xFFFFFF)",
+		":gworld24 @w @h",
+		":gfill 0 0 @w @h \\xFFFFFF",
 		":window \\-5 \\-3 12 9",
-		":wfill \\-3 \\-2 13 10 (gcolor \\xC0C0C0)",
+		":wfill \\-3 \\-2 13 10 \\xC0C0C0",
 
 		"@l = gx \\-3",
 		"@b = gy \\-2",
@@ -15,7 +15,7 @@ function setWindowImg( imgId ){
 		"@x = gx 0",
 		"@y = gy 0",
 
-		":gtext [\"(-3,-2)] (gx \\-5) (@b + 14) (gcolor \\x000000)",
+		":gtext [\"(-3,-2)] (gx \\-5) (@b + 14) \\x000000",
 		":gtextr [\"(10,8)] (gx 12) (@t - 2)",
 
 		":wline 0 \\-2 0 8",

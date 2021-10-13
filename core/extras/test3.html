@@ -267,7 +267,7 @@ function main(){
 	clip.procScript( script[2][0] ); // 初期化
 	(new _Timer()).setObject( [clip, script[2][1], 2] ).setFrameTime( 0 ).start();
 }
-function onTimer( timer ){
+window.onTimer = function( timer ){
 	var clip = timer.object()[0];
 	clip.procScript( timer.object()[1] ); // メイン
 //	if( timer.object()[2] != 2 ){
@@ -291,7 +291,7 @@ function onTimer( timer ){
 	}
 
 	return true;
-}
+};
 </script>
 </head>
 <body onload="main()">

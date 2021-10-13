@@ -16502,7 +16502,6 @@ function defProcFunction(){
 	if( window.doCommandPlot == undefined ) window.doCommandPlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandRePlot == undefined ) window.doCommandRePlot = function( parentProc, childProc, childParam, graph, start, end, step ){};
 	if( window.doCommandUsage == undefined ) window.doCommandUsage = function( topUsage ){};
-	if( window.doCustomCommand == undefined ) window.doCustomCommand = function( _this, param, code, token ){ return 0x2140 ; };
 	if( window.skipCommandLog == undefined ) window.skipCommandLog = function(){ return true; };
 	if( window.doCommandLog == undefined ) window.doCommandLog = function( topPrint ){};
 	if( window.doCommandDumpVar == undefined ) window.doCommandDumpVar = function( param, index ){};
