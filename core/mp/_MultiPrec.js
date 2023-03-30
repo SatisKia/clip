@@ -85,7 +85,7 @@ _MultiPrec.prototype._fmul = function( a/*Array*/, prec ){
 _MultiPrec.prototype._fdiv = function( a/*Array*/, len ){
 	var l = _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 	this._copy( a, len + 1, a, 1, l - len );
-	l -= len
+	l -= len;
 	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
 	if( l == 0 ){
 		a[0] = _MP_LEN_COEF + p; a[1] = 0;	// ゼロ値

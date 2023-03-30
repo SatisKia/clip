@@ -17,7 +17,7 @@ _MultiPrec.prototype._str2num = function( n/*Array*/, s/*Array*/ ){
 		return true;
 	}
 
-	var x = 0; k = 1;
+	var x = 0, k = 1;
 	var nn = 0;
 	do {
 		x += (s[--ss] - _CHAR_CODE_0) * k; k *= 10;

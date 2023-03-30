@@ -437,6 +437,7 @@ function intToString( val, radix, width ){
 	}
 
 	var chr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	var i;
 
 	// 符号をチェックして、負の値の場合は正の値に変換する
 	var swi = (val < 0);
@@ -461,7 +462,7 @@ function intToString( val, radix, width ){
 
 	// 文字列の反転
 	var str2 = "";
-	for( var i = str.length - 1; i >= 0; i-- ){
+	for( i = str.length - 1; i >= 0; i-- ){
 		str2 += str.charAt( i );
 	}
 

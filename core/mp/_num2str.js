@@ -17,7 +17,7 @@ _MultiPrec.prototype._num2str = function( s/*Array*/, n/*Array*/ ){
 		s[1] = 0;	// 文字列終端
 
 		n[0] = n0;
-		return
+		return;
 	}
 
 	var ss = -1; var nn = 0;
