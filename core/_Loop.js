@@ -20,6 +20,12 @@ function __Loop(){
 #define _LOOP_TYPE_FOR		4
 #define _LOOP_TYPE_FUNC		5
 
+#define _LOOP_END_TYPE_WHILE	0
+#define _LOOP_END_TYPE_FOR		1
+#define _LOOP_END_TYPE_FUNC		2
+#define _LOOP_END_TYPE_IF		3
+#define _LOOP_END_TYPE_SWITCH	4
+
 // ループ制御構造管理クラス
 function _Loop(){
 	this._beforeLoop = null;
@@ -35,6 +41,9 @@ function _Loop(){
 
 	this._breakFlag = false;
 	this._contFlag = false;
+
+	this._endType = new Array( 16 );
+	this._endCnt  = 0;
 }
 
 _Loop.prototype = {
@@ -122,7 +131,13 @@ _Loop.prototype = {
 			line._obj._line._beforeLoop = _this._curLoop;
 			_this._curLoop = line._obj._line;
 
+			_this._curLoop._endType[_this._curLoop._endCnt] = _LOOP_END_TYPE_WHILE;
+			_this._curLoop._endCnt++;
+
 			line.set( _this._curLoop._newLine() );
+		} else {
+			_this._curLoop._endType[_this._curLoop._endCnt] = _LOOP_END_TYPE_WHILE;
+			_this._curLoop._endCnt++;
 		}
 		return _CLIP_NO_ERR;
 	},
@@ -134,7 +149,13 @@ _Loop.prototype = {
 			line._obj._line._beforeLoop = _this._curLoop;
 			_this._curLoop = line._obj._line;
 
+			_this._curLoop._endType[_this._curLoop._endCnt] = _LOOP_END_TYPE_FOR;
+			_this._curLoop._endCnt++;
+
 			line.set( _this._curLoop._newLine() );
+		} else {
+			_this._curLoop._endType[_this._curLoop._endCnt] = _LOOP_END_TYPE_FOR;
+			_this._curLoop._endCnt++;
 		}
 		return _CLIP_NO_ERR;
 	},
@@ -148,6 +169,9 @@ _Loop.prototype = {
 		line._obj._line._loopType   = _LOOP_TYPE_FUNC;
 		line._obj._line._beforeLoop = _this._curLoop;
 		_this._curLoop = line._obj._line;
+
+		_this._curLoop._endType[_this._curLoop._endCnt] = _LOOP_END_TYPE_FUNC;
+		_this._curLoop._endCnt++;
 
 		line.set( _this._curLoop._newLine() );
 
@@ -172,6 +196,10 @@ _Loop.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopEndWhile : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
+		if( _this._curLoop._endCnt > 0 ){
+			_this._curLoop._endCnt--;
+		}
+
 		if( _this._curLoop._loopType == _LOOP_TYPE_WHILE ){
 			beforeFlag.set( true );
 		}
@@ -219,8 +247,26 @@ _Loop.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopEndFunc : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
+		if( _this._curLoop._endCnt > 0 ){
+			_this._curLoop._endCnt--;
+		}
+
 		if( _this._curLoop._loopType == _LOOP_TYPE_FUNC ){
 			beforeFlag.set( true );
+		}
+		return _CLIP_NO_ERR;
+	},
+	_loopMultiEnd : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
+		if( _this._curLoop._endCnt > 0 ){
+			switch( _this._curLoop._endType[_this._curLoop._endCnt - 1] ){
+			case _LOOP_END_TYPE_WHILE:
+				return _this._loopEndWhile( _this, line, beforeFlag );
+			case _LOOP_END_TYPE_FOR:
+				return _this._loopNext( _this, line, beforeFlag );
+			case _LOOP_END_TYPE_FUNC:
+				return _this._loopEndFunc( _this, line, beforeFlag );
+			}
+			_this._curLoop._endCnt--;
 		}
 		return _CLIP_NO_ERR;
 	},
@@ -237,6 +283,30 @@ _Loop.prototype = {
 		if( line._token.getToken() ){
 			code  = _get_code;
 			token = _get_token;
+
+			if( code == _CLIP_CODE_STATEMENT ){
+				switch( token ){
+				case _CLIP_STAT_IF:
+					this._curLoop._endType[this._curLoop._endCnt] = _LOOP_END_TYPE_IF;
+					this._curLoop._endCnt++;
+					break;
+				case _CLIP_STAT_ENDIF:
+					if( this._curLoop._endCnt > 0 ){
+						this._curLoop._endCnt--;
+					}
+					break;
+				case _CLIP_STAT_SWITCH:
+					this._curLoop._endType[this._curLoop._endCnt] = _LOOP_END_TYPE_SWITCH;
+					this._curLoop._endCnt++;
+					break;
+				case _CLIP_STAT_ENDSWI:
+					if( this._curLoop._endCnt > 0 ){
+						this._curLoop._endCnt--;
+					}
+					break;
+				}
+			}
+
 			if( (code == _CLIP_CODE_STATEMENT) && (token < _CLIP_STAT_LOOP_END) ){
 				if( (ret = _loopSub[token]( this, tmp, beforeFlag )) != _CLIP_NO_ERR ){
 					return ret;
@@ -370,5 +440,7 @@ var _loopSub = [
 	_Loop.prototype._loopNext,
 
 	_Loop.prototype._loopFunc,
-	_Loop.prototype._loopEndFunc
+	_Loop.prototype._loopEndFunc,
+
+	_Loop.prototype._loopMultiEnd
 ];

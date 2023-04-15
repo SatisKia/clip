@@ -28,6 +28,7 @@ function getParameter( key ){
 var testFlag = false;
 var traceLevel = 0;
 var traceString = new String();
+var traceLog;
 var extFuncFile = new Array();
 var extFuncData = new Array();
 function cssGetPropertyValue( selector, property ){
@@ -1339,6 +1340,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
   if( isEnglish ) error = "Number of loops exceeded the upper limit.";
   else error = "ループ回数オーバーしました";
   break;
+ case _CLIP_PROC_ERR_STAT_END:
+  if( isEnglish ) error = "\"" + token + "\" is invalid.";
+  else error = token + "は無効です";
+  break;
  case _CLIP_PROC_ERR_COMMAND_NULL:
   if( isEnglish ) error = "The command is incorrect.";
   else error = "コマンドが間違っています";
@@ -1543,7 +1548,7 @@ var needGUpdate = false;
 var addExtFuncList = false;
 var englishFlag = false;
 var lastTouchEnd = 0;
-function main( inputId, divId, canvasId, inputFileId, editorId ){
+function main( inputId, divId, canvasId, inputFileId, editorId, logId ){
  var i;
  defGWorldFunction();
  defProcFunction();
@@ -1658,6 +1663,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  curFunc = select.options[selFunc].value;
  loadFunc();
  updateSelectFunc();
+ traceLog = document.getElementById( logId );
  con.print( "CLIP" );
  var version = getParameter( "v" );
  if( version.length > 0 ){
@@ -1719,6 +1725,13 @@ try {
    con.setColor();
   }
   con.unlock();
+  if( (traceLevel > 0) && (traceString.length > 0) ){
+   traceLog.value = traceString;
+   if( canUseWriteFile() ){
+    writeFile( "clip_trace_" + time() + ".log", traceString );
+   }
+  }
+  traceString = "";
  }
  input.value = "";
 }
@@ -2705,14 +2718,13 @@ function _commandTest( _this, param, code, token ){
 function _commandTrace( _this, param, code, token ){
  var value = new _ProcVal();
  if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
-  if( (traceLevel > 0) && (traceString.length > 0) ){
-   if( canUseWriteFile() ){
-    writeFile( "clip_trace_" + time() + ".log", traceString );
-   }
-  }
-  traceString = "";
   traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
   setProcTraceFlag( traceLevel > 0 );
+  if( traceLevel == 0 ){
+   document.getElementById( "clip_tracelog" ).style.display = "none";
+  } else {
+   document.getElementById( "clip_tracelog" ).style.display = "block";
+  }
   return _CLIP_PROC_SUB_END;
  }
  return _CLIP_PROC_ERR_COMMAND_NULL;

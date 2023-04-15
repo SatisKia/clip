@@ -10,16 +10,16 @@
 <script type="text/javascript" src="DefCharInfoLarge.js"></script>
 
 <!--リリース用-->
-<script type="text/javascript" src="clip.js?v=211011"></script>
-<script type="text/javascript" src="Main.js?v=211011"></script>
+<script type="text/javascript" src="clip.js?v=230416"></script>
+<script type="text/javascript" src="Main.js?v=230416"></script>
 
 <!--デバッグ用
-<script type="text/javascript" src="clip.debug.js?v=211011"></script>
-<script type="text/javascript" src="Main.debug.js?v=211011"></script>
+<script type="text/javascript" src="clip.debug.js?v=230416"></script>
+<script type="text/javascript" src="Main.debug.js?v=230416"></script>
 -->
 
 <!--ライブラリ未使用版デバッグ用
-<script type="text/javascript" src="All.debug.js?v=211011"></script>
+<script type="text/javascript" src="All.debug.js?v=230416"></script>
 -->
 
 <script type="text/javascript">
@@ -139,6 +139,17 @@ input[type="number"]::-webkit-inner-spin-button {
 	border:1px solid #808080;
 	tab-size:4;
 }
+.textarea_log {
+	word-break:break-all;
+	overflow-wrap:break-word;
+	width:634px;
+	height:240px;
+	font-family:"Courier New";
+	font-size:16px;
+	line-height:18px;
+	border:1px solid #808080;
+	tab-size:4;
+}
 select {
 	-webkit-appearance:button;
 	padding:4px;
@@ -195,7 +206,7 @@ input[type="checkbox"]:checked + label::after {
 }
 </style>
 </head>
-<body onload="main( 'input0', 'div0', 'canvas0', 'file0', 'textarea0' )">
+<body onload="main( 'input0', 'div0', 'canvas0', 'file0', 'textarea0', 'textarea1' )">
 <div id="body" class="div_body" style="width:640px; height:480px">
 	<table>
 		<tr>
@@ -446,5 +457,9 @@ input[type="checkbox"]:checked + label::after {
 		</tr>
 	</table>
 </div>
+<div id="clip_tracelog" style="width:640px; display:none">
+	<hr style="border:0; margin:0; height:5px">
+	<textarea id="textarea1" class="textarea_log" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+<div>
 </body>
 </html>

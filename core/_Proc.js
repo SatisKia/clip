@@ -264,6 +264,11 @@ __Index.prototype = {
 #define _STAT_MODE_REGISTERING	1	// 行データの取り込み中
 #define _STAT_MODE_PROCESSING	2	// 制御処理実行中
 
+#define _PROC_END_TYPE_WHILE	0
+#define _PROC_END_TYPE_FOR		1
+#define _PROC_END_TYPE_IF		2
+#define _PROC_END_TYPE_SWITCH	3
+
 var _proc_token;	// 汎用_Tokenオブジェクト
 var _proc_val;		// updateAns用
 var _proc_mp;		// 多倍長演算サポート
@@ -345,6 +350,9 @@ function _Proc( parentMode, parentMpPrec, parentMpRound, printAns, printAssert, 
 
 	this._topUsage = null;
 	this._curUsage = null;
+
+	this._endType = new Array( 16 );
+	this._endCnt  = 0;
 }
 
 _Proc.prototype = {
@@ -4358,7 +4366,7 @@ _Proc.prototype = {
 		}
 
 		if( param._mpFlag ){
-			_this.mpFactorial( value.mp(), INT( tmpValue.mat()._mat[0].toFloat() ) );
+			_this.mpFactorial( value.mp(), _INT( tmpValue.mat()._mat[0].toFloat() ) );
 		} else {
 			value.matAss( tmpValue.mat()._mat[0].factorial() );
 		}
@@ -5963,8 +5971,20 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_loopWhile : function( _this ){
+		if( _this._statMode == _STAT_MODE_PROCESSING ){
+			_this._endType[_this._endCnt] = _PROC_END_TYPE_WHILE;
+			_this._endCnt++;
+		}
+
+		return _this._loopBegin( _this );
+	},
 	_loopEndWhile : function( _this ){
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
+			if( _this._endCnt > 0 ){
+				_this._endCnt--;
+			}
+
 			if( _this._checkSkip() ){
 				_this._stat.doBreak();
 				_this._stat.doEnd();
@@ -5973,8 +5993,20 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_loopFor : function( _this ){
+		if( _this._statMode == _STAT_MODE_PROCESSING ){
+			_this._endType[_this._endCnt] = _PROC_END_TYPE_FOR;
+			_this._endCnt++;
+		}
+
+		return _this._loopBegin( _this );
+	},
 	_loopNext : function( _this ){
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
+			if( _this._endCnt > 0 ){
+				_this._endCnt--;
+			}
+
 			if( _this._checkSkip() ){
 				_this._stat.doBreak();
 				_this._stat.doEnd();
@@ -5982,6 +6014,9 @@ _Proc.prototype = {
 			}
 		}
 		return _CLIP_NO_ERR;
+	},
+	_loopFunc : function( _this ){
+		return _this._loopBegin( _this );
 	},
 	_loopEndFunc : function( _this ){
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
@@ -5993,7 +6028,25 @@ _Proc.prototype = {
 		}
 		return _CLIP_NO_ERR;
 	},
+	_loopMultiEnd : function( _this ){
+		if( _this._endCnt > 0 ){
+			switch( _this._endType[_this._endCnt - 1] ){
+			case _PROC_END_TYPE_WHILE:
+				return _this._loopEndWhile( _this );
+			case _PROC_END_TYPE_FOR:
+				return _this._loopNext( _this );
+			case _PROC_END_TYPE_IF:
+				return _this._loopEndIf( _this );
+			case _PROC_END_TYPE_SWITCH:
+				return _this._loopEndSwi( _this );
+			}
+		}
+		return _CLIP_PROC_ERR_STAT_END;
+	},
 	_loopIf : function( _this ){
+		_this._endType[_this._endCnt] = _PROC_END_TYPE_IF;
+		_this._endCnt++;
+
 //		if( _this._statIfMode[_this._statIfCnt] != _STAT_IFMODE_STARTED ){
 			_this._statIfCnt++;
 			if( _this._statIfCnt > _this._statIfMax ){
@@ -6029,6 +6082,10 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopEndIf : function( _this ){
+		if( _this._endCnt > 0 ){
+			_this._endCnt--;
+		}
+
 		if( _this._statIfCnt == 0 ){
 			return _CLIP_PROC_ERR_STAT_ENDIF;
 		}
@@ -6039,6 +6096,9 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopSwitch : function( _this ){
+		_this._endType[_this._endCnt] = _PROC_END_TYPE_SWITCH;
+		_this._endCnt++;
+
 //		if( _this._statSwiMode[_this._statSwiCnt] != _STAT_SWIMODE_STARTED ){
 			_this._statSwiCnt++;
 			if( _this._statSwiCnt > _this._statSwiMax ){
@@ -6074,6 +6134,10 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopEndSwi : function( _this ){
+		if( _this._endCnt > 0 ){
+			_this._endCnt--;
+		}
+
 		if( _this._statSwiCnt == 0 ){
 			return _CLIP_PROC_ERR_STAT_ENDSWI;
 		}
@@ -6101,6 +6165,10 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopBreak : function( _this ){
+		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == _PROC_END_TYPE_SWITCH) ){
+			return _this._loopBreakSwi( _this );
+		}
+
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
 			if( _this._checkSkip() ){
 				return _CLIP_PROC_SUB_END;
@@ -6586,6 +6654,27 @@ _Proc.prototype = {
 		}
 		return _CLIP_PROC_SUB_END;
 	},
+	_statMultiEnd : function( _this, param, code, token ){
+		switch( _this._endType[_this._endCnt] ){
+		case _PROC_END_TYPE_WHILE:
+			return _this._statEndWhile( _this, param, code, token );
+		case _PROC_END_TYPE_FOR:
+			return _this._statNext( _this, param, code, token );
+		case _PROC_END_TYPE_IF:
+			return _this._statEndIf( _this, param, code, token );
+		case _PROC_END_TYPE_SWITCH:
+			return _this._statEndSwi( _this, param, code, token );
+		}
+
+		switch( _this._statMode ){
+		case _STAT_MODE_NOT_START:
+			return _CLIP_PROC_ERR_STAT_END;
+		case _STAT_MODE_PROCESSING:
+			_this._stat.doEnd();
+			break;
+		}
+		return _CLIP_PROC_SUB_END;
+	},
 	_statIf : function( _this, param, code, token ){
 		var ret;
 		var tmpValue = new _ProcVal( _this, param );
@@ -6676,6 +6765,10 @@ _Proc.prototype = {
 		return _CLIP_PROC_SUB_END;
 	},
 	_statBreak : function( _this, param, code, token ){
+		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == _PROC_END_TYPE_SWITCH) ){
+			return _this._statBreakSwi( _this, param, code, token );
+		}
+
 		switch( _this._statMode ){
 		case _STAT_MODE_NOT_START:
 			return _CLIP_PROC_ERR_STAT_BREAK;
@@ -10075,15 +10168,17 @@ var _procSubLoop = [
 	_Proc.prototype._loopBegin,
 	_Proc.prototype._loopUntil,
 
-	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopWhile,
 	_Proc.prototype._loopEndWhile,
 
-	_Proc.prototype._loopBegin,
-	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopFor,
+	_Proc.prototype._loopFor,
 	_Proc.prototype._loopNext,
 
-	_Proc.prototype._loopBegin,
+	_Proc.prototype._loopFunc,
 	_Proc.prototype._loopEndFunc,
+
+	_Proc.prototype._loopMultiEnd,
 
 	_Proc.prototype._loopIf,
 	_Proc.prototype._loopElIf,
@@ -10129,6 +10224,8 @@ var _procSubStat = [
 
 	_Proc.prototype._statFunc,
 	_Proc.prototype._statEndFunc,
+
+	_Proc.prototype._statMultiEnd,
 
 	_Proc.prototype._statIf,
 	_Proc.prototype._statElIf,

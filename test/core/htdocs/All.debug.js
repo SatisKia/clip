@@ -28,6 +28,7 @@ function getParameter( key ){
 var testFlag = false;
 var traceLevel = 0;
 var traceString = new String();
+var traceLog;
 var extFuncFile = new Array();
 var extFuncData = new Array();
 var _EPS5 = 0.001;
@@ -100,6 +101,7 @@ assert( r != undefined );
  },
  addAndAss : function( r ){
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    this._re += r._re;
    this._im += r._im;
@@ -108,15 +110,21 @@ assert( r != undefined );
   }
   return this;
  },
+
+
  sub : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    return new _Complex( this._re - r._re, this._im - r._im );
   }
   return new _Complex( this._re - r, this._im );
  },
  subAndAss : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    this._re -= r._re;
    this._im -= r._im;
@@ -125,8 +133,12 @@ assert( r != undefined );
   }
   return this;
  },
+
+
  mul : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re * r._re, this._im * r._re );
@@ -136,7 +148,9 @@ assert( r != undefined );
   return new _Complex( this._re * r, this._im * r );
  },
  mulAndAss : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re *= r._re;
@@ -152,8 +166,12 @@ assert( r != undefined );
   }
   return this;
  },
+
+
  div : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re / r._re, this._im / r._re );
@@ -170,7 +188,9 @@ assert( r != undefined );
   return new _Complex( this._re / r, this._im / r );
  },
  divAndAss : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re /= r._re;
@@ -194,8 +214,12 @@ assert( r != undefined );
   }
   return this;
  },
+
+
  mod : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re % r._re, this._im % r._re );
@@ -210,7 +234,9 @@ assert( r != undefined );
   return new _Complex( this._re % r, this._im % r );
  },
  modAndAss : function( r ){
+
 assert( r != undefined );
+
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re = this._re % r._re;
@@ -229,6 +255,8 @@ assert( r != undefined );
   }
   return this;
  },
+
+
  equal : function( r ){
   if( r instanceof _Complex ){
    return (this._re == r._re) && (this._im == r._im);
@@ -241,6 +269,8 @@ assert( r != undefined );
   }
   return (this._re != r) || (this._im != 0.0);
  },
+
+
  fabs : function(){
   if( this._re == 0.0 ){
    return _ABS( this._im );
@@ -255,15 +285,23 @@ assert( r != undefined );
   var t = this._im / this._re;
   return _ABS( this._re ) * _SQRT( 1.0 + t * t );
  },
+
+
  farg : function(){
   return fatan2( this._im, this._re );
  },
+
+
  fnorm : function(){
   return this._re * this._re + this._im * this._im;
  },
+
+
  conjg : function(){
   return new _Complex( this._re, -this._im );
  },
+
+
  sin : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsin( this._re ) );
@@ -275,6 +313,8 @@ assert( r != undefined );
    _COS( re ) * fsinh( im )
    );
  },
+
+
  cos : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcos( this._re ) );
@@ -286,6 +326,8 @@ assert( r != undefined );
    -_SIN( re ) * fsinh( im )
    );
  },
+
+
  tan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftan( this._re ) );
@@ -301,6 +343,8 @@ assert( r != undefined );
    fsinh( im2 ) / d
    );
  },
+
+
  asin : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -312,12 +356,15 @@ assert( r != undefined );
     return floatToComplex( fasin( this._re ) );
    }
   }
+
   var i = new _Complex( 0.0, 1.0 );
   var c = i.minus().mul( i.mul( this ).add( this.sqr().minus().add( 1.0 ).sqrt() ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
+
+
  acos : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -329,12 +376,19 @@ assert( r != undefined );
     return floatToComplex( facos( this._re ) );
    }
   }
+
+
+
+
+
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( this.sub( i.mul( this.sqr().minus().add( 1.0 ).sqrt() ) ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
+
+
  atan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fatan( this._re ) );
@@ -343,12 +397,15 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
+
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( i.add( this ).div( d ).log() ).mul( 0.5 );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
+
+
  sinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsinh( this._re ) );
@@ -358,6 +415,8 @@ assert( r != undefined );
    fcosh( this._re ) * _SIN( this._im )
    );
  },
+
+
  cosh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcosh( this._re ) );
@@ -367,6 +426,8 @@ assert( r != undefined );
    fsinh( this._re ) * _SIN( this._im )
    );
  },
+
+
  tanh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftanh( this._re ) );
@@ -382,12 +443,17 @@ assert( r != undefined );
    _SIN( im2 ) / d
    );
  },
+
+
  asinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fasinh( this._re ) );
   }
+
   return this.add( this.sqr().add( 1.0 ).sqrt() ).log();
  },
+
+
  acosh : function(){
   if( this._im == 0.0 ){
    if( this._re < 1.0 ){
@@ -399,8 +465,11 @@ assert( r != undefined );
     return floatToComplex( facosh( this._re ) );
    }
   }
+
   return this.add( this.sqr().sub( 1.0 ).sqrt() ).log();
  },
+
+
  atanh : function(){
   if( this._im == 0.0 ){
    if( (this._re <= -1.0) || (this._re >= 1.0) ){
@@ -416,20 +485,27 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
+
   return this.add( 1.0 ).div( d ).log().mul( 0.5 );
  },
+
+
  ceil : function(){
   return new _Complex(
    _CEIL( this._re ),
    _CEIL( this._im )
    );
  },
+
+
  floor : function(){
   return new _Complex(
    _FLOOR( this._re ),
    _FLOOR( this._im )
    );
  },
+
+
  exp : function(){
   if( this._im == 0.0 ){
    return floatToComplex( _EXP( this._re ) );
@@ -451,6 +527,8 @@ assert( r != undefined );
    e * _SIN( im )
    );
  },
+
+
  log : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
@@ -483,30 +561,40 @@ assert( r != undefined );
    _ATAN2( this._im, this._re ) * _NORMALIZE
    );
  },
+
+
  pow : function( y ){
   if( y instanceof _Complex ){
    if( y._im == 0.0 ){
     if( this._im == 0.0 ){
      return floatToComplex( _POW( this._re, y._re ) );
     }
+
     return this.log().mul( y._re ).exp();
    }
    if( this._im == 0.0 ){
+
     return y.mul( _LOG( this._re ) ).exp();
    }
+
    return this.log().mul( y ).exp();
   }
   if( this._im == 0.0 ){
    return floatToComplex( _POW( this._re, y ) );
   }
+
   return this.log().mul( y ).exp();
  },
+
+
  sqr : function(){
   if( this._im == 0.0 ){
    return floatToComplex( this._re * this._re );
   }
   return new _Complex( this._re * this._re - this._im * this._im, this._re * this._im + this._im * this._re );
  },
+
+
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
@@ -538,7 +626,9 @@ assert( r != undefined );
    -_SQRT05 * r
    );
  }
+
 };
+
 function getComplex( c, re , im ){
  re.set( c._re );
  im.set( c._im );
@@ -548,18 +638,26 @@ function setComplex( c, re, im ){
  c._im = im;
  return c;
 }
+
 function dupComplex( x ){
  return new _Complex( x._re, x._im );
 }
+
 function floatToComplex( x ){
  return new _Complex( x, 0.0 );
 }
+
+
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
+
+
 function _angToRad( ang ){
  return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
+
+
 function fsin( x ){
  return _SIN( _angToRad( x ) );
 }
@@ -1488,6 +1586,7 @@ function intToString( val, radix, width ){
   width = 1;
  }
  var chr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ var i;
  var swi = (val < 0);
  if( swi ){
   val = -val;
@@ -1504,7 +1603,7 @@ function intToString( val, radix, width ){
   str += "-";
  }
  var str2 = "";
- for( var i = str.length - 1; i >= 0; i-- ){
+ for( i = str.length - 1; i >= 0; i-- ){
   str2 += str.charAt( i );
  }
  return str2;
@@ -3158,7 +3257,7 @@ _MultiPrec.prototype._fmul = function( a , prec ){
 _MultiPrec.prototype._fdiv = function( a , len ){
  var l = _INT( _ABS( a[0] / _MP_LEN_COEF ) );
  this._copy( a, len + 1, a, 1, l - len );
- l -= len
+ l -= len;
  var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
  if( l == 0 ){
   a[0] = _MP_LEN_COEF + p; a[1] = 0;
@@ -3986,7 +4085,7 @@ _MultiPrec.prototype._num2str = function( s , n ){
   s[0] = _CHAR_CODE_0;
   s[1] = 0;
   n[0] = n0;
-  return
+  return;
  }
  var ss = -1; var nn = 0;
  var i, j, x;
@@ -4097,7 +4196,7 @@ _MultiPrec.prototype._str2num = function( n , s ){
   n[0] = 0;
   return true;
  }
- var x = 0; k = 1;
+ var x = 0, k = 1;
  var nn = 0;
  do {
   x += (s[--ss] - _CHAR_CODE_0) * k; k *= 10;
@@ -6135,8 +6234,8 @@ _GWorld.prototype = {
   this._ratioY2 = (this._ratioY >= 0.0) ? this._ratioY : -this._ratioY;
   this._offsetX = 0.5 - left * this._ratioX;
   this._offsetY = 0.5 - top * this._ratioY;
-  this._wndMoveX = this.wndPosX(this._imgMoveX);
-  this._wndMoveY = this.wndPosY(this._imgMoveY);
+  this._wndMoveX = this.wndPosX( this._imgMoveX );
+  this._wndMoveY = this.wndPosY( this._imgMoveY );
   return true;
  },
  scroll : function( scrollX, scrollY ){
@@ -6693,7 +6792,6 @@ _Line.prototype = {
  },
  dup : function(){
   var dst = new _Line();
-  var line;
   this._get = this._top;
   while( this._get != null ){
    dst.regLine( this._get );
@@ -6806,6 +6904,8 @@ function _Loop(){
  this._getFlag = false;
  this._breakFlag = false;
  this._contFlag = false;
+ this._endType = new Array( 16 );
+ this._endCnt = 0;
 }
 _Loop.prototype = {
  _newLine : function(){
@@ -6876,7 +6976,12 @@ _Loop.prototype = {
    line._obj._line._loopType = 3;
    line._obj._line._beforeLoop = _this._curLoop;
    _this._curLoop = line._obj._line;
+   _this._curLoop._endType[_this._curLoop._endCnt] = 0;
+   _this._curLoop._endCnt++;
    line.set( _this._curLoop._newLine() );
+  } else {
+   _this._curLoop._endType[_this._curLoop._endCnt] = 0;
+   _this._curLoop._endCnt++;
   }
   return 0x00;
  },
@@ -6887,7 +6992,12 @@ _Loop.prototype = {
    line._obj._line._loopType = 4;
    line._obj._line._beforeLoop = _this._curLoop;
    _this._curLoop = line._obj._line;
+   _this._curLoop._endType[_this._curLoop._endCnt] = 1;
+   _this._curLoop._endCnt++;
    line.set( _this._curLoop._newLine() );
+  } else {
+   _this._curLoop._endType[_this._curLoop._endCnt] = 1;
+   _this._curLoop._endCnt++;
   }
   return 0x00;
  },
@@ -6900,6 +7010,8 @@ _Loop.prototype = {
   line._obj._line._loopType = 5;
   line._obj._line._beforeLoop = _this._curLoop;
   _this._curLoop = line._obj._line;
+  _this._curLoop._endType[_this._curLoop._endCnt] = 2;
+  _this._curLoop._endCnt++;
   line.set( _this._curLoop._newLine() );
   return 0x00;
  },
@@ -6922,6 +7034,9 @@ _Loop.prototype = {
   return 0x00;
  },
  _loopEndWhile : function( _this, line , beforeFlag ){
+  if( _this._curLoop._endCnt > 0 ){
+   _this._curLoop._endCnt--;
+  }
   if( _this._curLoop._loopType == 3 ){
    beforeFlag.set( true );
   }
@@ -6962,8 +7077,25 @@ _Loop.prototype = {
   return 0x00;
  },
  _loopEndFunc : function( _this, line , beforeFlag ){
+  if( _this._curLoop._endCnt > 0 ){
+   _this._curLoop._endCnt--;
+  }
   if( _this._curLoop._loopType == 5 ){
    beforeFlag.set( true );
+  }
+  return 0x00;
+ },
+ _loopMultiEnd : function( _this, line , beforeFlag ){
+  if( _this._curLoop._endCnt > 0 ){
+   switch( _this._curLoop._endType[_this._curLoop._endCnt - 1] ){
+   case 0:
+    return _this._loopEndWhile( _this, line, beforeFlag );
+   case 1:
+    return _this._loopNext( _this, line, beforeFlag );
+   case 2:
+    return _this._loopEndFunc( _this, line, beforeFlag );
+   }
+   _this._curLoop._endCnt--;
   }
   return 0x00;
  },
@@ -6977,7 +7109,29 @@ _Loop.prototype = {
   if( line._token.getToken() ){
    code = _get_code;
    token = _get_token;
-   if( (code == 11) && (token < 17) ){
+   if( code == 11 ){
+    switch( token ){
+    case 18:
+     this._curLoop._endType[this._curLoop._endCnt] = 3;
+     this._curLoop._endCnt++;
+     break;
+    case 21:
+     if( this._curLoop._endCnt > 0 ){
+      this._curLoop._endCnt--;
+     }
+     break;
+    case 22:
+     this._curLoop._endType[this._curLoop._endCnt] = 4;
+     this._curLoop._endCnt++;
+     break;
+    case 25:
+     if( this._curLoop._endCnt > 0 ){
+      this._curLoop._endCnt--;
+     }
+     break;
+    }
+   }
+   if( (code == 11) && (token < 18) ){
     if( (ret = _loopSub[token]( this, tmp, beforeFlag )) != 0x00 ){
      return ret;
     }
@@ -7095,7 +7249,8 @@ var _loopSub = [
  _Loop.prototype._loopFor,
  _Loop.prototype._loopNext,
  _Loop.prototype._loopFunc,
- _Loop.prototype._loopEndFunc
+ _Loop.prototype._loopEndFunc,
+ _Loop.prototype._loopMultiEnd
 ];
 function __Replace( descCode, descToken, realCode, realToken ){
  this._descCode = descCode;
@@ -7720,6 +7875,8 @@ function _Proc( parentMode, parentMpPrec, parentMpRound, printAns, printAssert, 
  this._endInc = null;
  this._topUsage = null;
  this._curUsage = null;
+ this._endType = new Array( 16 );
+ this._endCnt = 0;
 }
 _Proc.prototype = {
  end : function(){
@@ -11181,7 +11338,7 @@ _Proc.prototype = {
    return ret;
   }
   if( param._mpFlag ){
-   _this.mpFactorial( value.mp(), INT( tmpValue.mat()._mat[0].toFloat() ) );
+   _this.mpFactorial( value.mp(), _INT( tmpValue.mat()._mat[0].toFloat() ) );
   } else {
    value.matAss( tmpValue.mat()._mat[0].factorial() );
   }
@@ -12585,8 +12742,18 @@ _Proc.prototype = {
   }
   return 0x00;
  },
+ _loopWhile : function( _this ){
+  if( _this._statMode == 2 ){
+   _this._endType[_this._endCnt] = 0;
+   _this._endCnt++;
+  }
+  return _this._loopBegin( _this );
+ },
  _loopEndWhile : function( _this ){
   if( _this._statMode == 2 ){
+   if( _this._endCnt > 0 ){
+    _this._endCnt--;
+   }
    if( _this._checkSkip() ){
     _this._stat.doBreak();
     _this._stat.doEnd();
@@ -12595,8 +12762,18 @@ _Proc.prototype = {
   }
   return 0x00;
  },
+ _loopFor : function( _this ){
+  if( _this._statMode == 2 ){
+   _this._endType[_this._endCnt] = 1;
+   _this._endCnt++;
+  }
+  return _this._loopBegin( _this );
+ },
  _loopNext : function( _this ){
   if( _this._statMode == 2 ){
+   if( _this._endCnt > 0 ){
+    _this._endCnt--;
+   }
    if( _this._checkSkip() ){
     _this._stat.doBreak();
     _this._stat.doEnd();
@@ -12604,6 +12781,9 @@ _Proc.prototype = {
    }
   }
   return 0x00;
+ },
+ _loopFunc : function( _this ){
+  return _this._loopBegin( _this );
  },
  _loopEndFunc : function( _this ){
   if( _this._statMode == 2 ){
@@ -12615,7 +12795,24 @@ _Proc.prototype = {
   }
   return 0x00;
  },
+ _loopMultiEnd : function( _this ){
+  if( _this._endCnt > 0 ){
+   switch( _this._endType[_this._endCnt - 1] ){
+   case 0:
+    return _this._loopEndWhile( _this );
+   case 1:
+    return _this._loopNext( _this );
+   case 2:
+    return _this._loopEndIf( _this );
+   case 3:
+    return _this._loopEndSwi( _this );
+   }
+  }
+  return 0x2131;
+ },
  _loopIf : function( _this ){
+  _this._endType[_this._endCnt] = 2;
+  _this._endCnt++;
    _this._statIfCnt++;
    if( _this._statIfCnt > _this._statIfMax ){
     _this._statIfCnt--;
@@ -12648,6 +12845,9 @@ _Proc.prototype = {
   return 0x00;
  },
  _loopEndIf : function( _this ){
+  if( _this._endCnt > 0 ){
+   _this._endCnt--;
+  }
   if( _this._statIfCnt == 0 ){
    return 0x2121;
   }
@@ -12658,6 +12858,8 @@ _Proc.prototype = {
   return 0x00;
  },
  _loopSwitch : function( _this ){
+  _this._endType[_this._endCnt] = 3;
+  _this._endCnt++;
    _this._statSwiCnt++;
    if( _this._statSwiCnt > _this._statSwiMax ){
     _this._statSwiCnt--;
@@ -12690,6 +12892,9 @@ _Proc.prototype = {
   return 0x00;
  },
  _loopEndSwi : function( _this ){
+  if( _this._endCnt > 0 ){
+   _this._endCnt--;
+  }
   if( _this._statSwiCnt == 0 ){
    return 0x2123;
   }
@@ -12717,6 +12922,9 @@ _Proc.prototype = {
   return 0x00;
  },
  _loopBreak : function( _this ){
+  if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == 3) ){
+   return _this._loopBreakSwi( _this );
+  }
   if( _this._statMode == 2 ){
    if( _this._checkSkip() ){
     return 0x03;
@@ -13131,6 +13339,26 @@ _Proc.prototype = {
   }
   return 0x03;
  },
+ _statMultiEnd : function( _this, param, code, token ){
+  switch( _this._endType[_this._endCnt] ){
+  case 0:
+   return _this._statEndWhile( _this, param, code, token );
+  case 1:
+   return _this._statNext( _this, param, code, token );
+  case 2:
+   return _this._statEndIf( _this, param, code, token );
+  case 3:
+   return _this._statEndSwi( _this, param, code, token );
+  }
+  switch( _this._statMode ){
+  case 0:
+   return 0x2131;
+  case 2:
+   _this._stat.doEnd();
+   break;
+  }
+  return 0x03;
+ },
  _statIf : function( _this, param, code, token ){
   var ret;
   var tmpValue = new _ProcVal( _this, param );
@@ -13217,6 +13445,9 @@ _Proc.prototype = {
   return 0x03;
  },
  _statBreak : function( _this, param, code, token ){
+  if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == 3) ){
+   return _this._statBreakSwi( _this, param, code, token );
+  }
   switch( _this._statMode ){
   case 0:
    return 0x212A;
@@ -16234,13 +16465,14 @@ var _procSubLoop = [
  _Proc.prototype._loopCont,
  _Proc.prototype._loopBegin,
  _Proc.prototype._loopUntil,
- _Proc.prototype._loopBegin,
+ _Proc.prototype._loopWhile,
  _Proc.prototype._loopEndWhile,
- _Proc.prototype._loopBegin,
- _Proc.prototype._loopBegin,
+ _Proc.prototype._loopFor,
+ _Proc.prototype._loopFor,
  _Proc.prototype._loopNext,
- _Proc.prototype._loopBegin,
+ _Proc.prototype._loopFunc,
  _Proc.prototype._loopEndFunc,
+ _Proc.prototype._loopMultiEnd,
  _Proc.prototype._loopIf,
  _Proc.prototype._loopElIf,
  _Proc.prototype._loopElse,
@@ -16277,6 +16509,7 @@ var _procSubStat = [
  _Proc.prototype._statNext,
  _Proc.prototype._statFunc,
  _Proc.prototype._statEndFunc,
+ _Proc.prototype._statMultiEnd,
  _Proc.prototype._statIf,
  _Proc.prototype._statElIf,
  _Proc.prototype._statElse,
@@ -16718,6 +16951,7 @@ var _tokenStat = [
  "next",
  "func",
  "endfunc",
+ "end",
  "if",
  "elif",
  "else",
@@ -17743,19 +17977,19 @@ _Token.prototype = {
       break;
      case 67:
       cur._code = 11;
-      cur._token = 28;
+      cur._token = 29;
       break;
      case 68:
       cur._code = 11;
-      cur._token = 29;
+      cur._token = 30;
       break;
      case 69:
       cur._code = 11;
-      cur._token = 32;
+      cur._token = 33;
       break;
      case 70:
       cur._code = 11;
-      cur._token = 33;
+      cur._token = 34;
       break;
      default:
       cur._code = 23;
@@ -17993,7 +18227,7 @@ _Token.prototype = {
  delAll : function(){
   var cur;
   var tmp;
-  cur = top;
+  cur = this._top;
   while( cur != null ){
    tmp = cur;
    cur = cur._next;
@@ -18577,22 +18811,22 @@ _Token.prototype = {
     case 5:
     case 6:
     case 7:
-    case 28:
     case 29:
-    case 32:
+    case 30:
     case 33:
+    case 34:
      return this._formatSe( param, strToVal );
     case 8:
     case 11:
     case 14:
     case 16:
-    case 19:
     case 20:
-    case 23:
+    case 21:
     case 24:
     case 25:
     case 26:
     case 27:
+    case 28:
      if( this._top._next != null ){
       return 0x100D;
      }
@@ -20298,6 +20532,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
   if( isEnglish ) error = "Number of loops exceeded the upper limit.";
   else error = "ループ回数オーバーしました";
   break;
+ case 0x2131:
+  if( isEnglish ) error = "\"" + token + "\" is invalid.";
+  else error = token + "は無効です";
+  break;
  case 0x2140:
   if( isEnglish ) error = "The command is incorrect.";
   else error = "コマンドが間違っています";
@@ -20502,7 +20740,7 @@ var needGUpdate = false;
 var addExtFuncList = false;
 var englishFlag = false;
 var lastTouchEnd = 0;
-function main( inputId, divId, canvasId, inputFileId, editorId ){
+function main( inputId, divId, canvasId, inputFileId, editorId, logId ){
  var i;
  defGWorldFunction();
  defProcFunction();
@@ -20617,6 +20855,7 @@ function main( inputId, divId, canvasId, inputFileId, editorId ){
  curFunc = select.options[selFunc].value;
  loadFunc();
  updateSelectFunc();
+ traceLog = document.getElementById( logId );
  con.print( "CLIP" );
  var version = getParameter( "v" );
  if( version.length > 0 ){
@@ -20678,6 +20917,13 @@ try {
    con.setColor();
   }
   con.unlock();
+  if( (traceLevel > 0) && (traceString.length > 0) ){
+   traceLog.value = traceString;
+   if( canUseWriteFile() ){
+    writeFile( "clip_trace_" + time() + ".log", traceString );
+   }
+  }
+  traceString = "";
  }
  input.value = "";
 }
@@ -21664,14 +21910,13 @@ function _commandTest( _this, param, code, token ){
 function _commandTrace( _this, param, code, token ){
  var value = new _ProcVal();
  if( _this._const( param, code, token, value ) == 0x00 ){
-  if( (traceLevel > 0) && (traceString.length > 0) ){
-   if( canUseWriteFile() ){
-    writeFile( "clip_trace_" + time() + ".log", traceString );
-   }
-  }
-  traceString = "";
   traceLevel = _INT( value.mat().toFloat( 0, 0 ) );
   setProcTraceFlag( traceLevel > 0 );
+  if( traceLevel == 0 ){
+   document.getElementById( "clip_tracelog" ).style.display = "none";
+  } else {
+   document.getElementById( "clip_tracelog" ).style.display = "block";
+  }
   return 0x03;
  }
  return 0x2140;

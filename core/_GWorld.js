@@ -213,8 +213,8 @@ _GWorld.prototype = {
 		this._offsetY = 0.5 - top  * this._ratioY;
 
 		// 現在点を更新する
-		this._wndMoveX = this.wndPosX(this._imgMoveX);
-		this._wndMoveY = this.wndPosY(this._imgMoveY);
+		this._wndMoveX = this.wndPosX( this._imgMoveX );
+		this._wndMoveY = this.wndPosY( this._imgMoveY );
 
 		return true;
 	},

@@ -4,7 +4,7 @@ var mp;
 #include "math\_MathEnv.js"
 
 // 離散フーリエ変換
-function dft( ret/*Array*/, ret_num, src/*Array*/, src_num ){
+function dft( ret/*Array*/, ret_num, src/*Array*/, src_start, src_num ){
 	var T = 6.28318530717958647692 / ret_num;
 	var t, x, U, V;
 	for( t = ret_num - 1; t >= 0; t-- ){
@@ -12,39 +12,41 @@ function dft( ret/*Array*/, ret_num, src/*Array*/, src_num ){
 		ret[t] = new _Complex();
 		for( x = 0; x < src_num; x++ ){
 			V = U * x;
-			ret[t]._re += src[x] * _COS( V );
-			ret[t]._im -= src[x] * _SIN( V );
+			ret[t]._re += src[src_start + x] * _COS( V );
+			ret[t]._im -= src[src_start + x] * _SIN( V );
 		}
 	}
 }
 
 // 逆離散フーリエ変換
-function idft( ret/*Array*/, ret_num, src/*Array*/, src_num ){
+function idft( ret/*Array*/, ret_start, ret_num, src/*Array*/, src_num ){
 	var T = 6.28318530717958647692 / ret_num;
 	var x, t, U, V;
+	var tmp;
 	for( x = ret_num - 1; x >= 0; x-- ){
 		U = T * x;
-		ret[x] = 0;
+		tmp = 0;
 		for( t = 0; t < src_num; t++ ){
 			V = U * t;
-			ret[x] += src[t]._re * _COS( V ) - src[t]._im * _SIN( V );
+			tmp += src[t]._re * _COS( V ) - src[t]._im * _SIN( V );
 		}
-		ret[x] /= ret_num;
+		tmp /= ret_num;
+		ret[ret_start + x] = _INT( tmp + 0.5 );
 	}
 }
 
 // 畳み込み
-function conv( ret/*Array*/, ret_num, x/*Array*/, x_num, y/*Array*/, y_num ){
+function conv( ret/*Array*/, ret_start, ret_num, x/*Array*/, x_start, x_num, y/*Array*/, y_start, y_num ){
 	var X = new Array();
 	var Y = new Array();
-	dft( X, ret_num, x, x_num );
-	dft( Y, ret_num, y, y_num );
+	dft( X, ret_num, x, x_start, x_num );
+	dft( Y, ret_num, y, y_start, y_num );
 
 	for( var i = ret_num - 1; i >= 0; i-- ){
 		X[i].mulAndAss( Y[i] );
 	}
 
-	idft( ret, ret_num, X, ret_num );
+	idft( ret, ret_start, ret_num, X, ret_num );
 }
 
 // 多倍長整数同士の乗算
@@ -64,15 +66,12 @@ function mul( ret/*Array*/, a/*Array*/, b/*Array*/ ){
 	}
 	var n = la + lb;
 
-	var r = new Array();
-	conv( r, n, a.slice( 1 ), la, b.slice( 1 ), lb );
-
 	ret[n] = 0;	// 配列の確保
-	var c = 0;
-	var i, rr;
-	ret[0] = 0;
-	for( i = 1; i < n; i++ ){
-		rr = _INT( r[i - 1] + 0.5 ) + c;
+	conv( ret, 1, n, a, 1, la, b, 1, lb );
+
+	var i = 1, c = 0, rr;
+	for( ; i < n; i++ ){
+		rr = ret[i] + c;
 		ret[i] = _MOD( rr, _MP_ELEMENT );
 		c = _DIV( rr, _MP_ELEMENT );
 	}
@@ -181,8 +180,6 @@ function main( id ){
 	// グローバル環境
 	setMathEnv( new _MathEnv() );
 
-	mp = new _MultiPrec();
-
 	con.lock();
 
 	try {
@@ -210,7 +207,10 @@ function testSqrt( prec ){
 		default: con.print( "fsqrt2 order=" + order + ": " ); break;
 		}
 
+		mp = new _MultiPrec();
+
 		var time = (new Date()).getTime();
+		pi = new Array();
 		start = 0;
 		if( order == 7 ){
 			mp.mul = mul;
@@ -234,6 +234,8 @@ function testSqrt( prec ){
 }
 
 function testRound1(){
+	mp = new _MultiPrec();
+
 	con.print( "<table border='1' cellspacing='1' cellpadding='4'>" );
 	con.print( "<tr>" );
 	con.print( "<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>" );
@@ -267,6 +269,8 @@ function testRound1(){
 }
 
 function testRound2(){
+	mp = new _MultiPrec();
+
 	var a = new Array();
 	mp.fsqrt( a, mp.F( "2" ), 45 );
 

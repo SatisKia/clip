@@ -302,28 +302,30 @@
 #define _CLIP_STAT_FUNC			15
 #define _CLIP_STAT_ENDFUNC		16
 
-#define _CLIP_STAT_LOOP_END		17
+#define _CLIP_STAT_MULTIEND		17
 
-#define _CLIP_STAT_IF			17/*_CLIP_STAT_LOOP_END*/
-#define _CLIP_STAT_ELIF			18
-#define _CLIP_STAT_ELSE			19
-#define _CLIP_STAT_ENDIF		20
+#define _CLIP_STAT_LOOP_END		18
 
-#define _CLIP_STAT_SWITCH		21
-#define _CLIP_STAT_CASE			22
-#define _CLIP_STAT_DEFAULT		23
-#define _CLIP_STAT_ENDSWI		24
-#define _CLIP_STAT_BREAKSWI		25
+#define _CLIP_STAT_IF			18/*_CLIP_STAT_LOOP_END*/
+#define _CLIP_STAT_ELIF			19
+#define _CLIP_STAT_ELSE			20
+#define _CLIP_STAT_ENDIF		21
 
-#define _CLIP_STAT_CONTINUE		26
-#define _CLIP_STAT_BREAK		27
-#define _CLIP_STAT_CONTINUE2	28
-#define _CLIP_STAT_BREAK2		29
+#define _CLIP_STAT_SWITCH		22
+#define _CLIP_STAT_CASE			23
+#define _CLIP_STAT_DEFAULT		24
+#define _CLIP_STAT_ENDSWI		25
+#define _CLIP_STAT_BREAKSWI		26
 
-#define _CLIP_STAT_ASSERT		30
-#define _CLIP_STAT_RETURN		31
-#define _CLIP_STAT_RETURN2		32
-#define _CLIP_STAT_RETURN3		33
+#define _CLIP_STAT_CONTINUE		27
+#define _CLIP_STAT_BREAK		28
+#define _CLIP_STAT_CONTINUE2	29
+#define _CLIP_STAT_BREAK2		30
+
+#define _CLIP_STAT_ASSERT		31
+#define _CLIP_STAT_RETURN		32
+#define _CLIP_STAT_RETURN2		33
+#define _CLIP_STAT_RETURN3		34
 
 /*
  * コマンドの種類
@@ -630,6 +632,7 @@
 #define _CLIP_PROC_ERR_STAT_FUNCNAME	0x212E//(_CLIP_PROC_ERR | 0x2E)		// 関数名は無効です
 #define _CLIP_PROC_ERR_STAT_FUNCPARAM	0x212F//(_CLIP_PROC_ERR | 0x2F)		// 関数の引数にラベル設定できません
 #define _CLIP_PROC_ERR_STAT_LOOP		0x2130//(_CLIP_PROC_ERR | 0x30)		// ループ回数オーバーしました
+#define _CLIP_PROC_ERR_STAT_END			0x2131//(_CLIP_PROC_ERR | 0x31)		// endは無効です
 
 #define _CLIP_PROC_ERR_COMMAND_NULL		0x2140//(_CLIP_PROC_ERR | 0x40)		// コマンドが間違っています
 #define _CLIP_PROC_ERR_COMMAND_PARAM	0x2141//(_CLIP_PROC_ERR | 0x41)		// コマンドの引数が間違っています

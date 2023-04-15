@@ -1,6 +1,13 @@
+
+
+
+
+
+
 function _Float( val ){
  this._val = (val == undefined) ? 0.0 : val;
 }
+
 _Float.prototype = {
  set : function( val ){
   this._val = val;
@@ -14,6 +21,7 @@ _Float.prototype = {
   return this._val;
  }
 };
+
 function newFloatArray( len ){
  var a = new Array( len );
  for( var i = 0; i < len; i++ ){
@@ -643,9 +651,13 @@ function floatToComplex( x ){
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
+
+
 function _angToRad( ang ){
  return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
+
+
 function fsin( x ){
  return _SIN( _angToRad( x ) );
 }
@@ -1571,6 +1583,7 @@ function intToString( val, radix, width ){
   width = 1;
  }
  var chr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+ var i;
  var swi = (val < 0);
  if( swi ){
   val = -val;
@@ -1587,7 +1600,7 @@ function intToString( val, radix, width ){
   str += "-";
  }
  var str2 = "";
- for( var i = str.length - 1; i >= 0; i-- ){
+ for( i = str.length - 1; i >= 0; i-- ){
   str2 += str.charAt( i );
  }
  return str2;

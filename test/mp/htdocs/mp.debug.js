@@ -382,6 +382,7 @@ function intToString( val, radix, width ){
 		width = 1;
 	}
 	var chr = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	var i;
 	var swi = (val < 0);
 	if( swi ){
 		val = -val;
@@ -398,7 +399,7 @@ function intToString( val, radix, width ){
 		str += "-";
 	}
 	var str2 = "";
-	for( var i = str.length - 1; i >= 0; i-- ){
+	for( i = str.length - 1; i >= 0; i-- ){
 		str2 += str.charAt( i );
 	}
 	return str2;
@@ -498,7 +499,7 @@ _MultiPrec.prototype._fmul = function( a , prec ){
 _MultiPrec.prototype._fdiv = function( a , len ){
 	var l = _INT( _ABS( a[0] / _MP_LEN_COEF ) );
 	this._copy( a, len + 1, a, 1, l - len );
-	l -= len
+	l -= len;
 	var p = _AND( _ABS( a[0] ), _MP_PREC_MASK );
 	if( l == 0 ){
 		a[0] = _MP_LEN_COEF + p; a[1] = 0;
@@ -1326,7 +1327,7 @@ _MultiPrec.prototype._num2str = function( s , n ){
 		s[0] = _CHAR_CODE_0;
 		s[1] = 0;
 		n[0] = n0;
-		return
+		return;
 	}
 	var ss = -1; var nn = 0;
 	var i, j, x;
@@ -1437,7 +1438,7 @@ _MultiPrec.prototype._str2num = function( n , s ){
 		n[0] = 0;
 		return true;
 	}
-	var x = 0; k = 1;
+	var x = 0, k = 1;
 	var nn = 0;
 	do {
 		x += (s[--ss] - _CHAR_CODE_0) * k; k *= 10;

@@ -47,7 +47,6 @@ _Line.prototype = {
 	dup : function(){
 		var dst = new _Line();
 
-		var line;
 		this._get = this._top;
 		while( this._get != null ){
 			dst.regLine( this._get );

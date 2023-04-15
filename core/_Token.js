@@ -166,6 +166,7 @@ var _tokenStat = [
 	"next",
 	"func",
 	"endfunc",
+	"end",
 	"if",
 	"elif",
 	"else",
@@ -1529,7 +1530,7 @@ _Token.prototype = {
 		var cur;
 		var tmp;
 
-		cur = top;
+		cur = this._top;
 		while( cur != null ){
 			tmp = cur;
 			cur = cur._next;

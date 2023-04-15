@@ -322,6 +322,10 @@ function getProcErrorDefString( err, token, isCalculator, isEnglish ){
 		if( isEnglish ) error = "Number of loops exceeded the upper limit.";
 		else            error = "ループ回数オーバーしました";
 		break;
+	case _CLIP_PROC_ERR_STAT_END:
+		if( isEnglish ) error = "\"" + token + "\" is invalid.";
+		else            error = token + "は無効です";
+		break;
 	case _CLIP_PROC_ERR_COMMAND_NULL:
 		if( isEnglish ) error = "The command is incorrect.";
 		else            error = "コマンドが間違っています";
