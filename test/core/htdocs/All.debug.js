@@ -12681,7 +12681,8 @@ _Proc.prototype = {
  },
  _opFact : function( _this, param, code, token, value ){
   if( param._mpFlag ){
-   _this.mpFactorial( value.mp(), _INT( value.mat()._mat[0].toFloat() ) );
+   var tmp = _INT( value.mat()._mat[0].toFloat() );
+   _this.mpFactorial( value.mp(), tmp );
   } else {
    value.matAss( value.mat()._mat[0].factorial() );
   }
