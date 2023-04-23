@@ -958,6 +958,7 @@ _Token.prototype = {
 				imag.set( "" );
 				break;
 			}
+			// そのまま下に流す
 		case _CLIP_MODE_I_FRACT:
 			if( value.denom() == 0 ){
 				real.set( value.toFloat() );

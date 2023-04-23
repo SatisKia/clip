@@ -199,7 +199,7 @@ _Func.prototype = {
 			if( cur._info._cnt <= tmp._info._cnt ){
 				tmp = cur;
 			}
-			cur = cur.next;
+			cur = cur._next;
 		}
 
 		this.del( tmp );

@@ -57,13 +57,6 @@ function __GraphInfo(){
 	this._isLogScaleY = false;	// 対数座標系かどうかのフラグ
 }
 
-// テキスト描画情報
-function __TextInfo(){
-	this._width   = 0;
-	this._ascent  = 0;
-	this._descent = 0;
-}
-
 // グラフ描画クラス
 function _Graph(){
 	this._gWorld = new _GWorld();
@@ -349,7 +342,7 @@ _Graph.prototype = {
 		var yy;
 
 		var text = floatToString( x, 15 );
-		var tmp = new __TextInfo();
+		var tmp = new _TextInfo();
 		this._gWorld.getTextInfo( text, tmp );
 		var width   = tmp._width;
 		var ascent  = tmp._ascent;
@@ -371,7 +364,7 @@ _Graph.prototype = {
 	},
 	_drawYText : function( x, y ){
 		var text = floatToString( y, 15 );
-		var tmp = new __TextInfo();
+		var tmp = new _TextInfo();
 		this._gWorld.getTextInfo( text, tmp );
 		var width   = tmp._width;
 		var ascent  = tmp._ascent;

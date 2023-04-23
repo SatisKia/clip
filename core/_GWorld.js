@@ -69,6 +69,13 @@ function gWorldBgColor(){
 	return _gworld_bg_color;
 }
 
+// テキスト描画情報
+function _TextInfo(){
+	this._width   = 0;
+	this._ascent  = 0;
+	this._descent = 0;
+}
+
 // イメージ・メモリ管理クラス
 function _GWorld(){
 	// イメージ情報
@@ -106,6 +113,7 @@ function _GWorld(){
 	// 文字セット
 	this._charSet = 0;
 
+	this._gWorldLine = true;
 	this._gWorldPut = true;
 }
 

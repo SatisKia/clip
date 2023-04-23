@@ -1,0 +1,7 @@
+#組合せの数 number of combinations
+#\!- <n> <k>
+:params n k
+:uint
+if n < k; return 0; endif
+if k == 0 || k == n; return 1; endif
+return !comb (n - 1) (k - 1) + !comb (n - 1) k

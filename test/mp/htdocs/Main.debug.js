@@ -1250,6 +1250,7 @@ function main( id ){
   testSqrt( 1000 );
   testRound1();
   testRound2();
+  testFactorial();
  } catch( e ){
   catchError( e );
  }
@@ -1350,6 +1351,118 @@ function testRound2(){
    }
    con.println( "&nbsp;" + s );
   }
+  con.println();
  }
+}
+function _mpCombination( n, r ){
+  n = _INT( n );
+  r = _INT( r );
+  var ret = new Array();
+  if( n < r ){
+   mp.set( ret, mp.I( "0" ) );
+   return ret;
+  }
+  if( n - r < r ) r = n - r;
+  if( r == 0 ){
+   mp.set( ret, mp.I( "1" ) );
+   return ret;
+  }
+  if( r == 1 ){
+   mp.str2num( ret, "" + n );
+   return ret;
+  }
+  var numer = new Array( r );
+  var denom = new Array( r );
+  var i, k;
+  var pivot;
+  var offset;
+  for( i = 0; i < r; i++ ){
+   numer[i] = n - r + i + 1;
+   denom[i] = i + 1;
+  }
+  for( k = 2; k <= r; k++ ){
+   pivot = denom[k - 1];
+   if( pivot > 1 ){
+    offset = _MOD( n - r, k );
+    for( i = k - 1; i < r; i += k ){
+     numer[i - offset] = _DIV( numer[i - offset], pivot );
+     denom[i] = _DIV( denom[i], pivot );
+    }
+   }
+  }
+  var ret = new Array();
+  mp.set( ret, mp.I( "1" ) );
+  var ii = new Array();
+  for( i = 0; i < r; i++ ){
+   if( numer[i] > 1 ){
+    mp.str2num( ii, "" + numer[i] );
+    mp.mul( ret, ret, ii );
+   }
+  }
+  return ret;
+}
+function _mpFactorial( n ){
+ if( n == 0 ){
+  var ret = new Array();
+  mp.set( ret, mp.I( "1" ) );
+  return ret;
+ }
+ var value = _mpFactorial( _DIV( n, 2 ) );
+ mp.mul( value, value, value );
+ mp.mul( value, value, _mpCombination( n, _DIV( n, 2 ) ) );
+ if( (n & 1) != 0 ){
+  var tmp = new Array();
+  mp.str2num( tmp, "" + _DIV( n + 1, 2 ) );
+  mp.mul( value, value, tmp );
+ }
+ return value;
+}
+function mpFactorial( ret , x ){
+ var m = false;
+ if( x < 0 ){
+  m = true;
+  x = 0 - x;
+ }
+ mp.str2num( ret, "1" );
+ var ii = new Array();
+ for( var i = 2; i <= x; i++ ){
+  mp.str2num( ii, "" + i );
+  mp.mul( ret, ret, ii );
+ }
+ if( m ){
+  mp.neg( ret );
+ }
+}
+function mpFactorial2( ret , x ){
+ var m = false;
+ if( x < 0 ){
+  m = true;
+  x = 0 - x;
+ }
+ mp.set( ret, _mpFactorial( x ) );
+ if( m ){
+  mp.neg( ret );
+ }
+}
+function testFactorial(){
+ mp = new _MultiPrec();
+ var i;
+ var time = (new Date()).getTime();
+ var a = new Array();
+ mpFactorial( a, 999 );
+ var s = mp.num2str( a );
+ for( i = 0; i < s.length; i += 100 ){
+  con.println( s.substring( i, i + 100 ) );
+ }
+ con.println( "" + ((new Date()).getTime() - time) + " ms" );
+ con.println();
+ var time = (new Date()).getTime();
+ var a = new Array();
+ mpFactorial2( a, 999 );
+ var s = mp.num2str( a );
+ for( i = 0; i < s.length; i += 100 ){
+  con.println( s.substring( i, i + 100 ) );
+ }
+ con.println( "" + ((new Date()).getTime() - time) + " ms" );
  con.println();
 }

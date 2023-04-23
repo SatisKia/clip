@@ -3542,18 +3542,88 @@ _Proc.prototype = {
 			}
 		}
 	},
+	_mpCombination : function( n, r ){
+		n = _INT( n );
+		r = _INT( r );
+
+		var ret = new Array();
+		if( n < r ){
+			_proc_mp.set( ret, _proc_mp.I( "0" ) );
+			return ret;
+		}
+		if( n - r < r ) r = n - r;
+		if( r == 0 ){
+			_proc_mp.set( ret, _proc_mp.I( "1" ) );
+			return ret;
+		}
+		if( r == 1 ){
+			_proc_mp.str2num( ret, "" + n );
+			return ret;
+		}
+
+		var numer = new Array( r );
+		var denom = new Array( r );
+
+		var i, k;
+		var pivot;
+		var offset;
+
+		for( i = 0; i < r; i++ ){
+			numer[i] = n - r + i + 1;
+			denom[i] = i + 1;
+		}
+
+		for( k = 2; k <= r; k++ ){
+			pivot = denom[k - 1];
+			if( pivot > 1 ){
+				offset = _MOD( n - r, k );
+				for( i = k - 1; i < r; i += k ){
+					numer[i - offset] = _DIV( numer[i - offset], pivot );
+					denom[i] = _DIV( denom[i], pivot );
+				}
+			}
+		}
+
+		var ret = new Array();
+		_proc_mp.set( ret, _proc_mp.I( "1" ) );
+		var ii = new Array();
+		for( i = 0; i < r; i++ ){
+			if( numer[i] > 1 ){
+				_proc_mp.str2num( ii, "" + numer[i] );
+				_proc_mp.mul( ret, ret, ii );
+			}
+		}
+		return ret;
+	},
+	_mpFactorial : function( _this, n ){
+		if( n == 0 ){
+			var ret = new Array();
+			_proc_mp.set( ret, _proc_mp.I( "1" ) );
+			return ret;
+		}
+		var value = _this._mpFactorial( _this, _DIV( n, 2 ) );
+		_proc_mp.mul( value, value, value );
+		_proc_mp.mul( value, value, _this._mpCombination( n, _DIV( n, 2 ) ) );
+		if( (n & 1) != 0 ){
+			var tmp = new Array();
+			_proc_mp.str2num( tmp, "" + _DIV( n + 1, 2 ) );
+			_proc_mp.mul( value, value, tmp );
+		}
+		return value;
+	},
 	mpFactorial : function( ret/*Array*/, x ){
 		var m = false;
 		if( x < 0 ){
 			m = true;
 			x = 0 - x;
 		}
-		_proc_mp.str2num( ret, "1" );
-		var ii = new Array();
-		for( var i = 2; i <= x; i++ ){
-			_proc_mp.str2num( ii, "" + i );
-			_proc_mp.mul( ret, ret, ii );
-		}
+//		_proc_mp.str2num( ret, "1" );
+//		var ii = new Array();
+//		for( var i = 2; i <= x; i++ ){
+//			_proc_mp.str2num( ii, "" + i );
+//			_proc_mp.mul( ret, ret, ii );
+//		}
+		_proc_mp.set( ret, this._mpFactorial( this, x ) );
 		if( m ){
 			_proc_mp.neg( ret );
 		}
@@ -5510,7 +5580,7 @@ _Proc.prototype = {
 
 		if( param._mpFlag ){
 			if( param._mode == _CLIP_MODE_F_MULTIPREC ){
-				if( _proc_mp.fcmp( rightValue.mp(), _proc_mp.F( "0.0" ) ) == 0 ){
+				if( _proc_mp.fcmp( value.mp(), _proc_mp.F( "0.0" ) ) != 0 ){
 					if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
 						if( _this._constSkipConditional( code, token ) == _CLIP_NO_ERR ){
 							return _CLIP_NO_ERR;
@@ -5524,7 +5594,7 @@ _Proc.prototype = {
 					}
 				}
 			} else {
-				if( _proc_mp.cmp( rightValue.mp(), _proc_mp.I( "0" ) ) == 0 ){
+				if( _proc_mp.cmp( value.mp(), _proc_mp.I( "0" ) ) != 0 ){
 					if( _this._const( param, code, token, value ) == _CLIP_NO_ERR ){
 						if( _this._constSkipConditional( code, token ) == _CLIP_NO_ERR ){
 							return _CLIP_NO_ERR;
@@ -6902,9 +6972,9 @@ _Proc.prototype = {
 		var tmp;
 		if( param._mpFlag ){
 			if( param._mode == _CLIP_MODE_F_MULTIPREC ){
-				tmp = (_proc_mp.fcmp( rightValue.mp(), _proc_mp.F( "0.0" ) ) != 0);
+				tmp = (_proc_mp.fcmp( tmpValue.mp(), _proc_mp.F( "0.0" ) ) != 0);
 			} else {
-				tmp = (_proc_mp.cmp( rightValue.mp(), _proc_mp.I( "0" ) ) != 0);
+				tmp = (_proc_mp.cmp( tmpValue.mp(), _proc_mp.I( "0" ) ) != 0);
 			}
 		} else {
 			tmp = tmpValue.mat().notEqual( 0.0 );
