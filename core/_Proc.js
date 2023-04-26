@@ -2521,8 +2521,8 @@ _Proc.prototype = {
 			return ret;
 		}
 
-		tmpValue[0].divAndAss( tmpValue[1]._mat[0].toFloat() );
-		value.mat().addAndAss( tmpValue[0] );
+		tmpValue[0].mat().divAndAss( tmpValue[1].mat()._mat[0].toFloat() );
+		value.mat().addAndAss( tmpValue[0].mat()._mat[0].toFloat() );
 		return _CLIP_NO_ERR;
 	},
 	_seMul : function( _this, param, code, token, value ){
@@ -10570,7 +10570,7 @@ function defProcFunction(){
 	if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
 	if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
 
-	if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){};
+	if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){ return _CLIP_PROC_END; };
 	if( window.assertProc == undefined ) window.assertProc = function( num, func ){ return false; };
 	if( window.errorProc == undefined ) window.errorProc = function( err, num, func, token ){};
 

@@ -9760,8 +9760,8 @@ _Proc.prototype = {
   if( (ret = _this._getSeOperand( param, code, token, tmpValue[1] )) != 0x00 ){
    return ret;
   }
-  tmpValue[0].divAndAss( tmpValue[1]._mat[0].toFloat() );
-  value.mat().addAndAss( tmpValue[0] );
+  tmpValue[0].mat().divAndAss( tmpValue[1].mat()._mat[0].toFloat() );
+  value.mat().addAndAss( tmpValue[0].mat()._mat[0].toFloat() );
   return 0x00;
  },
  _seMul : function( _this, param, code, token, value ){
@@ -16792,7 +16792,7 @@ var _procTest = [
 function defProcFunction(){
  if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
  if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
- if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){};
+ if( window.mainProc == undefined ) window.mainProc = function( parentProc, parentParam, func, funcParam, childProc, childParam ){ return 0x04; };
  if( window.assertProc == undefined ) window.assertProc = function( num, func ){ return false; };
  if( window.errorProc == undefined ) window.errorProc = function( err, num, func, token ){};
  if( window.printTrace == undefined ) window.printTrace = function( param, line, num, comment, skipFlag ){};
