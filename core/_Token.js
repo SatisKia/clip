@@ -975,7 +975,7 @@ _Token.prototype = {
 			break;
 		case _CLIP_MODE_H_TIME:
 			real.set( value.timeMinus() ? "-" : "" );
-			real.add( ((value.hour() < 10.0) ? "0" : "") + value.hour() );
+			real.add( ((value.hour() < 10.0) ? "0" : "") + floatToString( value.hour(), _CLIP_DEFPREC ) );
 			imag.set( "" );
 			break;
 		case _CLIP_MODE_M_TIME:
@@ -983,10 +983,10 @@ _Token.prototype = {
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.hour() < 10.0) ? "0" : "") + _INT( value.hour() ) );
 				real.add( ":" );
-				real.add( ((value.min () < 10.0) ? "0" : "") + value.min() );
+				real.add( ((value.min () < 10.0) ? "0" : "") + floatToString( value.min(), _CLIP_DEFPREC ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.min() < 10.0) ? "0" : "") + value.min() );
+				real.add( ((value.min() < 10.0) ? "0" : "") + floatToString( value.min(), _CLIP_DEFPREC ) );
 			}
 			imag.set( "" );
 			break;
@@ -997,15 +997,15 @@ _Token.prototype = {
 				real.add( ":" );
 				real.add( ((value.min () < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
-				real.add( ((value.sec () < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec () < 10.0) ? "0" : "") + floatToString( value.sec(), _CLIP_DEFPREC ) );
 			} else if( _INT( value.min() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.min() < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
-				real.add( ((value.sec() < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec() < 10.0) ? "0" : "") + floatToString( value.sec(), _CLIP_DEFPREC ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.sec() < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec() < 10.0) ? "0" : "") + floatToString( value.sec(), _CLIP_DEFPREC ) );
 			}
 			imag.set( "" );
 			break;
@@ -1018,22 +1018,22 @@ _Token.prototype = {
 				real.add( ":" );
 				real.add( ((value.sec  () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), _CLIP_DEFPREC ) );
 			} else if( _INT( value.min() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.min  () < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
 				real.add( ((value.sec  () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), _CLIP_DEFPREC ) );
 			} else if( _INT( value.sec() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.sec  () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), _CLIP_DEFPREC ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), _CLIP_DEFPREC ) );
 			}
 			imag.set( "" );
 			break;

@@ -755,7 +755,6 @@ _Proc.prototype = {
 		}
 	},
 	_procInitArray : function( param ){
-		var i;
 		var flag;
 		var code;
 		var token;
@@ -791,7 +790,6 @@ _Proc.prototype = {
 					resizeList[2] = -1;
 					saveLine = this._curLine._token;
 					this._curLine._token = this._initArray;
-					i = 0;
 					this._initArray.beginGetToken();
 					while( true ){
 						lock = this._initArray.lock();
@@ -834,7 +832,6 @@ _Proc.prototype = {
 								break;
 							}
 						}
-						i++;
 					}
 					this._curLine._token = saveLine;
 					arrayList  = null;
@@ -3546,7 +3543,9 @@ _Proc.prototype = {
 		n = _INT( n );
 		r = _INT( r );
 
-		var ret = new Array();
+		var ret;
+
+		ret = new Array();
 		if( n < r ){
 			_proc_mp.set( ret, _proc_mp.I( "0" ) );
 			return ret;
@@ -3584,7 +3583,7 @@ _Proc.prototype = {
 			}
 		}
 
-		var ret = new Array();
+		ret = new Array();
 		_proc_mp.set( ret, _proc_mp.I( "1" ) );
 		var ii = new Array();
 		for( i = 0; i < r; i++ ){

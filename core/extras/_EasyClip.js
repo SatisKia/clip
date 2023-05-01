@@ -393,9 +393,14 @@ _EasyClip.prototype = {
 			code  = getCode();
 			token = getToken();
 			if( code == _CLIP_CODE_ARRAY_TOP ){
-				_index[++_dim] = 0;
+				_dim++;
+				_index[_dim] = 0;
 			} else if( code == _CLIP_CODE_ARRAY_END ){
-				_index[--_dim]++;
+				_index[_dim] = 0;
+				_dim--;
+				if( _dim >= 0 ){
+					_index[_dim]++;
+				}
 			} else if( code == _CLIP_CODE_CONSTANT ){
 				if( (dim == undefined) || (dim == _dim + 1) ){
 					if( _dim > 0 ){

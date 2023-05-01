@@ -206,6 +206,10 @@ _Loop.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopNext : function( _this, line/*_Void*/, beforeFlag/*_Boolean*/ ){
+		if( _this._curLoop._endCnt > 0 ){
+			_this._curLoop._endCnt--;
+		}
+
 		var tmp;
 		var ret;
 

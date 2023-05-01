@@ -38,9 +38,11 @@ _MultiPrec.prototype._fnum2str = function( s/*Array*/, n/*Array*/, prec ){
 		s[j++] = _CHAR( '.' );
 		pp = true;
 		for( i = 0; i < p - l; i++ ){
-			prec--;
-			if( prec < 0 ){
-				break;
+			if( prec != undefined ){
+				prec--;
+				if( prec < 0 ){
+					break;
+				}
 			}
 			s[j++] = _CHAR_CODE_0;
 		}
@@ -51,9 +53,11 @@ _MultiPrec.prototype._fnum2str = function( s/*Array*/, n/*Array*/, prec ){
 			pp = true;
 		}
 		if( pp ){
-			prec--;
-			if( prec < 0 ){
-				break;
+			if( prec != undefined ){
+				prec--;
+				if( prec < 0 ){
+					break;
+				}
 			}
 		}
 		s[j++] = ss[k++];

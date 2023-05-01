@@ -3564,9 +3564,11 @@ _MultiPrec.prototype._fnum2str = function( s , n , prec ){
 		s[j++] = _CHAR( '.' );
 		pp = true;
 		for( i = 0; i < p - l; i++ ){
-			prec--;
-			if( prec < 0 ){
-				break;
+			if( prec != undefined ){
+				prec--;
+				if( prec < 0 ){
+					break;
+				}
 			}
 			s[j++] = _CHAR_CODE_0;
 		}
@@ -3577,9 +3579,11 @@ _MultiPrec.prototype._fnum2str = function( s , n , prec ){
 			pp = true;
 		}
 		if( pp ){
-			prec--;
-			if( prec < 0 ){
-				break;
+			if( prec != undefined ){
+				prec--;
+				if( prec < 0 ){
+					break;
+				}
 			}
 		}
 		s[j++] = ss[k++];
@@ -6920,6 +6924,9 @@ _Loop.prototype = {
 		return 0x00;
 	},
 	_loopNext : function( _this, line , beforeFlag ){
+		if( _this._curLoop._endCnt > 0 ){
+			_this._curLoop._endCnt--;
+		}
 		var tmp;
 		var ret;
 		if( _this._curLoop._loopType == 4 ){
@@ -8088,7 +8095,6 @@ _Proc.prototype = {
 		}
 	},
 	_procInitArray : function( param ){
-		var i;
 		var flag;
 		var code;
 		var token;
@@ -8123,7 +8129,6 @@ _Proc.prototype = {
 					resizeList[2] = -1;
 					saveLine = this._curLine._token;
 					this._curLine._token = this._initArray;
-					i = 0;
 					this._initArray.beginGetToken();
 					while( true ){
 						lock = this._initArray.lock();
@@ -8166,7 +8171,6 @@ _Proc.prototype = {
 								break;
 							}
 						}
-						i++;
 					}
 					this._curLine._token = saveLine;
 					arrayList = null;
@@ -10513,7 +10517,8 @@ _Proc.prototype = {
 	_mpCombination : function( n, r ){
 		n = _INT( n );
 		r = _INT( r );
-		var ret = new Array();
+		var ret;
+		ret = new Array();
 		if( n < r ){
 			_proc_mp.set( ret, _proc_mp.I( "0" ) );
 			return ret;
@@ -10546,7 +10551,7 @@ _Proc.prototype = {
 				}
 			}
 		}
-		var ret = new Array();
+		ret = new Array();
 		_proc_mp.set( ret, _proc_mp.I( "1" ) );
 		var ii = new Array();
 		for( i = 0; i < r; i++ ){
@@ -17647,7 +17652,7 @@ _Token.prototype = {
 			break;
 		case 0x0080:
 			real.set( value.timeMinus() ? "-" : "" );
-			real.add( ((value.hour() < 10.0) ? "0" : "") + value.hour() );
+			real.add( ((value.hour() < 10.0) ? "0" : "") + floatToString( value.hour(), 6 ) );
 			imag.set( "" );
 			break;
 		case 0x0081:
@@ -17655,10 +17660,10 @@ _Token.prototype = {
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.hour() < 10.0) ? "0" : "") + _INT( value.hour() ) );
 				real.add( ":" );
-				real.add( ((value.min () < 10.0) ? "0" : "") + value.min() );
+				real.add( ((value.min () < 10.0) ? "0" : "") + floatToString( value.min(), 6 ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.min() < 10.0) ? "0" : "") + value.min() );
+				real.add( ((value.min() < 10.0) ? "0" : "") + floatToString( value.min(), 6 ) );
 			}
 			imag.set( "" );
 			break;
@@ -17669,15 +17674,15 @@ _Token.prototype = {
 				real.add( ":" );
 				real.add( ((value.min () < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
-				real.add( ((value.sec () < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec () < 10.0) ? "0" : "") + floatToString( value.sec(), 6 ) );
 			} else if( _INT( value.min() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.min() < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
-				real.add( ((value.sec() < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec() < 10.0) ? "0" : "") + floatToString( value.sec(), 6 ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.sec() < 10.0) ? "0" : "") + value.sec() );
+				real.add( ((value.sec() < 10.0) ? "0" : "") + floatToString( value.sec(), 6 ) );
 			}
 			imag.set( "" );
 			break;
@@ -17690,22 +17695,22 @@ _Token.prototype = {
 				real.add( ":" );
 				real.add( ((value.sec () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), 6 ) );
 			} else if( _INT( value.min() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.min () < 10.0) ? "0" : "") + _INT( value.min() ) );
 				real.add( ":" );
 				real.add( ((value.sec () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), 6 ) );
 			} else if( _INT( value.sec() ) != 0 ){
 				real.set( value.timeMinus() ? "-" : "" );
 				real.add( ((value.sec () < 10.0) ? "0" : "") + _INT( value.sec() ) );
 				real.add( ":" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), 6 ) );
 			} else {
 				real.set( value.timeMinus() ? "-" : "" );
-				real.add( ((value.frame() < 10.0) ? "0" : "") + value.frame() );
+				real.add( ((value.frame() < 10.0) ? "0" : "") + floatToString( value.frame(), 6 ) );
 			}
 			imag.set( "" );
 			break;

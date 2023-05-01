@@ -195,7 +195,7 @@ function main( id ){
 }
 
 function testSqrt( prec ){
-	var i;
+	var i, j;
 
 	for( var order = 0; order <= 7; order++ ){
 		if( order != 0 ){
@@ -226,7 +226,8 @@ function testSqrt( prec ){
 		con.println( tmp[0] + "." );
 		if( tmp[1] ){
 			for( i = 0; i < tmp[1].length; i += 100 ){
-				con.println( tmp[1].substring( i, i + 100 ) );
+				j = i + 100; if( j > tmp[1].length ) j = tmp[1].length;
+				con.println( tmp[1].substring( i, j ) );
 			}
 		}
 	}
@@ -307,57 +308,59 @@ function testRound2(){
 }
 
 function _mpCombination( n, r ){
-		n = _INT( n );
-		r = _INT( r );
+	n = _INT( n );
+	r = _INT( r );
 
-		var ret = new Array();
-		if( n < r ){
-			mp.set( ret, mp.I( "0" ) );
-			return ret;
-		}
-		if( n - r < r ) r = n - r;
-		if( r == 0 ){
-			mp.set( ret, mp.I( "1" ) );
-			return ret;
-		}
-		if( r == 1 ){
-			mp.str2num( ret, "" + n );
-			return ret;
-		}
+	var ret;
 
-		var numer = new Array( r );
-		var denom = new Array( r );
-
-		var i, k;
-		var pivot;
-		var offset;
-
-		for( i = 0; i < r; i++ ){
-			numer[i] = n - r + i + 1;
-			denom[i] = i + 1;
-		}
-
-		for( k = 2; k <= r; k++ ){
-			pivot = denom[k - 1];
-			if( pivot > 1 ){
-				offset = _MOD( n - r, k );
-				for( i = k - 1; i < r; i += k ){
-					numer[i - offset] = _DIV( numer[i - offset], pivot );
-					denom[i] = _DIV( denom[i], pivot );
-				}
-			}
-		}
-
-		var ret = new Array();
-		mp.set( ret, mp.I( "1" ) );
-		var ii = new Array();
-		for( i = 0; i < r; i++ ){
-			if( numer[i] > 1 ){
-				mp.str2num( ii, "" + numer[i] );
-				mp.mul( ret, ret, ii );
-			}
-		}
+	ret = new Array();
+	if( n < r ){
+		mp.set( ret, mp.I( "0" ) );
 		return ret;
+	}
+	if( n - r < r ) r = n - r;
+	if( r == 0 ){
+		mp.set( ret, mp.I( "1" ) );
+		return ret;
+	}
+	if( r == 1 ){
+		mp.str2num( ret, "" + n );
+		return ret;
+	}
+
+	var numer = new Array( r );
+	var denom = new Array( r );
+
+	var i, k;
+	var pivot;
+	var offset;
+
+	for( i = 0; i < r; i++ ){
+		numer[i] = n - r + i + 1;
+		denom[i] = i + 1;
+	}
+
+	for( k = 2; k <= r; k++ ){
+		pivot = denom[k - 1];
+		if( pivot > 1 ){
+			offset = _MOD( n - r, k );
+			for( i = k - 1; i < r; i += k ){
+				numer[i - offset] = _DIV( numer[i - offset], pivot );
+				denom[i] = _DIV( denom[i], pivot );
+			}
+		}
+	}
+
+	ret = new Array();
+	mp.set( ret, mp.I( "1" ) );
+	var ii = new Array();
+	for( i = 0; i < r; i++ ){
+		if( numer[i] > 1 ){
+			mp.str2num( ii, "" + numer[i] );
+			mp.mul( ret, ret, ii );
+		}
+	}
+	return ret;
 }
 function _mpFactorial( n ){
 	if( n == 0 ){
@@ -405,25 +408,30 @@ function mpFactorial2( ret/*Array*/, x ){
 function testFactorial(){
 	mp = new _MultiPrec();
 
-	var i;
+	var i, j;
+	var time;
+	var a;
+	var s;
 
-	var time = (new Date()).getTime();
-	var a = new Array();
+	time = (new Date()).getTime();
+	a = new Array();
 	mpFactorial( a, 999 );
-	var s = mp.num2str( a );
+	s = mp.num2str( a );
 	for( i = 0; i < s.length; i += 100 ){
-		con.println( s.substring( i, i + 100 ) );
+		j = i + 100; if( j > s.length ) j = s.length;
+		con.println( s.substring( i, j ) );
 	}
 	con.println( "" + ((new Date()).getTime() - time) + " ms" );
 
 	con.println();
 
-	var time = (new Date()).getTime();
-	var a = new Array();
+	time = (new Date()).getTime();
+	a = new Array();
 	mpFactorial2( a, 999 );
-	var s = mp.num2str( a );
+	s = mp.num2str( a );
 	for( i = 0; i < s.length; i += 100 ){
-		con.println( s.substring( i, i + 100 ) );
+		j = i + 100; if( j > s.length ) j = s.length;
+		con.println( s.substring( i, j ) );
 	}
 	con.println( "" + ((new Date()).getTime() - time) + " ms" );
 
