@@ -10565,7 +10565,7 @@ var _procTest = [
 	_Proc.prototype._procTest3
 ];
 
-function defProcFunction(){
+function defProcFunction( window ){
 	if( window.getExtFuncDataDirect == undefined ) window.getExtFuncDataDirect = function( func ){ return null; };
 	if( window.getExtFuncDataNameSpace == undefined ) window.getExtFuncDataNameSpace = function( func ){ return null; };
 

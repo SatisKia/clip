@@ -1550,8 +1550,8 @@ var englishFlag = false;
 var lastTouchEnd = 0;
 function main( inputId, divId, canvasId, inputFileId, editorId, logId ){
  var i;
- defGWorldFunction();
- defProcFunction();
+ defGWorldFunction( window );
+ defProcFunction( window );
  var userAgent = window.navigator.userAgent;
  if( (userAgent.indexOf( "Android" ) != -1) || (userAgent.indexOf( "iPad" ) != -1) ){
   document.getElementById( "clip_loadextfunc" ).style.display = "none";

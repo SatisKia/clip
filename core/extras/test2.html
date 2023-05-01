@@ -10,9 +10,15 @@
 <script type="text/javascript" src="../clip.js"></script>
 <script type="text/javascript">
 function main(){
+	var clip = new _EasyClip();
+
 	// 文字情報を登録する
 	regGWorldDefCharInfo( 0 );
 
+	// カラー・パレットを登録する
+	clip.setPalette( COLOR_WIN );
+
+	var easyCanvas = new _EasyCanvas( window );
 	window.gWorldLine = function( gWorld, x1, y1, x2, y2 ){
 		var canvas = curCanvas();
 		if( gWorld.color() == 252 ){
@@ -22,17 +28,12 @@ function main(){
 		}
 		canvas.line( x1, y1, x2, y2 );
 	};
-	var easyCanvas = new _EasyCanvas();
 
 	window.doCommandGWorld = function( width, height ){
 		var canvas = curClip().createCanvas( width, height );
 		easyCanvas.setFont( canvas, 10, "Helvetica" );
 	};
 
-	var clip = new _EasyClip();
-	clip.setPalette( COLOR_WIN );
-	clip.commandGWorld( 256, 256 );
-	clip.commandGColor( 252 );
 	clip.procScript( [
 		"func text3d_x",
 		"    :ans FALSE",
@@ -180,7 +181,11 @@ function main(){
 		"    :gcolor @c # 現在色を戻す",
 		"end"
 	] );
+
+	clip.commandGWorld( 256, 256 );
+	clip.commandGColor( 252 );
 	clip.procLine( "plot3d [\"exp([-\\](x*x+y*y] \\-2 2 0.2 \\-2 2 0.2 0.2 5 1" );
+//	clip.updateCanvas();
 
 	var img = document.getElementById( "img0" );
 	img.src = clip.canvas().element().toDataURL( "image/png" );

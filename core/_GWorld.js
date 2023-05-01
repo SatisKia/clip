@@ -778,7 +778,7 @@ _GWorld.prototype = {
 
 };
 
-function defGWorldFunction(){
+function defGWorldFunction( window ){
 	if( window.gWorldClear == undefined ) window.gWorldClear = function( gWorld, color ){};
 	if( window.gWorldSetColor == undefined ) window.gWorldSetColor = function( gWorld, color ){};
 	if( window.gWorldPutColor == undefined ) window.gWorldPutColor = function( gWorld, x, y, color ){};

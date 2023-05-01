@@ -135,8 +135,8 @@ function _EasyClip(){
 			parentProc.doCommandRePlot( childProc, childParam, graph, start, end, step );
 		};
 	}
-	defGWorldFunction();
-	defProcFunction();
+	defGWorldFunction( window );
+	defProcFunction( window );
 
 	// 定義定数の値
 	setDefineValue();
