@@ -164,7 +164,7 @@ _Canvas.prototype = {
 
 	clear : function( x, y, w, h ){
 		if( (x == undefined) && (y == undefined) && (w == undefined) && (h == undefined) ){
-//			this._context.clearRect( 0, 0, this.width() + 1, this.height() + 1 );
+//			this._context.clearRect( 0, 0, this.width(), this.height() );
 			this._canvas.width = this._canvas.width;
 		} else if( (w == undefined) && (h == undefined) ){
 			this._context.clearRect( x, y, 1, 1 );
