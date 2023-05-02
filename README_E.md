@@ -120,11 +120,11 @@ window.printError = function( error, num, func ){
 };
 
 window.doCommandClear = function(){
-    // Function called when command :clear is executed
+    // Function called when command ":clear" is executed
 };
 window.doCommandPrint = function( topPrint, flag ){
-    // Functions called when the commands :print / :println are executed
-    // When command :print, false is passed to flag, and when command :println, true is passed to flag.
+    // Functions called when the commands ":print" / ":println" are executed
+    // When command ":print", false is passed to flag, and when command ":println", true is passed to flag.
     // The following is an example of generating a string
     var str = "";
     var cur = topPrint;
@@ -141,7 +141,7 @@ window.doCommandPrint = function( topPrint, flag ){
     }
 };
 window.doCommandScan = function( topScan, proc, param ){
-    // Function called when command :scan is executed
+    // Function called when command ":scan" is executed
     // The following is an example of displaying the character input dialog
     var defString = new String();
     var newString = new String();
@@ -157,10 +157,10 @@ window.doCommandScan = function( topScan, proc, param ){
     }
 };
 window.doCommandGWorld = function( width, height ){
-    // Function called when command :gworld is executed
+    // Function called when command ":gworld" is executed
 };
 window.doCommandGWorld24 = function( width, height ){
-    // Function called when command :gworld24 is executed
+    // Function called when command ":gworld24" is executed
 };
 ```
 
@@ -191,7 +191,7 @@ clip.setFract( 'c', -123, 45 ); // @c in CLIP
 clip.setMultiPrec( 'a', array/*Array*/ ); // @@a in CLIP
 ```
 
-### Set values ​​in the array
+### Set values in the array
 
 ```javascript
 clip.setVector( 'a', [1,2,3,4,5,6] ); // @@a{1 2 3 4 5 6}
@@ -228,7 +228,7 @@ var string = clip.getMultiPrecString( 'a' );
 
 Since the return value of the getValue function is a _Value object (core/math/_Value.js), you can use functions other than the toFloat, real, imag, fractMinus, num, and denom functions.
 
-### Check the values ​​in the array
+### Check the values in the array
 
 ```javascript
 var array = clip.getArray( 'a' ); // Forcibly convert to JavaScript Array
@@ -307,7 +307,7 @@ clip.setMode( mode, param1, param2 );
 
 Immediately after building the _EasyClip object: _CLIP_MODE_G_FLOAT
 
-**Floating point display accuracy** (:prec command in CLIP)
+**Floating point display accuracy** (":prec" command in CLIP)
 
 ```javascript
 clip.setPrec( prec );
@@ -315,7 +315,7 @@ clip.setPrec( prec );
 
 Immediately after building the _EasyClip object: 6
 
-**Frames per second** (:fps command in CLIP)
+**Frames per second** (":fps" command in CLIP)
 
 ```javascript
 clip.setFps( fps );
@@ -323,7 +323,7 @@ clip.setFps( fps );
 
 Immediately after building the _EasyClip object: 30.0
 
-**Radix in integer** (:radix command in CLIP)
+**Radix in integer** (":radix" command in CLIP)
 
 ```javascript
 clip.setRadix( radix );
@@ -345,7 +345,7 @@ clip.setAngType( type );
 
 Immediately after building the _EasyClip object: _ANG_TYPE_RAD
 
-**Calculator mode specification** (:calculator command in CLIP)
+**Calculator mode specification** (":calculator" command in CLIP)
 
 ```javascript
 clip.setCalculator( flag );
@@ -353,7 +353,7 @@ clip.setCalculator( flag );
 
 Immediately after building the _EasyClip object: false
 
-**Specify the lower limit of array subscripts** (:base command in CLIP)
+**Specify the lower limit of array subscripts** (":base" command in CLIP)
 
 ```javascript
 clip.setBase( base );
@@ -366,7 +366,7 @@ clip.setBase( base );
 
 Immediately after building the _EasyClip object: 0
 
-**Specify whether to return the calculation result** (:ans command in CLIP)
+**Specify whether to return the calculation result** (":ans" command in CLIP)
 
 ```javascript
 clip.setAnsFlag( flag );
@@ -374,7 +374,7 @@ clip.setAnsFlag( flag );
 
 Immediately after building the _EasyClip object: false
 
-**Specify whether diagnostic message is valid** (:assert command in CLIP)
+**Specify whether diagnostic message is valid** (":assert" command in CLIP)
 
 ```javascript
 clip.setAssertFlag( flag );
@@ -382,13 +382,13 @@ clip.setAssertFlag( flag );
 
 Immediately after building the _EasyClip object: false
 
-**Specify whether the warning message is valid** (:warn command in CLIP)
+**Specify whether the warning message is valid** (":warn" command in CLIP)
 
 ```javascript
 clip.setWarnFlag( flag );
 ```
 
-_EasyClip Immediately after object construction: true
+Immediately after building the _EasyClip object: true
 
 ### Command
 
