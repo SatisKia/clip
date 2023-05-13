@@ -18779,7 +18779,13 @@ _Token.prototype = {
         }
         break;
        case 12:
-        if( i == 0 ){
+        if( tmpEnd._token == 38 ){
+         if( i > 0 ){
+          i--;
+         } else {
+          retEnd = 1;
+         }
+        } else if( i == 0 ){
          if( (topLevel != assLevel) && ((level == posLevel) || (this._checkOp( tmpEnd._token ) <= topLevel)) ){
           retEnd = 2;
          }
