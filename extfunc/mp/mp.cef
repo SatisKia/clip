@@ -47,13 +47,13 @@ func checkOp op
 		return 2
 	case '\=
 		return 1
-	endswi
+	end
 	return 0
-endfunc
+end
 
 func isParenthesis token[] index
 	return token index (token index 0) == '\(
-endfunc
+end
 
 func insToken &token[] &tokenNum pos
 	:ans FALSE
@@ -62,9 +62,9 @@ func insToken &token[] &tokenNum pos
 		$LOOPSTART	# @i
 		:arraycopy token (@i - 1) 0 token @i 0 (1 + token (@i - 1) 0)
 		$LOOPEND_D	@i,pos
-	endif
+	end
 	$INC tokenNum
-endfunc
+end
 
 func makeToken expr[] &token[] &tokenNum
 	:ans FALSE
@@ -76,9 +76,9 @@ func makeToken expr[] &token[] &tokenNum
 	while expr @l != 0
 		if expr @l != [' ]
 			$SET expr (exprLen++),expr @l
-		endif
+		end
 		$INC @l
-	endwhile
+	end
 	$SET_Z expr exprLen # 文字列終端
 
 #	$SET_Z @c
@@ -106,14 +106,14 @@ func makeToken expr[] &token[] &tokenNum
 				$INC   @i
 				$SET_Z token @i 0 # 文字数
 				$SET_Z @t
-				breakswi
-			endif
+				break
+			end
 			if (@c == '\+) || (@c == '\-)
 				if (prev == 'e) || (prev == 'E)
 					$SET token @i ([++]@t),@c
-					breakswi
-				endif
-			endif
+					break
+				end
+			end
 			if @t > 0
 				$SET   token @i 0,@t # 文字数
 				$INC   @i
@@ -122,30 +122,30 @@ func makeToken expr[] &token[] &tokenNum
 			elif @c == '\-
 				if (@j < exprLen - 1) && ((expr (@j + 1) >= '0 && expr (@j + 1) <= '9) || expr (@j + 1) == '.)
 					$SET token @i ([++]@t),@c
-					breakswi
-				endif
+					break
+				end
 				$SET @c,'N
-			endif
+			end
 			$SET   token @i ([++]@t),@c
 			$SET   token @i 0,@t # 文字数
 			$INC   @i
 			$SET_Z token @i 0 # 文字数
 			$SET_Z @t
-			breakswi
+			break
 		default
 			$SET token @i ([++]@t),@c
-			breakswi
-		endswi
+			break
+		end
 		$LOOPEND_I @j,exprLen
-	endif
+	end
 	if @t > 0
 		$SET   token @i 0,@t # 文字数
 		$ADD_A tokenNum,@i,1
 	else
 		$SET tokenNum,@i
-	endif
+	end
 
-	:var cur top end
+	:var cur top _end
 	:var level topLevel assLevel
 	$SET assLevel,checkOp '\=
 	:var retTop retEnd
@@ -172,7 +172,7 @@ func makeToken expr[] &token[] &tokenNum
 						$DEC @i
 					else
 						$SET retTop,1
-					endif
+					end
 				elif token top 1 == '\) # 括弧の終わりの場合
 					$INC @i
 				elif (token top 0 == 1) && (checkOp (token top 1) > 0)
@@ -180,55 +180,55 @@ func makeToken expr[] &token[] &tokenNum
 						topLevel = checkOp (token top 1)
 						if ((topLevel == assLevel) && (level == assLevel)) || (topLevel < level)
 							$SET retTop,2
-						endif
-					endif
-				endif
+						end
+					end
+				end
 
 				if retTop == 2
 					# 後方検索
 					$SET_Z @i
-					$ADD_A end,cur,1
-					if end < tokenNum
-						$LOOPSTART # end
-						if isParenthesis token end # 括弧の始まりの場合
+					$ADD_A _end,cur,1
+					if _end < tokenNum
+						$LOOPSTART # _end
+						if isParenthesis token _end # 括弧の始まりの場合
 							$INC @i
-						elif token end 1 == '\) # 括弧の終わりの場合
+						elif token _end 1 == '\) # 括弧の終わりの場合
 							if @i > 0
 								$DEC @i
 							else
 								$SET retEnd,1
-							endif
-						elif (token end 0 == 1) && (checkOp (token end 1) > 0)
+							end
+						elif (token _end 0 == 1) && (checkOp (token _end 1) > 0)
 							if @i == 0
-								if (topLevel != assLevel) && (checkOp (token end 1) <= topLevel)
+								if (topLevel != assLevel) && (checkOp (token _end 1) <= topLevel)
 									$SET retEnd,2
-								endif
-							endif
-						endif
+								end
+							end
+						end
 						$BREAK		(retEnd > 0)
-						$LOOPEND_I	end,tokenNum
-					endif
+						$LOOPEND_I	_end,tokenNum
+					end
 
 					$ADD_A @t,top,1
 					insToken token tokenNum @t
 					$SET   token @t 1,'\(
 					$SET   token @t 0,1 # 文字数
 					$INC   cur
-					$INC   end
+					$INC   _end
 
 					if retEnd > 0
-						insToken token tokenNum end
-						$SET token end 1,'\)
-						$SET token end 0,1 # 文字数
-					endif
-				endif
+						insToken token tokenNum _end
+						$SET token _end 1,'\)
+						$SET token _end 0,1 # 文字数
+					end
+				end
 
 				$BREAK		(retTop > 0)
 				$LOOPENDE_D	top,0
-			endif
-		endif
+			end
+		end
 		$LOOPEND_I cur,tokenNum
-	endif
+	end
 
 	# 括弧を整える
 #	$SET_Z @k
@@ -246,75 +246,75 @@ func makeToken expr[] &token[] &tokenNum
 				$SET		token 0 0,1 # 文字数
 				$INC		cur
 				$LOOPEND_I	@k,0
-			endif
-		endif
+			end
+		end
 		$LOOPEND_I cur,tokenNum
-	endif
+	end
 	if @k > 0
 		$LOOPSTART	# @k
 		$SET		token tokenNum 1,'\)
 		$SET		token tokenNum 0,1 # 文字数
 		$INC		tokenNum
 		$LOOPEND_D	@k,0
-	endif
-endfunc
+	end
+end
 
 func tokenStr token[] index &str[]
 	:ans FALSE
 	:arraycopy token index 1 str 0 (token index 0)
 	$SET_Z str (token index 0) # 文字列終端
-endfunc
+end
 
 func mp_abs &rop[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:abs  rop
 	else;           !mp:fabs rop
-	endif
-endfunc
+	end
+end
 func mp_add &ret[] a[] b[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:add  ret a b
 	else;           !mp:fadd ret a b
-	endif
-endfunc
+	end
+end
 func mp_div &q[] a[] b[]
 	if MP_PROC_INT; @r = !mp:div   q a b
 	else;           @r = !mp:fdiv2 q a b MP_PREC
-	endif
+	end
 	return @r
-endfunc
+end
 func mp_mul &ret[] a[] b[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:mul  ret a b
 	else;           !mp:fmul ret a b MP_PREC
-	endif
-endfunc
+	end
+end
 func mp_neg &rop[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:neg  rop
 	else;           !mp:fneg rop
-	endif
-endfunc
+	end
+end
 func mp_num2str &s[] n[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:num2str  s n
 	else;           !mp:fnum2str s n
-	endif
-endfunc
+	end
+end
 func mp_set &rop[] op[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:set  rop op
 	else;           !mp:fset rop op
-	endif
-endfunc
+	end
+end
 func mp_sub &ret[] a[] b[]
 	:ans FALSE
 	if MP_PROC_INT; !mp:sub  ret a b
 	else;           !mp:fsub ret a b
-	endif
-endfunc
+	end
+end
 
-func proc token[] tokenNum top &end &ans[]
+func proc token[] tokenNum top &_end &ans[]
 	:parent @@:0
 	$SET		@i,'a
 	$LOOPSTART	# @i
@@ -335,11 +335,11 @@ func proc token[] tokenNum top &end &ans[]
 				if @i >= tokenNum
 					:println ["単項-の右辺がありません]
 					return TRUE
-				endif
+				end
 				tokenStr token @i @@S
-			endif
+			end
 		elif @@S 0 == '\) # 括弧の終わりの場合
-			$SET end,@i
+			$SET _end,@i
 			mp_set ans @@L
 			return FALSE
 		else
@@ -349,14 +349,14 @@ func proc token[] tokenNum top &end &ans[]
 				!putchar @o
 				:println ["の右辺がありません]
 				return TRUE
-			endif
+			end
 			tokenStr token @i @@S
 			if @@S 0 == '\) # 括弧の終わりの場合
 				!putchar @o
 				:println ["の右辺がありません]
 				return TRUE
-			endif
-		endif
+			end
+		end
 
 		# 左辺または右辺の値を取得する
 		if @@S (strlen @@S - 1) == '\( # 括弧の始まりの場合
@@ -365,7 +365,7 @@ func proc token[] tokenNum top &end &ans[]
 				$SET @c,'L
 			else
 				$SET @c,'R
-			endif
+			end
 			$RETURN_A proc token tokenNum (@i + 1) @i @@:@c,TRUE
 			if strcmp @@S ["abs(] == 0
 				mp_abs @@:@c
@@ -379,16 +379,16 @@ func proc token[] tokenNum top &end &ans[]
 					if !mp:fsqrt2 @@:@c @@:@c MP_PREC 4
 						:println ["sqrtの引数が負の値になりました]
 						return TRUE
-					endif
-				endif
+					end
+				end
 			elif strcmp @@S ["trunc(] == 0
 				if MP_PROC_INT
 					:println ["truncは浮動小数点数モードでしか使えません]
 					return TRUE
 				else
 					!mp:ftrunc @@:@c @@:@c
-				endif
-			endif
+				end
+			end
 		else
 			$STRCMP @a,@@S,["Ans]
 			if @l < 0
@@ -396,50 +396,50 @@ func proc token[] tokenNum top &end &ans[]
 				$SET @c,'L
 			else
 				$SET @c,'R
-			endif
+			end
 			if @a == 0
 				mp_set @@:@c @@:0
 			elif @@S 0 >= 'a && @@S 0 <= 'z
 				mp_set @@:@c @@:(@@S 0)
 			else
 				mp_set @@:@c @@S
-			endif
-		endif
+			end
+		end
 		if @c == 'L
 			if @o == 'N
 				mp_neg @@L
-			endif
+			end
 			continue
-		endif
+		end
 
 		# 演算結果を左辺の値にする
 		switch @o
 		case '\*
 			mp_mul @@L @@L @@R
-			breakswi
+			break
 		case '\/
 			if mp_div @@L @@L @@R
 				:println ["ゼロで除算しました]
 				return TRUE
-			endif
-			breakswi
+			end
+			break
 		case '\%
 			if MP_PROC_INT
 				if !mp:div @@D @@L @@R @@L
 					:println ["ゼロで除算しました]
 					return TRUE
-				endif
+				end
 			else
 				:println ["%は整数モードでしか使えません]
 				return TRUE
-			endif
-			breakswi
+			end
+			break
 		case '\+
 			mp_add @@L @@L @@R
-			breakswi
+			break
 		case '\-
 			mp_sub @@L @@L @@R
-			breakswi
+			break
 		case '\=
 			if @l == 0 || (@l >= 'a && @l <= 'z)
 				mp_set @@:@l @@R
@@ -447,22 +447,22 @@ func proc token[] tokenNum top &end &ans[]
 			else
 				:println ["=の左辺は変数でなければなりません]
 				return TRUE
-			endif
-			breakswi
-		endswi
+			end
+			break
+		end
 		$LOOPEND_I @i,tokenNum
-	endif
+	end
 
 	mp_set ans @@L
 	return FALSE
-endfunc
+end
 
 :params expr[] prec print_flag debug_flag
 
 :global MP_PREC MP_PROC_INT
 if @! > 1
 	$SET MP_PREC,prec
-endif
+end
 $EQ_A MP_PROC_INT,MP_PREC,0
 
 :parent @@:0
@@ -476,15 +476,15 @@ if debug_flag
 #	$SET_Z @j
 	if @j < @T
 		$LOOPSTART # @j
-		if @j > 0; :print [" ]; endif
+		if @j > 0; :print [" ]; end
 		tokenStr @@T @j @@S
 		if strcmp @@S "N == 0; :print "\-
 		else;                  :print @@S
-		endif
+		end
 		$LOOPEND_I @j,@T
-	endif
+	end
 	:println
-endif
+end
 
 $RETURN_A proc @@T @T 0 @t @@A,TRUE
 
@@ -492,6 +492,6 @@ mp_set @@:0 @@A
 if print_flag
 	mp_num2str @@S @@:0
 	:println @@S
-endif
+end
 
 return FALSE

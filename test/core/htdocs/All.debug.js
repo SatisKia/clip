@@ -101,7 +101,6 @@ assert( r != undefined );
  },
  addAndAss : function( r ){
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    this._re += r._re;
    this._im += r._im;
@@ -110,21 +109,15 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  sub : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    return new _Complex( this._re - r._re, this._im - r._im );
   }
   return new _Complex( this._re - r, this._im );
  },
  subAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    this._re -= r._re;
    this._im -= r._im;
@@ -133,12 +126,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  mul : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re * r._re, this._im * r._re );
@@ -148,9 +137,7 @@ assert( r != undefined );
   return new _Complex( this._re * r, this._im * r );
  },
  mulAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re *= r._re;
@@ -166,12 +153,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  div : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re / r._re, this._im / r._re );
@@ -188,9 +171,7 @@ assert( r != undefined );
   return new _Complex( this._re / r, this._im / r );
  },
  divAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re /= r._re;
@@ -214,12 +195,8 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  mod : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     return new _Complex( this._re % r._re, this._im % r._re );
@@ -234,9 +211,7 @@ assert( r != undefined );
   return new _Complex( this._re % r, this._im % r );
  },
  modAndAss : function( r ){
-
 assert( r != undefined );
-
   if( r instanceof _Complex ){
    if( r._im == 0.0 ){
     this._re = this._re % r._re;
@@ -255,8 +230,6 @@ assert( r != undefined );
   }
   return this;
  },
-
-
  equal : function( r ){
   if( r instanceof _Complex ){
    return (this._re == r._re) && (this._im == r._im);
@@ -269,8 +242,6 @@ assert( r != undefined );
   }
   return (this._re != r) || (this._im != 0.0);
  },
-
-
  fabs : function(){
   if( this._re == 0.0 ){
    return _ABS( this._im );
@@ -285,23 +256,15 @@ assert( r != undefined );
   var t = this._im / this._re;
   return _ABS( this._re ) * _SQRT( 1.0 + t * t );
  },
-
-
  farg : function(){
   return fatan2( this._im, this._re );
  },
-
-
  fnorm : function(){
   return this._re * this._re + this._im * this._im;
  },
-
-
  conjg : function(){
   return new _Complex( this._re, -this._im );
  },
-
-
  sin : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsin( this._re ) );
@@ -313,8 +276,6 @@ assert( r != undefined );
    _COS( re ) * fsinh( im )
    );
  },
-
-
  cos : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcos( this._re ) );
@@ -326,8 +287,6 @@ assert( r != undefined );
    -_SIN( re ) * fsinh( im )
    );
  },
-
-
  tan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftan( this._re ) );
@@ -343,8 +302,6 @@ assert( r != undefined );
    fsinh( im2 ) / d
    );
  },
-
-
  asin : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -356,15 +313,12 @@ assert( r != undefined );
     return floatToComplex( fasin( this._re ) );
    }
   }
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.minus().mul( i.mul( this ).add( this.sqr().minus().add( 1.0 ).sqrt() ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  acos : function(){
   if( this._im == 0.0 ){
    if( (this._re < -1.0) || (this._re > 1.0) ){
@@ -376,19 +330,12 @@ assert( r != undefined );
     return floatToComplex( facos( this._re ) );
    }
   }
-
-
-
-
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( this.sub( i.mul( this.sqr().minus().add( 1.0 ).sqrt() ) ).log() );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  atan : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fatan( this._re ) );
@@ -397,15 +344,12 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
-
   var i = new _Complex( 0.0, 1.0 );
   var c = i.mul( i.add( this ).div( d ).log() ).mul( 0.5 );
   c._re = _radToAng( c._re );
   c._im = _radToAng( c._im );
   return c;
  },
-
-
  sinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fsinh( this._re ) );
@@ -415,8 +359,6 @@ assert( r != undefined );
    fcosh( this._re ) * _SIN( this._im )
    );
  },
-
-
  cosh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fcosh( this._re ) );
@@ -426,8 +368,6 @@ assert( r != undefined );
    fsinh( this._re ) * _SIN( this._im )
    );
  },
-
-
  tanh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( ftanh( this._re ) );
@@ -443,17 +383,12 @@ assert( r != undefined );
    _SIN( im2 ) / d
    );
  },
-
-
  asinh : function(){
   if( this._im == 0.0 ){
    return floatToComplex( fasinh( this._re ) );
   }
-
   return this.add( this.sqr().add( 1.0 ).sqrt() ).log();
  },
-
-
  acosh : function(){
   if( this._im == 0.0 ){
    if( this._re < 1.0 ){
@@ -465,11 +400,8 @@ assert( r != undefined );
     return floatToComplex( facosh( this._re ) );
    }
   }
-
   return this.add( this.sqr().sub( 1.0 ).sqrt() ).log();
  },
-
-
  atanh : function(){
   if( this._im == 0.0 ){
    if( (this._re <= -1.0) || (this._re >= 1.0) ){
@@ -485,27 +417,20 @@ assert( r != undefined );
   if( d.equal( 0.0 ) ){
    setComplexError();
   }
-
   return this.add( 1.0 ).div( d ).log().mul( 0.5 );
  },
-
-
  ceil : function(){
   return new _Complex(
    _CEIL( this._re ),
    _CEIL( this._im )
    );
  },
-
-
  floor : function(){
   return new _Complex(
    _FLOOR( this._re ),
    _FLOOR( this._im )
    );
  },
-
-
  exp : function(){
   if( this._im == 0.0 ){
    return floatToComplex( _EXP( this._re ) );
@@ -527,8 +452,6 @@ assert( r != undefined );
    e * _SIN( im )
    );
  },
-
-
  log : function(){
   if( this._im == 0.0 ){
    if( this._re <= 0.0 ){
@@ -561,40 +484,30 @@ assert( r != undefined );
    _ATAN2( this._im, this._re ) * _NORMALIZE
    );
  },
-
-
  pow : function( y ){
   if( y instanceof _Complex ){
    if( y._im == 0.0 ){
     if( this._im == 0.0 ){
      return floatToComplex( _POW( this._re, y._re ) );
     }
-
     return this.log().mul( y._re ).exp();
    }
    if( this._im == 0.0 ){
-
     return y.mul( _LOG( this._re ) ).exp();
    }
-
    return this.log().mul( y ).exp();
   }
   if( this._im == 0.0 ){
    return floatToComplex( _POW( this._re, y ) );
   }
-
   return this.log().mul( y ).exp();
  },
-
-
  sqr : function(){
   if( this._im == 0.0 ){
    return floatToComplex( this._re * this._re );
   }
   return new _Complex( this._re * this._re - this._im * this._im, this._re * this._im + this._im * this._re );
  },
-
-
  sqrt : function(){
   if( this._im == 0.0 ){
    if( this._re < 0.0 ){
@@ -626,9 +539,7 @@ assert( r != undefined );
    -_SQRT05 * r
    );
  }
-
 };
-
 function getComplex( c, re , im ){
  re.set( c._re );
  im.set( c._im );
@@ -638,26 +549,18 @@ function setComplex( c, re, im ){
  c._im = im;
  return c;
 }
-
 function dupComplex( x ){
  return new _Complex( x._re, x._im );
 }
-
 function floatToComplex( x ){
  return new _Complex( x, 0.0 );
 }
-
-
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
-
-
 function _angToRad( ang ){
  return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
-
-
 function fsin( x ){
  return _SIN( _angToRad( x ) );
 }
@@ -5010,7 +4913,7 @@ _Func.prototype = {
   }
   var cur = this._top;
   while( cur != null ){
-   if( name.toLowerCase() == cur._info._name.toLowerCase() ){
+   if( name == cur._info._name ){
     if( updateCnt ){
      cur._info._cnt++;
     }
@@ -5155,10 +5058,10 @@ _Graph.prototype = {
   return this._info[this._curIndex]._expr2;
  },
  _checkExpr : function( expr, func ){
-  var pos = expr.toLowerCase().indexOf( func.toLowerCase() );
+  var pos = expr.indexOf( func );
   if( pos >= 0 ){
    if( expr.length > pos + func.length ){
-    var chr = expr.toLowerCase().charAt( pos + func.length );
+    var chr = expr.charAt( pos + func.length );
     var chrs = "0123456789_abcdefghijklmnopqrstuvwxyz";
     if( chrs.indexOf( chr ) < 0 ){
      return true;
@@ -18077,7 +17980,7 @@ _Token.prototype = {
     }
    } else if( tmp.charAt( 0 ) == '!' ){
     cur._code = 14;
-    cur._token = tmp.substring( 1, len ).toLowerCase();
+    cur._token = tmp.substring( 1, len );
    } else if( tmp.charAt( 0 ) == '"' ){
     cur._code = 20;
     cur._token = new String();
@@ -18103,7 +18006,7 @@ _Token.prototype = {
       cur._token += tmp.charAt( i );
      }
     }
-   } else if( this.checkFunc( tmp.toLowerCase(), code ) ){
+   } else if( this.checkFunc( tmp, code ) ){
     cur._code = 13;
     cur._token = code._val;
    } else if( this.checkStat( tmp, code ) ){
@@ -20154,7 +20057,7 @@ function _onInputFileChangeExtfunc( e ){
       }
      }
      var tmp = data.substring( top, top + 11 );
-     if( tmp.toLowerCase() == "#!namespace" ){
+     if( tmp == "#!NAMESPACE" ){
       var data2 = new _String( data );
       var data3 = data2.replaceNewLine().str();
       if( data3.indexOf( "\n" ) < 0 ){

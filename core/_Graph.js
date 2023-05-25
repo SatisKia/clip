@@ -190,10 +190,10 @@ _Graph.prototype = {
 
 	// 指定関数が計算式に含まれているかチェックする
 	_checkExpr : function( expr, func ){
-		var pos = expr.toLowerCase().indexOf( func.toLowerCase() );
+		var pos = expr.indexOf( func );
 		if( pos >= 0 ){
 			if( expr.length > pos + func.length ){
-				var chr = expr.toLowerCase().charAt( pos + func.length );
+				var chr = expr.charAt( pos + func.length );
 				var chrs = "0123456789_abcdefghijklmnopqrstuvwxyz";
 				if( chrs.indexOf( chr ) < 0 ){
 					return true;

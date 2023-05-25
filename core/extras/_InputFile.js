@@ -67,7 +67,7 @@ function _onInputFileChangeExtfunc( e ){
 						}
 					}
 					var tmp = data.substring( top, top + 11 );
-					if( tmp.toLowerCase() == "#!namespace" ){
+					if( tmp == "#!NAMESPACE" ){
 						var data2 = new _String( data );
 						var data3 = data2.replaceNewLine().str();
 						if( data3.indexOf( "\n" ) < 0 ){
