@@ -18497,6 +18497,8 @@ _Token.prototype = {
 								case '8':
 								case '9':
 								case '.':
+								case 'e':
+								case 'E':
 									break;
 								default:
 									_break = true;

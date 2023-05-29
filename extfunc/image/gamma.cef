@@ -9,7 +9,7 @@ $DIV_A		@t,1,@1
 $SET_Z		@i
 $LOOPSTART	# @i
 $DIV_A		@u,@i,255
-$POW		@@T @i,@u,@t
+$POW_A		@@T @i,@u,@t
 $MUL		@@T @i,255
 $LOOPEND_I	@i,256
 

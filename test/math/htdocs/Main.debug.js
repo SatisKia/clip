@@ -1,6 +1,13 @@
+
+
+
+
+
+
 function _Float( val ){
  this._val = (val == undefined) ? 0.0 : val;
 }
+
 _Float.prototype = {
  set : function( val ){
   this._val = val;
@@ -14,6 +21,7 @@ _Float.prototype = {
   return this._val;
  }
 };
+
 function newFloatArray( len ){
  var a = new Array( len );
  for( var i = 0; i < len; i++ ){
@@ -643,9 +651,13 @@ function floatToComplex( x ){
 function _radToAng( rad ){
  return complexIsRad() ? rad : rad * complexAngCoef() / _PI;
 }
+
+
 function _angToRad( ang ){
  return complexIsRad() ? ang : ang * _PI / complexAngCoef();
 }
+
+
 function fsin( x ){
  return _SIN( _angToRad( x ) );
 }
