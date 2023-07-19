@@ -145,7 +145,7 @@ func makeToken expr[] &token[] &tokenNum
 		$SET tokenNum,@i
 	end
 
-	:var cur top _end
+	:var cur top end
 	:var level topLevel assLevel
 	$SET assLevel,checkOp '\=
 	:var retTop retEnd
@@ -187,26 +187,26 @@ func makeToken expr[] &token[] &tokenNum
 				if retTop == 2
 					# 後方検索
 					$SET_Z @i
-					$ADD_A _end,cur,1
-					if _end < tokenNum
-						$LOOPSTART # _end
-						if isParenthesis token _end # 括弧の始まりの場合
+					$ADD_A end,cur,1
+					if end < tokenNum
+						$LOOPSTART # end
+						if isParenthesis token end # 括弧の始まりの場合
 							$INC @i
-						elif token _end 1 == '\) # 括弧の終わりの場合
+						elif token end 1 == '\) # 括弧の終わりの場合
 							if @i > 0
 								$DEC @i
 							else
 								$SET retEnd,1
 							end
-						elif (token _end 0 == 1) && (checkOp (token _end 1) > 0)
+						elif (token end 0 == 1) && (checkOp (token end 1) > 0)
 							if @i == 0
-								if (topLevel != assLevel) && (checkOp (token _end 1) <= topLevel)
+								if (topLevel != assLevel) && (checkOp (token end 1) <= topLevel)
 									$SET retEnd,2
 								end
 							end
 						end
 						$BREAK		(retEnd > 0)
-						$LOOPEND_I	_end,tokenNum
+						$LOOPEND_I	end,tokenNum
 					end
 
 					$ADD_A @t,top,1
@@ -214,12 +214,12 @@ func makeToken expr[] &token[] &tokenNum
 					$SET   token @t 1,'\(
 					$SET   token @t 0,1 # 文字数
 					$INC   cur
-					$INC   _end
+					$INC   end
 
 					if retEnd > 0
-						insToken token tokenNum _end
-						$SET token _end 1,'\)
-						$SET token _end 0,1 # 文字数
+						insToken token tokenNum end
+						$SET token end 1,'\)
+						$SET token end 0,1 # 文字数
 					end
 				end
 
@@ -314,7 +314,7 @@ func mp_sub &ret[] a[] b[]
 	end
 end
 
-func proc token[] tokenNum top &_end &ans[]
+func proc token[] tokenNum top &end &ans[]
 	:parent @@:0
 	$SET		@i,'a
 	$LOOPSTART	# @i
@@ -339,7 +339,7 @@ func proc token[] tokenNum top &_end &ans[]
 				tokenStr token @i @@S
 			end
 		elif @@S 0 == '\) # 括弧の終わりの場合
-			$SET _end,@i
+			$SET end,@i
 			mp_set ans @@L
 			return FALSE
 		else

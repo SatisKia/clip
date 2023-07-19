@@ -12863,8 +12863,13 @@ _Proc.prototype = {
 		return 0x00;
 	},
 	_loopBreak : function( _this ){
-		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == 3) ){
-			return _this._loopBreakSwi( _this );
+		for( var i = _this._endCnt; i > 0; i-- ){
+			if( _this._endType[i - 1] == 2 ){
+			} else if( _this._endType[i - 1] == 3 ){
+				return _this._loopBreakSwi( _this );
+			} else {
+				break;
+			}
 		}
 		if( _this._statMode == 2 ){
 			if( _this._checkSkip() ){
@@ -13386,8 +13391,13 @@ _Proc.prototype = {
 		return 0x03;
 	},
 	_statBreak : function( _this, param, code, token ){
-		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == 3) ){
-			return _this._statBreakSwi( _this, param, code, token );
+		for( var i = _this._endCnt; i > 0; i-- ){
+			if( _this._endType[i - 1] == 2 ){
+			} else if( _this._endType[i - 1] == 3 ){
+				return _this._statBreakSwi( _this, param, code, token );
+			} else {
+				break;
+			}
 		}
 		switch( _this._statMode ){
 		case 0:
@@ -17133,6 +17143,7 @@ function getToken(){
 function __Token(){
 	this._code = 0;
 	this._token = null;
+	this._str = null;
 	this._before = null;
 	this._next = null;
 }
@@ -17982,9 +17993,11 @@ _Token.prototype = {
 			} else if( this.checkFunc( tmp, code ) ){
 				cur._code = 13;
 				cur._token = code._val;
-			} else if( this.checkStat( tmp, code ) ){
+			} else if( cur._before == null && this.checkStat( tmp, code ) ){
 				cur._code = 11;
 				cur._token = code._val;
+				cur._str = new String();
+				cur._str = tmp;
 			} else {
 				cur._token = new _Value();
 				if( this.checkDefine( tmp, cur._token ) ){
@@ -18530,6 +18543,10 @@ _Token.prototype = {
 			this.add( param, token, len, strToVal );
 		}
 		if( this._top != null ){
+			if( this._top._code == 11 && this._top._token == 17 && this._top._next != null ){
+				this._top._code = 9;
+				this._top._token = this._top._str;
+			}
 			if( this._top._code == 23 ){
 				if( topCount != 0 ){
 					return 0x2181;

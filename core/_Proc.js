@@ -6235,8 +6235,13 @@ _Proc.prototype = {
 		return _CLIP_NO_ERR;
 	},
 	_loopBreak : function( _this ){
-		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == _PROC_END_TYPE_SWITCH) ){
-			return _this._loopBreakSwi( _this );
+		for( var i = _this._endCnt; i > 0; i-- ){
+			if( _this._endType[i - 1] == _PROC_END_TYPE_IF ){
+			} else if( _this._endType[i - 1] == _PROC_END_TYPE_SWITCH ){
+				return _this._loopBreakSwi( _this );
+			} else {
+				break;
+			}
 		}
 
 		if( _this._statMode == _STAT_MODE_PROCESSING ){
@@ -6835,8 +6840,13 @@ _Proc.prototype = {
 		return _CLIP_PROC_SUB_END;
 	},
 	_statBreak : function( _this, param, code, token ){
-		if( (_this._endCnt > 0) && (_this._endType[_this._endCnt - 1] == _PROC_END_TYPE_SWITCH) ){
-			return _this._statBreakSwi( _this, param, code, token );
+		for( var i = _this._endCnt; i > 0; i-- ){
+			if( _this._endType[i - 1] == _PROC_END_TYPE_IF ){
+			} else if( _this._endType[i - 1] == _PROC_END_TYPE_SWITCH ){
+				return _this._statBreakSwi( _this, param, code, token );
+			} else {
+				break;
+			}
 		}
 
 		switch( _this._statMode ){

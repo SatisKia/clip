@@ -416,6 +416,7 @@ function getToken(){
 function __Token(){
 	this._code   = 0;		// 識別コード
 	this._token  = null;	// トークン値
+	this._str    = null;
 	this._before = null;	// 前のトークン・データ
 	this._next   = null;	// 次のトークン・データ
 }
@@ -1324,9 +1325,11 @@ _Token.prototype = {
 			} else if( this.checkFunc( tmp, code ) ){
 				cur._code  = _CLIP_CODE_FUNCTION;
 				cur._token = code._val;
-			} else if( this.checkStat( tmp, code ) ){
+			} else if( cur._before == null && this.checkStat( tmp, code ) ){
 				cur._code  = _CLIP_CODE_STATEMENT;
 				cur._token = code._val;
+				cur._str   = new String();
+				cur._str   = tmp;
 			} else {
 				cur._token = new _Value();
 				if( this.checkDefine( tmp, cur._token ) ){
@@ -1903,6 +1906,10 @@ _Token.prototype = {
 		}
 
 		if( this._top != null ){
+			if( this._top._code == _CLIP_CODE_STATEMENT && this._top._token == _CLIP_STAT_MULTIEND && this._top._next != null ){
+				this._top._code  = _CLIP_CODE_LABEL;
+				this._top._token = this._top._str;
+			}
 			if( this._top._code == _CLIP_CODE_SE ){
 				if( topCount != 0 ){
 					return _CLIP_PROC_ERR_SE_OPERAND;
