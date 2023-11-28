@@ -40,7 +40,11 @@ Numerical calculation test program.
 
 ### test/core
 
-CLIP interpreter. Please set the environment variable "SKCOMMONPATH" in advance to build.
+CLIP interpreter. The following projects are required separately for building.
+
+https://github.com/SatisKia/common
+
+Set the local project folder path to the environment variable "SKCOMMONPATH".
 
 ## core/extras
 

@@ -42,7 +42,11 @@ JavaScriptコードの圧縮・難読化ツールです。
 
 ### test/core
 
-CLIPインタープリタです。ビルドするには事前に環境変数"SKCOMMONPATH"の設定を行ってください。
+CLIPインタープリタです。ビルドには別途、次のプロジェクトが必要です。
+
+https://github.com/SatisKia/common
+
+ローカルのプロジェクトフォルダパスを環境変数"SKCOMMONPATH"に設定します。
 
 ## core/extras
 
