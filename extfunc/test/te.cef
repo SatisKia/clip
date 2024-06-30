@@ -1,0 +1,20 @@
+func print a[]
+	:ans FALSE
+	!mp:fnum2str @@s a
+	:println @@s
+endfunc
+
+:ans FALSE
+:prec \16
+
+:println ["e]
+!println (!e)
+
+:println ["e2]
+:println (!e2 100)
+
+:println ["e_out]
+@s=time
+@a=0; while !e_out 100 @a 1 FALSE; endwhile
+!time @s
+print @@:0
