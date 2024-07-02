@@ -5,12 +5,13 @@ func print a[]
 endfunc
 
 :ans FALSE
-:prec \16
 
 :println ["e]
-!println (!e)
+:prec 16
+:println (!e)
 
 :println ["e2]
+:mfloat 100
 :println (!e2 100)
 
 :println ["e_out]
