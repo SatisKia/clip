@@ -1,0 +1,16 @@
+#ftのテスト
+#\!-
+
+!dft_test 100 0 35 0
+!dft_test 100 0 35 1
+
+!dft2_test 100 0 35 0
+!dft2_test 100 0 35 1
+
+!fft_test 100 0 35 0
+!fft_test 100 0 35 1
+
+!fft2_test
+
+!fft3_test 128 0 35 0
+!fft3_test 128 0 35 1
